@@ -5,23 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Puerto Rico Census Profile</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <style> 
-    .tab-active {
-      @apply border-b-2 border-blue-600 text-blue-600 font-semibold;
-    }
-  </style>
 </head>
 <body class="bg-gray-50 text-gray-900 font-sans">
 
   <!-- Top Navigation Tabs -->
   <nav class="bg-white shadow sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center space-x-6 text-sm sm:text-base">
-      <button class="tab-link tab-active" data-tab="all">All</button>
-      <button class="tab-link" data-tab="tables">Tables</button>
-      <button class="tab-link" data-tab="maps">Maps</button>
-      <button class="tab-link" data-tab="charts">Charts</button>
-      <button class="tab-link" data-tab="profiles">Profiles</button>
-      <button class="tab-link" data-tab="pages">Pages</button>
+    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center gap-6 text-sm sm:text-base" role="tablist" aria-label="Sections">
+      <button class="tab-link border-b-2 border-transparent" data-tab="all" aria-selected="true" role="tab">All</button>
+      <button class="tab-link border-b-2 border-transparent" data-tab="tables" role="tab">Tables</button>
+      <button class="tab-link border-b-2 border-transparent" data-tab="maps" role="tab">Maps</button>
+      <button class="tab-link border-b-2 border-transparent" data-tab="charts" role="tab">Charts</button>
+      <button class="tab-link border-b-2 border-transparent" data-tab="profiles" role="tab">Profiles</button>
+      <button class="tab-link border-b-2 border-transparent" data-tab="pages" role="tab">Pages</button>
     </div>
   </nav>
 
@@ -103,11 +98,27 @@
   <!-- Tab Navigation Script -->
   <script>
     const tabs = document.querySelectorAll(".tab-link");
+
+    // helper: remove active classes from all tabs
+    function clearActive() {
+      tabs.forEach(t => {
+        t.classList.remove("text-blue-600","font-semibold","border-blue-600");
+        t.setAttribute("aria-selected", "false");
+      });
+    }
+
+    // set default active on first tab
+    clearActive();
+    const first = tabs[0];
+    first.classList.add("text-blue-600","font-semibold","border-blue-600");
+    first.setAttribute("aria-selected", "true");
+
     tabs.forEach(tab => {
       tab.addEventListener("click", () => {
-        tabs.forEach(t => t.classList.remove("tab-active"));
-        tab.classList.add("tab-active");
-        // Add functionality to show different content per tab here if needed
+        clearActive();
+        tab.classList.add("text-blue-600","font-semibold","border-blue-600");
+        tab.setAttribute("aria-selected", "true");
+        // TODO: show/hide tab-specific content here if you add sections later
       });
     });
   </script>
