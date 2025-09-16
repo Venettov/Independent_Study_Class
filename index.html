@@ -1,262 +1,116 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Independent Study Dashboard</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script type="module">
-        // Firebase and Firestore SDKs
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInWithCustomToken, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, collection, addDoc, onSnapshot, query, orderBy, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-functions.js";
-
-        // Firebase configuration and authentication variables from the runtime environment
-        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-
-        // Initialize Firebase and get service instances
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        setLogLevel('debug'); // Enable Firestore debug logging
-
-        // Global variables for user and database reference
-        let userId = null;
-        let dataCollectionRef = null;
-
-        // UI elements
-        const loginSection = document.getElementById('login-section');
-        const dashboardSection = document.getElementById('dashboard-section');
-        const appTitle = document.getElementById('app-title');
-        const loginBtn = document.getElementById('login-btn');
-        const statusText = document.getElementById('status-text');
-        const dataForm = document.getElementById('data-form');
-        const dataInput = document.getElementById('data-input');
-        const dataList = document.getElementById('data-list');
-        const processBtn = document.getElementById('process-btn');
-        const resultSection = document.getElementById('result-section');
-        const processingStatus = document.getElementById('processing-status');
-
-        // --- AUTHENTICATION ---
-        // Listen for authentication state changes
-        auth.onAuthStateChanged(async (user) => {
-            if (user) {
-                userId = user.uid;
-                // Set up the collection reference for public data
-                dataCollectionRef = collection(db, `artifacts/${appId}/public/data/user_data`);
-                showDashboard();
-                subscribeToData();
-            } else {
-                showLogin();
-            }
-        });
-
-        // Sign in with custom token or anonymously
-        async function handleLogin() {
-            try {
-                if (initialAuthToken) {
-                    await signInWithCustomToken(auth, initialAuthToken);
-                } else {
-                    await signInAnonymously(auth);
-                }
-            } catch (error) {
-                console.error("Firebase Auth Error:", error);
-                statusText.textContent = `Login failed: ${error.message}`;
-            }
-        }
-
-        // --- UI TOGGLING ---
-        function showLogin() {
-            loginSection.classList.remove('hidden');
-            dashboardSection.classList.add('hidden');
-        }
-
-        function showDashboard() {
-            loginSection.classList.add('hidden');
-            dashboardSection.classList.remove('hidden');
-            appTitle.textContent = "Data Dashboard";
-            statusText.textContent = `Logged in. Your User ID is: ${userId}`;
-        }
-
-        // --- FIRESTORE DATA MANAGEMENT ---
-        // Add a new data entry to Firestore
-        dataForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const value = dataInput.value.trim();
-            if (value) {
-                try {
-                    await addDoc(dataCollectionRef, {
-                        value: value,
-                        timestamp: new Date().toISOString(),
-                        userId: userId
-                    });
-                    dataInput.value = '';
-                } catch (error) {
-                    console.error("Firestore Add Error:", error);
-                    alert("Failed to add data. See console for details.");
-                }
-            }
-        });
-
-        // Real-time listener for data updates
-        function subscribeToData() {
-            const q = query(dataCollectionRef, orderBy("timestamp", "desc"));
-            onSnapshot(q, (snapshot) => {
-                dataList.innerHTML = '';
-                snapshot.forEach((doc) => {
-                    const data = doc.data();
-                    const item = document.createElement('li');
-                    item.className = 'p-2 bg-gray-100 dark:bg-gray-700 rounded-md shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-2 sm:space-y-0';
-                    item.innerHTML = `
-                        <div class="flex-1">
-                            <span class="font-semibold">${data.value}</span>
-                            <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                <span class="block">By: ${data.userId.substring(0, 8)}...</span>
-                                <span class="block">${new Date(data.timestamp).toLocaleString()}</span>
-                            </div>
-                        </div>
-                    `;
-                    dataList.appendChild(item);
-                });
-            });
-        }
-
-        // --- PYTHON BACKEND SIMULATION (via Gemini API) ---
-        processBtn.addEventListener('click', async () => {
-            processingStatus.textContent = 'Processing data with Python model...';
-            processingStatus.classList.remove('text-red-500');
-            processingStatus.classList.add('text-yellow-500', 'animate-pulse');
-            resultSection.innerHTML = '';
-
-            try {
-                // Fetch all data from Firestore
-                const snapshot = await getDocs(query(dataCollectionRef, orderBy("timestamp", "asc")));
-                const allValues = [];
-                snapshot.forEach(doc => {
-                    allValues.push(doc.data().value);
-                });
-
-                // Prepare the prompt for the Python model
-                const userPrompt = `Analyze the following list of data values and provide a short summary. The data is: ${JSON.stringify(allValues)}. Please calculate and include the total sum and the average of the numerical values if any.`;
-
-                // API payload
-                const payload = {
-                    contents: [{ parts: [{ text: userPrompt }] }],
-                    tools: [{ "google_search": {} }],
-                    systemInstruction: {
-                        parts: [{ text: "Act as a Python script that analyzes user-provided data and generates a concise summary." }]
-                    },
-                };
-                
-                const apiKey = "";
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
-
-                let response;
-                let retries = 0;
-                const maxRetries = 5;
-                while (retries < maxRetries) {
-                    try {
-                        response = await fetch(apiUrl, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(payload)
-                        });
-                        if (response.status === 429) { // Too many requests
-                            const delay = Math.pow(2, retries) * 1000;
-                            console.warn(`Rate limit hit. Retrying in ${delay / 1000}s...`);
-                            await new Promise(res => setTimeout(res, delay));
-                            retries++;
-                        } else {
-                            break;
-                        }
-                    } catch (error) {
-                        if (retries < maxRetries - 1) {
-                            const delay = Math.pow(2, retries) * 1000;
-                            console.error(`Fetch failed. Retrying in ${delay / 1000}s...`, error);
-                            await new Promise(res => setTimeout(res, delay));
-                            retries++;
-                        } else {
-                            throw error;
-                        }
-                    }
-                }
-
-                if (!response.ok) {
-                    throw new Error(`API response error: ${response.status} ${response.statusText}`);
-                }
-
-                const result = await response.json();
-                const text = result?.candidates?.[0]?.content?.parts?.[0]?.text || "No result found.";
-
-                // Display the result
-                resultSection.innerHTML = `
-                    <h3 class="text-xl font-bold mb-2">Python Analysis Result</h3>
-                    <p class="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">${text}</p>
-                `;
-                processingStatus.textContent = 'Analysis complete!';
-                processingStatus.classList.remove('text-yellow-500', 'animate-pulse');
-            } catch (error) {
-                console.error("Python Model Error:", error);
-                processingStatus.textContent = `Processing failed: ${error.message}`;
-                processingStatus.classList.remove('text-yellow-500', 'animate-pulse');
-                processingStatus.classList.add('text-red-500');
-            }
-        });
-        
-        // Event listeners
-        loginBtn.addEventListener('click', handleLogin);
-
-    </script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Puerto Rico Census Profile</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .tab-active {
+      @apply border-b-2 border-blue-600 text-blue-600 font-semibold;
+    }
+  </style>
 </head>
-<body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white font-sans min-h-screen p-4 flex items-center justify-center">
+<body class="bg-gray-50 text-gray-900 font-sans">
 
-    <!-- Login Section -->
-    <div id="login-section" class="flex flex-col items-center p-8 bg-white dark:bg-gray-800 rounded-2xl shadow-xl transition-all duration-300">
-        <h1 class="text-3xl font-bold mb-6 text-center">Independent Study</h1>
-        <button id="login-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full shadow-lg transition-all duration-300 transform hover:scale-105">
-            Log In to Continue
-        </button>
-        <p id="status-text" class="mt-4 text-sm text-center text-gray-500 dark:text-gray-400"></p>
+  <!-- Top Navigation Tabs -->
+  <nav class="bg-white shadow sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center space-x-6 text-sm sm:text-base">
+      <button class="tab-link tab-active" data-tab="all">All</button>
+      <button class="tab-link" data-tab="tables">Tables</button>
+      <button class="tab-link" data-tab="maps">Maps</button>
+      <button class="tab-link" data-tab="charts">Charts</button>
+      <button class="tab-link" data-tab="profiles">Profiles</button>
+      <button class="tab-link" data-tab="pages">Pages</button>
     </div>
+  </nav>
 
-    <!-- Dashboard Section -->
-    <div id="dashboard-section" class="hidden w-full max-w-4xl p-6 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl transition-all duration-300">
-        <h1 id="app-title" class="text-3xl font-bold mb-4 text-center"></h1>
-        <p class="text-sm text-center text-gray-500 dark:text-gray-400 mb-6" id="user-id-display"></p>
-        
-        <!-- Data Submission Form -->
-        <form id="data-form" class="mb-8 p-4 bg-gray-100 dark:bg-gray-700 rounded-xl shadow-md flex flex-col sm:flex-row gap-4">
-            <input type="text" id="data-input" placeholder="Enter data (e.g., a number, a word)..." required
-                   class="flex-1 p-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500">
-            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-300">
-                Add Data
-            </button>
-        </form>
-        
-        <!-- Action Buttons and Status -->
-        <div class="flex justify-center mb-6">
-            <button id="process-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-300 transform hover:scale-105">
-                Process with Python
-            </button>
-        </div>
-        <p id="processing-status" class="text-sm text-center font-medium text-gray-500 dark:text-gray-400 mb-6"></p>
+  <!-- Main Content -->
+  <main class="max-w-7xl mx-auto px-4 py-8 space-y-8">
 
-        <!-- Data Display Section -->
-        <h2 class="text-2xl font-bold mb-4">All Data</h2>
-        <ul id="data-list" class="space-y-4">
-            <!-- Data items will be appended here by the JavaScript -->
-        </ul>
-        
-        <!-- Analysis Result Section -->
-        <div id="result-section" class="mt-8 p-6 bg-blue-50 dark:bg-blue-900 rounded-2xl shadow-inner border border-blue-200 dark:border-blue-700">
-            <h3 class="text-xl font-bold mb-2">Python Analysis Result</h3>
-            <p class="text-gray-700 dark:text-gray-300">Results will appear here after you click 'Process with Python'.</p>
-        </div>
-    </div>
-    
+    <!-- Title -->
+    <section class="text-center">
+      <h1 class="text-4xl font-bold">Puerto Rico</h1>
+      <p class="mt-2 text-gray-600">Puerto Rico has a land area of 3,424.5 square miles and a water area of 1,900.3 square miles.</p>
+    </section>
+
+    <!-- Map -->
+    <section class="flex justify-center">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/USA_Puerto_Rico_location_map.svg/800px-USA_Puerto_Rico_location_map.svg.png" alt="Map of Puerto Rico" class="w-full max-w-3xl rounded-lg shadow"/>
+    </section>
+
+    <!-- Stats Grid -->
+    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <!-- Population -->
+      <div class="bg-white p-6 rounded-lg shadow text-center">
+        <div class="text-sm text-gray-500">Total Population</div>
+        <div class="text-2xl font-bold">3,285,874</div>
+        <div class="text-xs text-gray-400 mt-1">2020 Decennial Census</div>
+      </div>
+
+      <!-- Employment -->
+      <div class="bg-white p-6 rounded-lg shadow text-center">
+        <div class="text-sm text-gray-500">Employment Rate</div>
+        <div class="text-2xl font-bold">43.4%</div>
+        <div class="text-xs text-gray-400 mt-1">2024 ACS</div>
+      </div>
+
+      <!-- Income -->
+      <div class="bg-white p-6 rounded-lg shadow text-center">
+        <div class="text-sm text-gray-500">Median Household Income</div>
+        <div class="text-2xl font-bold">$27,213</div>
+        <div class="text-xs text-gray-400 mt-1">2024 ACS</div>
+      </div>
+
+      <!-- Housing Units -->
+      <div class="bg-white p-6 rounded-lg shadow text-center">
+        <div class="text-sm text-gray-500">Total Housing Units</div>
+        <div class="text-2xl font-bold">1,616,963</div>
+        <div class="text-xs text-gray-400 mt-1">2024 ACS</div>
+      </div>
+
+      <!-- Race -->
+      <div class="bg-white p-6 rounded-lg shadow text-center">
+        <div class="text-sm text-gray-500">Hispanic or Latino</div>
+        <div class="text-2xl font-bold">3,249,043</div>
+        <div class="text-xs text-gray-400 mt-1">2020 Decennial Census</div>
+      </div>
+
+      <!-- Education -->
+      <div class="bg-white p-6 rounded-lg shadow text-center">
+        <div class="text-sm text-gray-500">Bachelor’s Degree or Higher</div>
+        <div class="text-2xl font-bold">29.7%</div>
+        <div class="text-xs text-gray-400 mt-1">2024 ACS</div>
+      </div>
+
+      <!-- Health -->
+      <div class="bg-white p-6 rounded-lg shadow text-center">
+        <div class="text-sm text-gray-500">Without Health Care Coverage</div>
+        <div class="text-2xl font-bold">5.6%</div>
+        <div class="text-xs text-gray-400 mt-1">2024 ACS</div>
+      </div>
+
+      <!-- Businesses -->
+      <div class="bg-white p-6 rounded-lg shadow text-center">
+        <div class="text-sm text-gray-500">Total Employer Establishments</div>
+        <div class="text-2xl font-bold">50,332</div>
+        <div class="text-xs text-gray-400 mt-1">2023 Business Patterns</div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Tab Navigation Script -->
+  <script>
+    const tabs = document.querySelectorAll(".tab-link");
+    tabs.forEach(tab => {
+      tab.addEventListener("click", () => {
+        tabs.forEach(t => t.classList.remove("tab-active"));
+        tab.classList.add("tab-active");
+        // Add functionality to show different content per tab here if needed
+      });
+    });
+  </script>
+
 </body>
 </html>
-
