@@ -7,41 +7,57 @@
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-50 text-gray-900 font-sans">
+  <!-- Navigation -->
   <nav class="bg-white shadow sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-4 py-3 flex items-center gap-6 text-sm sm:text-base">
-      <a href="index.html" class="nav-link border-b-2 border-transparent">All</a>
-      <a href="tables.html" class="nav-link border-b-2 border-transparent">Tables</a>
-      <a href="maps.html" class="nav-link border-b-2 border-transparent">Maps</a>
-      <a href="charts.html" class="nav-link border-b-2 border-transparent">Charts</a>
+      <a href="index.html"    class="nav-link border-b-2 border-transparent">All</a>
+      <a href="tables.html"   class="nav-link border-b-2 border-transparent">Tables</a>
+      <a href="maps.html"     class="nav-link border-b-2 border-transparent">Maps</a>
+      <a href="charts.html"   class="nav-link border-b-2 border-transparent">Charts</a>
       <a href="profiles.html" class="nav-link border-b-2 border-transparent">Profiles</a>
-      <a href="pages.html" class="nav-link border-b-2 border-transparent">Pages</a>
+      <a href="pages.html"    class="nav-link border-b-2 border-transparent">Pages</a>
     </div>
   </nav>
 
-  <main class="max-w-7xl mx-auto px-4 py-8 space-y-8">
-    <header class="text-center">
-      <h1 class="text-4xl font-bold">Maps</h1>
-      <p class="mt-2 text-gray-600">Static or interactive maps placeholder.</p>
-    </header>
+  <!-- Main Content -->
+  <main class="max-w-7xl mx-auto px-4 py-10">
+    <div class="bg-white rounded-lg shadow overflow-hidden">
+      <div class="grid grid-cols-1 md:grid-cols-2">
+        
+        <!-- Left column: Text -->
+        <div class="p-8 flex flex-col justify-center space-y-4">
+          <p class="text-sm text-gray-500 uppercase tracking-wide">State</p>
+          <h1 class="text-5xl font-extrabold">Puerto Rico</h1>
+          <p class="text-gray-700 max-w-md">
+            Puerto Rico has a land area of <strong>3,424.5</strong> square miles and a water area of 
+            <strong>1,900.3</strong> square miles.
+          </p>
+          <a href="#" class="inline-flex items-center gap-2 text-blue-600 border border-blue-600 px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-50 w-max">
+            <!-- Share icon -->
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 12v.01M12 4h.01M20 12v.01M12 20h.01M12 12l8-4-8-4-8 4 8 4z" />
+            </svg>
+            Share Profile
+          </a>
+        </div>
 
-    <!-- Static map placeholder -->
-    <section class="bg-white rounded-lg shadow p-4">
-      <h2 class="text-lg font-semibold mb-4">Puerto Rico — Location</h2>
-      <img class="w-full max-w-3xl rounded-lg mx-auto"
-        src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/USA_Puerto_Rico_location_map.svg/800px-USA_Puerto_Rico_location_map.svg.png"
-        alt="Map of Puerto Rico"/>
-      <p class="text-sm text-gray-500 mt-3">Replace with an embedded map or your own tiles.</p>
-    </section>
-
-    <!-- Interactive embed placeholder -->
-    <section class="bg-white rounded-lg shadow p-4">
-      <h2 class="text-lg font-semibold mb-4">Interactive Map (Embed)</h2>
-      <div class="aspect-video w-full bg-gray-100 rounded-lg flex items-center justify-center text-gray-500">
-        Add your map embed here (e.g., Mapbox, Leaflet, ArcGIS, or a custom iframe).
+        <!-- Right column: Map -->
+        <div class="h-96 md:h-auto">
+          <iframe
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d805474.107267328!2d-67.32416219662487!3d18.22083327645521!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8c029627c1e446b3%3A0x73f7cbf2e0a6e2f!2sPuerto%20Rico!5e0!3m2!1sen!2sus!4v1694892000000!5m2!1sen!2sus"
+            width="100%"
+            height="100%"
+            style="border:0;"
+            allowfullscreen=""
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade">
+          </iframe>
+        </div>
       </div>
-    </section>
+    </div>
   </main>
 
+  <!-- Highlight current nav -->
   <script>
     document.querySelectorAll('.nav-link').forEach(a=>{
       if (location.pathname.endsWith(a.getAttribute('href'))) {
