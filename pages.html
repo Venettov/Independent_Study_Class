@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Puerto Rico — Pages</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-900 font-sans">
+  <nav class="bg-white shadow sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center gap-6 text-sm sm:text-base">
+      <a href="index.html" class="nav-link border-b-2 border-transparent">All</a>
+      <a href="tables.html" class="nav-link border-b-2 border-transparent">Tables</a>
+      <a href="maps.html" class="nav-link border-b-2 border-transparent">Maps</a>
+      <a href="charts.html" class="nav-link border-b-2 border-transparent">Charts</a>
+      <a href="profiles.html" class="nav-link border-b-2 border-transparent">Profiles</a>
+      <a href="pages.html" class="nav-link border-b-2 border-transparent">Pages</a>
+    </div>
+  </nav>
+
+  <main class="max-w-7xl mx-auto px-4 py-8 space-y-8">
+    <header class="text-center">
+      <h1 class="text-4xl font-bold">Pages</h1>
+      <p class="mt-2 text-gray-600">Standalone writeups, methodology, notes, and resources.</p>
+    </header>
+
+    <!-- Example list -->
+    <section class="bg-white rounded-lg shadow divide-y">
+      <a href="#" class="block px-6 py-4 hover:bg-gray-50">
+        <h2 class="font-semibold">Methodology</h2>
+        <p class="text-sm text-gray-500">How we source and clean data.</p>
+      </a>
+      <a href="#" class="block px-6 py-4 hover:bg-gray-50">
+        <h2 class="font-semibold">Data Dictionary</h2>
+        <p class="text-sm text-gray-500">Definitions of variables and codes.</p>
+      </a>
+      <a href="#" class="block px-6 py-4 hover:bg-gray-50">
+        <h2 class="font-semibold">Citations</h2>
+        <p class="text-sm text-gray-500">Links to federal/state sources.</p>
+      </a>
+    </section>
+  </main>
+
+  <script>
+    document.querySelectorAll('.nav-link').forEach(a=>{
+      if (location.pathname.endsWith(a.getAttribute('href'))) {
+        a.classList.add('text-blue-600','font-semibold','border-blue-600');
+        a.setAttribute('aria-current','page');
+      }
+    });
+  </script>
+</body>
+</html>

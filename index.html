@@ -8,15 +8,15 @@
 </head>
 <body class="bg-gray-50 text-gray-900 font-sans">
 
-  <!-- Top Navigation Tabs -->
+  <!-- Top Navigation -->
   <nav class="bg-white shadow sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center gap-6 text-sm sm:text-base" role="tablist" aria-label="Sections">
-      <button class="tab-link border-b-2 border-transparent" data-tab="all" aria-selected="true" role="tab">All</button>
-      <button class="tab-link border-b-2 border-transparent" data-tab="tables" role="tab">Tables</button>
-      <button class="tab-link border-b-2 border-transparent" data-tab="maps" role="tab">Maps</button>
-      <button class="tab-link border-b-2 border-transparent" data-tab="charts" role="tab">Charts</button>
-      <button class="tab-link border-b-2 border-transparent" data-tab="profiles" role="tab">Profiles</button>
-      <button class="tab-link border-b-2 border-transparent" data-tab="pages" role="tab">Pages</button>
+    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center gap-6 text-sm sm:text-base" role="navigation" aria-label="Main">
+      <a href="index.html"    class="nav-link border-b-2 border-transparent">All</a>
+      <a href="tables.html"   class="nav-link border-b-2 border-transparent">Tables</a>
+      <a href="maps.html"     class="nav-link border-b-2 border-transparent">Maps</a>
+      <a href="charts.html"   class="nav-link border-b-2 border-transparent">Charts</a>
+      <a href="profiles.html" class="nav-link border-b-2 border-transparent">Profiles</a>
+      <a href="pages.html"    class="nav-link border-b-2 border-transparent">Pages</a>
     </div>
   </nav>
 
@@ -31,7 +31,11 @@
 
     <!-- Map -->
     <section class="flex justify-center">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/USA_Puerto_Rico_location_map.svg/800px-USA_Puerto_Rico_location_map.svg.png" alt="Map of Puerto Rico" class="w-full max-w-3xl rounded-lg shadow"/>
+      <img
+        src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/USA_Puerto_Rico_location_map.svg/800px-USA_Puerto_Rico_location_map.svg.png"
+        alt="Map of Puerto Rico"
+        class="w-full max-w-3xl rounded-lg shadow"
+      />
     </section>
 
     <!-- Stats Grid -->
@@ -95,32 +99,31 @@
 
   </main>
 
-  <!-- Tab Navigation Script -->
+  <!-- Script: highlight current page in nav -->
   <script>
-    const tabs = document.querySelectorAll(".tab-link");
+    (function () {
+      const links = document.querySelectorAll('.nav-link');
 
-    // helper: remove active classes from all tabs
-    function clearActive() {
-      tabs.forEach(t => {
-        t.classList.remove("text-blue-600","font-semibold","border-blue-600");
-        t.setAttribute("aria-selected", "false");
+      function isHome(link) {
+        const href = link.getAttribute('href');
+        if (href !== 'index.html') return false;
+        const path = location.pathname;
+        // treat "/" or ".../repo/" as index on GitHub Pages
+        return path.endsWith('/') || path.endsWith('/index.html');
+      }
+
+      links.forEach(a => {
+        const href = a.getAttribute('href');
+        const match =
+          location.pathname.endsWith(href) ||
+          (href === 'index.html' && isHome(a));
+
+        if (match) {
+          a.classList.add('text-blue-600','font-semibold','border-blue-600');
+          a.setAttribute('aria-current','page');
+        }
       });
-    }
-
-    // set default active on first tab
-    clearActive();
-    const first = tabs[0];
-    first.classList.add("text-blue-600","font-semibold","border-blue-600");
-    first.setAttribute("aria-selected", "true");
-
-    tabs.forEach(tab => {
-      tab.addEventListener("click", () => {
-        clearActive();
-        tab.classList.add("text-blue-600","font-semibold","border-blue-600");
-        tab.setAttribute("aria-selected", "true");
-        // TODO: show/hide tab-specific content here if you add sections later
-      });
-    });
+    })();
   </script>
 
 </body>

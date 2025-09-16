@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Puerto Rico — Charts</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-900 font-sans">
+  <nav class="bg-white shadow sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center gap-6 text-sm sm:text-base">
+      <a href="index.html" class="nav-link border-b-2 border-transparent">All</a>
+      <a href="tables.html" class="nav-link border-b-2 border-transparent">Tables</a>
+      <a href="maps.html" class="nav-link border-b-2 border-transparent">Maps</a>
+      <a href="charts.html" class="nav-link border-b-2 border-transparent">Charts</a>
+      <a href="profiles.html" class="nav-link border-b-2 border-transparent">Profiles</a>
+      <a href="pages.html" class="nav-link border-b-2 border-transparent">Pages</a>
+    </div>
+  </nav>
+
+  <main class="max-w-7xl mx-auto px-4 py-8 space-y-8">
+    <header class="text-center">
+      <h1 class="text-4xl font-bold">Charts</h1>
+      <p class="mt-2 text-gray-600">Add your chart library of choice (Chart.js, ECharts, etc.).</p>
+    </header>
+
+    <!-- Chart placeholders -->
+    <section class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="bg-white rounded-lg shadow p-4">
+        <h2 class="text-lg font-semibold mb-3">Line Chart — Placeholder</h2>
+        <div class="aspect-video bg-gray-100 rounded flex items-center justify-center text-gray-500">
+          Insert canvas or SVG chart here.
+        </div>
+      </div>
+      <div class="bg-white rounded-lg shadow p-4">
+        <h2 class="text-lg font-semibold mb-3">Bar Chart — Placeholder</h2>
+        <div class="aspect-video bg-gray-100 rounded flex items-center justify-center text-gray-500">
+          Insert canvas or SVG chart here.
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    document.querySelectorAll('.nav-link').forEach(a=>{
+      if (location.pathname.endsWith(a.getAttribute('href'))) {
+        a.classList.add('text-blue-600','font-semibold','border-blue-600');
+        a.setAttribute('aria-current','page');
+      }
+    });
+  </script>
+</body>
+</html>

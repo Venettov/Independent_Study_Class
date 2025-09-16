@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Puerto Rico — Tables</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-900 font-sans">
+  <!-- Nav -->
+  <nav class="bg-white shadow sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center gap-6 text-sm sm:text-base">
+      <a href="index.html" class="nav-link border-b-2 border-transparent">All</a>
+      <a href="tables.html" class="nav-link border-b-2 border-transparent">Tables</a>
+      <a href="maps.html" class="nav-link border-b-2 border-transparent">Maps</a>
+      <a href="charts.html" class="nav-link border-b-2 border-transparent">Charts</a>
+      <a href="profiles.html" class="nav-link border-b-2 border-transparent">Profiles</a>
+      <a href="pages.html" class="nav-link border-b-2 border-transparent">Pages</a>
+    </div>
+  </nav>
+
+  <main class="max-w-7xl mx-auto px-4 py-8 space-y-8">
+    <header class="text-center">
+      <h1 class="text-4xl font-bold">Tables</h1>
+      <p class="mt-2 text-gray-600">Starter data tables for Puerto Rico.</p>
+    </header>
+
+    <!-- Example data table -->
+    <section class="bg-white rounded-lg shadow overflow-hidden">
+      <div class="px-6 py-4 border-b">
+        <h2 class="text-lg font-semibold">Population, Income, and Education</h2>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="min-w-full text-left text-sm">
+          <thead class="bg-gray-50 text-gray-600">
+            <tr>
+              <th class="px-6 py-3">Metric</th>
+              <th class="px-6 py-3">Value</th>
+              <th class="px-6 py-3">Source/Year</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y">
+            <tr>
+              <td class="px-6 py-3">Total Population</td>
+              <td class="px-6 py-3 font-medium">3,285,874</td>
+              <td class="px-6 py-3 text-gray-500">2020 Decennial Census</td>
+            </tr>
+            <tr>
+              <td class="px-6 py-3">Median Household Income</td>
+              <td class="px-6 py-3 font-medium">$27,213</td>
+              <td class="px-6 py-3 text-gray-500">2024 ACS</td>
+            </tr>
+            <tr>
+              <td class="px-6 py-3">Bachelor’s Degree or Higher</td>
+              <td class="px-6 py-3 font-medium">29.7%</td>
+              <td class="px-6 py-3 text-gray-500">2024 ACS</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="px-6 py-3 text-sm text-gray-500 bg-gray-50">
+        Add more rows/columns as needed. Consider converting to a reusable component.
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // highlight current link
+    const links = document.querySelectorAll('.nav-link');
+    links.forEach(a => {
+      if (location.pathname.endsWith(a.getAttribute('href'))) {
+        a.classList.add('text-blue-600','font-semibold','border-blue-600');
+        a.setAttribute('aria-current','page');
+      }
+    });
+  </script>
+</body>
+</html>

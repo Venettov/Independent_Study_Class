@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Puerto Rico — Profiles</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-900 font-sans">
+  <nav class="bg-white shadow sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center gap-6 text-sm sm:text-base">
+      <a href="index.html" class="nav-link border-b-2 border-transparent">All</a>
+      <a href="tables.html" class="nav-link border-b-2 border-transparent">Tables</a>
+      <a href="maps.html" class="nav-link border-b-2 border-transparent">Maps</a>
+      <a href="charts.html" class="nav-link border-b-2 border-transparent">Charts</a>
+      <a href="profiles.html" class="nav-link border-b-2 border-transparent">Profiles</a>
+      <a href="pages.html" class="nav-link border-b-2 border-transparent">Pages</a>
+    </div>
+  </nav>
+
+  <main class="max-w-7xl mx-auto px-4 py-8 space-y-8">
+    <header class="text-center">
+      <h1 class="text-4xl font-bold">Profiles</h1>
+      <p class="mt-2 text-gray-600">Build sub-profiles (e.g., by municipio, age group, industry).</p>
+    </header>
+
+    <!-- Card grid -->
+    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <!-- Example card -->
+      <article class="bg-white rounded-lg shadow p-6">
+        <h2 class="text-xl font-semibold">San Juan</h2>
+        <p class="text-gray-600 mt-1">Quick stats and a link to a dedicated page.</p>
+        <ul class="text-sm text-gray-500 mt-3 list-disc list-inside space-y-1">
+          <li>Population: TBD</li>
+          <li>Median Income: TBD</li>
+          <li>Key Industries: TBD</li>
+        </ul>
+        <a href="#" class="inline-block mt-4 text-blue-600 hover:underline">Open profile →</a>
+      </article>
+
+      <!-- Duplicate/modify for more profiles -->
+      <article class="bg-white rounded-lg shadow p-6">
+        <h2 class="text-xl font-semibold">Bayamón</h2>
+        <p class="text-gray-600 mt-1">Another placeholder profile.</p>
+        <a href="#" class="inline-block mt-4 text-blue-600 hover:underline">Open profile →</a>
+      </article>
+
+      <article class="bg-white rounded-lg shadow p-6">
+        <h2 class="text-xl font-semibold">Ponce</h2>
+        <p class="text-gray-600 mt-1">Another placeholder profile.</p>
+        <a href="#" class="inline-block mt-4 text-blue-600 hover:underline">Open profile →</a>
+      </article>
+    </section>
+  </main>
+
+  <script>
+    document.querySelectorAll('.nav-link').forEach(a=>{
+      if (location.pathname.endsWith(a.getAttribute('href'))) {
+        a.classList.add('text-blue-600','font-semibold','border-blue-600');
+        a.setAttribute('aria-current','page');
+      }
+    });
+  </script>
+</body>
+</html>
