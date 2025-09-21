@@ -6,7 +6,6 @@
   <title>Puerto Rico Census Profile</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    /* New CSS to create the fading background effect */
     .fade-bg-container {
       position: relative;
       overflow: hidden;
@@ -17,26 +16,17 @@
       top: 0;
       right: 0;
       bottom: 0;
-      left: 50%; /* Starts the gradient from the middle */
+      left: 50%;
       background: linear-gradient(to right, rgba(255, 255, 255, 0.8), rgba(173, 216, 230, 0.9));
-      pointer-events: none; /* Allows clicks to pass through to the map */
+      pointer-events: none;
       z-index: 0;
     }
     @media (max-width: 767px) {
       .fade-bg-container::before {
-        display: none; /* Hide the gradient on mobile */
+        display: none;
       }
     }
-
-    #map {
-      position: relative; /* Ensure the map is above the pseudo-element */
-      z-index: 1;
-      height: 100%;
-      min-height: 400px;
-    }
   </style>
-  
-  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCgX6T1KG27exE3Wh64uqCFA4Z90FsJQLk&callback=initMap&libraries=marker" async defer></script>
 </head>
 <body class="bg-gray-50 text-gray-900 font-sans">
 
@@ -64,7 +54,7 @@
           </p>
         </div>
 
-        <div class="md:min-h-[400px]" id="map">
+        <div class="md:min-h-[400px]">
         </div>
       </div>
     </section>
@@ -164,23 +154,6 @@
         }
       });
     })();
-  </script>
-
-  <script>
-    let map;
-
-    async function initMap() {
-      const position = { lat: 18.2208, lng: -66.5901 };
-      
-      map = new google.maps.Map(document.getElementById("map"), {
-        zoom: 8,
-        center: position,
-        mapId: "YOUR_MAP_ID",
-        disableDefaultUI: true,
-        zoomControl: true,
-        gestureHandling: "greedy",
-      });
-    }
   </script>
 
 </body>
