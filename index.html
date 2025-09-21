@@ -3,50 +3,185 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Puerto Rico — Pages</title>
+  <title>Puerto Rico Census Profile</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Custom styles for map container */
+    #map {
+      height: 100%; /* Make map fill its container */
+      min-height: 400px; /* Minimum height for map on smaller screens */
+      /* Apply the gradient background here */
+      background: linear-gradient(to right, white, #ADD8E6); /* White to light blue */
+      /* Or for a softer fade, match the image more closely: */
+      /* background: linear-gradient(to right, rgba(255,255,255,1) 0%, rgba(255,255,255,0.8) 20%, rgba(173,216,230,0.5) 70%, rgba(173,216,230,1) 100%); */
+    }
+
+    /* Ensure the map itself is transparent/styled to show the background */
+    .gm-style .gm-style-iw-c { /* Example for info window, you might need to target specific Google Map elements */
+        background-color: transparent !important;
+    }
+  </style>
+  
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCgX6T1KG27exE3Wh64uqCFA4Z90FsJQLk&callback=initMap&libraries=marker" async defer></script>
 </head>
 <body class="bg-gray-50 text-gray-900 font-sans">
+
   <nav class="bg-white shadow sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center gap-6 text-sm sm:text-base">
-      <a href="index.html" class="nav-link border-b-2 border-transparent">All</a>
-      <a href="tables.html" class="nav-link border-b-2 border-transparent">Tables</a>
-      <a href="maps.html" class="nav-link border-b-2 border-transparent">Maps</a>
-      <a href="charts.html" class="nav-link border-b-2 border-transparent">Charts</a>
+    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-center gap-6 text-sm sm:text-base" role="navigation" aria-label="Main">
+      <a href="index.html"    class="nav-link border-b-2 border-transparent">Home</a>
+      <a href="tables.html"   class="nav-link border-b-2 border-transparent">Tables</a>
+      <a href="maps.html"     class="nav-link border-b-2 border-transparent">Maps</a>
+      <a href="charts.html"   class="nav-link border-b-2 border-transparent">Charts</a>
       <a href="profiles.html" class="nav-link border-b-2 border-transparent">Profiles</a>
-      <a href="pages.html" class="nav-link border-b-2 border-transparent">Pages</a>
+      <a href="pages.html"    class="nav-link border-b-2 border-transparent">Pages</a>
     </div>
   </nav>
 
   <main class="max-w-7xl mx-auto px-4 py-8 space-y-8">
-    <header class="text-center">
-      <h1 class="text-4xl font-bold">Pages</h1>
-      <p class="mt-2 text-gray-600">Standalone writeups, methodology, notes, and resources.</p>
-    </header>
 
-    <section class="bg-white rounded-lg shadow divide-y">
-      <a href="methodology.html" class="block px-6 py-4 hover:bg-gray-50">
-        <h2 class="font-semibold">Methodology</h2>
-        <p class="text-sm text-gray-500">How we source and clean data.</p>
-      </a>
-      <a href="data-dictionary.html" class="block px-6 py-4 hover:bg-gray-50">
-        <h2 class="font-semibold">Data Dictionary</h2>
-        <p class="text-sm text-gray-500">Definitions of variables and codes.</p>
-      </a>
-      <a href="citations.html" class="block px-6 py-4 hover:bg-gray-50">
-        <h2 class="font-semibold">Citations</h2>
-        <p class="text-sm text-gray-500">Links to federal/state sources.</p>
-      </a>
+    <section class="rounded-lg shadow overflow-hidden p-0 bg-white"> <div class="grid grid-cols-1 md:grid-cols-2 gap-0">
+        
+        <div class="p-8 flex flex-col justify-center bg-white"> <p class="text-sm text-gray-500 uppercase tracking-wide">State</p>
+          <h1 class="text-5xl font-extrabold mt-1">Puerto Rico</h1>
+          <p class="text-gray-700 max-w-md mt-4">
+            Puerto Rico has a land area of 3,424.5 square miles and a water area of 1,900.3 square miles.
+          </p>
+          <button class="inline-flex items-center gap-2 text-blue-600 border border-blue-600 px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-50 w-max mt-6">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 12v.01M12 4h.01M20 12v.01M12 20h.01M12 12l8-4-8-4-8 4 8 4z" />
+            </svg>
+            Share Profile
+          </button>
+        </div>
+
+        <div class="md:min-h-[400px]" id="map">
+          </div>
+      </div>
     </section>
+
+    <div class="flex justify-between items-center text-sm text-gray-500 mt-8 mb-4">
+      <p class="border-l-2 border-gray-300 pl-2">
+        <a href="#" class="hover:underline">United States</a> / Puerto Rico
+      </p>
+      <button class="text-blue-600 hover:underline">Display Sources</button>
+    </div>
+
+
+    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+
+      <div class="space-y-6">
+        <h2 class="text-lg font-semibold">Populations and People</h2>
+        <div class="bg-white p-4 rounded-lg shadow flex items-start space-x-3">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h-5v-5H4v-4H1v-2l2-4L1 2h22L21 8l2 4v2h-3v5h-5v-5h-4v5zm-1-8H8V4h8v8zM9 9H7v2h2V9zm4 0h-2v2h2V9z"/></svg>
+          <div>
+            <div class="text-gray-500 text-sm">Total Population</div>
+            <div class="font-bold text-xl">3,285,874</div>
+            <div class="text-xs text-gray-400 mt-1">P1 | 2020 Decennial Census</div>
+          </div>
+        </div>
+        <div class="bg-white p-4 rounded-lg shadow flex items-start space-x-3">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m7 0V5a2 2 0 012-2h2a2 2 0 012 2v4m-7 0h-3l-2 2H5m14 0h-3l-2 2h-2m2-2h-2"/></svg>
+          <div>
+            <div class="text-gray-500 text-sm">Employment Rate</div>
+            <div class="font-bold text-xl">43.4%</div>
+            <div class="text-xs text-gray-400 mt-1">DP03 | 2024 American Community Survey 1-Year Estimates</div>
+          </div>
+        </div>
+        <h2 class="text-lg font-semibold mt-6">Business and Economy</h2>
+        <div class="bg-white p-4 rounded-lg shadow flex items-start space-x-3">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m-1 4h1m8-16v16m-5-10H9m1.5-12a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"/></svg>
+          <div>
+            <div class="text-gray-500 text-sm">Total Employer Establishments</div>
+            <div class="font-bold text-xl">50,332</div>
+            <div class="text-xs text-gray-400 mt-1">CB2300CBP | 2023 Economic Surveys Business Patterns</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="space-y-6">
+        <h2 class="text-lg font-semibold">Income and Poverty</h2>
+        <div class="bg-white p-4 rounded-lg shadow flex items-start space-x-3">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1L19 18H5l1.401-1.401C10.92 12.001 12 10.11 12 8z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          <div>
+            <div class="text-gray-500 text-sm">Median Household Income</div>
+            <div class="font-bold text-xl">$27,213</div>
+            <div class="text-xs text-gray-400 mt-1">S1901 | 2024 American Community Survey 1-Year Estimates</div>
+          </div>
+        </div>
+        <h2 class="text-lg font-semibold mt-6">Housing</h2>
+        <div class="bg-white p-4 rounded-lg shadow flex items-start space-x-3">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001 1h4a1 1 0 001-1m-6 0v-6a1 1 0 011-1h2a1 1 0 011 1v6m-4 0v-4h4v4m-4 0a1 1 0 00-1-1h-2a1 1 0 00-1 1"/></svg>
+          <div>
+            <div class="text-gray-500 text-sm">Total Housing Units</div>
+            <div class="font-bold text-xl">1,616,963</div>
+            <div class="text-xs text-gray-400 mt-1">B25002 | 2024 American Community Survey 1-Year Estimates</div>
+          </div>
+        </div>
+        <h2 class="text-lg font-semibold mt-6">Race and Ethnicity</h2>
+        <div class="bg-white p-4 rounded-lg shadow flex items-start space-x-3">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h-5v-5H4v-4H1v-2l2-4L1 2h22L21 8l2 4v2h-3v5h-5v-5h-4v5zm-1-8H8V4h8v8zM9 9H7v2h2V9zm4 0h-2v2h2V9z"/></svg>
+          <div>
+            <div class="text-gray-500 text-sm">Hispanic or Latino (of any race)</div>
+            <div class="font-bold text-xl">3,249,043</div>
+            <div class="text-xs text-gray-400 mt-1">P9 | 2020 Decennial Census</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="space-y-6">
+        <h2 class="text-lg font-semibold">Education</h2>
+        <div class="bg-white p-4 rounded-lg shadow flex items-start space-x-3">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm0 0V5.001"/></svg>
+          <div>
+            <div class="text-gray-500 text-sm">Bachelor’s Degree or Higher</div>
+            <div class="font-bold text-xl">29.7%</div>
+            <div class="text-xs text-gray-400 mt-1">S1501 | 2024 American Community Survey 1-Year Estimates</div>
+          </div>
+        </div>
+        <h2 class="text-lg font-semibold mt-6">Health</h2>
+        <div class="bg-white p-4 rounded-lg shadow flex items-start space-x-3">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 12H6m-2 0h-2V6h2v6zm14 0h2V6h-2v6zM4 6a2 2 0 012-2h12a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V6z"/></svg>
+          <div>
+            <div class="text-gray-500 text-sm">Without Health Care Coverage</div>
+            <div class="font-bold text-xl">5.6%</div>
+            <div class="text-xs text-gray-400 mt-1">S2701 | 2024 American Community Survey 1-Year Estimates</div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
   </main>
 
   <script>
-    document.querySelectorAll('.nav-link').forEach(a=>{
-      if (location.pathname.endsWith(a.getAttribute('href'))) {
-        a.classList.add('text-blue-600','font-semibold','border-blue-600');
-        a.setAttribute('aria-current','page');
-      }
-    });
+    (function () {
+      const links = document.querySelectorAll('.nav-link');
+      links.forEach(a => {
+        const href = a.getAttribute('href');
+        if (location.pathname.endsWith(href) || (href === 'index.html' && (location.pathname.endsWith('/') || location.pathname.includes('index.html')))) {
+          a.classList.add('text-blue-600', 'font-semibold', 'border-blue-600');
+          a.setAttribute('aria-current', 'page');
+        }
+      });
+    })();
   </script>
+
+  <script>
+    let map;
+
+    async function initMap() {
+      const position = { lat: 18.2208, lng: -66.5901 };
+      
+      map = new google.maps.Map(document.getElementById("map"), {
+        zoom: 8,
+        center: position,
+        mapId: "YOUR_MAP_ID", // IMPORTANT: This should be a valid Map ID from your Google Cloud project for advanced styling.
+        disableDefaultUI: true, // Hides most default controls
+        zoomControl: true, // Re-enable zoom controls
+        gestureHandling: "greedy", // Improves mobile experience
+      });
+    }
+  </script>
+
 </body>
 </html>
