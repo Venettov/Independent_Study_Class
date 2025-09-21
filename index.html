@@ -6,10 +6,10 @@
   <title>Puerto Rico Census Profile</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    /* Custom styles for map container if needed */
     #map {
-      height: 100%; /* Make map fill its container */
-      min-height: 400px; /* Minimum height for map on smaller screens */
+      height: 100%;
+      min-height: 400px;
+      background: linear-gradient(to right, white, #ADD8E6);
     }
   </style>
   
@@ -30,10 +30,10 @@
 
   <main class="max-w-7xl mx-auto px-4 py-8 space-y-8">
 
-    <section class="bg-white rounded-lg shadow overflow-hidden p-0">
+    <section class="rounded-lg shadow overflow-hidden p-0 bg-white"> 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-0">
         
-        <div class="p-8 flex flex-col justify-center">
+        <div class="p-8 flex flex-col justify-center bg-white"> 
           <p class="text-sm text-gray-500 uppercase tracking-wide">State</p>
           <h1 class="text-5xl font-extrabold mt-1">Puerto Rico</h1>
           <p class="text-gray-700 max-w-md mt-4">
@@ -46,12 +46,7 @@
       </div>
     </section>
 
-    <div class="flex justify-end items-center text-sm text-gray-500 mt-8 mb-4">
-      <button class="text-blue-600 hover:underline">Display Sources</button>
-    </div>
-
     <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-
       <div class="space-y-6">
         <h2 class="text-lg font-semibold">Populations and People</h2>
         <div class="bg-white p-4 rounded-lg shadow flex items-start space-x-3">
@@ -131,9 +126,7 @@
           </div>
         </div>
       </div>
-
     </section>
-
   </main>
 
   <script>
