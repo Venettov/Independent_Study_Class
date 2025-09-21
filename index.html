@@ -6,7 +6,6 @@
   <title>Puerto Rico Census Profile</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    /* New CSS to create the fading background effect */
     .fade-bg-container {
       position: relative;
       overflow: hidden;
@@ -17,19 +16,18 @@
       top: 0;
       right: 0;
       bottom: 0;
-      left: 50%; /* Starts the gradient from the middle */
+      left: 50%;
       background: linear-gradient(to right, rgba(255, 255, 255, 0.8), rgba(173, 216, 230, 0.9));
-      pointer-events: none; /* Allows clicks to pass through to the map */
+      pointer-events: none;
       z-index: 0;
     }
     @media (max-width: 767px) {
       .fade-bg-container::before {
-        display: none; /* Hide the gradient on mobile */
+        display: none;
       }
     }
-
     #map {
-      position: relative; /* Ensure the map is above the pseudo-element */
+      position: relative;
       z-index: 1;
       height: 100%;
       min-height: 400px;
