@@ -6,10 +6,33 @@
   <title>Puerto Rico Census Profile</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
+    /* New CSS to create the fading background effect */
+    .fade-bg-container {
+      position: relative;
+      overflow: hidden;
+    }
+    .fade-bg-container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 50%; /* Starts the gradient from the middle */
+      background: linear-gradient(to right, rgba(255, 255, 255, 0.8), rgba(173, 216, 230, 0.9));
+      pointer-events: none; /* Allows clicks to pass through to the map */
+      z-index: 0;
+    }
+    @media (max-width: 767px) {
+      .fade-bg-container::before {
+        display: none; /* Hide the gradient on mobile */
+      }
+    }
+
     #map {
+      position: relative; /* Ensure the map is above the pseudo-element */
+      z-index: 1;
       height: 100%;
       min-height: 400px;
-      background: linear-gradient(to right, white, #ADD8E6);
     }
   </style>
   
@@ -30,11 +53,11 @@
 
   <main class="max-w-7xl mx-auto px-4 py-8 space-y-8">
 
-    <section class="rounded-lg shadow overflow-hidden p-0 bg-white"> 
+    <section class="rounded-lg shadow overflow-hidden p-0 bg-white fade-bg-container"> 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-0">
         
         <div class="p-8 flex flex-col justify-center bg-white"> 
-          <p class="text-sm text-gray-500 uppercase tracking-wide">State</p>
+          <p class="text-sm text-gray-500 uppercase tracking-wide">Population and Economic Analysis in</p>
           <h1 class="text-5xl font-extrabold mt-1">Puerto Rico</h1>
           <p class="text-gray-700 max-w-md mt-4">
             Puerto Rico has a land area of 3,424.5 square miles and a water area of 1,900.3 square miles.
@@ -47,6 +70,7 @@
     </section>
 
     <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+
       <div class="space-y-6">
         <h2 class="text-lg font-semibold">Populations and People</h2>
         <div class="bg-white p-4 rounded-lg shadow flex items-start space-x-3">
