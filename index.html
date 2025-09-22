@@ -11,30 +11,20 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 
   <style>
-    .fade-bg-container {
+    /* Blue gradient hero card */
+    .hero-card {
       position: relative;
       overflow: hidden;
-      border-radius: 0.75rem; /* match rounded look */
+      border-radius: 0.75rem;
+      background: linear-gradient(to right, rgba(255,255,255,0.85), rgba(173,216,230,0.95));
     }
-    .fade-bg-container::before {
-      content: '';
-      position: absolute;
-      inset: 0 0 0 50%;
-      background: linear-gradient(to right, rgba(255, 255, 255, 0.8), rgba(173, 216, 230, 0.9));
-      pointer-events: none;
-      z-index: 0;
-    }
-    @media (max-width: 767px) {
-      .fade-bg-container::before { display: none; }
-    }
-
-    /* Ensure Leaflet fills its box */
+    /* Let the map fill its area and stay behind content */
     #hero-map {
-      height: 380px;            /* adjust to taste */
+      height: 420px;
       width: 100%;
     }
     @media (min-width: 768px) {
-      #hero-map { height: 420px; }
+      #hero-map { height: 480px; }
     }
     .leaflet-tooltip {
       background: rgba(255,255,255,.95);
@@ -49,6 +39,7 @@
 </head>
 <body class="bg-gray-50 text-gray-900 font-sans">
 
+  <!-- NAV -->
   <nav class="bg-white shadow sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-center gap-6 text-sm sm:text-base" role="navigation" aria-label="Main">
       <a href="index.html"    class="nav-link border-b-2 border-transparent">Home</a>
@@ -62,28 +53,38 @@
 
   <main class="max-w-7xl mx-auto px-4 py-8 space-y-8">
 
-    <!-- HERO with embedded map on the right -->
-    <section class="rounded-lg shadow bg-white fade-bg-container">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-0 relative">
-        <!-- Left text -->
-        <div class="p-8 flex flex-col justify-center relative z-10 bg-white/0">
-          <p class="text-sm text-gray-500 uppercase tracking-wide">Population and Economic Analysis in</p>
-          <h1 class="text-5xl font-extrabold mt-1">Puerto Rico</h1>
-          <p class="text-gray-700 max-w-md mt-4">
-            Puerto Rico has a land area of 3,424.5 square miles and a water area of 1,900.3 square miles.
-          </p>
-        </div>
+    <!-- HERO: Bigger map, text inside blue area -->
+    <section class="hero-card shadow">
+      <!-- Desktop layout: text overlay left, big map right; Mobile: stacked -->
+      <div class="relative">
 
-        <!-- Right: map container -->
-        <div class="relative p-4 md:p-6 z-10">
-          <div class="rounded-lg overflow-hidden shadow ring-1 ring-black/5 bg-gray-100">
-            <div id="hero-map"></div>
+        <!-- Map wrapper (desktop: fills right ~65%; mobile: full width below text) -->
+        <div class="p-4 md:p-6">
+          <div
+            class="rounded-lg overflow-hidden shadow ring-1 ring-black/5 bg-gray-100
+                   h-72 md:h-[480px] w-full
+                   md:absolute md:inset-y-4 md:right-4 md:left-1/3">
+            <div id="hero-map" class="h-full w-full"></div>
           </div>
         </div>
+
+        <!-- Text block INSIDE the blue area -->
+        <div class="absolute inset-x-4 top-4 md:left-6 md:right-auto md:max-w-md">
+          <div class="backdrop-blur-sm bg-white/60 rounded-lg shadow p-6 ring-1 ring-black/5">
+            <p class="text-xs md:text-sm text-gray-600 uppercase tracking-wide">Population and Economic Analysis in</p>
+            <h1 class="text-4xl md:text-5xl font-extrabold mt-1">Puerto Rico</h1>
+            <p class="text-gray-700 mt-3">
+              Puerto Rico has a land area of 3,424.5 square miles and a water area of 1,900.3 square miles.
+            </p>
+          </div>
+        </div>
+
+        <!-- Spacer to preserve height when map is absolutely positioned on desktop -->
+        <div class="h-72 md:h-[520px]"></div>
       </div>
     </section>
 
-    <!-- Stats grid -->
+    <!-- STATS GRID (unchanged) -->
     <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
       <div class="space-y-6">
         <h2 class="text-lg font-semibold">Populations and People</h2>
@@ -184,14 +185,17 @@
     (async function initHeroMap () {
       try {
         const prBounds = L.latLngBounds([[17.85, -67.45],[18.55, -65.25]]);
-        const map = L.map('hero-map', { zoomControl: false, attributionControl: false }).fitBounds(prBounds);
+        const map = L.map('hero-map', {
+          zoomControl: false,
+          attributionControl: false
+        }).fitBounds(prBounds);
 
         // Tiles
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
           minZoom: 7, maxZoom: 18
         }).addTo(map);
 
-        // Load municipalities GeoJSON (path relative to site root)
+        // Load municipalities GeoJSON
         const geojsonUrl = './data/tl_2022_72_cousub/pr_municipalities.geojson';
         const res = await fetch(geojsonUrl + (geojsonUrl.includes('?') ? '&' : '?') + 'cb=' + Date.now());
         if (!res.ok) throw new Error('Failed to fetch municipalities GeoJSON: ' + res.status);
@@ -215,11 +219,13 @@
         const b = layer.getBounds();
         if (b.isValid()) map.fitBounds(b, { padding:[10,10] });
 
-        // Keep layout crisp if the section resizes
         window.addEventListener('resize', () => map.invalidateSize());
+
+        // Optional: click-through to full map
+        // map.on('click', () => window.location.href = 'maps.html');
+
       } catch (e) {
         console.error(e);
-        // If something fails, leave the hero area as a subtle gray block
         const el = document.getElementById('hero-map');
         if (el) el.innerHTML = '<div class="w-full h-full flex items-center justify-center text-gray-500 text-sm">Map unavailable</div>';
       }
