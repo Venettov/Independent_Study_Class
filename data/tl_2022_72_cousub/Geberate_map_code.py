@@ -22,11 +22,10 @@ def create_geojson_from_shapefile(filepath, geojson_filename="pr_municipalities.
             gdf = gdf.to_crs(epsg=4326)
 
         # Filter for the relevant columns and convert to GeoJSON
-        # We need the 'ADM1_ES' column for municipality names on hover
         gdf = gdf[['ADM1_ES', 'geometry']]
         geojson_data = json.loads(gdf.to_json())
 
-        # Rename the 'ADM1_ES' property to 'name' for easier use in the JavaScript
+        # Rename the 'ADM1_ES' property to 'name'
         for feature in geojson_data['features']:
             if 'ADM1_ES' in feature['properties']:
                 feature['properties']['name'] = feature['properties'].pop('ADM1_ES')
@@ -52,6 +51,8 @@ def create_html_map_file(geojson_filename, output_filename="maps.html"):
         print("Cannot create HTML file without a GeoJSON data file.")
         return
 
+    # Use a direct fetch call as it is the standard and should work
+    # Note: Double curly braces {{ and }} are used to escape the JavaScript code inside the f-string
     html_template = f"""
 <!DOCTYPE html>
 <html lang="en">
@@ -108,9 +109,15 @@ def create_html_map_file(geojson_filename, output_filename="maps.html"):
                 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             }}).addTo(map);
 
-            // Use fetch to load the external GeoJSON file
-            fetch('{geojson_filename}')
-                .then(response => response.json())
+            const geojsonUrl = 'https://raw.githubusercontent.com/venettov/Independent_Study_Class/main/data/tl_2022_72_cousub/pr_municipalities.geojson';
+
+            fetch(geojsonUrl)
+                .then(response => {{
+                    if (!response.ok) {{
+                        throw new Error(`HTTP error! Status: ${{response.status}}`);
+                    }}
+                    return response.json();
+                }})
                 .then(prMunicipalities => {{
                     const geojsonLayer = L.geoJSON(prMunicipalities, {{
                         style: {{
@@ -168,7 +175,6 @@ def create_html_map_file(geojson_filename, output_filename="maps.html"):
 if __name__ == "__main__":
     shapefile_path = "pri_admbnda_adm1_2019.shp"
     
-    # Check if the shapefile exists before trying to process it
     if not os.path.exists(shapefile_path):
         print(f"Error: The file '{shapefile_path}' was not found.")
         print("Please ensure the shapefile is in the same directory as this script.")
