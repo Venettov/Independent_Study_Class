@@ -5,26 +5,45 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Puerto Rico Census Profile</title>
   <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Leaflet (for the hero map) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+
   <style>
     .fade-bg-container {
       position: relative;
       overflow: hidden;
+      border-radius: 0.75rem; /* match rounded look */
     }
     .fade-bg-container::before {
       content: '';
       position: absolute;
-      top: 0;
-      right: 0;
-      bottom: 0;
-      left: 50%;
+      inset: 0 0 0 50%;
       background: linear-gradient(to right, rgba(255, 255, 255, 0.8), rgba(173, 216, 230, 0.9));
       pointer-events: none;
       z-index: 0;
     }
     @media (max-width: 767px) {
-      .fade-bg-container::before {
-        display: none;
-      }
+      .fade-bg-container::before { display: none; }
+    }
+
+    /* Ensure Leaflet fills its box */
+    #hero-map {
+      height: 380px;            /* adjust to taste */
+      width: 100%;
+    }
+    @media (min-width: 768px) {
+      #hero-map { height: 420px; }
+    }
+    .leaflet-tooltip {
+      background: rgba(255,255,255,.95);
+      border-color:#333;
+      color:#333;
+      font-size:12px;
+      font-weight:600;
+      box-shadow:0 2px 5px rgba(0,0,0,.2);
+      padding:4px 8px;
     }
   </style>
 </head>
@@ -43,10 +62,11 @@
 
   <main class="max-w-7xl mx-auto px-4 py-8 space-y-8">
 
-    <section class="rounded-lg shadow overflow-hidden p-0 bg-white fade-bg-container"> 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-0">
-        
-        <div class="p-8 flex flex-col justify-center bg-white"> 
+    <!-- HERO with embedded map on the right -->
+    <section class="rounded-lg shadow bg-white fade-bg-container">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-0 relative">
+        <!-- Left text -->
+        <div class="p-8 flex flex-col justify-center relative z-10 bg-white/0">
           <p class="text-sm text-gray-500 uppercase tracking-wide">Population and Economic Analysis in</p>
           <h1 class="text-5xl font-extrabold mt-1">Puerto Rico</h1>
           <p class="text-gray-700 max-w-md mt-4">
@@ -54,13 +74,17 @@
           </p>
         </div>
 
-        <div class="md:min-h-[400px]">
+        <!-- Right: map container -->
+        <div class="relative p-4 md:p-6 z-10">
+          <div class="rounded-lg overflow-hidden shadow ring-1 ring-black/5 bg-gray-100">
+            <div id="hero-map"></div>
+          </div>
         </div>
       </div>
     </section>
 
+    <!-- Stats grid -->
     <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-
       <div class="space-y-6">
         <h2 class="text-lg font-semibold">Populations and People</h2>
         <div class="bg-white p-4 rounded-lg shadow flex items-start space-x-3">
@@ -144,6 +168,7 @@
   </main>
 
   <script>
+    // Highlight current nav link
     (function () {
       const links = document.querySelectorAll('.nav-link');
       links.forEach(a => {
@@ -154,7 +179,51 @@
         }
       });
     })();
-  </script>
 
+    // Mini Leaflet map in hero
+    (async function initHeroMap () {
+      try {
+        const prBounds = L.latLngBounds([[17.85, -67.45],[18.55, -65.25]]);
+        const map = L.map('hero-map', { zoomControl: false, attributionControl: false }).fitBounds(prBounds);
+
+        // Tiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          minZoom: 7, maxZoom: 18
+        }).addTo(map);
+
+        // Load municipalities GeoJSON (path relative to site root)
+        const geojsonUrl = './data/tl_2022_72_cousub/pr_municipalities.geojson';
+        const res = await fetch(geojsonUrl + (geojsonUrl.includes('?') ? '&' : '?') + 'cb=' + Date.now());
+        if (!res.ok) throw new Error('Failed to fetch municipalities GeoJSON: ' + res.status);
+        const fc = await res.json();
+
+        const baseStyle = { fillColor:'#93c5fd', weight:1, color:'#1f2937', fillOpacity:0.7 };
+        const hiStyle   = { weight:2.5, color:'#111827', fillOpacity:0.9 };
+
+        const layer = L.geoJSON(fc, {
+          style: baseStyle,
+          onEachFeature: (f, lyr) => {
+            const name = (f.properties && (f.properties.NAME || f.properties.NAMELSAD)) || 'Municipality';
+            lyr.bindTooltip(name, {direction:'center', className:'leaflet-tooltip'});
+            lyr.on({
+              mouseover: e => { e.target.setStyle(hiStyle); e.target.bringToFront?.(); },
+              mouseout:  e => layer.resetStyle(e.target)
+            });
+          }
+        }).addTo(map);
+
+        const b = layer.getBounds();
+        if (b.isValid()) map.fitBounds(b, { padding:[10,10] });
+
+        // Keep layout crisp if the section resizes
+        window.addEventListener('resize', () => map.invalidateSize());
+      } catch (e) {
+        console.error(e);
+        // If something fails, leave the hero area as a subtle gray block
+        const el = document.getElementById('hero-map');
+        if (el) el.innerHTML = '<div class="w-full h-full flex items-center justify-center text-gray-500 text-sm">Map unavailable</div>';
+      }
+    })();
+  </script>
 </body>
 </html>
