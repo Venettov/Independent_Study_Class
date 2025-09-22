@@ -55,7 +55,7 @@
             }).addTo(map);
 
             // Use fetch to load the external GeoJSON file
-            fetch('pr_municipalities.geojson')
+            fetch('https://raw.githubusercontent.com/Venettov/Independent_Study_Class/main/data/tl_2022_72_cousub/pr_municipalities.geojson')
                 .then(response => response.json())
                 .then(prMunicipalities => {
                     const geojsonLayer = L.geoJSON(prMunicipalities, {
