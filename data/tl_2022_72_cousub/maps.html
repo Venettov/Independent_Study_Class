@@ -1,107 +1,66 @@
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const map = L.map('map').fitBounds([
+            [17.85, -67.45], 
+            [18.55, -65.25]
+        ]);
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Puerto Rico Municipalities</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-        crossorigin=""/>
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-        integrity="sha256-20n69z7S+y9oRbywbydY+a/oYvSjY+yT5q4lQ4a4R28="
-        crossorigin=""></script>
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6;
-        }
-        #map {
-            height: 85vh;
-            width: 100%;
-            border-radius: 1rem;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-        }
-        .leaflet-tooltip {
-            background: rgba(255, 255, 255, 0.9);
-            border-color: #333;
-            color: #333;
-            font-size: 14px;
-            font-weight: bold;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            padding: 5px 10px;
-        }
-    </style>
-</head>
-<body class="flex items-center justify-center p-8 min-h-screen">
-    <div class="container mx-auto max-w-7xl">
-        <div class="bg-white rounded-xl p-6 shadow-lg">
-            <h1 class="text-3xl font-bold text-center text-gray-800 mb-4">Puerto Rico Municipalities</h1>
-            <p class="text-center text-gray-600 mb-6">Hover over a municipality to see its name.</p>
-            <div id="map" class="rounded-lg"></div>
-        </div>
-    </div>
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const map = L.map('map').fitBounds([
-                [17.85, -67.45], 
-                [18.55, -65.25]
-            ]);
+        const geojsonUrl = 'https://raw.githubusercontent.com/venettov/Independent_Study_Class/main/data/tl_2022_72_cousub/pr_municipalities.geojson';
 
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            }).addTo(map);
-
-            // Use fetch to load the external GeoJSON file
-            fetch('https://raw.githubusercontent.com/venettov/Independent_Study_Class/main/data/tl_2022_72_cousub/pr_municipalities.geojson')
-                .then(response => response.json())
-                .then(prMunicipalities => {
-                    const geojsonLayer = L.geoJSON(prMunicipalities, {
-                        style: {
-                            fillColor: 'lightblue',
-                            weight: 1.5,
-                            opacity: 1,
-                            color: 'black',
-                            fillOpacity: 0.7
-                        },
-                        onEachFeature: function(feature, layer) {
-                            if (feature.properties && feature.properties.name) {
-                                layer.bindTooltip(feature.properties.name, {
-                                    permanent: false,
-                                    direction: 'center',
-                                    className: 'leaflet-tooltip',
-                                    offset: [0, 0]
-                                });
-                            }
-
-                            layer.on({
-                                mouseover: function(e) {
-                                    e.target.setStyle({
-                                        weight: 3,
-                                        color: '#666',
-                                        dashArray: '',
-                                        fillOpacity: 0.9
-                                    });
-                                    if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
-                                        e.target.bringToFront();
-                                    }
-                                },
-                                mouseout: function(e) {
-                                    geojsonLayer.resetStyle(e.target);
-                                },
-                                click: function(e) {
-                                    map.fitBounds(e.target.getBounds());
-                                }
+        const xhr = new XMLHttpRequest();
+        xhr.open('GET', geojsonUrl, true);
+        xhr.onload = function() {
+            if (xhr.status === 200) {
+                const prMunicipalities = JSON.parse(xhr.responseText);
+                const geojsonLayer = L.geoJSON(prMunicipalities, {
+                    style: {
+                        fillColor: 'lightblue',
+                        weight: 1.5,
+                        opacity: 1,
+                        color: 'black',
+                        fillOpacity: 0.7
+                    },
+                    onEachFeature: function(feature, layer) {
+                        if (feature.properties && feature.properties.name) {
+                            layer.bindTooltip(feature.properties.name, {
+                                permanent: false,
+                                direction: 'center',
+                                className: 'leaflet-tooltip',
+                                offset: [0, 0]
                             });
                         }
-                    }).addTo(map);
-                })
-                .catch(error => {
-                    console.error('Error loading the GeoJSON data:', error);
-                });
-        });
-    </script>
-</body>
-</html>
+                        layer.on({
+                            mouseover: function(e) {
+                                e.target.setStyle({
+                                    weight: 3,
+                                    color: '#666',
+                                    dashArray: '',
+                                    fillOpacity: 0.9
+                                });
+                                if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+                                    e.target.bringToFront();
+                                }
+                            },
+                            mouseout: function(e) {
+                                geojsonLayer.resetStyle(e.target);
+                            },
+                            click: function(e) {
+                                map.fitBounds(e.target.getBounds());
+                            }
+                        });
+                    }
+                }).addTo(map);
+            } else {
+                console.error('Error loading the GeoJSON data:', xhr.status, xhr.statusText);
+            }
+        };
+        xhr.onerror = function() {
+            console.error('Network error occurred.');
+        };
+        xhr.send();
+    });
+</script>
