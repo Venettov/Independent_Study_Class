@@ -3,61 +3,166 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Puerto Rico — Maps</title>
+  <title>Puerto Rico Municipalities</title>
   <script src="https://cdn.tailwindcss.com"></script>
+
+  <link rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+        crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+          integrity="sha256-20n69z7S+y9oRbywbydY+a/oYvSjY+yT5q4lQ4a4R28="
+          crossorigin=""></script>
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f3f4f6;
+    }
+    #map {
+      height: 85vh;
+      width: 100%;
+      border-radius: 1rem;
+      box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+    }
+    @media (min-height: 900px) {
+      #map { height: 88vh; }
+    }
+    .leaflet-tooltip {
+      background: rgba(255,255,255,0.95);
+      border-color: #333;
+      color: #333;
+      font-size: 14px;
+      font-weight: 600;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      padding: 5px 10px;
+    }
+  </style>
 </head>
-<body class="bg-gray-50 text-gray-900 font-sans">
-  <nav class="bg-white shadow sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-center gap-6 text-sm sm:text-base">
-      <a href="index.html"    class="nav-link border-b-2 border-transparent">Home</a>
-      <a href="tables.html"   class="nav-link border-b-2 border-transparent">Tables</a>
-      <a href="maps.html"     class="nav-link border-b-2 border-transparent">Maps</a>
-      <a href="charts.html"   class="nav-link border-b-2 border-transparent">Charts</a>
-      <a href="profiles.html" class="nav-link border-b-2 border-transparent">Profiles</a>
-      <a href="pages.html"    class="nav-link border-b-2 border-transparent">Pages</a>
-    </div>
-  </nav>
-
-  <main class="max-w-7xl mx-auto px-4 py-10">
-    <div class="bg-white rounded-lg shadow overflow-hidden">
-      <div class="grid grid-cols-1 md:grid-cols-2">
-        
-        <div class="p-8 flex flex-col justify-center space-y-4">
-          <p class="text-sm text-gray-500 uppercase tracking-wide">Population and Economic Analysis in</p>
-          <h1 class="text-5xl font-extrabold">Puerto Rico</h1>
-          <p class="text-gray-700 max-w-md">
-            Puerto Rico has a land area of <strong>3,424.5</strong> square miles and a water area of 
-            <strong>1,900.3</strong> square miles.
-          </p>
-          <a href="#" class="inline-flex items-center gap-2 text-blue-600 border border-blue-600 px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-50 w-max">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 12v.01M12 4h.01M20 12v.01M12 20h.01M12 12l8-4-8-4-8 4 8 4z" />
-            </svg>
-            Share Profile
-          </a>
-        </div>
-
-        <div class="h-96 md:h-auto">
-          <iframe
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d805474.107267328!2d-67.32416219662487!3d18.22083327645521!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8c029627c1e446b3%3A0x73f7cbf2e0a6e2f!2sPuerto%20Rico!5e0!3m2!1sen!2sus!4v1694892000000!5m2!1sen!2sus"
-            width="100%"
-            height="100%"
-            style="border:0;"
-            allowfullscreen=""
-            loading="lazy"
-            referrerpolicy="no-referrer-when-downgrade">
-          </iframe>
-        </div>
+<body class="flex items-center justify-center p-8 min-h-screen">
+  <div class="container mx-auto max-w-7xl w-full">
+    <div class="bg-white rounded-xl p-6 shadow-lg">
+      <div class="flex items-center justify-between gap-3 mb-4">
+        <h1 class="text-2xl sm:text-3xl font-bold text-gray-800">Puerto Rico Municipalities</h1>
+        <button id="resetBtn"
+                class="px-3 py-2 rounded-lg border text-sm font-medium bg-gray-50 hover:bg-gray-100">
+          Reset view
+        </button>
       </div>
+      <p class="text-gray-600 mb-4">Hover a municipality to see its name. Click to zoom.</p>
+      <div id="map" class="rounded-lg"></div>
+      <p id="errorMsg" class="hidden mt-4 text-sm text-red-600"></p>
+      <p class="mt-3 text-xs text-gray-500">
+        Basemap © OpenStreetMap contributors · Boundaries: TIGER/Line® (via your repo)
+      </p>
     </div>
-  </main>
+  </div>
 
   <script>
-    document.querySelectorAll('.nav-link').forEach(a=>{
-      if (location.pathname.endsWith(a.getAttribute('href'))) {
-        a.classList.add('text-blue-600','font-semibold','border-blue-600');
-        a.setAttribute('aria-current','page');
-      }
+    document.addEventListener('DOMContentLoaded', function () {
+      // Initial bounds covering Puerto Rico (incl. Vieques & Culebra)
+      const prBounds = L.latLngBounds([ [17.85, -67.45], [18.55, -65.25] ]);
+
+      const map = L.map('map', {
+        zoomControl: true,
+        attributionControl: true
+      }).fitBounds(prBounds);
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution:
+          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+        minZoom: 7,
+        maxZoom: 19
+      }).addTo(map);
+
+      const geojsonUrl = 'https://raw.githubusercontent.com/venettov/Independent_Study_Class/main/data/tl_2022_72_cousub/pr_municipalities.geojson';
+
+      // Style helpers
+      const defaultStyle = {
+        fillColor: '#93c5fd', // light blue
+        weight: 1.2,
+        opacity: 1,
+        color: '#111827',     // near-black stroke
+        fillOpacity: 0.70
+      };
+
+      const highlightStyle = {
+        weight: 3,
+        color: '#374151',
+        dashArray: '',
+        fillOpacity: 0.9
+      };
+
+      // For consistent hover reset, we keep a reference to the layer
+      let geojsonLayer = null;
+
+      // Fetch GeoJSON
+      fetch(geojsonUrl)
+        .then((response) => {
+          if (!response.ok) throw new Error(`HTTP ${response.status} fetching GeoJSON`);
+          return response.json();
+        })
+        .then((fc) => {
+          geojsonLayer = L.geoJSON(fc, {
+            style: defaultStyle,
+            onEachFeature: function (feature, layer) {
+              const props = feature.properties || {};
+              // Robust name fallback for TIGER/Line variants
+              const muniName = props.NAME || props.NAMELSAD || props.name || 'Unknown';
+
+              // Tooltip on hover
+              layer.bindTooltip(muniName, {
+                permanent: false,
+                direction: 'center',
+                className: 'leaflet-tooltip',
+                offset: [0, 0]
+              });
+
+              // Interactions
+              layer.on({
+                mouseover: function (e) {
+                  e.target.setStyle(highlightStyle);
+                  if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+                    e.target.bringToFront();
+                  }
+                },
+                mouseout: function (e) {
+                  geojsonLayer.resetStyle(e.target);
+                },
+                click: function (e) {
+                  map.fitBounds(e.target.getBounds(), { padding: [20, 20] });
+                }
+              });
+
+              // Optional popup with a little more info if present
+              const geoid = props.GEOID || props.geoid || '';
+              if (geoid) {
+                layer.bindPopup(`<strong>${muniName}</strong><br/><span style="font-size:12px">GEOID: ${geoid}</span>`);
+              } else {
+                layer.bindPopup(`<strong>${muniName}</strong>`);
+              }
+            }
+          }).addTo(map);
+        })
+        .catch((err) => {
+          console.error('Error loading GeoJSON:', err);
+          const msg = document.getElementById('errorMsg');
+          msg.textContent = 'There was a problem loading boundary data. Check the file path and that the repo is public.';
+          msg.classList.remove('hidden');
+        });
+
+      // Reset button
+      document.getElementById('resetBtn').addEventListener('click', () => {
+        map.fitBounds(prBounds, { padding: [10, 10] });
+      });
+
+      // Press Escape to reset view
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') map.fitBounds(prBounds, { padding: [10, 10] });
+      });
+
+      // Ensure map resizes nicely when container changes
+      window.addEventListener('resize', () => map.invalidateSize());
     });
   </script>
 </body>
