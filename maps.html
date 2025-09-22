@@ -21,20 +21,45 @@
     }
   </style>
 </head>
-<body class="flex items-center justify-center p-6 min-h-screen">
-  <div class="container mx-auto max-w-7xl w-full">
-    <div class="bg-white rounded-xl p-6 shadow-lg">
+<body class="bg-gray-50 text-gray-900 font-sans">
+
+  <nav class="bg-white shadow sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-center gap-6 text-sm sm:text-base">
+      <a href="index.html" class="nav-link border-b-2 border-transparent">Home</a>
+      <a href="tables.html" class="nav-link border-b-2 border-transparent">Tables</a>
+      <a href="maps.html" class="nav-link border-b-2 border-transparent">Maps</a>
+      <a href="charts.html" class="nav-link border-b-2 border-transparent">Charts</a>
+      <a href="profiles.html" class="nav-link border-b-2 border-transparent">Profiles</a>
+      <a href="pages.html" class="nav-link border-b-2 border-transparent">Pages</a>
+    </div>
+  </nav>
+
+  <main class="max-w-7xl mx-auto px-4 py-8 space-y-8">
+    <header class="text-center">
+      <h1 class="text-4xl font-bold">Puerto Rico Municipalities</h1>
+      <p class="mt-2 text-gray-600">Hover a municipality to see its name. Click to zoom.</p>
+    </header>
+
+    <div class="bg-white rounded-lg shadow-lg p-6">
       <div class="flex items-center justify-between mb-3">
-        <h1 class="text-3xl font-bold text-gray-800">Puerto Rico Municipalities</h1>
+        <h2 class="text-lg font-semibold text-gray-800">Interactive Map</h2>
         <button id="resetBtn" class="px-3 py-2 rounded-lg border text-sm bg-gray-50 hover:bg-gray-100">Reset view</button>
       </div>
-      <p class="text-gray-600 mb-4">Hover a municipality to see its name. Click to zoom.</p>
-      <div id="map"></div>
+      <div id="map" class="mt-4"></div>
       <pre id="errorMsg" class="hidden mt-3 text-sm text-red-600 whitespace-pre-wrap"></pre>
     </div>
-  </div>
+  </main>
 
   <script>
+    // Highlight current nav link
+    document.querySelectorAll('.nav-link').forEach(a => {
+      if (location.pathname.endsWith(a.getAttribute('href'))) {
+        a.classList.add('text-blue-600', 'font-semibold', 'border-blue-600');
+        a.setAttribute('aria-current', 'page');
+      }
+    });
+
+    // Leaflet map code remains the same
     document.addEventListener('DOMContentLoaded', async () => {
       const prBounds = L.latLngBounds([[17.85, -67.45],[18.55, -65.25]]);
       const map = L.map('map').fitBounds(prBounds);
@@ -42,7 +67,7 @@
         attribution: '&copy; OpenStreetMap contributors', minZoom: 7, maxZoom: 19
       }).addTo(map);
 
-      const geojsonUrl = './data/tl_2022_72_cousub/pr_municipalities.geojson'; // <= correct for repo root
+      const geojsonUrl = './data/tl_2022_72_cousub/pr_municipalities.geojson';
 
       function showError(msg){
         const el = document.getElementById('errorMsg');
@@ -77,7 +102,6 @@
           }
         }).addTo(map);
 
-        // Fit to actual data bounds (more reliable than a preset)
         const b = layer.getBounds();
         if (b.isValid()) map.fitBounds(b, { padding: [15,15] });
 
