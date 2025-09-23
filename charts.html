@@ -5,9 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Puerto Rico — Charts</title>
   <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- Load libraries first -->
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.20.2/dist/xlsx.full.min.js" defer></script>
+  <!-- Only Chart.js needed now -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
 </head>
 <body class="bg-gray-50 text-gray-900 font-sans">
@@ -26,12 +24,12 @@
     <header class="text-center">
       <h1 class="text-4xl font-bold">Charts</h1>
       <p class="mt-2 text-gray-600">
-        Auto-loads <code>data/population/prm-est2024-chg.xlsx</code> and plots the Puerto Rico row.
+        Auto-loads <code>data/population/pr_pr_2020_2024.json</code> (falls back to the full table JSON) and plots the Puerto Rico row.
       </p>
     </header>
 
     <section class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <!-- Chart Card -->
+      <!-- Line chart -->
       <div class="bg-white rounded-lg shadow p-4">
         <div class="flex items-center justify-between mb-3">
           <h2 class="text-lg font-semibold">Puerto Rico Population (2020–2024)</h2>
@@ -40,8 +38,8 @@
               Reload
             </button>
             <label class="text-sm text-gray-600">
-              <input id="fileInput" type="file" accept=".xlsx,.xls" class="hidden">
-              <span class="px-3 py-1.5 rounded-lg bg-gray-200 hover:bg-gray-300 cursor-pointer">Upload Excel</span>
+              <input id="jsonInput" type="file" accept=".json" class="hidden">
+              <span class="px-3 py-1.5 rounded-lg bg-gray-200 hover:bg-gray-300 cursor-pointer">Upload JSON</span>
             </label>
           </div>
         </div>
@@ -51,114 +49,44 @@
         <p id="status" class="mt-2 text-xs text-gray-500"></p>
       </div>
 
-      <!-- Placeholder Card -->
+      <!-- Annual % change bar chart -->
       <div class="bg-white rounded-lg shadow p-4">
-        <h2 class="text-lg font-semibold mb-3">Bar Chart — Placeholder</h2>
-        <div class="aspect-video bg-gray-100 rounded flex items-center justify-center text-gray-500">
-          Insert canvas or SVG chart here.
+        <h2 class="text-lg font-semibold mb-3">Annual % Change — Puerto Rico</h2>
+        <div class="aspect-video bg-gray-50 rounded p-3">
+          <canvas id="pctChart"></canvas>
         </div>
       </div>
     </section>
   </main>
 
-  <!-- Your logic script loads *after* the libraries -->
   <script defer>
-    const XLSX_PATH = "data/population/prm-est2024-chg.xlsx";
-    const YEARS = [2020, 2021, 2022, 2023, 2024];
-
-    const headerCandidates = {
-      base2020: ["April 1, 2020 – Estimates Base","April 1, 2020 Estimates Base","2020"],
-      y2021: ["2021","July 1, 2021"],
-      y2022: ["2022","July 1, 2022"],
-      y2023: ["2023","July 1, 2023"],
-      y2024: ["2024","July 1, 2024"]
-    };
-
-    const statusEl = document.getElementById("status");
-    const ctx = document.getElementById("prChart").getContext("2d");
-    let chartInstance = null;
-
-    function setStatus(msg) { statusEl.textContent = msg || ""; }
-
-    function findHeader(obj, candidates) {
-      return candidates.find(h => Object.prototype.hasOwnProperty.call(obj,h)) || null;
-    }
-
-    function parsePuertoRicoRow(sheet) {
-      const rows = XLSX.utils.sheet_to_json(sheet,{defval:null});
-      const geoHeader = ["Geographic Area","Geographic Area Name","Geographic Area:"]
-                        .find(h => rows[0] && h in rows[0]);
-      if (!geoHeader) throw new Error("No Geographic Area header found");
-      let prRow = rows.find(r => r[geoHeader]==="Puerto Rico") ||
-                  rows.find(r => String(r[geoHeader]||"").toLowerCase().startsWith("puerto rico"));
-      if (!prRow) throw new Error("No Puerto Rico row found");
-
-      const headers = [
-        findHeader(prRow,headerCandidates.base2020),
-        findHeader(prRow,headerCandidates.y2021),
-        findHeader(prRow,headerCandidates.y2022),
-        findHeader(prRow,headerCandidates.y2023),
-        findHeader(prRow,headerCandidates.y2024)
-      ];
-      if (headers.includes(null)) throw new Error("Missing year headers");
-
-      const toNum = v => v==null?null:(typeof v==="number"?v:Number(String(v).replace(/,/g,"")));
-      const values = headers.map(h=>toNum(prRow[h]));
-      if (values.some(v=>!Number.isFinite(v))) throw new Error("Bad values");
-      return values;
-    }
-
-    function drawChart(values){
-      if(chartInstance) chartInstance.destroy();
-      chartInstance = new Chart(ctx,{
-        type:"line",
-        data:{
-          labels:YEARS,
-          datasets:[{label:"Population",data:values,tension:0.2,pointRadius:4}]
-        },
-        options:{
-          responsive:true,
-          plugins:{
-            legend:{display:false},
-            title:{display:true,text:"Puerto Rico Population Estimates (2020–2024)"},
-            tooltip:{callbacks:{label:c=>c.parsed.y.toLocaleString()}}
-          },
-          scales:{y:{ticks:{callback:v=>Number(v).toLocaleString()}}}
-        }
-      });
-    }
-
-    async function loadFromUrl(){
-      setStatus("Loading Excel…");
-      const res = await fetch(XLSX_PATH,{cache:"no-store"});
-      if(!res.ok) throw new Error("Fetch failed");
-      const ab = await res.arrayBuffer();
-      const wb = XLSX.read(ab,{type:"array"});
-      const values = parsePuertoRicoRow(wb.Sheets[wb.SheetNames[0]]);
-      drawChart(values);
-      setStatus("Done.");
-    }
-
-    async function loadFromFile(file){
-      const ab = await file.arrayBuffer();
-      const wb = XLSX.read(ab,{type:"array"});
-      const values = parsePuertoRicoRow(wb.Sheets[wb.SheetNames[0]]);
-      drawChart(values);
-      setStatus(`Loaded ${file.name}`);
-    }
-
-    document.getElementById("reloadBtn").addEventListener("click",()=>loadFromUrl().catch(e=>setStatus(e.message)));
-    document.getElementById("fileInput").addEventListener("change",e=>{
-      if(e.target.files[0]) loadFromFile(e.target.files[0]).catch(err=>setStatus(err.message));
-    });
-
-    window.addEventListener("load",()=>{
-      if(location.protocol==="file:"){
-        setStatus("Running from file:// — use Upload Excel.");
-      } else {
-        loadFromUrl().catch(e=>setStatus(e.message));
+    // highlight current link
+    document.querySelectorAll('.nav-link').forEach(a=>{
+      if (location.pathname.endsWith(a.getAttribute('href'))) {
+        a.classList.add('text-blue-600','font-semibold','border-blue-600');
+        a.setAttribute('aria-current','page');
       }
     });
-  </script>
-</body>
-</html>
+
+    const COMPACT_JSON = "data/population/pr_pr_2020_2024.json";
+    const FULL_JSON    = "data/population/prm-est2024-chg.json";
+
+    const statusEl = document.getElementById("status");
+    const lineCtx  = document.getElementById("prChart").getContext("2d");
+    const pctCtx   = document.getElementById("pctChart").getContext("2d");
+    let lineChart = null, pctChart = null;
+
+    function setStatus(msg){ statusEl.textContent = msg || ""; }
+
+    function drawLine(years, values){
+      if (lineChart) lineChart.destroy();
+      lineChart = new Chart(lineCtx, {
+        type: "line",
+        data: { labels: years, datasets: [{ label: "Population", data: values, tension: 0.2, pointRadius: 4 }] },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { display: false },
+            title: { display: true, text: "Puerto Rico Population Estimates (2020–2024)" },
+            tooltip: { callbacks: { label: (c)=> c.parsed.y.toLocaleString() } }
+         
