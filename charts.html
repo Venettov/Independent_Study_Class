@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Puerto Rico — Charts</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Only Chart.js needed now -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
 </head>
 <body class="bg-gray-50 text-gray-900 font-sans">
@@ -49,7 +48,7 @@
         <p id="status" class="mt-2 text-xs text-gray-500"></p>
       </div>
 
-      <!-- Annual % change bar chart -->
+      <!-- % change bar chart -->
       <div class="bg-white rounded-lg shadow p-4">
         <h2 class="text-lg font-semibold mb-3">Annual % Change — Puerto Rico</h2>
         <div class="aspect-video bg-gray-50 rounded p-3">
@@ -60,7 +59,7 @@
   </main>
 
   <script defer>
-    // highlight current link
+    // --- nav highlight ---
     document.querySelectorAll('.nav-link').forEach(a=>{
       if (location.pathname.endsWith(a.getAttribute('href'))) {
         a.classList.add('text-blue-600','font-semibold','border-blue-600');
@@ -68,19 +67,23 @@
       }
     });
 
+    // ---- Paths ----
     const COMPACT_JSON = "data/population/pr_pr_2020_2024.json";
-    const FULL_JSON    = "data/population/prm-est2024-chg.json";
+    const FULL_JSON    = "data/population/prm-est2024-chg.json"; // fallback
 
+    // ---- Status + canvases ----
     const statusEl = document.getElementById("status");
-    const lineCtx  = document.getElementById("prChart").getContext("2d");
-    const pctCtx   = document.getElementById("pctChart").getContext("2d");
-    let lineChart = null, pctChart = null;
+    const prCtx  = document.getElementById("prChart").getContext("2d");
+    const pctCtx = document.getElementById("pctChart").getContext("2d");
+    let lineChart = null;
+    let barChart  = null;
 
-    function setStatus(msg){ statusEl.textContent = msg || ""; }
+    const setStatus = (msg) => statusEl.textContent = msg || "";
 
+    // ---- Drawing functions ----
     function drawLine(years, values){
       if (lineChart) lineChart.destroy();
-      lineChart = new Chart(lineCtx, {
+      lineChart = new Chart(prCtx, {
         type: "line",
         data: { labels: years, datasets: [{ label: "Population", data: values, tension: 0.2, pointRadius: 4 }] },
         options: {
@@ -89,4 +92,121 @@
             legend: { display: false },
             title: { display: true, text: "Puerto Rico Population Estimates (2020–2024)" },
             tooltip: { callbacks: { label: (c)=> c.parsed.y.toLocaleString() } }
-         
+          },
+          scales: { y: { ticks: { callback: v => Number(v).toLocaleString() } } }
+        }
+      });
+    }
+
+    function drawPct(years, values) {
+      const labels = [];
+      const pct    = [];
+      for (let i = 1; i < years.length; i++) {
+        labels.push(`${years[i-1]}→${years[i]}`);
+        pct.push(+(((values[i] - values[i-1]) / values[i-1]) * 100).toFixed(2));
+      }
+      if (barChart) barChart.destroy();
+      barChart = new Chart(pctCtx, {
+        type: "bar",
+        data: { labels, datasets: [{ label: "% change", data: pct }] },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { display: false },
+            title: { display: true, text: "Annual Percent Change" },
+            tooltip: { callbacks: { label: (c)=> `${c.parsed.y.toFixed(2)}%` } }
+          },
+          scales: { y: { ticks: { callback: v => `${v}%` } } }
+        }
+      });
+    }
+
+    // ---- Loaders ----
+    async function loadCompact() {
+      const res = await fetch(COMPACT_JSON, { cache: "no-store" });
+      if (!res.ok) throw new Error("compact JSON not found");
+      const j = await res.json(); // { name, series:[{year, population}] }
+      const years = j.series.map(d => d.year);
+      const vals  = j.series.map(d => d.population);
+      drawLine(years, vals);
+      drawPct(years, vals);
+    }
+
+    async function loadFromFull() {
+      const res = await fetch(FULL_JSON, { cache: "no-store" });
+      if (!res.ok) throw new Error("full JSON not found");
+      const rows = await res.json();
+      const sample = rows[0] || {};
+      const geoHeader = ["Geographic Area","Geographic Area Name","Geographic Area:"]
+                        .find(h => Object.prototype.hasOwnProperty.call(sample, h))
+                        // the converter sometimes uses "col_1" for the first column header:
+                        || Object.keys(sample).find(k => k.toLowerCase().includes("geographic") || k.toLowerCase().includes(".geographic") || k.toLowerCase().includes("area"));
+      if (!geoHeader) throw new Error("couldn't find a geographic column");
+      const pr = rows.find(r => r[geoHeader] === "Puerto Rico")
+             || rows.find(r => String(r[geoHeader]||"").toLowerCase().startsWith("puerto rico"));
+      if (!pr) throw new Error("Puerto Rico row not found in full JSON");
+
+      // Prefer plain year columns (your converter produced these), with fallback to composed headers
+      const years = [2020, 2021, 2022, 2023, 2024];
+      const vals = years.map(y => {
+        const direct = pr[String(y)];
+        if (direct != null) return Number(String(direct).replace(/,/g,""));
+        const composed = pr[`Population Estimate (as of July 1) | ${y}`];
+        if (composed != null) return Number(String(composed).replace(/,/g,""));
+        if (y === 2020 && pr["April 1, 2020 Estimates Base"] != null)
+          return Number(String(pr["April 1, 2020 Estimates Base"]).replace(/,/g,""));
+        return null;
+      });
+      if (vals.some(v => !Number.isFinite(v))) throw new Error("missing/invalid PR values in full JSON");
+      drawLine(years, vals);
+      drawPct(years, vals);
+    }
+
+    async function autoLoad(){
+      try{
+        if (location.protocol === "file:") {
+          setStatus("Open via a local server or upload a JSON file.");
+          return;
+        }
+        setStatus("Loading data…");
+        try { await loadCompact(); }
+        catch { await loadFromFull(); }
+        setStatus("Done.");
+      } catch(e){
+        setStatus(e.message || String(e));
+      }
+    }
+
+    // ---- Buttons ----
+    document.getElementById("reloadBtn").addEventListener("click", autoLoad);
+    document.getElementById("jsonInput").addEventListener("change", async (e)=>{
+      const f = e.target.files?.[0];
+      if (!f) return;
+      try{
+        const txt = await f.text();
+        const j = JSON.parse(txt);
+        let years, vals;
+        if (j.series) {
+          years = j.series.map(d => d.year);
+          vals  = j.series.map(d => d.population);
+        } else if (Array.isArray(j)) {
+          const sample = j[0] || {};
+          const geoHeader = Object.keys(sample).find(k => k.toLowerCase().includes("geographic") || k.toLowerCase().includes(".geographic") || k.toLowerCase().includes("area"));
+          const pr = j.find(r => r[geoHeader] === "Puerto Rico") || j.find(r => String(r[geoHeader]||"").toLowerCase().startsWith("puerto rico"));
+          years = [2020, 2021, 2022, 2023, 2024];
+          vals  = years.map(y => Number(String(pr[String(y)] ?? pr[`Population Estimate (as of July 1) | ${y}`] ?? pr["April 1, 2020 Estimates Base"]).replace(/,/g,"")));
+        } else {
+          throw new Error("Unknown JSON shape.");
+        }
+        drawLine(years, vals);
+        drawPct(years, vals);
+        setStatus("Loaded from uploaded JSON.");
+      }catch(err){
+        setStatus(err.message || String(err));
+      }
+    });
+
+    window.addEventListener("load", autoLoad);
+  </script>
+</body>
+</html>
