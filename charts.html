@@ -56,10 +56,31 @@
         </div>
       </div>
     </section>
+
+    <!-- NEW: File Sources -->
+    <section class="bg-white rounded-lg shadow p-5">
+      <h2 class="text-lg font-semibold">File Sources</h2>
+      <ol class="list-decimal pl-6 mt-2 text-sm">
+        <li>
+          <a href="https://www.census.gov/data/datasets/time-series/demo/popest/2020s-total-puerto-rico-municipios.html"
+             class="text-blue-600 underline"
+             target="_blank" rel="noopener noreferrer">
+            https://www.census.gov/data/datasets/time-series/demo/popest/2020s-total-puerto-rico-municipios.html
+          </a>
+        </li>
+      </ol>
+      <div class="mt-3 text-sm">
+        <span class="font-medium">Files:</span>
+        <ul class="list-disc pl-6 mt-1">
+          <li><code>prm-est2024-chg.xlsx</code></li>
+          <li><code>prm-est2024-pop.xlsx</code></li>
+        </ul>
+      </div>
+    </section>
   </main>
 
   <script defer>
-    // --- nav highlight ---
+    // nav highlight
     document.querySelectorAll('.nav-link').forEach(a=>{
       if (location.pathname.endsWith(a.getAttribute('href'))) {
         a.classList.add('text-blue-600','font-semibold','border-blue-600');
@@ -67,20 +88,17 @@
       }
     });
 
-    // ---- Paths ----
+    // Data paths
     const COMPACT_JSON = "data/population/pr_pr_2020_2024.json";
-    const FULL_JSON    = "data/population/prm-est2024-chg.json"; // fallback
+    const FULL_JSON    = "data/population/prm-est2024-chg.json";
 
-    // ---- Status + canvases ----
     const statusEl = document.getElementById("status");
     const prCtx  = document.getElementById("prChart").getContext("2d");
     const pctCtx = document.getElementById("pctChart").getContext("2d");
-    let lineChart = null;
-    let barChart  = null;
+    let lineChart = null, barChart = null;
 
-    const setStatus = (msg) => statusEl.textContent = msg || "";
+    const setStatus = (m)=> statusEl.textContent = m || "";
 
-    // ---- Drawing functions ----
     function drawLine(years, values){
       if (lineChart) lineChart.destroy();
       lineChart = new Chart(prCtx, {
@@ -99,8 +117,7 @@
     }
 
     function drawPct(years, values) {
-      const labels = [];
-      const pct    = [];
+      const labels = [], pct = [];
       for (let i = 1; i < years.length; i++) {
         labels.push(`${years[i-1]}→${years[i]}`);
         pct.push(+(((values[i] - values[i-1]) / values[i-1]) * 100).toFixed(2));
@@ -121,11 +138,10 @@
       });
     }
 
-    // ---- Loaders ----
     async function loadCompact() {
       const res = await fetch(COMPACT_JSON, { cache: "no-store" });
       if (!res.ok) throw new Error("compact JSON not found");
-      const j = await res.json(); // { name, series:[{year, population}] }
+      const j = await res.json();
       const years = j.series.map(d => d.year);
       const vals  = j.series.map(d => d.population);
       drawLine(years, vals);
@@ -138,15 +154,14 @@
       const rows = await res.json();
       const sample = rows[0] || {};
       const geoHeader = ["Geographic Area","Geographic Area Name","Geographic Area:"]
-                        .find(h => Object.prototype.hasOwnProperty.call(sample, h))
-                        // the converter sometimes uses "col_1" for the first column header:
-                        || Object.keys(sample).find(k => k.toLowerCase().includes("geographic") || k.toLowerCase().includes(".geographic") || k.toLowerCase().includes("area"));
+        .find(h => Object.prototype.hasOwnProperty.call(sample, h))
+        || Object.keys(sample).find(k => k.toLowerCase().includes("geographic") || k.toLowerCase().includes(".geographic") || k.toLowerCase().includes("area"));
       if (!geoHeader) throw new Error("couldn't find a geographic column");
-      const pr = rows.find(r => r[geoHeader] === "Puerto Rico")
-             || rows.find(r => String(r[geoHeader]||"").toLowerCase().startsWith("puerto rico"));
-      if (!pr) throw new Error("Puerto Rico row not found in full JSON");
 
-      // Prefer plain year columns (your converter produced these), with fallback to composed headers
+      const pr = rows.find(r => r[geoHeader] === "Puerto Rico")
+              || rows.find(r => String(r[geoHeader]||"").toLowerCase().startsWith("puerto rico"));
+      if (!pr) throw new Error("Puerto Rico row not found");
+
       const years = [2020, 2021, 2022, 2023, 2024];
       const vals = years.map(y => {
         const direct = pr[String(y)];
@@ -155,9 +170,10 @@
         if (composed != null) return Number(String(composed).replace(/,/g,""));
         if (y === 2020 && pr["April 1, 2020 Estimates Base"] != null)
           return Number(String(pr["April 1, 2020 Estimates Base"]).replace(/,/g,""));
-        return null;
+        return NaN;
       });
       if (vals.some(v => !Number.isFinite(v))) throw new Error("missing/invalid PR values in full JSON");
+
       drawLine(years, vals);
       drawPct(years, vals);
     }
@@ -177,7 +193,6 @@
       }
     }
 
-    // ---- Buttons ----
     document.getElementById("reloadBtn").addEventListener("click", autoLoad);
     document.getElementById("jsonInput").addEventListener("change", async (e)=>{
       const f = e.target.files?.[0];
