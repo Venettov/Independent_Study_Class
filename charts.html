@@ -27,22 +27,34 @@
         Loads <code>data/population/prm-est2024-chg.json</code> and lets you chart any of Puerto Rico’s 78 municipios.
       </p>
 
-      <!-- Searchable municipio combobox -->
+      <!-- Custom dropdown (shows all municipios, searchable) -->
       <div class="flex items-center justify-center gap-3 mt-2">
-        <label for="muniInput" class="text-sm text-gray-600">Municipio:</label>
-        <div class="flex items-center gap-2">
-          <input id="muniInput" list="muniList"
-                 class="px-3 py-1.5 rounded border bg-white text-sm w-64"
-                 placeholder="Start typing… (e.g., Adjuntas)" />
-          <datalist id="muniList"></datalist>
-          <button id="reloadBtn" class="px-3 py-1.5 rounded-lg bg-blue-600 text-white text-sm hover:bg-blue-700">
-            Reload
+        <span class="text-sm text-gray-600">Municipio:</span>
+
+        <div class="relative">
+          <button id="pickerBtn"
+                  class="min-w-64 px-3 py-2 rounded border bg-white text-sm flex items-center justify-between gap-3">
+            <span id="pickerLabel">Loading…</span>
+            <svg class="w-4 h-4 opacity-70" viewBox="0 0 20 20" fill="currentColor"><path d="M5.8 7l4.2 4.3L14.2 7 16 8.8l-6 6-6-6z"/></svg>
           </button>
-          <label class="text-sm text-gray-600">
-            <input id="jsonInput" type="file" accept=".json" class="hidden">
-            <span class="px-3 py-1.5 rounded-lg bg-gray-200 hover:bg-gray-300 cursor-pointer">Upload JSON</span>
-          </label>
+
+          <div id="pickerPanel"
+               class="hidden absolute z-20 mt-1 w-72 bg-white border rounded-lg shadow-lg">
+            <div class="p-2 border-b">
+              <input id="pickerSearch" type="text" placeholder="Search municipio…"
+                     class="w-full px-2 py-1.5 rounded border bg-white text-sm">
+            </div>
+            <ul id="pickerList" class="max-h-64 overflow-auto py-1 text-sm"></ul>
+          </div>
         </div>
+
+        <button id="reloadBtn" class="px-3 py-1.5 rounded-lg bg-blue-600 text-white text-sm hover:bg-blue-700">
+          Reload
+        </button>
+        <label class="text-sm text-gray-600">
+          <input id="jsonInput" type="file" accept=".json" class="hidden">
+          <span class="px-3 py-1.5 rounded-lg bg-gray-200 hover:bg-gray-300 cursor-pointer">Upload JSON</span>
+        </label>
       </div>
     </header>
 
@@ -68,8 +80,7 @@
       <ol class="list-decimal pl-6 mt-2 text-sm">
         <li>
           <a href="https://www.census.gov/data/datasets/time-series/demo/popest/2020s-total-puerto-rico-municipios.html"
-             class="text-blue-600 underline"
-             target="_blank" rel="noopener noreferrer">
+             class="text-blue-600 underline" target="_blank" rel="noopener noreferrer">
             https://www.census.gov/data/datasets/time-series/demo/popest/2020s-total-puerto-rico-municipios.html
           </a>
         </li>
@@ -85,7 +96,7 @@
   </main>
 
   <script defer>
-    // nav highlight
+    // highlight nav
     document.querySelectorAll('.nav-link').forEach(a=>{
       if (location.pathname.endsWith(a.getAttribute('href'))) {
         a.classList.add('text-blue-600','font-semibold','border-blue-600');
@@ -93,77 +104,69 @@
       }
     });
 
-    // --- data + helpers ---
     const FULL_JSON = "data/population/prm-est2024-chg.json";
     const YEARS = [2020, 2021, 2022, 2023, 2024];
-    const statusEl = document.getElementById("status");
-    const muniInput = document.getElementById("muniInput");
-    const muniList  = document.getElementById("muniList");
-    const prCtx  = document.getElementById("prChart").getContext("2d");
-    const pctCtx = document.getElementById("pctChart").getContext("2d");
-    const lineTitle = document.getElementById("lineTitle");
-    const barTitle  = document.getElementById("barTitle");
-    let lineChart = null, barChart = null;
+
+    // elements
+    const statusEl   = document.getElementById("status");
+    const prCtx      = document.getElementById("prChart").getContext("2d");
+    const pctCtx     = document.getElementById("pctChart").getContext("2d");
+    const lineTitle  = document.getElementById("lineTitle");
+    const barTitle   = document.getElementById("barTitle");
+    const pickerBtn  = document.getElementById("pickerBtn");
+    const pickerLabel= document.getElementById("pickerLabel");
+    const pickerPanel= document.getElementById("pickerPanel");
+    const pickerSearch = document.getElementById("pickerSearch");
+    const pickerList   = document.getElementById("pickerList");
+
     let rows = [], geoHeader = null, municipios = [];
+    let lineChart = null, barChart = null;
+    let current = "Adjuntas";
 
     const setStatus = (m)=> statusEl.textContent = m || "";
+    const sanitizeName = (s)=> String(s||"").replace(/^\s*[.\-•]\s*/,"").trim();
+
     const num = (v) => {
       if (v == null) return NaN;
       const s = String(v).replace(/\xa0/g,"").replace(/,/g,"").replace(/[^0-9.\-]/g,"");
       return s ? Number(s) : NaN;
     };
 
+    // Robust geo header detection: prefer col_1, then common "Geographic..." names
     function detectGeoHeader(allRows){
       const keys = Object.keys(allRows[0] || {});
+      const priority = ["col_1","Geographic Area","Geographic Area Name","Geographic Area:"];
+      for (const p of priority) if (keys.includes(p)) return p;
+
+      // otherwise, column with many strings and containing "puerto rico"
       for (const k of keys) {
         const col = allRows.map(r => r[k]);
         const strCount = col.filter(v => typeof v === "string").length;
-        const hasPR = col.some(v => typeof v === "string" && v.toLowerCase().includes("puerto rico"));
-        if (strCount >= 10 && hasPR) return k;
+        const hasPR = col.some(v => typeof v === "string" && /puerto rico/i.test(v));
+        if (strCount >= 20 && hasPR) return k;
       }
-      return keys.find(k => /geographic|area|name|col_1/i.test(k)) || keys[0];
+      // last resort: first key that looks like geographic-ish
+      return keys.find(k => /geographic|area|name/i.test(k)) || keys[0];
     }
 
-    function getMunicipios(){
-      const names = rows.map(r => r[geoHeader]).filter(Boolean).map(String).filter(n => n.trim().length>0);
-      const set = new Set(names);
-      const list = Array.from(set).sort((a,b)=> a.localeCompare(b,'en'));
-      const i = list.indexOf("Puerto Rico");
-      if (i > 0) { list.splice(i,1); list.unshift("Puerto Rico"); }
-      return list;
-    }
-
-    function populateDatalist(defaultName="Adjuntas"){
-      municipios = getMunicipios();
-      muniList.innerHTML = "";
-      for (const name of municipios){
-        const opt = document.createElement("option");
-        opt.value = name;
-        muniList.appendChild(opt);
-      }
-      // Default value (Adjuntas if present, else Puerto Rico)
-      muniInput.value = municipios.includes(defaultName) ? defaultName : (municipios[0] || "");
-    }
-
-    function findBestMatch(q){
-      if (!q) return null;
-      const exact = municipios.find(n => n === q);
-      if (exact) return exact;
-      const lower = q.toLowerCase();
-      return municipios.find(n => n.toLowerCase().startsWith(lower))
-          || municipios.find(n => n.toLowerCase().includes(lower))
-          || null;
+    function extractMunicipios(){
+      const names = rows
+        .map(r => sanitizeName(r[geoHeader]))
+        .filter(Boolean);
+      const uniq = Array.from(new Set(names));
+      // Puerto Rico first, then rest alphabetically
+      const rest = uniq.filter(n => n !== "Puerto Rico").sort((a,b)=> a.localeCompare(b,"en"));
+      return ["Puerto Rico", ...rest];
     }
 
     function rowFor(name){
-      return rows.find(r => String(r[geoHeader]) === name);
+      return rows.find(r => sanitizeName(r[geoHeader]) === name);
     }
 
     function valuesFor(row){
       return YEARS.map(y => {
         if (row.hasOwnProperty(String(y))) {
-          const v = num(row[String(y)]);
-          if (Number.isFinite(v)) return v;
+          const v = num(row[String(y)]); if (Number.isFinite(v)) return v;
         }
         const comp = `Population Estimate (as of July 1) | ${y}`;
         if (row.hasOwnProperty(comp)) {
@@ -221,29 +224,64 @@
       setStatus("Done.");
     }
 
+    // ---------- custom dropdown ----------
+    function openPicker(){
+      pickerPanel.classList.remove("hidden");
+      pickerSearch.focus();
+      filterPicker();   // ensure list is fresh
+    }
+    function closePicker(){ pickerPanel.classList.add("hidden"); }
+
+    function filterPicker(){
+      const q = pickerSearch.value.toLowerCase().trim();
+      pickerList.innerHTML = "";
+      const items = q ? municipios.filter(n => n.toLowerCase().includes(q)) : municipios;
+      for (const name of items){
+        const li = document.createElement("li");
+        li.innerHTML = `<button class="w-full text-left px-3 py-2 hover:bg-gray-100">${name}</button>`;
+        li.querySelector("button").addEventListener("click", ()=>{
+          current = name;
+          pickerLabel.textContent = name;
+          closePicker();
+          drawCharts(name);
+        });
+        pickerList.appendChild(li);
+      }
+      if (items.length === 0){
+        const empty = document.createElement("div");
+        empty.className = "px-3 py-2 text-gray-500";
+        empty.textContent = "No matches";
+        pickerList.appendChild(empty);
+      }
+    }
+
+    pickerBtn.addEventListener("click", (e)=>{
+      e.stopPropagation();
+      if (pickerPanel.classList.contains("hidden")) openPicker(); else closePicker();
+    });
+    pickerSearch.addEventListener("input", filterPicker);
+    document.addEventListener("click", (e)=>{
+      if (!pickerPanel.contains(e.target) && !pickerBtn.contains(e.target)) closePicker();
+    });
+    document.addEventListener("keydown", (e)=>{ if (e.key === "Escape") closePicker(); });
+
+    // ---------- load data ----------
     async function fetchFull(){
       const res = await fetch(FULL_JSON, { cache: "no-store" });
       if (!res.ok) throw new Error("Could not fetch full JSON.");
       rows = await res.json();
       geoHeader = detectGeoHeader(rows);
-      populateDatalist("Adjuntas");   // default
-      drawCharts(muniInput.value);
+      municipios = extractMunicipios();
+      // default selection
+      current = municipios.includes("Adjuntas") ? "Adjuntas" : municipios[0];
+      pickerLabel.textContent = current;
+      pickerSearch.value = "";
+      filterPicker();
+      drawCharts(current);
     }
 
-    // events
     document.getElementById("reloadBtn").addEventListener("click", () => {
       setStatus("Reloading…"); fetchFull().catch(e => setStatus(e.message));
-    });
-
-    muniInput.addEventListener("keydown", (e)=>{
-      if (e.key === "Enter") {
-        const pick = findBestMatch(muniInput.value);
-        if (pick) { muniInput.value = pick; drawCharts(pick); }
-      }
-    });
-    muniInput.addEventListener("change", ()=>{
-      const pick = findBestMatch(muniInput.value);
-      if (pick) { muniInput.value = pick; drawCharts(pick); }
     });
 
     document.getElementById("jsonInput").addEventListener("change", async (e)=>{
@@ -254,12 +292,15 @@
         const txt = await f.text();
         rows = JSON.parse(txt);
         geoHeader = detectGeoHeader(rows);
-        populateDatalist("Adjuntas");
-        drawCharts(muniInput.value);
+        municipios = extractMunicipios();
+        current = municipios.includes("Adjuntas") ? "Adjuntas" : municipios[0];
+        pickerLabel.textContent = current;
+        pickerSearch.value = "";
+        filterPicker();
+        drawCharts(current);
       }catch(err){ setStatus(err.message || String(err)); }
     });
 
-    // init
     window.addEventListener("load", ()=>{
       if (location.protocol === "file:") {
         setStatus("Open via a local server or use Upload JSON."); return;
