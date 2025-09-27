@@ -9,7 +9,6 @@ Hardened version:
 - Composes unique headers "Parent | Child".
 - Robust numeric parsing (strip commas, NBSP, any non-digits except '-' and '.').
 - For each year, tries multiple candidate columns in priority order.
-- NEW: Cleans geographic names by removing the suffix "Municipio, Puerto Rico".
 """
 
 from __future__ import annotations
@@ -66,16 +65,6 @@ def to_int(v: Any) -> Optional[int]:
         return int(float(s))
     except Exception:
         return None
-
-# NEW: cleaner for geographic names
-_rm_municipio_suffix = re.compile(r"\s*Municipio,\s*Puerto\s*Rico\s*$", re.IGNORECASE)
-def clean_geo_name(value: Any) -> Any:
-    if value is None:
-        return value
-    s = str(value).strip()
-    # Only remove the exact suffix "Municipio, Puerto Rico"
-    s = _rm_municipio_suffix.sub("", s)
-    return s
 
 print(f"Reading workbook: {XLSX}")
 wb = load_workbook(XLSX, data_only=True, read_only=True)
@@ -154,7 +143,13 @@ if not data_rows:
 # Build DataFrame with unique columns
 df = pd.DataFrame(data_rows, columns=uniquify(headers))
 
-# --- 4) Identify and CLEAN the geographic column BEFORE saving outputs
+# --- 4) Save full table
+OUT_CSV.parent.mkdir(parents=True, exist_ok=True)
+df.to_csv(OUT_CSV, index=False)
+df.to_json(OUT_JSON, orient="records", force_ascii=False)
+print("Wrote table CSV and JSON.")
+
+# --- 5) Geographic column
 geo_col = None
 geo_regex = re.compile(r"(geographic.*area|area.*name|geographic.*name|\.geographic area)", re.I)
 for c in df.columns:
@@ -172,16 +167,7 @@ if geo_col is None:
     raise RuntimeError("Could not identify the 'Geographic Area' column.")
 print(f"Geographic column: {geo_col}")
 
-# NEW: apply the cleaner
-df[geo_col] = df[geo_col].apply(clean_geo_name)
-
-# --- 5) Save full table (now with cleaned names)
-OUT_CSV.parent.mkdir(parents=True, exist_ok=True)
-df.to_csv(OUT_CSV, index=False)
-df.to_json(OUT_JSON, orient="records", force_ascii=False)
-print("Wrote table CSV and JSON.")
-
-# --- 6) Puerto Rico row (unchanged by cleaning)
+# --- 6) Puerto Rico row
 pr_mask = df[geo_col].astype(str).str.strip().str.lower().str.startswith("puerto rico")
 if not pr_mask.any():
     pr_mask = df[geo_col].astype(str).str.contains(r"\bpuerto rico\b", case=False, na=False)
@@ -212,12 +198,12 @@ def candidate_columns_for_year(year: int) -> List[str]:
     exact = f"Population Estimate (as of July 1) | {year}"
     c = find_exact(exact)
     if c: cands.append(c)
-    # 2) Contains "Population Estimate" + year
+    # 2) Any header that contains both "Population Estimate" and the year
     cands.extend([col for col in find_contains("population estimate", str(year)) if col not in cands])
-    # 3) Plain year header (e.g., "2020")
+    # 3) A header that is exactly the year (e.g., '2020') — some sheets include a plain year column
     c = find_exact(str(year))
     if c and c not in cands: cands.append(c)
-    # 4) Special fallback for 2020 base
+    # 4) Special fallback for 2020: April 1, 2020 Estimates Base
     if year == 2020:
         base = find_exact("April 1, 2020 Estimates Base")
         if not base:
@@ -242,6 +228,7 @@ chosen_map: Dict[int, str] = {}
 for y in [2020, 2021, 2022, 2023, 2024]:
     val, chosen_col, raw = get_year_value(pr_row, y)
     if val is None:
+        # print helpful debug before failing
         print(f"[DEBUG] Could not parse a value for {y}. Candidates were: {candidate_columns_for_year(y)}")
         raise RuntimeError(f"Null/invalid value for {y}")
     series.append({"year": y, "population": val})
