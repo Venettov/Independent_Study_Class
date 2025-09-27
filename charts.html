@@ -24,7 +24,8 @@
     <header class="text-center space-y-2">
       <h1 class="text-4xl font-bold">Charts</h1>
       <p class="text-gray-600">
-        Loads <code>data/population/prm-est2024-chg.json</code> and lets you chart any of Puerto Rico’s 78 municipios.
+        Interactive 2020–2024 resident-population charts for Puerto Rico and its 78 municipios.
+        Data are loaded from <code>data/population/prm-est2024-chg.json</code> (U.S. Census Bureau, Vintage 2024).
       </p>
 
       <!-- Custom dropdown (searchable, scrollable) -->
@@ -51,10 +52,6 @@
         <button id="reloadBtn" class="px-3 py-1.5 rounded-lg bg-blue-600 text-white text-sm hover:bg-blue-700">
           Reload
         </button>
-        <label class="text-sm text-gray-600">
-          <input id="jsonInput" type="file" accept=".json" class="hidden">
-          <span class="px-3 py-1.5 rounded-lg bg-gray-200 hover:bg-gray-300 cursor-pointer">Upload JSON</span>
-        </label>
       </div>
     </header>
 
@@ -148,7 +145,7 @@
       return s ? Number(s) : NaN;
     };
 
-    // Prefer 'col_1' (from your converter), else well-known header names, else heuristic
+    // Prefer 'col_1', else common headers, else heuristic
     function detectGeoHeader(allRows){
       const keys = Object.keys(allRows[0] || {});
       const priority = ["col_1","Geographic Area","Geographic Area Name","Geographic Area:"];
@@ -163,7 +160,6 @@
       return keys.find(k => /geographic|area|name/i.test(k)) || keys[0];
     }
 
-    // Build the final municipio list from the data, filtered to the official set
     function extractMunicipios(){
       const names = rows
         .map(r => sanitizeName(r[geoHeader]).replace(/\s+/g,' ').trim())
@@ -173,7 +169,6 @@
       const uniq = Array.from(new Set(filtered));
       const sorted = uniq.sort((a,b)=> a.localeCompare(b,'es'));
 
-      // Puerto Rico first
       const i = sorted.findIndex(n => stripDiacritics(n).toLowerCase() === 'puerto rico');
       if (i > 0) { const pr = sorted.splice(i,1)[0]; sorted.unshift(pr); }
 
@@ -307,26 +302,9 @@
       setStatus("Reloading…"); fetchFull().catch(e => setStatus(e.message));
     });
 
-    document.getElementById("jsonInput").addEventListener("change", async (e)=>{
-      const f = e.target.files?.[0];
-      if (!f) return;
-      try{
-        setStatus("Reading uploaded JSON…");
-        const txt = await f.text();
-        rows = JSON.parse(txt);
-        geoHeader = detectGeoHeader(rows);
-        municipios = extractMunicipios();
-        current = municipios.includes("Adjuntas") ? "Adjuntas" : (municipios[0] || "Puerto Rico");
-        pickerLabel.textContent = current;
-        pickerSearch.value = "";
-        filterPicker();
-        drawCharts(current);
-      }catch(err){ setStatus(err.message || String(err)); }
-    });
-
     window.addEventListener("load", ()=>{
       if (location.protocol === "file:") {
-        setStatus("Open via a local server or use Upload JSON."); return;
+        setStatus("Open via a local server."); return;
       }
       setStatus("Loading data…");
       fetchFull().catch(e => setStatus(e.message));
