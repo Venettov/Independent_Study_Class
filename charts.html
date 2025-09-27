@@ -27,19 +27,19 @@
         Loads <code>data/population/prm-est2024-chg.json</code> and lets you chart any of Puerto Rico’s 78 municipios.
       </p>
 
-      <!-- Custom dropdown (shows all municipios, searchable) -->
+      <!-- Custom dropdown (searchable, scrollable) -->
       <div class="flex items-center justify-center gap-3 mt-2">
         <span class="text-sm text-gray-600">Municipio:</span>
 
         <div class="relative">
           <button id="pickerBtn"
-                  class="min-w-64 px-3 py-2 rounded border bg-white text-sm flex items-center justify-between gap-3">
+                  class="w-72 px-3 py-2 rounded border bg-white text-sm flex items-center justify-between gap-3">
             <span id="pickerLabel">Loading…</span>
             <svg class="w-4 h-4 opacity-70" viewBox="0 0 20 20" fill="currentColor"><path d="M5.8 7l4.2 4.3L14.2 7 16 8.8l-6 6-6-6z"/></svg>
           </button>
 
           <div id="pickerPanel"
-               class="hidden absolute z-20 mt-1 w-72 bg-white border rounded-lg shadow-lg">
+               class="hidden absolute z-20 mt-1 w-80 bg-white border rounded-lg shadow-lg">
             <div class="p-2 border-b">
               <input id="pickerSearch" type="text" placeholder="Search municipio…"
                      class="w-full px-2 py-1.5 rounded border bg-white text-sm">
@@ -107,6 +107,22 @@
     const FULL_JSON = "data/population/prm-est2024-chg.json";
     const YEARS = [2020, 2021, 2022, 2023, 2024];
 
+    // --- Official PR municipios (78) + "Puerto Rico"
+    const VALID_MUNICIPIOS = [
+      "Adjuntas","Aguada","Aguadilla","Aguas Buenas","Aibonito","Añasco","Arecibo","Arroyo",
+      "Barceloneta","Barranquitas","Bayamón","Cabo Rojo","Caguas","Camuy","Canóvanas","Carolina",
+      "Cataño","Cayey","Ceiba","Ciales","Cidra","Coamo","Comerío","Corozal","Culebra","Dorado",
+      "Fajardo","Florida","Guánica","Guayama","Guayanilla","Guaynabo","Gurabo","Hatillo",
+      "Hormigueros","Humacao","Isabela","Jayuya","Juana Díaz","Juncos","Lajas","Lares",
+      "Las Marías","Las Piedras","Loíza","Luquillo","Manatí","Maricao","Maunabo","Mayagüez",
+      "Moca","Morovis","Naguabo","Naranjito","Orocovis","Patillas","Peñuelas","Ponce",
+      "Quebradillas","Rincón","Río Grande","Sabana Grande","Salinas","San Germán","San Juan",
+      "San Lorenzo","San Sebastián","Santa Isabel","Toa Alta","Toa Baja","Trujillo Alto",
+      "Utuado","Vega Alta","Vega Baja","Vieques","Villalba","Yabucoa","Yauco","Puerto Rico"
+    ];
+    const stripDiacritics = s => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    const VALID_LOOKUP = new Set(VALID_MUNICIPIOS.map(n => stripDiacritics(n).toLowerCase()));
+
     // elements
     const statusEl   = document.getElementById("status");
     const prCtx      = document.getElementById("prChart").getContext("2d");
@@ -132,31 +148,36 @@
       return s ? Number(s) : NaN;
     };
 
-    // Robust geo header detection: prefer col_1, then common "Geographic..." names
+    // Prefer 'col_1' (from your converter), else well-known header names, else heuristic
     function detectGeoHeader(allRows){
       const keys = Object.keys(allRows[0] || {});
       const priority = ["col_1","Geographic Area","Geographic Area Name","Geographic Area:"];
       for (const p of priority) if (keys.includes(p)) return p;
 
-      // otherwise, column with many strings and containing "puerto rico"
       for (const k of keys) {
         const col = allRows.map(r => r[k]);
         const strCount = col.filter(v => typeof v === "string").length;
         const hasPR = col.some(v => typeof v === "string" && /puerto rico/i.test(v));
         if (strCount >= 20 && hasPR) return k;
       }
-      // last resort: first key that looks like geographic-ish
       return keys.find(k => /geographic|area|name/i.test(k)) || keys[0];
     }
 
+    // Build the final municipio list from the data, filtered to the official set
     function extractMunicipios(){
       const names = rows
-        .map(r => sanitizeName(r[geoHeader]))
+        .map(r => sanitizeName(r[geoHeader]).replace(/\s+/g,' ').trim())
         .filter(Boolean);
-      const uniq = Array.from(new Set(names));
-      // Puerto Rico first, then rest alphabetically
-      const rest = uniq.filter(n => n !== "Puerto Rico").sort((a,b)=> a.localeCompare(b,"en"));
-      return ["Puerto Rico", ...rest];
+
+      const filtered = names.filter(n => VALID_LOOKUP.has(stripDiacritics(n).toLowerCase()));
+      const uniq = Array.from(new Set(filtered));
+      const sorted = uniq.sort((a,b)=> a.localeCompare(b,'es'));
+
+      // Puerto Rico first
+      const i = sorted.findIndex(n => stripDiacritics(n).toLowerCase() === 'puerto rico');
+      if (i > 0) { const pr = sorted.splice(i,1)[0]; sorted.unshift(pr); }
+
+      return sorted;
     }
 
     function rowFor(name){
@@ -228,17 +249,20 @@
     function openPicker(){
       pickerPanel.classList.remove("hidden");
       pickerSearch.focus();
-      filterPicker();   // ensure list is fresh
+      filterPicker();
     }
     function closePicker(){ pickerPanel.classList.add("hidden"); }
 
     function filterPicker(){
-      const q = pickerSearch.value.toLowerCase().trim();
+      const q = stripDiacritics(pickerSearch.value).toLowerCase().trim();
       pickerList.innerHTML = "";
-      const items = q ? municipios.filter(n => n.toLowerCase().includes(q)) : municipios;
+      const items = q
+        ? municipios.filter(n => stripDiacritics(n).toLowerCase().includes(q))
+        : municipios;
+
       for (const name of items){
         const li = document.createElement("li");
-        li.innerHTML = `<button class="w-full text-left px-3 py-2 hover:bg-gray-100">${name}</button>`;
+        li.innerHTML = `<button type="button" class="w-full text-left px-3 py-2 hover:bg-gray-100">${name}</button>`;
         li.querySelector("button").addEventListener("click", ()=>{
           current = name;
           pickerLabel.textContent = name;
@@ -272,8 +296,7 @@
       rows = await res.json();
       geoHeader = detectGeoHeader(rows);
       municipios = extractMunicipios();
-      // default selection
-      current = municipios.includes("Adjuntas") ? "Adjuntas" : municipios[0];
+      current = municipios.includes("Adjuntas") ? "Adjuntas" : (municipios[0] || "Puerto Rico");
       pickerLabel.textContent = current;
       pickerSearch.value = "";
       filterPicker();
@@ -293,7 +316,7 @@
         rows = JSON.parse(txt);
         geoHeader = detectGeoHeader(rows);
         municipios = extractMunicipios();
-        current = municipios.includes("Adjuntas") ? "Adjuntas" : municipios[0];
+        current = municipios.includes("Adjuntas") ? "Adjuntas" : (municipios[0] || "Puerto Rico");
         pickerLabel.textContent = current;
         pickerSearch.value = "";
         filterPicker();
