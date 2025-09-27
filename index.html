@@ -1,29 +1,53 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Puerto Rico Data</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Puerto Rico — Map</title>
+
+  <!-- Tailwind (optional, for consistent look with the rest of your site) -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+
+  <!-- Leaflet -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+  />
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""
+    defer
+  ></script>
+
+  <!-- Chart.js for the hover mini-chart -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
+
   <style>
-    body { font-family: Inter, system-ui, sans-serif; background:#f3f4f6; }
-    #map {
-      height: 400px;
-      width: 100%;
-      border-radius: 1rem;
-      box-shadow: 0 10px 15px -3px rgba(0,0,0,.1), 0 4px 6px -2px rgba(0,0,0,.05);
-      background: #e5e7eb;
+    #map { height: 70vh; }
+    .mini-chart {
+      position: absolute;
+      z-index: 1000;
+      width: 320px;
+      pointer-events: none;            /* do not block map interactions */
+      background: #ffffff;
+      border: 1px solid rgba(0,0,0,.12);
+      border-radius: 0.75rem;
+      box-shadow: 0 10px 20px rgba(0,0,0,.12);
+      display: none;                   /* hidden by default */
     }
-    .leaflet-tooltip {
-      background: rgba(255,255,255,.95); border-color:#333; color:#333;
-      font-size:14px; font-weight:600; box-shadow:0 2px 5px rgba(0,0,0,.2); padding:5px 10px;
+    .mini-chart header {
+      font-weight: 600; font-size: 12px;
+      padding: 6px 10px; border-bottom: 1px solid #eee;
     }
+    .mini-chart .canvas-wrap { padding: 8px; }
   </style>
 </head>
-<body class="bg-gray-50 text-gray-900 font-sans">
 
+<body class="bg-gray-50 text-gray-900 font-sans">
+  <!-- Simple top nav to match your site -->
   <nav class="bg-white shadow sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-center gap-6 text-sm sm:text-base">
       <a href="index.html" class="nav-link border-b-2 border-transparent">Home</a>
@@ -35,164 +59,228 @@
     </div>
   </nav>
 
-  <main class="max-w-7xl mx-auto px-4 py-8 space-y-8">
+  <main class="max-w-7xl mx-auto px-4 py-6 space-y-6">
+    <header class="text-center space-y-2">
+      <h1 class="text-3xl sm:text-4xl font-bold">Puerto Rico — Municipios</h1>
+      <p class="text-gray-600">
+        Hover any municipio to see a 2020–2024 population mini-chart. Data are loaded from
+        <code>data/population/prm-est2024-chg.json</code>.
+      </p>
+    </header>
 
-    <div class="bg-white rounded-lg shadow-lg p-6">
-      <p class="text-sm font-semibold text-gray-500 uppercase">Population and Economic Analysis in</p>
-      <h1 class="text-5xl font-extrabold mt-1">Puerto Rico</h1>
-      <p class="mt-4 text-lg text-gray-700">Puerto Rico has a land area of 3,424.5 square miles and a water area of 1,900.3 square miles.</p>
+    <div id="map" class="rounded-lg shadow bg-white"></div>
+
+    <!-- Hover mini-chart -->
+    <div id="miniChart" class="mini-chart">
+      <header id="miniChartTitle">Municipio</header>
+      <div class="canvas-wrap">
+        <canvas id="miniChartCanvas" width="300" height="160"></canvas>
+      </div>
     </div>
 
-    <div class="bg-white rounded-lg shadow-lg p-6">
-      <div id="map"></div>
-      <pre id="errorMsg" class="hidden mt-3 text-sm text-red-600 whitespace-pre-wrap"></pre>
-    </div>
-
-    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-      <div class="space-y-6">
-        <h2 class="text-lg font-semibold">Populations and People</h2>
-        <div class="bg-white p-4 rounded-lg shadow flex items-start space-x-3">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h-5v-5H4v-4H1v-2l2-4L1 2h22L21 8l2 4v2h-3v5h-5v-5h-4v5zm-1-8H8V4h8v8zM9 9H7v2h2V9zm4 0h-2v2h2V9z"/></svg>
-          <div>
-            <div class="text-gray-500 text-sm">Total Population</div>
-            <div class="font-bold text-xl">3,285,874</div>
-            <div class="text-xs text-gray-400 mt-1">P1 | 2020 Decennial Census</div>
-          </div>
-        </div>
-        <div class="bg-white p-4 rounded-lg shadow flex items-start space-x-3">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m7 0V5a2 2 0 012-2h2a2 2 0 012 2v4m-7 0h-3l-2 2H5m14 0h-3l-2 2h-2m2-2h-2"/></svg>
-          <div>
-            <div class="text-gray-500 text-sm">Employment Rate</div>
-            <div class="font-bold text-xl">43.4%</div>
-            <div class="text-xs text-gray-400 mt-1">DP03 | 2024 American Community Survey 1-Year Estimates</div>
-          </div>
-        </div>
-        <h2 class="text-lg font-semibold mt-6">Business and Economy</h2>
-        <div class="bg-white p-4 rounded-lg shadow flex items-start space-x-3">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m-1 4h1m8-16v16m-5-10H9m1.5-12a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"/></svg>
-          <div>
-            <div class="text-gray-500 text-sm">Total Employer Establishments</div>
-            <div class="font-bold text-xl">50,332</div>
-            <div class="text-xs text-gray-400 mt-1">CB2300CBP | 2023 Economic Surveys Business Patterns</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="space-y-6">
-        <h2 class="text-lg font-semibold">Income and Poverty</h2>
-        <div class="bg-white p-4 rounded-lg shadow flex items-start space-x-3">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1L19 18H5l1.401-1.401C10.92 12.001 12 10.11 12 8z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-          <div>
-            <div class="text-gray-500 text-sm">Median Household Income</div>
-            <div class="font-bold text-xl">$27,213</div>
-            <div class="text-xs text-gray-400 mt-1">S1901 | 2024 American Community Survey 1-Year Estimates</div>
-          </div>
-        </div>
-        <h2 class="text-lg font-semibold mt-6">Housing</h2>
-        <div class="bg-white p-4 rounded-lg shadow flex items-start space-x-3">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001 1h4a1 1 0 001-1m-6 0v-6a1 1 0 011-1h2a1 1 0 011 1v6m-4 0v-4h4v4m-4 0a1 1 0 00-1-1h-2a1 1 0 00-1 1"/></svg>
-          <div>
-            <div class="text-gray-500 text-sm">Total Housing Units</div>
-            <div class="font-bold text-xl">1,616,963</div>
-            <div class="text-xs text-gray-400 mt-1">B25002 | 2024 American Community Survey 1-Year Estimates</div>
-          </div>
-        </div>
-        <h2 class="text-lg font-semibold mt-6">Race and Ethnicity</h2>
-        <div class="bg-white p-4 rounded-lg shadow flex items-start space-x-3">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h-5v-5H4v-4H1v-2l2-4L1 2h22L21 8l2 4v2h-3v5h-5v-5h-4v5zm-1-8H8V4h8v8zM9 9H7v2h2V9zm4 0h-2v2h2V9z"/></svg>
-          <div>
-            <div class="text-gray-500 text-sm">Hispanic or Latino (of any race)</div>
-            <div class="font-bold text-xl">3,249,043</div>
-            <div class="text-xs text-gray-400 mt-1">P9 | 2020 Decennial Census</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="space-y-6">
-        <h2 class="text-lg font-semibold">Education</h2>
-        <div class="bg-white p-4 rounded-lg shadow flex items-start space-x-3">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm0 0V5.001"/></svg>
-          <div>
-            <div class="text-gray-500 text-sm">Bachelor’s Degree or Higher</div>
-            <div class="font-bold text-xl">29.7%</div>
-            <div class="text-xs text-gray-400 mt-1">S1501 | 2024 American Community Survey 1-Year Estimates</div>
-          </div>
-        </div>
-        <h2 class="text-lg font-semibold mt-6">Health</h2>
-        <div class="bg-white p-4 rounded-lg shadow flex items-start space-x-3">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 12H6m-2 0h-2V6h2v6zm14 0h2V6h-2v6zM4 6a2 2 0 012-2h12a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V6z"/></svg>
-          <div>
-            <div class="text-gray-500 text-sm">Without Health Care Coverage</div>
-            <div class="font-bold text-xl">5.6%</div>
-            <div class="text-xs text-gray-400 mt-1">S2701 | 2024 American Community Survey 1-Year Estimates</div>
-          </div>
-        </div>
-      </div>
+    <section class="bg-white rounded-lg shadow p-5">
+      <h2 class="text-lg font-semibold">File Sources</h2>
+      <ol class="list-decimal pl-6 mt-2 text-sm">
+        <li>
+          <a href="https://www.census.gov/data/datasets/time-series/demo/popest/2020s-total-puerto-rico-municipios.html"
+             class="text-blue-600 underline" target="_blank" rel="noopener noreferrer">
+            https://www.census.gov/data/datasets/time-series/demo/popest/2020s-total-puerto-rico-municipios.html
+          </a>
+        </li>
+      </ol>
     </section>
-
   </main>
 
   <script>
-    // Highlight current nav link
-    document.querySelectorAll('.nav-link').forEach(a => {
-      if (location.pathname.endsWith(a.getAttribute('href')) || (location.pathname === '/' && a.getAttribute('href') === 'index.html')) {
-        a.classList.add('text-blue-600', 'font-semibold', 'border-blue-600');
-        a.setAttribute('aria-current', 'page');
+    // highlight nav
+    document.querySelectorAll('.nav-link').forEach(a=>{
+      if (location.pathname.endsWith(a.getAttribute('href'))) {
+        a.classList.add('text-blue-600','font-semibold','border-blue-600');
+        a.setAttribute('aria-current','page');
       }
     });
 
-    document.addEventListener('DOMContentLoaded', async () => {
-      const prBounds = L.latLngBounds([[17.85, -67.45],[18.55, -65.25]]);
-      const map = L.map('map').fitBounds(prBounds);
+    // ----------- CONFIG: set this to your municipios GeoJSON path -----------
+    // Example candidates:
+    //   "tl_2022_72_cousub/puerto_rico_municipios.geojson"
+    //   "resources/puerto_rico_municipios.geojson"
+    const GEOJSON_URL = "tl_2022_72_cousub/puerto_rico_municipios.geojson";
+    // Population data table (already in your repo)
+    const DATA_URL    = "data/population/prm-est2024-chg.json";
+
+    // Years to chart
+    const YEARS = [2020, 2021, 2022, 2023, 2024];
+
+    // Helpers
+    const stripDiacritics = s => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    const tidyLead = v => String(v ?? '').replace(/^\s*[.\-•]\s*/,'').trim();
+    const num = v => {
+      const s = String(v ?? '').replace(/\xa0/g,'').replace(/,/g,'').replace(/[^0-9.\-]/g,'');
+      return s ? Number(s) : NaN;
+    };
+
+    function nameFromProps(props){
+      // Common TIGER/Line fields:
+      // NAME = "Adjuntas"; NAMELSAD = "Adjuntas Municipio"
+      const raw = props.NAME || props.NAMELSAD || props.MUNI || props.Municipio || "";
+      return tidyLead(String(raw).replace(/\s*Municipio\s*$/i,'').replace(/,?\s*Puerto Rico$/i,'').trim());
+    }
+
+    // Detect the "geographic" column in the JSON table produced by your converter
+    function detectGeoHeader(rows){
+      const keys = Object.keys(rows[0] || {});
+      const priority = ['col_1','Geographic Area','Geographic Area Name','Geographic Area:'];
+      for (const k of priority) if (keys.includes(k)) return k;
+      for (const k of keys) {
+        const col = rows.map(r => r[k]);
+        const strCount = col.filter(v => typeof v === 'string').length;
+        const hasPR = col.some(v => typeof v === 'string' && /puerto rico/i.test(v));
+        if (strCount >= 20 && hasPR) return k;
+      }
+      return keys[0];
+    }
+
+    function valuesForRow(row){
+      return YEARS.map(y => {
+        if (row.hasOwnProperty(String(y))) {
+          const v = num(row[String(y)]); if (Number.isFinite(v)) return v;
+        }
+        const composed = `Population Estimate (as of July 1) | ${y}`;
+        if (row.hasOwnProperty(composed)) {
+          const v = num(row[composed]); if (Number.isFinite(v)) return v;
+        }
+        if (y === 2020 && row.hasOwnProperty("April 1, 2020 Estimates Base")) {
+          const v = num(row["April 1, 2020 Estimates Base"]); if (Number.isFinite(v)) return v;
+        }
+        return NaN;
+      });
+    }
+
+    // ----------- Preload population table and create lookup -----------
+    let municipioLookup = new Map(); // key: normalized municipio name -> row
+    let lookupReady = false;
+
+    async function loadPopulationTable() {
+      try {
+        const r = await fetch(DATA_URL, { cache: "no-store" });
+        const rows = await r.json();
+        const geoHeader = detectGeoHeader(rows);
+        rows.forEach(row => {
+          const name = tidyLead(row[geoHeader]);
+          if (!name) return;
+          const key = stripDiacritics(name.toLowerCase());
+          if (!municipioLookup.has(key)) municipioLookup.set(key, row);
+        });
+        lookupReady = true;
+      } catch (err) {
+        console.warn("Population JSON not available for mini-chart:", err);
+      }
+    }
+
+    // ----------- Mini-chart UI -----------
+    const mini = document.getElementById('miniChart');
+    const miniTitle = document.getElementById('miniChartTitle');
+    const miniCanvas = document.getElementById('miniChartCanvas');
+    let miniChart = null;
+
+    function showMiniChart(name, mouseEvt) {
+      if (!lookupReady) return;
+      const key = stripDiacritics(name.toLowerCase());
+      const row = municipioLookup.get(key);
+      if (!row) { hideMiniChart(); return; }
+
+      const vals = valuesForRow(row);
+      if (vals.some(v => !Number.isFinite(v))) { hideMiniChart(); return; }
+
+      miniTitle.textContent = `${name} — Population (2020–2024)`;
+
+      if (miniChart) {
+        miniChart.data.labels = YEARS;
+        miniChart.data.datasets[0].data = vals;
+        miniChart.update();
+      } else {
+        const ctx = miniCanvas.getContext('2d');
+        miniChart = new Chart(ctx, {
+          type: 'line',
+          data: { labels: YEARS, datasets: [{ label: 'Population', data: vals, tension: 0.2, pointRadius: 2 }] },
+          options: {
+            responsive: false,
+            plugins: { legend: { display: false }, tooltip: { enabled: false } },
+            scales: { y: { ticks: { callback: v => Number(v).toLocaleString() } } }
+          }
+        });
+      }
+
+      // position near cursor
+      if (mouseEvt && mouseEvt.originalEvent) {
+        const { pageX, pageY } = mouseEvt.originalEvent;
+        mini.style.left = (pageX + 12) + 'px';
+        mini.style.top  = (pageY + 12) + 'px';
+      }
+      mini.style.display = 'block';
+    }
+
+    function moveMiniChart(mouseEvt) {
+      if (mini.style.display === 'none') return;
+      if (mouseEvt && mouseEvt.originalEvent) {
+        const { pageX, pageY } = mouseEvt.originalEvent;
+        mini.style.left = (pageX + 12) + 'px';
+        mini.style.top  = (pageY + 12) + 'px';
+      }
+    }
+
+    function hideMiniChart() {
+      mini.style.display = 'none';
+    }
+
+    // ----------- Build map -----------
+    async function init() {
+      await loadPopulationTable();
+
+      const map = L.map('map', { scrollWheelZoom: true });
+      // Center on Puerto Rico
+      map.setView([18.22, -66.4], 8);
+
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors', minZoom: 7, maxZoom: 19
+        maxZoom: 18,
+        attribution: '&copy; OpenStreetMap'
       }).addTo(map);
 
-      const geojsonUrl = './data/tl_2022_72_cousub/pr_municipalities.geojson';
+      // Fetch municipios GeoJSON
+      const gj = await fetch(GEOJSON_URL, { cache: "no-store" }).then(r => r.json());
 
-      function showError(msg){
-        const el = document.getElementById('errorMsg');
-        el.textContent = msg; el.classList.remove('hidden');
-      }
+      const baseStyle = {
+        color: '#2b6cb0',
+        weight: 1,
+        fillColor: '#4299e1',
+        fillOpacity: 0.15
+      };
+      const hiStyle = { weight: 2, fillOpacity: 0.35 };
 
-      try {
-        const url = geojsonUrl + (geojsonUrl.includes('?') ? '&' : '?') + 'cb=' + Date.now();
-        const res = await fetch(url);
-        if (!res.ok) {
-          const t = await res.text().catch(()=> '');
-          throw new Error(`HTTP ${res.status} fetching ${url}\n${t.slice(0,300)}`);
+      const layer = L.geoJSON(gj, {
+        style: baseStyle,
+        onEachFeature: (feat, lyr) => {
+          const name = nameFromProps(feat.properties || {});
+          // Existing hover label (if you already had one)
+          lyr.bindTooltip(name, { direction: 'center', permanent: false, className: 'text-xs' });
+
+          lyr.on({
+            mouseover: e => {
+              e.target.setStyle(hiStyle); e.target.bringToFront?.();
+              showMiniChart(name, e);
+            },
+            mousemove: e => moveMiniChart(e),
+            mouseout:  e => { layer.resetStyle(e.target); hideMiniChart(); },
+            click:     e => map.fitBounds(e.target.getBounds(), { padding: [20,20] })
+          });
         }
-        const fc = await res.json();
+      }).addTo(map);
 
-        const baseStyle = { fillColor:'#93c5fd', weight:1.2, color:'#111827', fillOpacity:0.7 };
-        const hiStyle   = { weight:3, color:'#374151', fillOpacity:0.9 };
+      map.fitBounds(layer.getBounds(), { padding: [12,12] });
+    }
 
-        const layer = L.geoJSON(fc, {
-          style: baseStyle,
-          onEachFeature: (f, lyr) => {
-            const p = f.properties || {};
-            const name = p.NAME || p.NAMELSAD || p.name || 'Unknown';
-            const geoid = p.GEOID || p.geoid || '';
-            lyr.bindTooltip(name, { direction: 'center', className: 'leaflet-tooltip' });
-            lyr.bindPopup(`<strong>${name}</strong>${geoid ? `<br><small>GEOID: ${geoid}</small>` : ''}`);
-            lyr.on({
-              mouseover: e => { e.target.setStyle(hiStyle); e.target.bringToFront?.(); },
-              mouseout:  e => layer.resetStyle(e.target),
-              click:     e => map.fitBounds(e.target.getBounds(), { padding:[20,20] })
-            });
-          }
-        }).addTo(map);
-
-        const b = layer.getBounds();
-        if (b.isValid()) map.fitBounds(b, { padding: [15,15] });
-
-      } catch (err) {
-        console.error(err);
-        showError(String(err));
-      }
-
-      window.addEventListener('resize', () => map.invalidateSize());
-    });
+    // Kick off
+    init().catch(err => console.error(err));
   </script>
 </body>
 </html>
