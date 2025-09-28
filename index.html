@@ -7,6 +7,8 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  <!-- Mini chart -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
   <style>
     body { font-family: Inter, system-ui, sans-serif; background:#f3f4f6; }
     #map {
@@ -57,9 +59,12 @@
           <p class="text-gray-500">Hover over a municipio to see details.</p>
           <div id="mcBody" class="hidden">
             <div><span class="text-gray-500">Name:</span> <span id="mcName" class="font-semibold"></span></div>
-            <div><span class="text-gray-500">GEOID:</span> <span id="mcGeoid" class="font-mono"></span></div>
-            <div><span class="text-gray-500">Land area:</span> <span id="mcLand"></span></div>
-            <div><span class="text-gray-500">Water area:</span> <span id="mcWater"></span></div>
+
+            <!-- Only show these rows if values exist -->
+            <div id="rowGeoid" class="hidden"><span class="text-gray-500">GEOID:</span> <span id="mcGeoid" class="font-mono"></span></div>
+            <div id="rowLand" class="hidden"><span class="text-gray-500">Land area:</span> <span id="mcLand"></span></div>
+            <div id="rowWater" class="hidden"><span class="text-gray-500">Water area:</span> <span id="mcWater"></span></div>
+
             <div><span class="text-gray-500">Centroid:</span> <span id="mcCentroid"></span></div>
 
             <!-- Population from prm-est2024-chg.json -->
@@ -72,6 +77,14 @@
               </ul>
             </div>
 
+            <!-- Mini population trend chart -->
+            <div id="miniChartBox" class="mt-3 hidden">
+              <div class="text-gray-500 mb-1">Population trend (2020–2024)</div>
+              <div class="bg-gray-50 rounded p-2" style="height:120px;">
+                <canvas id="miniChart"></canvas>
+              </div>
+            </div>
+
             <!-- data.census.gov -->
             <div class="mt-3">
               <a id="mcLink" class="text-blue-600 hover:underline" target="_blank" rel="noopener">Open on data.census.gov ↗</a>
@@ -81,7 +94,7 @@
       </aside>
     </div>
 
-    <!-- Stats cards (unchanged except links already added previously) -->
+    <!-- Summary stat cards -->
     <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
       <div class="space-y-6">
         <h2 class="text-lg font-semibold">Populations and People</h2>
@@ -189,15 +202,14 @@
       return [c.lat, c.lng];
     }
 
-    // ----- Load population file used by charts.html -----
-    // This mirrors the robust header/value detection used on the charts page.
+    // Population JSON used by charts.html
     const POP_JSON = "data/population/prm-est2024-chg.json";
     const YEARS = [2020, 2021, 2022, 2023, 2024];
     let popRows = [], popGeoHeader = null, popByName = new Map();
 
     const num = (v) => {
       if (v == null) return NaN;
-      const s = String(v).replace(/\xa0/g,"").replace(/,/g,"").replace(/[^0-9.\\-]/g,"");
+      const s = String(v).replace(/\xa0/g,"").replace(/,/g,"").replace(/[^0-9.\-]/g,"");
       return s ? Number(s) : NaN;
     };
 
@@ -205,7 +217,6 @@
       const keys = Object.keys(allRows[0] || {});
       const priority = ["col_1","Geographic Area","Geographic Area Name","Geographic Area:"];
       for (const p of priority) if (keys.includes(p)) return p;
-
       for (const k of keys) {
         const col = allRows.map(r => r[k]);
         const strCount = col.filter(v => typeof v === "string").length;
@@ -240,15 +251,14 @@
       for (const r of popRows) {
         const raw = sanitizeName(r[popGeoHeader]);
         if (!raw) continue;
-        // store both with and without diacritics
+        // store both normalized with/without diacritics
         popByName.set(norm(raw), r);
         popByName.set(norm(stripDiacritics(raw)), r);
       }
     }
 
     function statsForMunicipio(name) {
-      const key = norm(name);
-      const row = popByName.get(key);
+      const row = popByName.get(norm(name));
       if (!row) return null;
 
       const vals = valuesFor(row);
@@ -256,21 +266,16 @@
 
       const p2020 = vals[0];
       const p2024 = vals[4];
-      const abs = p2024 - p2020;
+      const abs   = p2024 - p2020;
       const pctTot = p2020 ? (abs / p2020) * 100 : NaN;
-      const yoy = vals[3] ? ((p2024 - vals[3]) / vals[3]) * 100 : NaN;
+      const yoy    = vals[3] ? ((p2024 - vals[3]) / vals[3]) * 100 : NaN;
 
-      return {
-        p2024,
-        abs,
-        pctTot,
-        yoy
-      };
+      return { p2024, abs, pctTot, yoy, series: vals };
     }
 
     // ----- Page init -----
     document.addEventListener('DOMContentLoaded', async () => {
-      // Load population file (best-effort; page still works if not found)
+      // Load population file (best-effort)
       try {
         const res = await fetch(POP_JSON, { cache: "no-store" });
         if (res.ok) {
@@ -278,10 +283,7 @@
           popGeoHeader = detectGeoHeader(popRows);
           buildPopLookup();
         }
-      } catch (e) {
-        // Silently ignore; panel will just hide pop section if not available
-        console.warn("Population JSON not available:", e);
-      }
+      } catch {}
 
       // Map
       const prBounds = L.latLngBounds([[17.85, -67.45],[18.55, -65.25]]);
@@ -306,11 +308,20 @@
       const mcCentroid = document.getElementById('mcCentroid');
       const mcLink = document.getElementById('mcLink');
 
+      const rowGeoid = document.getElementById('rowGeoid');
+      const rowLand = document.getElementById('rowLand');
+      const rowWater = document.getElementById('rowWater');
+
       // Population nodes
       const mcPopBox = document.getElementById('mcPopBox');
       const mcPop2024 = document.getElementById('mcPop2024');
       const mcPopDelta = document.getElementById('mcPopDelta');
       const mcPopYoY = document.getElementById('mcPopYoY');
+
+      // Mini chart
+      const miniChartBox = document.getElementById('miniChartBox');
+      const miniChartCtx = document.getElementById('miniChart')?.getContext('2d');
+      let miniChart = null;
 
       function updateInfoPanel(props, feature) {
         const name = props.NAME || props.NAMELSAD || props.name || 'Unknown';
@@ -319,32 +330,84 @@
         const awater = Number(props.AWATER || props.AWATER20 || 0);
 
         mcName.textContent = name;
-        mcGeoid.textContent = geoid || '—';
-        mcLand.textContent = aland ? `${fmt.format(round(aland / m2PerMi2, 2))} sq mi` : '—';
-        mcWater.textContent = awater ? `${fmt.format(round(awater / m2PerMi2, 2))} sq mi` : '—';
+
+        // GEOID row: show only if present
+        if (geoid && geoid.length >= 5) {
+          mcGeoid.textContent = geoid;
+          rowGeoid.classList.remove('hidden');
+          mcLink.href = `https://data.census.gov/table?g=0600000US${geoid}`;
+        } else {
+          rowGeoid.classList.add('hidden');
+          mcGeoid.textContent = '';
+          mcLink.removeAttribute('href');
+        }
+
+        // Land/Water rows only if > 0
+        if (aland > 0) {
+          mcLand.textContent = `${fmt.format(round(aland / m2PerMi2, 2))} sq mi`;
+          rowLand.classList.remove('hidden');
+        } else {
+          rowLand.classList.add('hidden');
+          mcLand.textContent = '';
+        }
+        if (awater > 0) {
+          mcWater.textContent = `${fmt.format(round(awater / m2PerMi2, 2))} sq mi`;
+          rowWater.classList.remove('hidden');
+        } else {
+          rowWater.classList.add('hidden');
+          mcWater.textContent = '';
+        }
 
         const c = centroidOf(feature);
         mcCentroid.textContent = c ? `${round(c[0], 4)}, ${round(c[1], 4)}` : '—';
 
-        // data.census.gov link (county subdivision level)
-        if (geoid && geoid.length >= 5) {
-          mcLink.href = `https://data.census.gov/table?g=0600000US${geoid}`;
-        } else {
-          mcLink.removeAttribute('href');
-        }
-
-        // Populate population info from prm-est2024-chg.json (if available)
+        // Population info from prm-est2024-chg.json
         const st = statsForMunicipio(name);
         if (st) {
           mcPop2024.textContent = fmt.format(st.p2024);
           const sign = st.abs > 0 ? '+' : '';
           const pctLabel = Number.isFinite(st.pctTot) ? ` (${st.pctTot.toFixed(2)}%)` : '';
           mcPopDelta.textContent = `${sign}${fmt.format(st.abs)}${pctLabel}`;
-
           mcPopYoY.textContent = Number.isFinite(st.yoy) ? `${st.yoy.toFixed(2)}%` : '—';
           mcPopBox.classList.remove('hidden');
+
+          // Mini trend chart (2020–2024)
+          if (miniChartCtx) {
+            const labels = YEARS;
+            const data = st.series;
+            if (!miniChart) {
+              miniChart = new Chart(miniChartCtx, {
+                type: 'line',
+                data: {
+                  labels,
+                  datasets: [{
+                    label: 'Population',
+                    data,
+                    tension: 0.3,
+                    pointRadius: 2,
+                    borderWidth: 2
+                  }]
+                },
+                options: {
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => c.parsed.y.toLocaleString() } } },
+                  scales: {
+                    x: { ticks: { maxRotation: 0, autoSkip: true } },
+                    y: { ticks: { callback: v => Number(v).toLocaleString() } }
+                  }
+                }
+              });
+            } else {
+              miniChart.data.labels = labels;
+              miniChart.data.datasets[0].data = data;
+              miniChart.update();
+            }
+            miniChartBox.classList.remove('hidden');
+          }
         } else {
           mcPopBox.classList.add('hidden');
+          miniChartBox.classList.add('hidden');
         }
 
         mcBody.classList.remove('hidden');
