@@ -26,17 +26,20 @@
       background: rgba(255,255,255,.95); border-color:#333; color:#333;
       font-size:14px; font-weight:600; box-shadow:0 2px 5px rgba(0,0,0,.2); padding:5px 10px;
     }
-    /* Simple, consistent card style for the stats grid */
+    /* Compact, consistent cards */
     .stat-card {
       display:flex; gap:.75rem; align-items:flex-start;
       background:#fff; border-radius:.75rem; padding:1rem;
       box-shadow: 0 4px 10px rgba(0,0,0,.06);
-      height:100%;
     }
     .stat-icon {
       flex:none; display:flex; align-items:center; justify-content:center;
       width:2.5rem; height:2.5rem; border-radius:.75rem; background:#f3f4f6; color:#6b7280;
     }
+    .stat-body .label { font-size:.85rem; color:#6b7280; }
+    .stat-body .value { font-weight:800; font-size:1.5rem; line-height:1.1; }
+    .stat-body a { font-size:.75rem; color:#2563eb; }
+    .stat-section h2 { font-weight:600; font-size:1.125rem; margin-bottom:.5rem; }
   </style>
 </head>
 <body class="bg-gray-50 text-gray-900 font-sans">
@@ -76,14 +79,14 @@
           <div id="mcBody" class="hidden">
             <div><span class="text-gray-500">Name:</span> <span id="mcName" class="font-semibold"></span></div>
 
-            <!-- Only show these rows if values exist -->
+            <!-- Show these rows only if values exist -->
             <div id="rowGeoid" class="hidden"><span class="text-gray-500">GEOID:</span> <span id="mcGeoid" class="font-mono"></span></div>
             <div id="rowLand" class="hidden"><span class="text-gray-500">Land area:</span> <span id="mcLand"></span></div>
             <div id="rowWater" class="hidden"><span class="text-gray-500">Water area:</span> <span id="mcWater"></span></div>
 
             <div><span class="text-gray-500">Centroid:</span> <span id="mcCentroid"></span></div>
 
-            <!-- Population from prm-est2024-chg.json -->
+            <!-- Population (file: data/population/prm-est2024-chg.json) -->
             <div id="mcPopBox" class="mt-3 hidden">
               <div class="text-gray-500">Population (Vintage 2024):</div>
               <ul class="list-disc list-inside space-y-1">
@@ -101,29 +104,28 @@
               </div>
             </div>
 
-            <!-- data.census.gov (only visible when GEOID exists) -->
-            <div id="mcLinkWrap" class="mt-3">
-              <a id="mcLink" class="text-blue-600 hover:underline hidden" target="_blank" rel="noopener">Open on data.census.gov ↗</a>
+            <!-- Always present; uses best link we can build for this municipio -->
+            <div class="mt-3">
+              <a id="mcLink" class="text-blue-600 hover:underline" target="_blank" rel="noopener">Open on data.census.gov ↗</a>
             </div>
           </div>
         </div>
       </aside>
     </div>
 
-    <!-- STAT CARDS (clean, uniform layout) -->
-    <section class="space-y-6">
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <h2 class="md:col-span-3 text-xl font-semibold">Populations and People</h2>
-
+    <!-- Stats (original three-column structure; cleaner styling) -->
+    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <!-- Col 1 -->
+      <div class="space-y-6 stat-section">
+        <h2>Populations and People</h2>
         <div class="stat-card">
           <div class="stat-icon">
-            <!-- icon -->
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h-5v-5H4v-4H1v-2l2-4L1 2h22L21 8l2 4v2h-3v5h-5v-5h-4v5zm-1-8H8V4h8v8z"/></svg>
           </div>
-          <div class="min-w-0">
-            <div class="text-gray-500 text-sm">Total Population</div>
-            <div class="font-bold text-2xl leading-tight">3,285,874</div>
-            <a class="text-xs text-blue-600 hover:underline block mt-1" target="_blank" rel="noopener" href="https://data.census.gov/table?q=P1&g=040XX00US72">P1 • 2020 Decennial Census (Puerto Rico)</a>
+          <div class="stat-body min-w-0">
+            <div class="label">Total Population</div>
+            <div class="value">3,285,874</div>
+            <a target="_blank" rel="noopener" href="https://data.census.gov/table?q=P1&g=040XX00US72">P1 • 2020 Decennial Census (Puerto Rico)</a>
           </div>
         </div>
 
@@ -131,88 +133,88 @@
           <div class="stat-icon">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m7 0V5a2 2 0 012-2h2a2 2 0 012 2v4m-7 0h-3l-2 2H5m14 0h-3l-2 2h-2m2-2h-2"/></svg>
           </div>
-          <div class="min-w-0">
-            <div class="text-gray-500 text-sm">Employment Rate</div>
-            <div class="font-bold text-2xl leading-tight">43.4%</div>
-            <a class="text-xs text-blue-600 hover:underline block mt-1" target="_blank" rel="noopener" href="https://data.census.gov/table?q=DP03&g=040XX00US72">DP03 • 2024 ACS 1-Year (Puerto Rico)</a>
+          <div class="stat-body min-w-0">
+            <div class="label">Employment Rate</div>
+            <div class="value">43.4%</div>
+            <a target="_blank" rel="noopener" href="https://data.census.gov/table?q=DP03&g=040XX00US72">DP03 • 2024 ACS 1-Year (Puerto Rico)</a>
           </div>
         </div>
 
-        <h2 class="md:col-span-3 text-xl font-semibold">Income and Poverty</h2>
-
-        <div class="stat-card">
-          <div class="stat-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1L19 18H5l1.401-1.401C10.92 12.001 12 10.11 12 8z"/></svg>
-          </div>
-          <div class="min-w-0">
-            <div class="text-gray-500 text-sm">Median Household Income</div>
-            <div class="font-bold text-2xl leading-tight">$27,213</div>
-            <a class="text-xs text-blue-600 hover:underline block mt-1" target="_blank" rel="noopener" href="https://data.census.gov/table?q=S1901&g=040XX00US72">S1901 • 2024 ACS 1-Year (Puerto Rico)</a>
-          </div>
-        </div>
-
-        <h2 class="md:col-span-3 text-xl font-semibold">Housing</h2>
-
-        <div class="stat-card">
-          <div class="stat-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001 1h4a1 1 0 001-1m-6 0v-6a1 1 0 011-1h2a1 1 0 011 1v6m-4 0v-4h4v4m-4 0a1 1 0 00-1-1h-2a1 1 0 00-1 1"/></svg>
-          </div>
-          <div class="min-w-0">
-            <div class="text-gray-500 text-sm">Total Housing Units</div>
-            <div class="font-bold text-2xl leading-tight">1,616,963</div>
-            <a class="text-xs text-blue-600 hover:underline block mt-1" target="_blank" rel="noopener" href="https://data.census.gov/table?q=B25002&g=040XX00US72">B25002 • 2024 ACS 1-Year (Puerto Rico)</a>
-          </div>
-        </div>
-
-        <h2 class="md:col-span-3 text-xl font-semibold">Education</h2>
-
-        <div class="stat-card">
-          <div class="stat-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"/></svg>
-          </div>
-          <div class="min-w-0">
-            <div class="text-gray-500 text-sm">Bachelor’s Degree or Higher</div>
-            <div class="font-bold text-2xl leading-tight">29.7%</div>
-            <a class="text-xs text-blue-600 hover:underline block mt-1" target="_blank" rel="noopener" href="https://data.census.gov/table?q=S1501&g=040XX00US72">S1501 • 2024 ACS 1-Year (Puerto Rico)</a>
-          </div>
-        </div>
-
-        <h2 class="md:col-span-3 text-xl font-semibold">Health</h2>
-
-        <div class="stat-card">
-          <div class="stat-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 12H6m-2 0h-2V6h2v6zm14 0h2V6h-2v6zM4 6a2 2 0 012-2h12a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V6z"/></svg>
-          </div>
-          <div class="min-w-0">
-            <div class="text-gray-500 text-sm">Without Health Care Coverage</div>
-            <div class="font-bold text-2xl leading-tight">5.6%</div>
-            <a class="text-xs text-blue-600 hover:underline block mt-1" target="_blank" rel="noopener" href="https://data.census.gov/table?q=S2701&g=040XX00US72">S2701 • 2024 ACS 1-Year (Puerto Rico)</a>
-          </div>
-        </div>
-
-        <h2 class="md:col-span-3 text-xl font-semibold">Business and Economy</h2>
-
+        <h2 class="mt-6">Business and Economy</h2>
         <div class="stat-card">
           <div class="stat-icon">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5"/></svg>
           </div>
-          <div class="min-w-0">
-            <div class="text-gray-500 text-sm">Total Employer Establishments</div>
-            <div class="font-bold text-2xl leading-tight">50,332</div>
-            <a class="text-xs text-blue-600 hover:underline block mt-1" target="_blank" rel="noopener" href="https://www.census.gov/programs-surveys/cbp.html">CBP • County Business Patterns (Program Page)</a>
+          <div class="stat-body min-w-0">
+            <div class="label">Total Employer Establishments</div>
+            <div class="value">50,332</div>
+            <a target="_blank" rel="noopener" href="https://www.census.gov/programs-surveys/cbp.html">CBP • County Business Patterns (Program Page)</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Col 2 -->
+      <div class="space-y-6 stat-section">
+        <h2>Income and Poverty</h2>
+        <div class="stat-card">
+          <div class="stat-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1L19 18H5l1.401-1.401C10.92 12.001 12 10.11 12 8z"/></svg>
+          </div>
+          <div class="stat-body min-w-0">
+            <div class="label">Median Household Income</div>
+            <div class="value">$27,213</div>
+            <a target="_blank" rel="noopener" href="https://data.census.gov/table?q=S1901&g=040XX00US72">S1901 • 2024 ACS 1-Year (Puerto Rico)</a>
           </div>
         </div>
 
-        <h2 class="md:col-span-3 text-xl font-semibold">Race and Ethnicity</h2>
+        <h2 class="mt-6">Housing</h2>
+        <div class="stat-card">
+          <div class="stat-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001 1h4a1 1 0 001-1m-6 0v-6a1 1 0 011-1h2a1 1 0 011 1v6m-4 0v-4h4v4m-4 0a1 1 0 00-1 1"/></svg>
+          </div>
+          <div class="stat-body min-w-0">
+            <div class="label">Total Housing Units</div>
+            <div class="value">1,616,963</div>
+            <a target="_blank" rel="noopener" href="https://data.census.gov/table?q=B25002&g=040XX00US72">B25002 • 2024 ACS 1-Year (Puerto Rico)</a>
+          </div>
+        </div>
 
+        <h2 class="mt-6">Race and Ethnicity</h2>
         <div class="stat-card">
           <div class="stat-icon">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h-5v-5H4v-4H1v-2l2-4L1 2h22L21 8l2 4v2h-3v5h-5v-5h-4v5z"/></svg>
           </div>
-          <div class="min-w-0">
-            <div class="text-gray-500 text-sm">Hispanic or Latino (of any race)</div>
-            <div class="font-bold text-2xl leading-tight">3,249,043</div>
-            <a class="text-xs text-blue-600 hover:underline block mt-1" target="_blank" rel="noopener" href="https://data.census.gov/table?q=P9&g=040XX00US72">P9 • 2020 Decennial Census (Puerto Rico)</a>
+          <div class="stat-body min-w-0">
+            <div class="label">Hispanic or Latino (of any race)</div>
+            <div class="value">3,249,043</div>
+            <a target="_blank" rel="noopener" href="https://data.census.gov/table?q=P9&g=040XX00US72">P9 • 2020 Decennial Census (Puerto Rico)</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Col 3 -->
+      <div class="space-y-6 stat-section">
+        <h2>Education</h2>
+        <div class="stat-card">
+          <div class="stat-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"/></svg>
+          </div>
+          <div class="stat-body min-w-0">
+            <div class="label">Bachelor’s Degree or Higher</div>
+            <div class="value">29.7%</div>
+            <a target="_blank" rel="noopener" href="https://data.census.gov/table?q=S1501&g=040XX00US72">S1501 • 2024 ACS 1-Year (Puerto Rico)</a>
+          </div>
+        </div>
+
+        <h2 class="mt-6">Health</h2>
+        <div class="stat-card">
+          <div class="stat-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 12H6m-2 0h-2V6h2v6zm14 0h2V6h-2v6zM4 6a2 2 0 012-2h12a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V6z"/></svg>
+          </div>
+          <div class="stat-body min-w-0">
+            <div class="label">Without Health Care Coverage</div>
+            <div class="value">5.6%</div>
+            <a target="_blank" rel="noopener" href="https://data.census.gov/table?q=S2701&g=040XX00US72">S2701 • 2024 ACS 1-Year (Puerto Rico)</a>
           </div>
         </div>
       </div>
@@ -241,6 +243,29 @@
       if (!b.isValid()) return null;
       const c = b.getCenter();
       return [c.lat, c.lng];
+    }
+
+    // Build the best possible data.census.gov link for a municipio.
+    function censusLinkFor(props, name) {
+      const stateFP = props.STATEFP || "72"; // default PR
+      const countyFP = props.COUNTYFP || "";
+      const cousubFP = props.COUSUBFP || "";
+
+      // Prefer explicit 060 GEOID if present or constructable
+      const geoid060 = String(props.GEOID || props.geoid || (stateFP && countyFP && cousubFP ? `${stateFP}${countyFP}${cousubFP}` : "")).trim();
+      if (geoid060 && geoid060.length === 10) {
+        return `https://data.census.gov/table?g=0600000US${geoid060}`;
+      }
+
+      // Fallback to 050 (county/municipio) if we have state+county
+      const geoid050 = (stateFP && countyFP) ? `${stateFP}${countyFP}` : "";
+      if (geoid050 && geoid050.length === 5) {
+        return `https://data.census.gov/table?g=0500000US${geoid050}`;
+      }
+
+      // Last resort: name-based search within Puerto Rico
+      const q = encodeURIComponent(`${name} municipio, Puerto Rico`);
+      return `https://data.census.gov/search?q=${q}`;
     }
 
     // Population JSON (same file your charts page uses)
@@ -345,13 +370,10 @@
       const mcLand = document.getElementById('mcLand');
       const mcWater = document.getElementById('mcWater');
       const mcCentroid = document.getElementById('mcCentroid');
-
       const rowGeoid = document.getElementById('rowGeoid');
       const rowLand = document.getElementById('rowLand');
       const rowWater = document.getElementById('rowWater');
-
       const mcLink = document.getElementById('mcLink');
-      const mcLinkWrap = document.getElementById('mcLinkWrap');
 
       // Population nodes
       const mcPopBox = document.getElementById('mcPopBox');
@@ -366,23 +388,19 @@
 
       function updateInfoPanel(props, feature) {
         const name = props.NAME || props.NAMELSAD || props.name || 'Unknown';
-        const geoid = String(props.GEOID || props.geoid || '').trim();
+        const geoidProp = String(props.GEOID || props.geoid || '').trim();
         const aland = Number(props.ALAND || props.ALAND20 || 0);
         const awater = Number(props.AWATER || props.AWATER20 || 0);
 
         mcName.textContent = name;
 
-        // GEOID row + reliable link behavior
-        if (geoid && geoid.length >= 5) {
-          mcGeoid.textContent = geoid;
+        // GEOID row only if we have one
+        if (geoidProp) {
+          mcGeoid.textContent = geoidProp;
           rowGeoid.classList.remove('hidden');
-          mcLink.href = `https://data.census.gov/table?g=0600000US${geoid}`;
-          mcLink.classList.remove('hidden');  // ensure visible when valid
         } else {
-          rowGeoid.classList.add('hidden');
           mcGeoid.textContent = '';
-          mcLink.classList.add('hidden');     // hide link when no GEOID
-          mcLink.removeAttribute('href');
+          rowGeoid.classList.add('hidden');
         }
 
         // Land/Water rows only if > 0
@@ -404,7 +422,10 @@
         const c = centroidOf(feature);
         mcCentroid.textContent = c ? `${round(c[0], 4)}, ${round(c[1], 4)}` : '—';
 
-        // Population info from prm-est2024-chg.json
+        // Build/link data.census.gov URL (works even if GEOID missing)
+        mcLink.href = censusLinkFor(props, name);
+
+        // Population info
         const st = statsForMunicipio(name);
         if (st) {
           mcPop2024.textContent = fmt.format(st.p2024);
@@ -487,9 +508,9 @@
 
             lyr.bindTooltip(tooltipHtml, { direction: 'center', className: 'leaflet-tooltip' });
 
-            const geoid = String(p.GEOID || p.geoid || '').trim();
-            const link = geoid ? `<br><a href="https://data.census.gov/table?g=0600000US${geoid}" target="_blank" rel="noopener" style="color:#2563eb;text-decoration:underline;">View on data.census.gov ↗</a>` : '';
-            lyr.bindPopup(`<strong>${name}</strong>${geoid ? `<br><small>GEOID: ${geoid}</small>` : ''}${link}`);
+            // Popup includes deep link when we can build it
+            const deeplink = censusLinkFor(p, name);
+            lyr.bindPopup(`<strong>${name}</strong><br><a href="${deeplink}" target="_blank" rel="noopener" style="color:#2563eb;text-decoration:underline;">View on data.census.gov ↗</a>`);
 
             lyr.on({
               mouseover: e => {
