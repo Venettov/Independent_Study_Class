@@ -79,7 +79,7 @@
           <div id="mcBody" class="hidden">
             <div><span class="text-gray-500">Name:</span> <span id="mcName" class="font-semibold"></span></div>
 
-            <!-- Show these rows only if values exist -->
+            <!-- These rows show only when values exist -->
             <div id="rowGeoid" class="hidden"><span class="text-gray-500">GEOID:</span> <span id="mcGeoid" class="font-mono"></span></div>
             <div id="rowLand" class="hidden"><span class="text-gray-500">Land area:</span> <span id="mcLand"></span></div>
             <div id="rowWater" class="hidden"><span class="text-gray-500">Water area:</span> <span id="mcWater"></span></div>
@@ -104,9 +104,9 @@
               </div>
             </div>
 
-            <!-- Always present; uses best link we can build for this municipio -->
+            <!-- Safe, stable link to data.census.gov (hidden if we can't build it) -->
             <div class="mt-3">
-              <a id="mcLink" class="text-blue-600 hover:underline" target="_blank" rel="noopener">Open on data.census.gov ↗</a>
+              <a id="mcLink" class="text-blue-600 hover:underline hidden" target="_blank" rel="noopener">Open on data.census.gov ↗</a>
             </div>
           </div>
         </div>
@@ -245,27 +245,26 @@
       return [c.lat, c.lng];
     }
 
-    // Build the best possible data.census.gov link for a municipio.
+    // Build a safe, stable link for data.census.gov (avoids blocked /search URLs)
     function censusLinkFor(props, name) {
-      const stateFP = props.STATEFP || "72"; // default PR
-      const countyFP = props.COUNTYFP || "";
-      const cousubFP = props.COUSUBFP || "";
+      const state = String(props.STATEFP || "72").padStart(2, "0");
+      const county = String(props.COUNTYFP || "").padStart(3, "0");
 
-      // Prefer explicit 060 GEOID if present or constructable
-      const geoid060 = String(props.GEOID || props.geoid || (stateFP && countyFP && cousubFP ? `${stateFP}${countyFP}${cousubFP}` : "")).trim();
-      if (geoid060 && geoid060.length === 10) {
-        return `https://data.census.gov/table?g=0600000US${geoid060}`;
+      // Prefer municipio (county-equivalent) profile: g=0500000US{STATE}{COUNTY}
+      if (county && county !== "000") {
+        const geoid050 = `${state}${county}`;
+        return `https://data.census.gov/profile?g=0500000US${geoid050}`;
       }
 
-      // Fallback to 050 (county/municipio) if we have state+county
-      const geoid050 = (stateFP && countyFP) ? `${stateFP}${countyFP}` : "";
-      if (geoid050 && geoid050.length === 5) {
-        return `https://data.census.gov/table?g=0500000US${geoid050}`;
+      // If COUNTYFP missing, try to derive first 5 digits from a 10-digit 060 GEOID
+      const geoid060 = String(props.GEOID || props.geoid || "").trim();
+      if (geoid060.length === 10) {
+        const geoid050 = geoid060.slice(0, 5);
+        return `https://data.census.gov/profile?g=0500000US${geoid050}`;
       }
 
-      // Last resort: name-based search within Puerto Rico
-      const q = encodeURIComponent(`${name} municipio, Puerto Rico`);
-      return `https://data.census.gov/search?q=${q}`;
+      // Otherwise, we can't build a reliable link—hide it.
+      return null;
     }
 
     // Population JSON (same file your charts page uses)
@@ -422,8 +421,15 @@
         const c = centroidOf(feature);
         mcCentroid.textContent = c ? `${round(c[0], 4)}, ${round(c[1], 4)}` : '—';
 
-        // Build/link data.census.gov URL (works even if GEOID missing)
-        mcLink.href = censusLinkFor(props, name);
+        // Build/link data.census.gov URL (hide if we can't build a safe one)
+        const deeplink = censusLinkFor(props, name);
+        if (deeplink) {
+          mcLink.href = deeplink;
+          mcLink.classList.remove('hidden');
+        } else {
+          mcLink.removeAttribute('href');
+          mcLink.classList.add('hidden');
+        }
 
         // Population info
         const st = statsForMunicipio(name);
@@ -508,9 +514,12 @@
 
             lyr.bindTooltip(tooltipHtml, { direction: 'center', className: 'leaflet-tooltip' });
 
-            // Popup includes deep link when we can build it
+            // Popup with the same safe deep link (only if available)
             const deeplink = censusLinkFor(p, name);
-            lyr.bindPopup(`<strong>${name}</strong><br><a href="${deeplink}" target="_blank" rel="noopener" style="color:#2563eb;text-decoration:underline;">View on data.census.gov ↗</a>`);
+            const linkHtml = deeplink
+              ? `<br><a href="${deeplink}" target="_blank" rel="noopener" style="color:#2563eb;text-decoration:underline;">View on data.census.gov ↗</a>`
+              : '';
+            lyr.bindPopup(`<strong>${name}</strong>${linkHtml}`);
 
             lyr.on({
               mouseover: e => {
