@@ -41,7 +41,7 @@
     .stat-section h2 { font-weight:600; font-size:1.125rem; margin-bottom:.5rem; }
 
     /* Bigger mini charts */
-    .miniTitle { font-size:.925rem; color:#6b7280; margin-bottom:.375rem; }
+    .miniTitle { font-size:.925rem; font-weight:600; color:#374151; margin-bottom:.375rem; } /* bold titles */
     .miniCard { background:#f9fafb; border-radius:.75rem; padding:.75rem; height:210px; }
     .miniCanvasWrap { height:175px; }
   </style>
@@ -87,10 +87,13 @@
       <pre id="errorMsg" class="hidden mt-3 text-sm text-red-600 whitespace-pre-wrap"></pre>
     </div>
 
-    <!-- Population details (3 columns: left text | middle trend | right % change) -->
+    <!-- Population details -->
     <aside class="bg-white rounded-lg shadow-lg p-6">
-      <h3 class="text-lg font-semibold mb-3">Population details</h3>
+      <div class="flex items-baseline justify-between mb-3">
+        <h3 class="text-lg font-semibold">Population details</h3>
+      </div>
 
+      <!-- 3 equal columns: left text | middle trend | right % change -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
         <!-- LEFT: text details -->
         <div id="detailsCol" class="text-sm space-y-2">
@@ -119,16 +122,16 @@
           </div>
         </div>
 
-        <!-- MIDDLE: Population trend -->
-        <div id="trendBox" class="hidden">
+        <!-- MIDDLE: Population trend (pulled up to align with heading) -->
+        <div id="trendBox" class="hidden md:-mt-3 lg:-mt-4">
           <div class="miniTitle">Population trend (2020–2024)</div>
           <div class="miniCard">
             <div class="miniCanvasWrap"><canvas id="miniChart"></canvas></div>
           </div>
         </div>
 
-        <!-- RIGHT: Annual % Change -->
-        <div id="pctBox" class="hidden">
+        <!-- RIGHT: Annual % Change (pulled up to align with heading) -->
+        <div id="pctBox" class="hidden md:-mt-3 lg:-mt-4">
           <div class="miniTitle">Annual % Change</div>
           <div class="miniCard">
             <div class="miniCanvasWrap"><canvas id="miniPctChart"></canvas></div>
@@ -137,9 +140,8 @@
       </div>
     </aside>
 
-    <!-- Stats -->
+    <!-- Stats (unchanged) -->
     <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-      <!-- Col 1 -->
       <div class="space-y-6 stat-section">
         <h2>Populations and People</h2>
         <div class="stat-card">
@@ -171,7 +173,6 @@
         </div>
       </div>
 
-      <!-- Col 2 -->
       <div class="space-y-6 stat-section">
         <h2>Income and Poverty</h2>
         <div class="stat-card">
@@ -204,7 +205,6 @@
         </div>
       </div>
 
-      <!-- Col 3 -->
       <div class="space-y-6 stat-section">
         <h2>Education</h2>
         <div class="stat-card">
@@ -337,7 +337,7 @@
       return { p2024, abs, pctTot, yoy, series: vals };
     }
 
-    // YoY % series (as used on charts page)
+    // YoY % series
     function percentSeries(vals){
       const out = [];
       for (let i=1;i<vals.length;i++){
@@ -458,9 +458,9 @@
           mcPopYoY.textContent = Number.isFinite(st.yoy) ? `${st.yoy.toFixed(2)}%` : '—';
           mcPopBox.classList.remove('hidden');
 
-          // Charts (now individual boxes in columns 2 & 3)
-          safeMakeMiniChart(YEARS, st.series);
-          const pctLabels = [ `${YEARS[0]}→${YEARS[1]}`, `${YEARS[1]}→${YEARS[2]}`, `${YEARS[2]}→${YEARS[3]}`, `${YEARS[3]}→${YEARS[4]}` ];
+          // Charts
+          safeMakeMiniChart([2020,2021,2022,2023,2024], st.series);
+          const pctLabels = ['2020→2021','2021→2022','2022→2023','2023→2024'];
           safeMakePctChart(pctLabels, percentSeries(st.series));
         } else {
           mcPopBox.classList.add('hidden');
@@ -473,15 +473,23 @@
 
       // Load population JSON
       try {
-        const res = await fetch(POP_JSON, { cache: "no-store" });
+        const res = await fetch("data/population/prm-est2024-chg.json", { cache: "no-store" });
         if (res.ok) {
-          popRows = await res.json();
-          popGeoHeader = detectGeoHeader(popRows);
-          buildPopLookup();
+          const popRows = await res.json();
+          // header + lookup helpers (from your file)
+          const keys = Object.keys(popRows[0] || {});
+          const priority = ["col_1","Geographic Area","Geographic Area Name","Geographic Area:"];
+          let popGeoHeader = priority.find(p => keys.includes(p)) || keys.find(k => /geographic|area|name/i.test(k)) || keys[0];
+          const stripDiacritics = s => String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+          const norm = s => stripDiacritics(String(s||'').trim()).toLowerCase();
+          const popByName = new Map();
+          const sanitizeName = s => String(s||"").replace(/^\s*[.\-•]\s*/,"").replace(/\s+/g,' ').trim();
+          for (const r of popRows) {
+            const raw = sanitizeName(r[popGeoHeader]); if (!raw) continue;
+            popByName.set(norm(raw), r); popByName.set(norm(stripDiacritics(raw)), r);
+          }
         }
-      } catch (e) {
-        console.warn('Population file load failed:', e);
-      }
+      } catch(e){ /* non-blocking */ }
 
       // Leaflet map
       const prBounds = L.latLngBounds([[17.85, -67.45],[18.55, -65.25]]);
@@ -518,14 +526,19 @@
               `<div style="text-align:center;">
                  <div style="font-weight:700">${name}</div>
                  <div style="font-size:12px;opacity:.8">
-                   ${aland ? `Land: ${round(aland / M2_PER_MI2, 2)} mi²` : ''}${aland && awater ? ' · ' : ''}
-                   ${awater ? `Water: ${round(awater / M2_PER_MI2, 2)} mi²` : ''}
+                   ${aland ? `Land: ${Number((aland/2589988.110336)).toFixed(2)} mi²` : ''}${aland && awater ? ' · ' : ''}
+                   ${awater ? `Water: ${Number((awater/2589988.110336)).toFixed(2)} mi²` : ''}
                  </div>
                </div>`;
 
             lyr.bindTooltip(tooltipHtml, { direction: 'center', className: 'leaflet-tooltip' });
 
-            const deeplink = censusLinkFor(p, name);
+            const state = String(p.STATEFP || "72").padStart(2,"0");
+            const county = String(p.COUNTYFP || "").padStart(3,"0");
+            const deeplink = (name === "Puerto Rico" || !county || county === "000")
+              ? `https://data.census.gov/profile?g=0400000US${state}`
+              : `https://data.census.gov/profile?g=0500000US${state}${county}`;
+
             const linkHtml = deeplink
               ? `<br><a href="${deeplink}" target="_blank" rel="noopener" style="color:#2563eb;text-decoration:underline;">View on data.census.gov ↗</a>`
               : '';
