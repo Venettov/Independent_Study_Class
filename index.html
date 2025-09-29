@@ -61,32 +61,33 @@
     <div class="bg-white rounded-lg shadow-lg p-6">
       <p class="text-sm font-semibold text-gray-500 uppercase">Population and Economic Analysis in</p>
       <h1 class="text-5xl font-extrabold mt-1">Puerto Rico</h1>
-      <p class="mt-4 text-lg text-gray-700">Puerto Rico has a land area of 3,424.5 square miles and a water area of 1,900.3 square miles.</p>
+      <p class="mt-4 text-lg text-gray-700">
+        Puerto Rico has a land area of 3,424.5 square miles and a water area of 1,900.3 square miles.
+      </p>
+
+      <!-- NEW: hover hint -->
+      <div class="mt-3">
+        <div class="text-[15px] sm:text-base font-medium text-gray-800 bg-blue-50 border border-blue-200 rounded-md px-3 py-2 inline-flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <path d="M18 10A8 8 0 11.001 10 8 8 0 0118 10zM9 7h2V5H9v2zm0 8h2V8H9v7z"/>
+          </svg>
+          Hover over the map to see municipio details
+        </div>
+      </div>
     </div>
 
     <!-- Map + Info panel -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <div class="bg-white rounded-lg shadow-lg p-6 lg:col-span-2">
-        <!-- NEW: hint above the map -->
-        <div id="mapHint" class="mb-3">
-          <div class="text-[15px] sm:text-base font-medium text-gray-800 bg-blue-50 border border-blue-200 rounded-md px-3 py-2 inline-flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-              <path d="M18 10A8 8 0 11.001 10 8 8 0 0118 10zM9 7h2V5H9v2zm0 8h2V8H9v7z"/>
-            </svg>
-            Hover over the map to see municipio details
-          </div>
-        </div>
-
-        <div id="map"></div>
-        <pre id="errorMsg" class="hidden mt-3 text-sm text-red-600 whitespace-pre-wrap"></pre>
-      </div>
+    <div class="bg-white rounded-lg shadow-lg p-6 lg:col-span-2">
+      <div id="map"></div>
+      <pre id="errorMsg" class="hidden mt-3 text-sm text-red-600 whitespace-pre-wrap"></pre>
+    </div>
 
       <aside class="bg-white rounded-lg shadow-lg p-6">
-        <h3 class="text-lg font-semibold mb-3">Municipio details</h3>
+        <h3 class="text-lg font-semibold mb-3">Population details</h3>
         <div id="hoverCard" class="text-sm space-y-2">
           <!-- removed the old hint here -->
           <div id="mcBody" class="hidden">
-            <div><span class="text-gray-500">Name:</span> <span id="mcName" class="font-semibold"></span></div>
+            <div><span class="text-gray-500">Municipio:</span> <span id="mcName" class="font-semibold"></span></div>
 
             <div id="rowGeoid" class="hidden"><span class="text-gray-500">GEOID:</span> <span id="mcGeoid" class="font-mono"></span></div>
             <div id="rowLand" class="hidden"><span class="text-gray-500">Land area:</span> <span id="mcLand"></span></div>
