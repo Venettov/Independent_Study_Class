@@ -40,18 +40,13 @@
     .stat-body a { font-size:.75rem; color:#2563eb; }
     .stat-section h2 { font-weight:600; font-size:1.125rem; margin-bottom:.5rem; }
 
-    /* Mini chart cards */
-    .miniTitle { font-size:.925rem; font-weight:600; color:#374151; margin-bottom:.375rem; }
-    .miniCard { background:#f9fafb; border-radius:.75rem; padding:.75rem; height:210px; }
-    .miniCanvasWrap { height:175px; }
+    /* Mini chart cards (BIGGER + aligned with section title) */
+    .miniTitle { font-size:.925rem; font-weight:700; color:#374151; margin-bottom:.375rem; }
+    .miniCard { background:#f9fafb; border-radius:.75rem; padding:.75rem; height:280px; }
+    .miniCanvasWrap { height:240px; }
 
-    /* Align charts with heading on wider screens */
-    @media (min-width: 768px) {
-      #trendBox, #pctBox { margin-top: -0.75rem; }
-    }
-    @media (min-width: 1024px) {
-      #trendBox, #pctBox { margin-top: -1rem; }
-    }
+    /* Ensure charts start at the same top as the left column title */
+    #trendBox, #pctBox { margin-top: 0 !important; }
   </style>
 </head>
 <body class="bg-gray-50 text-gray-900 font-sans">
@@ -521,8 +516,8 @@
               `<div style="text-align:center;">
                  <div style="font-weight:700">${name}</div>
                  <div style="font-size:12px;opacity:.8">
-                   ${aland ? `Land: ${round(aland / M2_PER_MI2, 2)} mi²` : ''}${aland && awater ? ' · ' : ''}
-                   ${awater ? `Water: ${round(awater / M2_PER_MI2, 2)} mi²` : ''}
+                   ${aland ? \`Land: ${round(aland / M2_PER_MI2, 2)} mi²\` : ''}${aland && awater ? ' · ' : ''}
+                   ${awater ? \`Water: ${round(awater / M2_PER_MI2, 2)} mi²\` : ''}
                  </div>
                </div>`;
 
