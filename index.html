@@ -40,10 +40,18 @@
     .stat-body a { font-size:.75rem; color:#2563eb; }
     .stat-section h2 { font-weight:600; font-size:1.125rem; margin-bottom:.5rem; }
 
-    /* Bigger mini charts */
-    .miniTitle { font-size:.925rem; font-weight:600; color:#374151; margin-bottom:.375rem; } /* bold titles */
+    /* Mini chart cards */
+    .miniTitle { font-size:.925rem; font-weight:600; color:#374151; margin-bottom:.375rem; }
     .miniCard { background:#f9fafb; border-radius:.75rem; padding:.75rem; height:210px; }
     .miniCanvasWrap { height:175px; }
+
+    /* Align charts with heading on wider screens */
+    @media (min-width: 768px) {
+      #trendBox, #pctBox { margin-top: -0.75rem; }
+    }
+    @media (min-width: 1024px) {
+      #trendBox, #pctBox { margin-top: -1rem; }
+    }
   </style>
 </head>
 <body class="bg-gray-50 text-gray-900 font-sans">
@@ -89,9 +97,7 @@
 
     <!-- Population details -->
     <aside class="bg-white rounded-lg shadow-lg p-6">
-      <div class="flex items-baseline justify-between mb-3">
-        <h3 class="text-lg font-semibold">Population details</h3>
-      </div>
+      <h3 class="text-lg font-semibold mb-3">Population details</h3>
 
       <!-- 3 equal columns: left text | middle trend | right % change -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
@@ -122,16 +128,16 @@
           </div>
         </div>
 
-        <!-- MIDDLE: Population trend (pulled up to align with heading) -->
-        <div id="trendBox" class="hidden md:-mt-3 lg:-mt-4">
+        <!-- MIDDLE: Population trend -->
+        <div id="trendBox" class="hidden">
           <div class="miniTitle">Population trend (2020–2024)</div>
           <div class="miniCard">
             <div class="miniCanvasWrap"><canvas id="miniChart"></canvas></div>
           </div>
         </div>
 
-        <!-- RIGHT: Annual % Change (pulled up to align with heading) -->
-        <div id="pctBox" class="hidden md:-mt-3 lg:-mt-4">
+        <!-- RIGHT: Annual % Change -->
+        <div id="pctBox" class="hidden">
           <div class="miniTitle">Annual % Change</div>
           <div class="miniCard">
             <div class="miniCanvasWrap"><canvas id="miniPctChart"></canvas></div>
@@ -140,7 +146,7 @@
       </div>
     </aside>
 
-    <!-- Stats (unchanged) -->
+    <!-- Stats -->
     <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
       <div class="space-y-6 stat-section">
         <h2>Populations and People</h2>
@@ -271,7 +277,7 @@
       return null;
     }
 
-    // ---- Population helpers ----
+    // ---- Population helpers (globals) ----
     const POP_JSON = "data/population/prm-est2024-chg.json";
     const YEARS = [2020, 2021, 2022, 2023, 2024];
     let popRows = [], popGeoHeader = null, popByName = new Map();
@@ -337,7 +343,6 @@
       return { p2024, abs, pctTot, yoy, series: vals };
     }
 
-    // YoY % series
     function percentSeries(vals){
       const out = [];
       for (let i=1;i<vals.length;i++){
@@ -384,8 +389,7 @@
               type: 'line',
               data: { labels, datasets: [{ label: 'Population', data, tension: 0.3, pointRadius: 2, borderWidth: 2 }] },
               options: {
-                responsive: true,
-                maintainAspectRatio: false,
+                responsive: true, maintainAspectRatio: false,
                 plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => c.parsed.y.toLocaleString() } } },
                 scales: {
                   x: { ticks: { maxRotation: 0, autoSkip: true } },
@@ -410,8 +414,7 @@
               type: 'bar',
               data: { labels, datasets: [{ label: '% change', data }] },
               options: {
-                responsive: true,
-                maintainAspectRatio: false,
+                responsive: true, maintainAspectRatio: false,
                 plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => `${c.parsed.y.toFixed(2)}%` } } },
                 scales: { y: { ticks: { callback: v => `${v}%` } } }
               }
@@ -459,8 +462,8 @@
           mcPopBox.classList.remove('hidden');
 
           // Charts
-          safeMakeMiniChart([2020,2021,2022,2023,2024], st.series);
-          const pctLabels = ['2020→2021','2021→2022','2022→2023','2023→2024'];
+          safeMakeMiniChart(YEARS, st.series);
+          const pctLabels = [ `${YEARS[0]}→${YEARS[1]}`, `${YEARS[1]}→${YEARS[2]}`, `${YEARS[2]}→${YEARS[3]}`, `${YEARS[3]}→${YEARS[4]}` ];
           safeMakePctChart(pctLabels, percentSeries(st.series));
         } else {
           mcPopBox.classList.add('hidden');
@@ -471,25 +474,17 @@
         mcBody.classList.remove('hidden');
       }
 
-      // Load population JSON
+      // ✅ Correct population JSON load (sets globals + lookup)
       try {
-        const res = await fetch("data/population/prm-est2024-chg.json", { cache: "no-store" });
+        const res = await fetch(POP_JSON, { cache: "no-store" });
         if (res.ok) {
-          const popRows = await res.json();
-          // header + lookup helpers (from your file)
-          const keys = Object.keys(popRows[0] || {});
-          const priority = ["col_1","Geographic Area","Geographic Area Name","Geographic Area:"];
-          let popGeoHeader = priority.find(p => keys.includes(p)) || keys.find(k => /geographic|area|name/i.test(k)) || keys[0];
-          const stripDiacritics = s => String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-          const norm = s => stripDiacritics(String(s||'').trim()).toLowerCase();
-          const popByName = new Map();
-          const sanitizeName = s => String(s||"").replace(/^\s*[.\-•]\s*/,"").replace(/\s+/g,' ').trim();
-          for (const r of popRows) {
-            const raw = sanitizeName(r[popGeoHeader]); if (!raw) continue;
-            popByName.set(norm(raw), r); popByName.set(norm(stripDiacritics(raw)), r);
-          }
+          popRows = await res.json();
+          popGeoHeader = detectGeoHeader(popRows);
+          buildPopLookup();
         }
-      } catch(e){ /* non-blocking */ }
+      } catch (e) {
+        console.warn('Population file load failed:', e);
+      }
 
       // Leaflet map
       const prBounds = L.latLngBounds([[17.85, -67.45],[18.55, -65.25]]);
@@ -526,19 +521,14 @@
               `<div style="text-align:center;">
                  <div style="font-weight:700">${name}</div>
                  <div style="font-size:12px;opacity:.8">
-                   ${aland ? `Land: ${Number((aland/2589988.110336)).toFixed(2)} mi²` : ''}${aland && awater ? ' · ' : ''}
-                   ${awater ? `Water: ${Number((awater/2589988.110336)).toFixed(2)} mi²` : ''}
+                   ${aland ? `Land: ${round(aland / M2_PER_MI2, 2)} mi²` : ''}${aland && awater ? ' · ' : ''}
+                   ${awater ? `Water: ${round(awater / M2_PER_MI2, 2)} mi²` : ''}
                  </div>
                </div>`;
 
             lyr.bindTooltip(tooltipHtml, { direction: 'center', className: 'leaflet-tooltip' });
 
-            const state = String(p.STATEFP || "72").padStart(2,"0");
-            const county = String(p.COUNTYFP || "").padStart(3,"0");
-            const deeplink = (name === "Puerto Rico" || !county || county === "000")
-              ? `https://data.census.gov/profile?g=0400000US${state}`
-              : `https://data.census.gov/profile?g=0500000US${state}${county}`;
-
+            const deeplink = censusLinkFor(p, name);
             const linkHtml = deeplink
               ? `<br><a href="${deeplink}" target="_blank" rel="noopener" style="color:#2563eb;text-decoration:underline;">View on data.census.gov ↗</a>`
               : '';
