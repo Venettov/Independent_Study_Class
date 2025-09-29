@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 
-  <!-- Mini chart (defer so it’s ready before DOMContentLoaded handlers run) -->
+  <!-- Mini chart -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
 
   <style>
@@ -67,6 +67,16 @@
     <!-- Map + Info panel -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <div class="bg-white rounded-lg shadow-lg p-6 lg:col-span-2">
+        <!-- NEW: hint above the map -->
+        <div id="mapHint" class="mb-3">
+          <div class="text-[15px] sm:text-base font-medium text-gray-800 bg-blue-50 border border-blue-200 rounded-md px-3 py-2 inline-flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+              <path d="M18 10A8 8 0 11.001 10 8 8 0 0118 10zM9 7h2V5H9v2zm0 8h2V8H9v7z"/>
+            </svg>
+            Hover over the map to see municipio details
+          </div>
+        </div>
+
         <div id="map"></div>
         <pre id="errorMsg" class="hidden mt-3 text-sm text-red-600 whitespace-pre-wrap"></pre>
       </div>
@@ -74,7 +84,7 @@
       <aside class="bg-white rounded-lg shadow-lg p-6">
         <h3 class="text-lg font-semibold mb-3">Municipio details</h3>
         <div id="hoverCard" class="text-sm space-y-2">
-          <p class="text-gray-500">Hover over a municipio to see details.</p>
+          <!-- removed the old hint here -->
           <div id="mcBody" class="hidden">
             <div><span class="text-gray-500">Name:</span> <span id="mcName" class="font-semibold"></span></div>
 
@@ -220,7 +230,7 @@
     const round = (n,d=2)=> Math.round(n*10**d)/10**d;
 
     function centroidOf(feature) {
-      if (!feature) return null;                       // allow null
+      if (!feature) return null;
       const b = L.geoJSON(feature).getBounds();
       if (!b.isValid()) return null;
       const c = b.getCenter();
@@ -244,7 +254,7 @@
       return null;
     }
 
-    // ---- Population helpers (same logic as charts page) ----
+    // ---- Population helpers ----
     const POP_JSON = "data/population/prm-est2024-chg.json";
     const YEARS = [2020, 2021, 2022, 2023, 2024];
     let popRows = [], popGeoHeader = null, popByName = new Map();
@@ -335,7 +345,7 @@
 
       function safeMakeMiniChart(labels, data){
         try {
-          if (!miniChartCtx || !window.Chart) return;  // guard: don’t block map if chart lib not ready
+          if (!miniChartCtx || !window.Chart) return;
           if (!miniChart) {
             miniChart = new Chart(miniChartCtx, {
               type: 'line',
@@ -357,7 +367,6 @@
           }
           miniChartBox.classList.remove('hidden');
         } catch (e) {
-          // If anything goes wrong, hide the mini chart but DO NOT stop the app
           miniChartBox.classList.add('hidden');
           console.error('Mini chart error:', e);
         }
@@ -404,7 +413,7 @@
         mcBody.classList.remove('hidden');
       }
 
-      // Load population JSON first (so PR prefill shows numbers)
+      // Load population JSON
       try {
         const res = await fetch(POP_JSON, { cache: "no-store" });
         if (res.ok) {
@@ -416,14 +425,14 @@
         console.warn('Population file load failed:', e);
       }
 
-      // Initialize Leaflet map immediately (so we always see the map)
+      // Leaflet map
       const prBounds = L.latLngBounds([[17.85, -67.45],[18.55, -65.25]]);
       const map = L.map('map').fitBounds(prBounds);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap contributors', minZoom: 7, maxZoom: 19
       }).addTo(map);
 
-      // Prefill right pane with Puerto Rico (no geometry needed)
+      // Prefill right pane with Puerto Rico
       updateInfoPanel({ NAME: 'Puerto Rico', STATEFP: '72', COUNTYFP: '000' }, null);
 
       // Load municipios GeoJSON
