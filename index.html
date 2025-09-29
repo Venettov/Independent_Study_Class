@@ -40,10 +40,10 @@
     .stat-body a { font-size:.75rem; color:#2563eb; }
     .stat-section h2 { font-weight:600; font-size:1.125rem; margin-bottom:.5rem; }
 
-    /* Mini chart card */
-    .miniCard { background:#f9fafb; border-radius:.5rem; padding:.5rem .75rem; height:150px; }
-    .miniTitle { font-size:.875rem; color:#6b7280; margin-bottom:.25rem; }
-    .miniCanvasWrap { height:120px; }
+    /* Bigger mini charts */
+    .miniTitle { font-size:.925rem; color:#6b7280; margin-bottom:.375rem; }
+    .miniCard { background:#f9fafb; border-radius:.75rem; padding:.75rem; height:210px; }
+    .miniCanvasWrap { height:175px; }
   </style>
 </head>
 <body class="bg-gray-50 text-gray-900 font-sans">
@@ -87,11 +87,11 @@
       <pre id="errorMsg" class="hidden mt-3 text-sm text-red-600 whitespace-pre-wrap"></pre>
     </div>
 
-    <!-- Population details -->
+    <!-- Population details (3 columns: left text | middle trend | right % change) -->
     <aside class="bg-white rounded-lg shadow-lg p-6">
       <h3 class="text-lg font-semibold mb-3">Population details</h3>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
         <!-- LEFT: text details -->
         <div id="detailsCol" class="text-sm space-y-2">
           <div id="mcBody" class="hidden">
@@ -119,21 +119,19 @@
           </div>
         </div>
 
-        <!-- RIGHT: charts now side-by-side (responsive) -->
-        <div id="chartsCol" class="grid grid-cols-1 sm:grid-cols-2 gap-4 hidden">
-          <!-- Trend -->
-          <div>
-            <div class="miniTitle">Population trend (2020–2024)</div>
-            <div class="miniCard">
-              <div class="miniCanvasWrap"><canvas id="miniChart"></canvas></div>
-            </div>
+        <!-- MIDDLE: Population trend -->
+        <div id="trendBox" class="hidden">
+          <div class="miniTitle">Population trend (2020–2024)</div>
+          <div class="miniCard">
+            <div class="miniCanvasWrap"><canvas id="miniChart"></canvas></div>
           </div>
-          <!-- Annual % change -->
-          <div>
-            <div class="miniTitle">Annual % Change</div>
-            <div class="miniCard">
-              <div class="miniCanvasWrap"><canvas id="miniPctChart"></canvas></div>
-            </div>
+        </div>
+
+        <!-- RIGHT: Annual % Change -->
+        <div id="pctBox" class="hidden">
+          <div class="miniTitle">Annual % Change</div>
+          <div class="miniCard">
+            <div class="miniCanvasWrap"><canvas id="miniPctChart"></canvas></div>
           </div>
         </div>
       </div>
@@ -339,7 +337,7 @@
       return { p2024, abs, pctTot, yoy, series: vals };
     }
 
-    // Percent-change helper (same idea as charts.html)
+    // YoY % series (as used on charts page)
     function percentSeries(vals){
       const out = [];
       for (let i=1;i<vals.length;i++){
@@ -371,12 +369,11 @@
       const mcPopDelta = document.getElementById('mcPopDelta');
       const mcPopYoY = document.getElementById('mcPopYoY');
 
-      // Charts
-      const chartsCol = document.getElementById('chartsCol');
-      const miniChartCanvas = document.getElementById('miniChart');
-      const miniPctChartCanvas = document.getElementById('miniPctChart');
-      const miniChartCtx = miniChartCanvas ? miniChartCanvas.getContext('2d') : null;
-      const miniPctChartCtx = miniPctChartCanvas ? miniPctChartCanvas.getContext('2d') : null;
+      // Chart elements
+      const trendBox = document.getElementById('trendBox');
+      const pctBox = document.getElementById('pctBox');
+      const miniChartCtx = document.getElementById('miniChart')?.getContext('2d') || null;
+      const miniPctChartCtx = document.getElementById('miniPctChart')?.getContext('2d') || null;
       let miniChart = null, miniPctChart = null;
 
       function safeMakeMiniChart(labels, data){
@@ -401,7 +398,8 @@
             miniChart.data.datasets[0].data = data;
             miniChart.update();
           }
-        } catch (e) { console.error('Mini chart error:', e); }
+          trendBox.classList.remove('hidden');
+        } catch (e) { console.error('Mini chart error:', e); trendBox.classList.add('hidden'); }
       }
 
       function safeMakePctChart(labels, data){
@@ -423,7 +421,8 @@
             miniPctChart.data.datasets[0].data = data;
             miniPctChart.update();
           }
-        } catch (e) { console.error('Mini pct chart error:', e); }
+          pctBox.classList.remove('hidden');
+        } catch (e) { console.error('Mini pct chart error:', e); pctBox.classList.add('hidden'); }
       }
 
       function updateInfoPanel(props, feature) {
@@ -459,14 +458,14 @@
           mcPopYoY.textContent = Number.isFinite(st.yoy) ? `${st.yoy.toFixed(2)}%` : '—';
           mcPopBox.classList.remove('hidden');
 
-          // Charts: side-by-side
+          // Charts (now individual boxes in columns 2 & 3)
           safeMakeMiniChart(YEARS, st.series);
           const pctLabels = [ `${YEARS[0]}→${YEARS[1]}`, `${YEARS[1]}→${YEARS[2]}`, `${YEARS[2]}→${YEARS[3]}`, `${YEARS[3]}→${YEARS[4]}` ];
           safeMakePctChart(pctLabels, percentSeries(st.series));
-          chartsCol.classList.remove('hidden');
         } else {
           mcPopBox.classList.add('hidden');
-          chartsCol.classList.add('hidden');
+          trendBox.classList.add('hidden');
+          pctBox.classList.add('hidden');
         }
 
         mcBody.classList.remove('hidden');
