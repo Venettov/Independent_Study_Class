@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 
-  <!-- Mini chart -->
+  <!-- Mini chart (defer so it’s ready before DOMContentLoaded handlers run) -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
 
   <style>
@@ -26,7 +26,6 @@
       background: rgba(255,255,255,.95); border-color:#333; color:#333;
       font-size:14px; font-weight:600; box-shadow:0 2px 5px rgba(0,0,0,.2); padding:5px 10px;
     }
-    /* Compact, consistent cards */
     .stat-card {
       display:flex; gap:.75rem; align-items:flex-start;
       background:#fff; border-radius:.75rem; padding:1rem;
@@ -79,7 +78,6 @@
           <div id="mcBody" class="hidden">
             <div><span class="text-gray-500">Name:</span> <span id="mcName" class="font-semibold"></span></div>
 
-            <!-- These rows show only when values exist -->
             <div id="rowGeoid" class="hidden"><span class="text-gray-500">GEOID:</span> <span id="mcGeoid" class="font-mono"></span></div>
             <div id="rowLand" class="hidden"><span class="text-gray-500">Land area:</span> <span id="mcLand"></span></div>
             <div id="rowWater" class="hidden"><span class="text-gray-500">Water area:</span> <span id="mcWater"></span></div>
@@ -104,7 +102,6 @@
               </div>
             </div>
 
-            <!-- Safe, stable link to data.census.gov (hidden if we can't build it) -->
             <div class="mt-3">
               <a id="mcLink" class="text-blue-600 hover:underline hidden" target="_blank" rel="noopener">Open on data.census.gov ↗</a>
             </div>
@@ -113,15 +110,13 @@
       </aside>
     </div>
 
-    <!-- Stats (original three-column structure; cleaner styling) -->
+    <!-- Stats -->
     <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
       <!-- Col 1 -->
       <div class="space-y-6 stat-section">
         <h2>Populations and People</h2>
         <div class="stat-card">
-          <div class="stat-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h-5v-5H4v-4H1v-2l2-4L1 2h22L21 8l2 4v2h-3v5h-5v-5h-4v5zm-1-8H8V4h8v8z"/></svg>
-          </div>
+          <div class="stat-icon">👥</div>
           <div class="stat-body min-w-0">
             <div class="label">Total Population</div>
             <div class="value">3,285,874</div>
@@ -130,9 +125,7 @@
         </div>
 
         <div class="stat-card">
-          <div class="stat-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m7 0V5a2 2 0 012-2h2a2 2 0 012 2v4m-7 0h-3l-2 2H5m14 0h-3l-2 2h-2m2-2h-2"/></svg>
-          </div>
+          <div class="stat-icon">📈</div>
           <div class="stat-body min-w-0">
             <div class="label">Employment Rate</div>
             <div class="value">43.4%</div>
@@ -142,9 +135,7 @@
 
         <h2 class="mt-6">Business and Economy</h2>
         <div class="stat-card">
-          <div class="stat-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5"/></svg>
-          </div>
+          <div class="stat-icon">🏢</div>
           <div class="stat-body min-w-0">
             <div class="label">Total Employer Establishments</div>
             <div class="value">50,332</div>
@@ -157,9 +148,7 @@
       <div class="space-y-6 stat-section">
         <h2>Income and Poverty</h2>
         <div class="stat-card">
-          <div class="stat-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1L19 18H5l1.401-1.401C10.92 12.001 12 10.11 12 8z"/></svg>
-          </div>
+          <div class="stat-icon">💵</div>
           <div class="stat-body min-w-0">
             <div class="label">Median Household Income</div>
             <div class="value">$27,213</div>
@@ -169,9 +158,7 @@
 
         <h2 class="mt-6">Housing</h2>
         <div class="stat-card">
-          <div class="stat-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001 1h4a1 1 0 001-1m-6 0v-6a1 1 0 011-1h2a1 1 0 011 1v6m-4 0v-4h4v4m-4 0a1 1 0 00-1 1"/></svg>
-          </div>
+          <div class="stat-icon">🏠</div>
           <div class="stat-body min-w-0">
             <div class="label">Total Housing Units</div>
             <div class="value">1,616,963</div>
@@ -181,9 +168,7 @@
 
         <h2 class="mt-6">Race and Ethnicity</h2>
         <div class="stat-card">
-          <div class="stat-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h-5v-5H4v-4H1v-2l2-4L1 2h22L21 8l2 4v2h-3v5h-5v-5h-4v5z"/></svg>
-          </div>
+          <div class="stat-icon">🧑🏽‍🤝‍🧑🏻</div>
           <div class="stat-body min-w-0">
             <div class="label">Hispanic or Latino (of any race)</div>
             <div class="value">3,249,043</div>
@@ -196,9 +181,7 @@
       <div class="space-y-6 stat-section">
         <h2>Education</h2>
         <div class="stat-card">
-          <div class="stat-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"/></svg>
-          </div>
+          <div class="stat-icon">🎓</div>
           <div class="stat-body min-w-0">
             <div class="label">Bachelor’s Degree or Higher</div>
             <div class="value">29.7%</div>
@@ -208,9 +191,7 @@
 
         <h2 class="mt-6">Health</h2>
         <div class="stat-card">
-          <div class="stat-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 12H6m-2 0h-2V6h2v6zm14 0h2V6h-2v6zM4 6a2 2 0 012-2h12a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V6z"/></svg>
-          </div>
+          <div class="stat-icon">🏥</div>
           <div class="stat-body min-w-0">
             <div class="label">Without Health Care Coverage</div>
             <div class="value">5.6%</div>
@@ -231,43 +212,39 @@
       }
     });
 
-    // Helpers
+    // ---- Utilities ----
     const fmt = new Intl.NumberFormat('en-US');
-    const m2PerMi2 = 2_589_988.110336;
+    const M2_PER_MI2 = 2589988.110336;
     const stripDiacritics = s => String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g, '');
     const norm = s => stripDiacritics(String(s||'').trim()).toLowerCase();
-    function round(n, d = 2) { const p = Math.pow(10, d); return Math.round(n * p) / p; }
+    const round = (n,d=2)=> Math.round(n*10**d)/10**d;
 
     function centroidOf(feature) {
+      if (!feature) return null;                       // allow null
       const b = L.geoJSON(feature).getBounds();
       if (!b.isValid()) return null;
       const c = b.getCenter();
       return [c.lat, c.lng];
     }
 
-    // Build a safe, stable link for data.census.gov (avoids blocked /search URLs)
     function censusLinkFor(props, name) {
       const state = String(props.STATEFP || "72").padStart(2, "0");
       const county = String(props.COUNTYFP || "").padStart(3, "0");
-
-      // Prefer municipio (county-equivalent) profile: g=0500000US{STATE}{COUNTY}
+      if (name === "Puerto Rico" || !county || county === "000") {
+        return `https://data.census.gov/profile?g=0400000US${state}`;
+      }
       if (county && county !== "000") {
         const geoid050 = `${state}${county}`;
         return `https://data.census.gov/profile?g=0500000US${geoid050}`;
       }
-
-      // If COUNTYFP missing, try to derive first 5 digits from a 10-digit 060 GEOID
-      const geoid060 = String(props.GEOID || props.geoid || "").trim();
+      const geoid060 = String(props.GEOID || props.geoid || "");
       if (geoid060.length === 10) {
-        const geoid050 = geoid060.slice(0, 5);
-        return `https://data.census.gov/profile?g=0500000US${geoid050}`;
+        return `https://data.census.gov/profile?g=0500000US${geoid060.slice(0,5)}`;
       }
-
-      // Otherwise, we can't build a reliable link—hide it.
       return null;
     }
 
-    // Population JSON (same file your charts page uses)
+    // ---- Population helpers (same logic as charts page) ----
     const POP_JSON = "data/population/prm-est2024-chg.json";
     const YEARS = [2020, 2021, 2022, 2023, 2024];
     let popRows = [], popGeoHeader = null, popByName = new Map();
@@ -324,45 +301,17 @@
     function statsForMunicipio(name) {
       const row = popByName.get(norm(name));
       if (!row) return null;
-
       const vals = valuesFor(row);
       if (vals.some(v => !Number.isFinite(v))) return null;
-
-      const p2020 = vals[0];
-      const p2024 = vals[4];
+      const p2020 = vals[0], p2024 = vals[4];
       const abs   = p2024 - p2020;
       const pctTot = p2020 ? (abs / p2020) * 100 : NaN;
       const yoy    = vals[3] ? ((p2024 - vals[3]) / vals[3]) * 100 : NaN;
-
       return { p2024, abs, pctTot, yoy, series: vals };
     }
 
     document.addEventListener('DOMContentLoaded', async () => {
-      // Load population file (best-effort)
-      try {
-        const res = await fetch(POP_JSON, { cache: "no-store" });
-        if (res.ok) {
-          popRows = await res.json();
-          popGeoHeader = detectGeoHeader(popRows);
-          buildPopLookup();
-        }
-      } catch {}
-
-      // Map
-      const prBounds = L.latLngBounds([[17.85, -67.45],[18.55, -65.25]]);
-      const map = L.map('map').fitBounds(prBounds);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors', minZoom: 7, maxZoom: 19
-      }).addTo(map);
-
-      const geojsonUrl = './data/tl_2022_72_cousub/pr_municipalities.geojson';
-
-      function showError(msg){
-        const el = document.getElementById('errorMsg');
-        el.textContent = msg; el.classList.remove('hidden');
-      }
-
-      // Info panel nodes
+      // Grab panel nodes
       const mcBody = document.getElementById('mcBody');
       const mcName = document.getElementById('mcName');
       const mcGeoid = document.getElementById('mcGeoid');
@@ -374,107 +323,79 @@
       const rowWater = document.getElementById('rowWater');
       const mcLink = document.getElementById('mcLink');
 
-      // Population nodes
       const mcPopBox = document.getElementById('mcPopBox');
       const mcPop2024 = document.getElementById('mcPop2024');
       const mcPopDelta = document.getElementById('mcPopDelta');
       const mcPopYoY = document.getElementById('mcPopYoY');
 
-      // Mini chart
       const miniChartBox = document.getElementById('miniChartBox');
-      const miniChartCtx = document.getElementById('miniChart')?.getContext('2d');
+      const miniChartCanvas = document.getElementById('miniChart');
+      const miniChartCtx = miniChartCanvas ? miniChartCanvas.getContext('2d') : null;
       let miniChart = null;
+
+      function safeMakeMiniChart(labels, data){
+        try {
+          if (!miniChartCtx || !window.Chart) return;  // guard: don’t block map if chart lib not ready
+          if (!miniChart) {
+            miniChart = new Chart(miniChartCtx, {
+              type: 'line',
+              data: { labels, datasets: [{ label: 'Population', data, tension: 0.3, pointRadius: 2, borderWidth: 2 }] },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => c.parsed.y.toLocaleString() } } },
+                scales: {
+                  x: { ticks: { maxRotation: 0, autoSkip: true } },
+                  y: { ticks: { callback: v => Number(v).toLocaleString() } }
+                }
+              }
+            });
+          } else {
+            miniChart.data.labels = labels;
+            miniChart.data.datasets[0].data = data;
+            miniChart.update();
+          }
+          miniChartBox.classList.remove('hidden');
+        } catch (e) {
+          // If anything goes wrong, hide the mini chart but DO NOT stop the app
+          miniChartBox.classList.add('hidden');
+          console.error('Mini chart error:', e);
+        }
+      }
 
       function updateInfoPanel(props, feature) {
         const name = props.NAME || props.NAMELSAD || props.name || 'Unknown';
-        const geoidProp = String(props.GEOID || props.geoid || '').trim();
+        const geoidProp = String(props.GEOID || props.geoid || "");
         const aland = Number(props.ALAND || props.ALAND20 || 0);
         const awater = Number(props.AWATER || props.AWATER20 || 0);
 
         mcName.textContent = name;
 
-        // GEOID row only if we have one
-        if (geoidProp) {
-          mcGeoid.textContent = geoidProp;
-          rowGeoid.classList.remove('hidden');
-        } else {
-          mcGeoid.textContent = '';
-          rowGeoid.classList.add('hidden');
-        }
+        if (geoidProp) { mcGeoid.textContent = geoidProp; rowGeoid.classList.remove('hidden'); }
+        else { mcGeoid.textContent = ''; rowGeoid.classList.add('hidden'); }
 
-        // Land/Water rows only if > 0
-        if (aland > 0) {
-          mcLand.textContent = `${fmt.format(round(aland / m2PerMi2, 2))} sq mi`;
-          rowLand.classList.remove('hidden');
-        } else {
-          rowLand.classList.add('hidden');
-          mcLand.textContent = '';
-        }
-        if (awater > 0) {
-          mcWater.textContent = `${fmt.format(round(awater / m2PerMi2, 2))} sq mi`;
-          rowWater.classList.remove('hidden');
-        } else {
-          rowWater.classList.add('hidden');
-          mcWater.textContent = '';
-        }
+        if (aland > 0) { mcLand.textContent = `${fmt.format(round(aland / M2_PER_MI2, 2))} sq mi`; rowLand.classList.remove('hidden'); }
+        else { rowLand.classList.add('hidden'); mcLand.textContent = ''; }
+
+        if (awater > 0) { mcWater.textContent = `${fmt.format(round(awater / M2_PER_MI2, 2))} sq mi`; rowWater.classList.remove('hidden'); }
+        else { rowWater.classList.add('hidden'); mcWater.textContent = ''; }
 
         const c = centroidOf(feature);
         mcCentroid.textContent = c ? `${round(c[0], 4)}, ${round(c[1], 4)}` : '—';
 
-        // Build/link data.census.gov URL (hide if we can't build a safe one)
-        const deeplink = censusLinkFor(props, name);
-        if (deeplink) {
-          mcLink.href = deeplink;
-          mcLink.classList.remove('hidden');
-        } else {
-          mcLink.removeAttribute('href');
-          mcLink.classList.add('hidden');
-        }
+        const link = censusLinkFor(props, name);
+        if (link) { mcLink.href = link; mcLink.classList.remove('hidden'); }
+        else { mcLink.removeAttribute('href'); mcLink.classList.add('hidden'); }
 
-        // Population info
         const st = statsForMunicipio(name);
         if (st) {
           mcPop2024.textContent = fmt.format(st.p2024);
           const sign = st.abs > 0 ? '+' : '';
-          const pctLabel = Number.isFinite(st.pctTot) ? ` (${st.pctTot.toFixed(2)}%)` : '';
-          mcPopDelta.textContent = `${sign}${fmt.format(st.abs)}${pctLabel}`;
+          const pctStr = Number.isFinite(st.pctTot) ? ` (${st.pctTot.toFixed(2)}%)` : '';
+          mcPopDelta.textContent = `${sign}${fmt.format(st.abs)}${pctStr}`;
           mcPopYoY.textContent = Number.isFinite(st.yoy) ? `${st.yoy.toFixed(2)}%` : '—';
           mcPopBox.classList.remove('hidden');
-
-          // Mini trend chart (2020–2024)
-          if (miniChartCtx) {
-            const labels = YEARS;
-            const data = st.series;
-            if (!miniChart) {
-              miniChart = new Chart(miniChartCtx, {
-                type: 'line',
-                data: {
-                  labels,
-                  datasets: [{
-                    label: 'Population',
-                    data,
-                    tension: 0.3,
-                    pointRadius: 2,
-                    borderWidth: 2
-                  }]
-                },
-                options: {
-                  responsive: true,
-                  maintainAspectRatio: false,
-                  plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => c.parsed.y.toLocaleString() } } },
-                  scales: {
-                    x: { ticks: { maxRotation: 0, autoSkip: true } },
-                    y: { ticks: { callback: v => Number(v).toLocaleString() } }
-                  }
-                }
-              });
-            } else {
-              miniChart.data.labels = labels;
-              miniChart.data.datasets[0].data = data;
-              miniChart.update();
-            }
-            miniChartBox.classList.remove('hidden');
-          }
+          safeMakeMiniChart(YEARS, st.series);
         } else {
           mcPopBox.classList.add('hidden');
           miniChartBox.classList.add('hidden');
@@ -483,13 +404,36 @@
         mcBody.classList.remove('hidden');
       }
 
+      // Load population JSON first (so PR prefill shows numbers)
+      try {
+        const res = await fetch(POP_JSON, { cache: "no-store" });
+        if (res.ok) {
+          popRows = await res.json();
+          popGeoHeader = detectGeoHeader(popRows);
+          buildPopLookup();
+        }
+      } catch (e) {
+        console.warn('Population file load failed:', e);
+      }
+
+      // Initialize Leaflet map immediately (so we always see the map)
+      const prBounds = L.latLngBounds([[17.85, -67.45],[18.55, -65.25]]);
+      const map = L.map('map').fitBounds(prBounds);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors', minZoom: 7, maxZoom: 19
+      }).addTo(map);
+
+      // Prefill right pane with Puerto Rico (no geometry needed)
+      updateInfoPanel({ NAME: 'Puerto Rico', STATEFP: '72', COUNTYFP: '000' }, null);
+
+      // Load municipios GeoJSON
+      const geojsonUrl = './data/tl_2022_72_cousub/pr_municipalities.geojson';
+      const showError = (msg) => { const el = document.getElementById('errorMsg'); el.textContent = msg; el.classList.remove('hidden'); };
+
       try {
         const url = geojsonUrl + (geojsonUrl.includes('?') ? '&' : '?') + 'cb=' + Date.now();
         const res = await fetch(url);
-        if (!res.ok) {
-          const t = await res.text().catch(()=> '');
-          throw new Error(`HTTP ${res.status} fetching ${url}\n${t.slice(0,300)}`);
-        }
+        if (!res.ok) throw new Error(`HTTP ${res.status} fetching ${url}`);
         const fc = await res.json();
 
         const baseStyle = { fillColor:'#93c5fd', weight:1.2, color:'#111827', fillOpacity:0.7 };
@@ -507,14 +451,13 @@
               `<div style="text-align:center;">
                  <div style="font-weight:700">${name}</div>
                  <div style="font-size:12px;opacity:.8">
-                   ${aland ? `Land: ${round(aland / m2PerMi2, 2)} mi²` : ''}${aland && awater ? ' · ' : ''}
-                   ${awater ? `Water: ${round(awater / m2PerMi2, 2)} mi²` : ''}
+                   ${aland ? `Land: ${round(aland / M2_PER_MI2, 2)} mi²` : ''}${aland && awater ? ' · ' : ''}
+                   ${awater ? `Water: ${round(awater / M2_PER_MI2, 2)} mi²` : ''}
                  </div>
                </div>`;
 
             lyr.bindTooltip(tooltipHtml, { direction: 'center', className: 'leaflet-tooltip' });
 
-            // Popup with the same safe deep link (only if available)
             const deeplink = censusLinkFor(p, name);
             const linkHtml = deeplink
               ? `<br><a href="${deeplink}" target="_blank" rel="noopener" style="color:#2563eb;text-decoration:underline;">View on data.census.gov ↗</a>`
