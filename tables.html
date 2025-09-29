@@ -5,6 +5,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Puerto Rico — Tables</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Styles reused from index for the stats grid */
+    .stat-card {
+      display:flex; gap:.75rem; align-items:flex-start;
+      background:#fff; border-radius:.75rem; padding:1rem;
+      box-shadow: 0 4px 10px rgba(0,0,0,.06);
+    }
+    .stat-icon {
+      flex:none; display:flex; align-items:center; justify-content:center;
+      width:2.5rem; height:2.5rem; border-radius:.75rem; background:#f3f4f6; color:#6b7280;
+    }
+    .stat-body .label { font-size:.85rem; color:#6b7280; }
+    .stat-body .value { font-weight:800; font-size:1.5rem; line-height:1.1; }
+    .stat-body a { font-size:.75rem; color:#2563eb; }
+    .stat-section h2 { font-weight:600; font-size:1.125rem; margin-bottom:.5rem; }
+  </style>
 </head>
 <body class="bg-gray-50 text-gray-900 font-sans">
   <nav class="bg-white shadow sticky top-0 z-50">
@@ -21,12 +37,102 @@
   <main class="max-w-7xl mx-auto px-4 py-8 space-y-8">
     <header class="text-center">
       <h1 class="text-4xl font-bold">Tables</h1>
-      <p class="mt-2 text-gray-600">Starter data tables for Puerto Rico.</p>
+      <p class="mt-2 text-gray-600">Key Puerto Rico indicators and sources.</p>
     </header>
 
+    <!-- ===== Stats grid moved from index.html ===== -->
+    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div class="space-y-6 stat-section">
+        <h2>Populations and People</h2>
+        <div class="stat-card">
+          <div class="stat-icon">👥</div>
+          <div class="stat-body min-w-0">
+            <div class="label">Total Population</div>
+            <div class="value">3,285,874</div>
+            <a target="_blank" rel="noopener" href="https://data.census.gov/table?q=P1&g=040XX00US72">P1 • 2020 Decennial Census (Puerto Rico)</a>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon">📈</div>
+          <div class="stat-body min-w-0">
+            <div class="label">Employment Rate</div>
+            <div class="value">43.4%</div>
+            <a target="_blank" rel="noopener" href="https://data.census.gov/table?q=DP03&g=040XX00US72">DP03 • 2024 ACS 1-Year (Puerto Rico)</a>
+          </div>
+        </div>
+
+        <h2 class="mt-6">Business and Economy</h2>
+        <div class="stat-card">
+          <div class="stat-icon">🏢</div>
+          <div class="stat-body min-w-0">
+            <div class="label">Total Employer Establishments</div>
+            <div class="value">50,332</div>
+            <a target="_blank" rel="noopener" href="https://www.census.gov/programs-surveys/cbp.html">CBP • County Business Patterns (Program Page)</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="space-y-6 stat-section">
+        <h2>Income and Poverty</h2>
+        <div class="stat-card">
+          <div class="stat-icon">💵</div>
+          <div class="stat-body min-w-0">
+            <div class="label">Median Household Income</div>
+            <div class="value">$27,213</div>
+            <a target="_blank" rel="noopener" href="https://data.census.gov/table?q=S1901&g=040XX00US72">S1901 • 2024 ACS 1-Year (Puerto Rico)</a>
+          </div>
+        </div>
+
+        <h2 class="mt-6">Housing</h2>
+        <div class="stat-card">
+          <div class="stat-icon">🏠</div>
+          <div class="stat-body min-w-0">
+            <div class="label">Total Housing Units</div>
+            <div class="value">1,616,963</div>
+            <a target="_blank" rel="noopener" href="https://data.census.gov/table?q=B25002&g=040XX00US72">B25002 • 2024 ACS 1-Year (Puerto Rico)</a>
+          </div>
+        </div>
+
+        <h2 class="mt-6">Race and Ethnicity</h2>
+        <div class="stat-card">
+          <div class="stat-icon">🧑🏽‍🤝‍🧑🏻</div>
+          <div class="stat-body min-w-0">
+            <div class="label">Hispanic or Latino (of any race)</div>
+            <div class="value">3,249,043</div>
+            <a target="_blank" rel="noopener" href="https://data.census.gov/table?q=P9&g=040XX00US72">P9 • 2020 Decennial Census (Puerto Rico)</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="space-y-6 stat-section">
+        <h2>Education</h2>
+        <div class="stat-card">
+          <div class="stat-icon">🎓</div>
+          <div class="stat-body min-w-0">
+            <div class="label">Bachelor’s Degree or Higher</div>
+            <div class="value">29.7%</div>
+            <a target="_blank" rel="noopener" href="https://data.census.gov/table?q=S1501&g=040XX00US72">S1501 • 2024 ACS 1-Year (Puerto Rico)</a>
+          </div>
+        </div>
+
+        <h2 class="mt-6">Health</h2>
+        <div class="stat-card">
+          <div class="stat-icon">🏥</div>
+          <div class="stat-body min-w-0">
+            <div class="label">Without Health Care Coverage</div>
+            <div class="value">5.6%</div>
+            <a target="_blank" rel="noopener" href="https://data.census.gov/table?q=S2701&g=040XX00US72">S2701 • 2024 ACS 1-Year (Puerto Rico)</a>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- ===== /Stats grid ===== -->
+
+    <!-- Optional example table section (keep or remove) -->
     <section class="bg-white rounded-lg shadow overflow-hidden">
       <div class="px-6 py-4 border-b">
-        <h2 class="text-lg font-semibold">Population, Income, and Education</h2>
+        <h2 class="text-lg font-semibold">Population, Income, and Education (Sample Table)</h2>
       </div>
       <div class="overflow-x-auto">
         <table class="min-w-full text-left text-sm">
@@ -57,7 +163,7 @@
         </table>
       </div>
       <div class="px-6 py-3 text-sm text-gray-500 bg-gray-50">
-        Add more rows/columns as needed. Consider converting to a reusable component.
+        Add more rows/columns as needed or replace this with a dynamic table.
       </div>
     </section>
   </main>
