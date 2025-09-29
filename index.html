@@ -73,11 +73,11 @@
       </div>
 
       <aside class="bg-white rounded-lg shadow-lg p-6">
-        <h3 class="text-lg font-semibold mb-3">Population details</h3>
+        <h3 class="text-lg font-semibold mb-3">Municipio details</h3>
         <div id="hoverCard" class="text-sm space-y-2">
           <p class="text-gray-500">Hover over a municipio to see details.</p>
           <div id="mcBody" class="hidden">
-            <div><span class="text-gray-500">Municipio:</span> <span id="mcName" class="font-semibold"></span></div>
+            <div><span class="text-gray-500">Name:</span> <span id="mcName" class="font-semibold"></span></div>
 
             <!-- These rows show only when values exist -->
             <div id="rowGeoid" class="hidden"><span class="text-gray-500">GEOID:</span> <span id="mcGeoid" class="font-mono"></span></div>
@@ -238,37 +238,32 @@
     const norm = s => stripDiacritics(String(s||'').trim()).toLowerCase();
     function round(n, d = 2) { const p = Math.pow(10, d); return Math.round(n * p) / p; }
 
-    // CHANGE 1: allow null feature (for Puerto Rico prefill)
     function centroidOf(feature) {
-      if (!feature) return null;
       const b = L.geoJSON(feature).getBounds();
       if (!b.isValid()) return null;
       const c = b.getCenter();
       return [c.lat, c.lng];
     }
 
-    // CHANGE 2: support Puerto Rico state profile
+    // Build a safe, stable link for data.census.gov (avoids blocked /search URLs)
     function censusLinkFor(props, name) {
       const state = String(props.STATEFP || "72").padStart(2, "0");
       const county = String(props.COUNTYFP || "").padStart(3, "0");
 
-      // Puerto Rico wide (state-level) profile
-      if (name === "Puerto Rico" || !county || county === "000") {
-        return `https://data.census.gov/profile?g=0400000US${state}`;
-      }
-
-      // Municipio (county-equivalent) profile
+      // Prefer municipio (county-equivalent) profile: g=0500000US{STATE}{COUNTY}
       if (county && county !== "000") {
         const geoid050 = `${state}${county}`;
         return `https://data.census.gov/profile?g=0500000US${geoid050}`;
       }
 
-      // Derive 050 from a 060 GEOID if present
+      // If COUNTYFP missing, try to derive first 5 digits from a 10-digit 060 GEOID
       const geoid060 = String(props.GEOID || props.geoid || "").trim();
       if (geoid060.length === 10) {
         const geoid050 = geoid060.slice(0, 5);
         return `https://data.census.gov/profile?g=0500000US${geoid050}`;
       }
+
+      // Otherwise, we can't build a reliable link—hide it.
       return null;
     }
 
@@ -352,9 +347,6 @@
           buildPopLookup();
         }
       } catch {}
-
-      // CHANGE 3: Pre-fill right pane with Puerto Rico (no feature geometry)
-      updateInfoPanel({ NAME: 'Puerto Rico', STATEFP: '72', COUNTYFP: '000' }, null);
 
       // Map
       const prBounds = L.latLngBounds([[17.85, -67.45],[18.55, -65.25]]);
@@ -443,9 +435,9 @@
         const st = statsForMunicipio(name);
         if (st) {
           mcPop2024.textContent = fmt.format(st.p2024);
-          const sign = st.abs > 0 ? '+';
+          const sign = st.abs > 0 ? '+' : '';
           const pctLabel = Number.isFinite(st.pctTot) ? ` (${st.pctTot.toFixed(2)}%)` : '';
-          mcPopDelta.textContent = `${sign || ''}${fmt.format(st.abs)}${pctLabel}`;
+          mcPopDelta.textContent = `${sign}${fmt.format(st.abs)}${pctLabel}`;
           mcPopYoY.textContent = Number.isFinite(st.yoy) ? `${st.yoy.toFixed(2)}%` : '—';
           mcPopBox.classList.remove('hidden');
 
