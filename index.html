@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 
-  <!-- Mini chart -->
+  <!-- Mini charts -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
 
   <style>
@@ -39,6 +39,8 @@
     .stat-body .value { font-weight:800; font-size:1.5rem; line-height:1.1; }
     .stat-body a { font-size:.75rem; color:#2563eb; }
     .stat-section h2 { font-weight:600; font-size:1.125rem; margin-bottom:.5rem; }
+    /* Mini chart heights (right column in the Population details card) */
+    .miniChartWrap { height: 140px; }
   </style>
 </head>
 <body class="bg-gray-50 text-gray-900 font-sans">
@@ -65,7 +67,7 @@
         Puerto Rico has a land area of 3,424.5 square miles and a water area of 1,900.3 square miles.
       </p>
 
-      <!-- NEW: hover hint -->
+      <!-- Hover hint (moved into hero) -->
       <div class="mt-3">
         <div class="text-[15px] sm:text-base font-medium text-gray-800 bg-blue-50 border border-blue-200 rounded-md px-3 py-2 inline-flex items-center gap-2">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -76,16 +78,19 @@
       </div>
     </div>
 
-    <!-- Map + Info panel -->
+    <!-- Map -->
     <div class="bg-white rounded-lg shadow-lg p-6 lg:col-span-2">
       <div id="map"></div>
       <pre id="errorMsg" class="hidden mt-3 text-sm text-red-600 whitespace-pre-wrap"></pre>
     </div>
 
-      <aside class="bg-white rounded-lg shadow-lg p-6">
-        <h3 class="text-lg font-semibold mb-3">Population details</h3>
-        <div id="hoverCard" class="text-sm space-y-2">
-          <!-- removed the old hint here -->
+    <!-- Population details: now a 2-col layout (details | charts) -->
+    <aside class="bg-white rounded-lg shadow-lg p-6">
+      <h3 class="text-lg font-semibold mb-3">Population details</h3>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- LEFT: text details -->
+        <div id="detailsCol" class="text-sm space-y-2">
           <div id="mcBody" class="hidden">
             <div><span class="text-gray-500">Municipio:</span> <span id="mcName" class="font-semibold"></span></div>
 
@@ -105,21 +110,31 @@
               </ul>
             </div>
 
-            <!-- Mini population trend chart -->
-            <div id="miniChartBox" class="mt-3 hidden">
-              <div class="text-gray-500 mb-1">Population trend (2020–2024)</div>
-              <div class="bg-gray-50 rounded p-2" style="height:120px;">
-                <canvas id="miniChart"></canvas>
-              </div>
-            </div>
-
             <div class="mt-3">
               <a id="mcLink" class="text-blue-600 hover:underline hidden" target="_blank" rel="noopener">Open on data.census.gov ↗</a>
             </div>
           </div>
         </div>
-      </aside>
-    </div>
+
+        <!-- RIGHT: charts -->
+        <div id="chartsCol" class="space-y-4 hidden">
+          <!-- Trend -->
+          <div>
+            <div class="text-gray-500 mb-1">Population trend (2020–2024)</div>
+            <div class="bg-gray-50 rounded p-2 miniChartWrap">
+              <canvas id="miniChart"></canvas>
+            </div>
+          </div>
+          <!-- Annual % change -->
+          <div>
+            <div class="text-gray-500 mb-1">Annual % Change</div>
+            <div class="bg-gray-50 rounded p-2 miniChartWrap">
+              <canvas id="miniPctChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
 
     <!-- Stats -->
     <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -321,8 +336,22 @@
       return { p2024, abs, pctTot, yoy, series: vals };
     }
 
+    // Percent-change helper (mirrors charts.html)
+    function percentSeries(vals){
+      const out = [];
+      for (let i=1;i<vals.length;i++){
+        const prev = vals[i-1], cur = vals[i];
+        if (Number.isFinite(prev) && Number.isFinite(cur)) {
+          out.push(+(((cur - prev) / prev) * 100).toFixed(2));
+        } else {
+          out.push(NaN);
+        }
+      }
+      return out;
+    }
+
     document.addEventListener('DOMContentLoaded', async () => {
-      // Grab panel nodes
+      // Grab detail panel nodes
       const mcBody = document.getElementById('mcBody');
       const mcName = document.getElementById('mcName');
       const mcGeoid = document.getElementById('mcGeoid');
@@ -339,10 +368,13 @@
       const mcPopDelta = document.getElementById('mcPopDelta');
       const mcPopYoY = document.getElementById('mcPopYoY');
 
-      const miniChartBox = document.getElementById('miniChartBox');
+      // Charts column
+      const chartsCol = document.getElementById('chartsCol');
       const miniChartCanvas = document.getElementById('miniChart');
+      const miniPctChartCanvas = document.getElementById('miniPctChart');
       const miniChartCtx = miniChartCanvas ? miniChartCanvas.getContext('2d') : null;
-      let miniChart = null;
+      const miniPctChartCtx = miniPctChartCanvas ? miniPctChartCanvas.getContext('2d') : null;
+      let miniChart = null, miniPctChart = null;
 
       function safeMakeMiniChart(labels, data){
         try {
@@ -366,11 +398,29 @@
             miniChart.data.datasets[0].data = data;
             miniChart.update();
           }
-          miniChartBox.classList.remove('hidden');
-        } catch (e) {
-          miniChartBox.classList.add('hidden');
-          console.error('Mini chart error:', e);
-        }
+        } catch (e) { console.error('Mini chart error:', e); }
+      }
+
+      function safeMakePctChart(labels, data){
+        try {
+          if (!miniPctChartCtx || !window.Chart) return;
+          if (!miniPctChart) {
+            miniPctChart = new Chart(miniPctChartCtx, {
+              type: 'bar',
+              data: { labels, datasets: [{ label: '% change', data }] },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => `${c.parsed.y.toFixed(2)}%` } } },
+                scales: { y: { ticks: { callback: v => `${v}%` } } }
+              }
+            });
+          } else {
+            miniPctChart.data.labels = labels;
+            miniPctChart.data.datasets[0].data = data;
+            miniPctChart.update();
+          }
+        } catch (e) { console.error('Mini pct chart error:', e); }
       }
 
       function updateInfoPanel(props, feature) {
@@ -405,10 +455,15 @@
           mcPopDelta.textContent = `${sign}${fmt.format(st.abs)}${pctStr}`;
           mcPopYoY.textContent = Number.isFinite(st.yoy) ? `${st.yoy.toFixed(2)}%` : '—';
           mcPopBox.classList.remove('hidden');
+
+          // Charts on the right
           safeMakeMiniChart(YEARS, st.series);
+          const pctLabels = [ `${YEARS[0]}→${YEARS[1]}`, `${YEARS[1]}→${YEARS[2]}`, `${YEARS[2]}→${YEARS[3]}`, `${YEARS[3]}→${YEARS[4]}` ];
+          safeMakePctChart(pctLabels, percentSeries(st.series));
+          chartsCol.classList.remove('hidden');
         } else {
           mcPopBox.classList.add('hidden');
-          miniChartBox.classList.add('hidden');
+          chartsCol.classList.add('hidden');
         }
 
         mcBody.classList.remove('hidden');
@@ -433,7 +488,7 @@
         attribution: '&copy; OpenStreetMap contributors', minZoom: 7, maxZoom: 19
       }).addTo(map);
 
-      // Prefill right pane with Puerto Rico
+      // Prefill panel with Puerto Rico
       updateInfoPanel({ NAME: 'Puerto Rico', STATEFP: '72', COUNTYFP: '000' }, null);
 
       // Load municipios GeoJSON
