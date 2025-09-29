@@ -134,7 +134,7 @@
 
     let rows = [], geoHeader = null, municipios = [];
     let lineChart = null, barChart = null;
-    let current = "Adjuntas";
+    let current = "Puerto Rico";
 
     const setStatus = (m)=> statusEl.textContent = m || "";
     const sanitizeName = (s)=> String(s||"").replace(/^\s*[.\-•]\s*/,"").trim();
@@ -291,7 +291,7 @@
       rows = await res.json();
       geoHeader = detectGeoHeader(rows);
       municipios = extractMunicipios();
-      current = municipios.includes("Adjuntas") ? "Adjuntas" : (municipios[0] || "Puerto Rico");
+      current = municipios.includes("Puerto Rico") ? "Puerto Rico" : (municipios[0] || "Puerto Rico");
       pickerLabel.textContent = current;
       pickerSearch.value = "";
       filterPicker();
