@@ -6,6 +6,16 @@
   <title>Puerto Rico — Charts</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
+  <style>
+    body { background:#f3f4f6; color:#111827; }
+    .card { background:#fff; border-radius:1rem; box-shadow:0 10px 15px -3px rgba(0,0,0,.1), 0 4px 6px -2px rgba(0,0,0,.05); }
+    .hero {
+      background:
+        radial-gradient(1200px 600px at 20% -10%, rgba(239,68,68,.12), transparent 60%),
+        radial-gradient(1200px 600px at 80% -10%, rgba(37,99,235,.10), transparent 60%),
+        linear-gradient(180deg, #fafafa 0%, #f3f4f6 100%);
+    }
+  </style>
 </head>
 <body class="bg-gray-50 text-gray-900 font-sans">
   <nav class="bg-white shadow sticky top-0 z-50">
@@ -21,15 +31,19 @@
 
   <main class="max-w-7xl mx-auto px-4 py-8 space-y-8">
 
-    <header class="text-center space-y-2">
-      <h1 class="text-4xl font-bold">Charts</h1>
-      <p class="text-gray-600">
+    <!-- HERO (matches index/metrics/strategy style) -->
+    <header class="card hero p-8">
+      <p class="text-sm font-semibold text-gray-500 uppercase">Graduate Independent Study</p>
+      <h1 class="mt-2 text-4xl sm:text-5xl font-extrabold leading-tight">Charts</h1>
+      <p class="mt-3 text-lg text-gray-700">
         Interactive 2020–2024 resident-population charts for Puerto Rico and its 78 municipios.
         Data are loaded from <code>data/population/prm-est2024-chg.json</code> (U.S. Census Bureau, Vintage 2024).
       </p>
+    </header>
 
-      <!-- Custom dropdown (searchable, scrollable) -->
-      <div class="flex items-center justify-center gap-3 mt-2">
+    <!-- Picker toolbar -->
+    <section class="card p-5">
+      <div class="flex flex-wrap items-center justify-center gap-3">
         <span class="text-sm text-gray-600">Municipio:</span>
 
         <div class="relative">
@@ -49,12 +63,13 @@
           </div>
         </div>
 
-        <button id="reloadBtn" class="px-3 py-1.5 rounded-lg bg-blue-600 text-white text-sm hover:bg-blue-700">
+        <button id="reloadBtn" class="px-3 py-2 rounded-lg bg-blue-600 text-white text-sm hover:bg-blue-700">
           Reload
         </button>
       </div>
-    </header>
+    </section>
 
+    <!-- Charts -->
     <section class="grid grid-cols-1 md:grid-cols-2 gap-6">
       <div class="bg-white rounded-lg shadow p-4">
         <h2 id="lineTitle" class="text-lg font-semibold mb-3">Population (2020–2024)</h2>
@@ -72,6 +87,7 @@
       </div>
     </section>
 
+    <!-- Source block -->
     <section class="bg-white rounded-lg shadow p-5">
       <h2 class="text-lg font-semibold">File Sources</h2>
       <ol class="list-decimal pl-6 mt-2 text-sm">
@@ -298,7 +314,7 @@
       drawCharts(current);
     }
 
-    document.getElementById("reloadBtn").addEventListener("click", () => {
+    document.getElementById("reloadBtn")?.addEventListener("click", () => {
       setStatus("Reloading…"); fetchFull().catch(e => setStatus(e.message));
     });
 
