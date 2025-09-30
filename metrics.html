@@ -20,6 +20,14 @@
     .stat-body .value { font-weight:800; font-size:1.5rem; line-height:1.1; }
     .stat-body a { font-size:.75rem; color:#2563eb; }
     .stat-section h2 { font-weight:600; font-size:1.125rem; margin-bottom:.5rem; }
+
+    /* Hero styling (same as index/strategy) */
+    .hero {
+      background:
+        radial-gradient(1200px 600px at 20% -10%, rgba(239,68,68,.12), transparent 60%),
+        radial-gradient(1200px 600px at 80% -10%, rgba(37,99,235,.10), transparent 60%),
+        linear-gradient(180deg, #fafafa 0%, #f3f4f6 100%);
+    }
   </style>
 </head>
 <body class="bg-gray-50 text-gray-900 font-sans">
@@ -35,11 +43,14 @@
   </nav>
 
   <main class="max-w-7xl mx-auto px-4 py-8 space-y-8">
-    <header class="text-center">
-      <h1 class="text-4xl font-bold">Metrics</h1>
-      <p class="mt-2 text-gray-600">Key Puerto Rico indicators and sources.</p>
+    <!-- HERO -->
+    <header class="card hero p-8">
+      <p class="text-sm font-semibold text-gray-500 uppercase">Graduate Independent Study</p>
+      <h1 class="mt-2 text-4xl sm:text-5xl font-extrabold leading-tight">Metrics</h1>
+      <p class="mt-3 text-lg text-gray-700">Key Puerto Rico indicators and sources.</p>
     </header>
 
+    <!-- ===== Stats grid ===== -->
     <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
       <div class="space-y-6 stat-section">
         <h2>Populations and People</h2>
