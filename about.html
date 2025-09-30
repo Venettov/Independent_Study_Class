@@ -11,13 +11,11 @@
     .muted { color:#6b7280; }
     .label { font-size:.85rem; color:#6b7280; }
     .value { font-weight:700; }
-    /* Simple hero pattern */
     .hero {
       background: radial-gradient(1200px 600px at 20% -10%, rgba(239,68,68,.12), transparent 60%),
                   radial-gradient(1200px 600px at 80% -10%, rgba(37,99,235,.10), transparent 60%),
                   linear-gradient(180deg, #fafafa 0%, #f3f4f6 100%);
     }
-    /* Timeline line */
     .timeline::before {
       content:""; position:absolute; left:1.15rem; top:0; bottom:0; width:2px; background:#e5e7eb;
     }
@@ -27,12 +25,12 @@
   <!-- Top Nav -->
   <nav class="bg-white shadow sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-center gap-6 text-sm sm:text-base">
-      <a href="index.html"   class="nav-link border-b-2 border-transparent">Home</a>
+      <a href="index.html"  class="nav-link border-b-2 border-transparent">Home</a>
       <a href="metrics.html" class="nav-link border-b-2 border-transparent">Metrics</a>
-      <a href="maps.html"    class="nav-link border-b-2 border-transparent">Maps</a>
-      <a href="charts.html"  class="nav-link border-b-2 border-transparent">Charts</a>
-      <a href="strategy.html"class="nav-link border-b-2 border-transparent">Strategy</a>
-      <a href="about.html"   class="nav-link border-b-2 border-transparent">About</a>
+      <a href="maps.html"   class="nav-link border-b-2 border-transparent">Maps</a>
+      <a href="charts.html" class="nav-link border-b-2 border-transparent">Charts</a>
+      <a href="strategy.html" class="nav-link border-b-2 border-transparent">Strategy</a>
+      <a href="about.html"  class="nav-link border-b-2 border-transparent">About</a>
     </div>
   </nav>
 
@@ -51,20 +49,6 @@
             strategies through linked data analysis and policy synthesis.
           </p>
         </div>
-
-        <!-- Rutgers wordmark (official logo variant; seal use is restricted) -->
-        <a class="shrink-0" href="https://www.rutgers.edu/" target="_blank" rel="noopener">
-          <img
-            src="https://upload.wikimedia.org/wikipedia/commons/4/49/Rutgers_University_logo.svg"
-            alt="Rutgers, The State University of New Jersey"
-            class="h-12 md:h-16"
-            loading="lazy"
-          />
-        </a>
-      </div>
-
-      <div class="mt-4 text-xs text-gray-500">
-        Note: Rutgers’ seal has restricted use; public pages should use the official Rutgers logo/signature instead. See Visual Identity guidelines linked below.
       </div>
     </header>
 
@@ -80,9 +64,7 @@
 
         <div>
           <div class="label">Graduate Program</div>
-          <div class="value">
-            Data Science (M.S.), Rutgers University–Camden
-          </div>
+          <div class="value">Data Science (M.S.), Rutgers University–Camden</div>
           <ul class="mt-1 text-sm text-blue-600 space-y-1">
             <li><a class="underline" href="https://datascience.camden.rutgers.edu/" target="_blank" rel="noopener">Program site</a></li>
             <li><a class="underline" href="https://graduateschool.camden.rutgers.edu/data-science-m-s/" target="_blank" rel="noopener">Graduate School overview</a></li>
@@ -107,8 +89,6 @@
           <div class="p-4 rounded-xl bg-gray-50">
             <div class="label">Student</div>
             <div class="value">Jose Andres Riveraruiz</div>
-            <!-- Optional email; add yours if you want it visible -->
-            <div class="muted text-sm">rutgers email (optional)</div>
           </div>
           <div class="p-4 rounded-xl bg-gray-50">
             <div class="label">Instructor</div>
@@ -134,17 +114,17 @@
           <a class="p-4 rounded-xl bg-sky-50 hover:bg-sky-100 transition block" href="maps.html">
             🗺️ <span class="font-semibold">Interactive Maps</span>
           </a>
-          <a class="p-4 rounded-xl bg-emerald-50 hover:bg-emerald-100 transition block" href="tables.html">
+          <a class="p-4 rounded-xl bg-emerald-50 hover:bg-emerald-100 transition block" href="metrics.html">
             📋 <span class="font-semibold">Key Indicators</span>
           </a>
-          <a class="p-4 rounded-xl bg-rose-50 hover:bg-rose-100 transition block" href="profiles.html">
+          <a class="p-4 rounded-xl bg-rose-50 hover:bg-rose-100 transition block" href="strategy.html">
             🧭 <span class="font-semibold">Synthesis & Solutions</span>
           </a>
         </div>
       </aside>
     </section>
 
-    <!-- VISUAL ENHANCEMENT: SIMPLE TIMELINE -->
+    <!-- TIMELINE -->
     <section class="card p-6">
       <h2 class="text-2xl font-bold">Project Timeline</h2>
       <div class="relative timeline mt-5">
@@ -173,30 +153,25 @@
       </div>
     </section>
 
-    <!-- REFERENCES / BRAND NOTE -->
+    <!-- CUSTOMER -->
     <section class="card p-6">
-      <h2 class="text-2xl font-bold">References</h2>
-      <ul class="mt-3 text-sm leading-6 list-disc list-inside">
-        <li>
-          Rutgers–Camden Data Science (M.S.) program site — 
-          <a class="text-blue-600 underline" href="https://datascience.camden.rutgers.edu/" target="_blank" rel="noopener">datascience.camden.rutgers.edu</a>. :contentReference[oaicite:1]{index=1}
-        </li>
-        <li>
-          Graduate School–Camden overview: Data Science (M.S.) — 
-          <a class="text-blue-600 underline" href="https://graduateschool.camden.rutgers.edu/data-science-m-s/" target="_blank" rel="noopener">graduateschool.camden.rutgers.edu/data-science-m-s</a>. :contentReference[oaicite:2]{index=2}
-        </li>
-        <li>
-          Logo & visual identity guidance (use Rutgers logo/signature; seal use is restricted) — 
-          <a class="text-blue-600 underline" href="https://communications.rutgers.edu/services-resources/logos-signatures-and-visual-identity" target="_blank" rel="noopener">communications.rutgers.edu/logos-signatures-and-visual-identity</a>, 
-          and FAQ (“May I use the seal?”) — 
-          <a class="text-blue-600 underline" href="https://communications.rutgers.edu/faq" target="_blank" rel="noopener">communications.rutgers.edu/faq</a>. :contentReference[oaicite:3]{index=3}
-        </li>
-        <li>
-          Rutgers wordmark used above (SVG) — 
-          <a class="text-blue-600 underline" href="https://commons.wikimedia.org/wiki/File:Rutgers_University_with_the_state_university_logo.svg" target="_blank" rel="noopener">Wikimedia Commons file</a>.
-          (For official projects, prefer downloading assets via Rutgers identity site.) :contentReference[oaicite:4]{index=4}
-        </li>
-      </ul>
+      <h2 class="text-2xl font-bold">Customer</h2>
+      <div class="mt-4 space-y-3">
+        <p>
+          <span class="font-semibold">Puerto Rico Planning Board (Junta de Planificación)</span>
+        </p>
+        <p class="text-gray-700">
+          The Planning Board oversees long-term economic development, demographic analysis, and land-use
+          planning for Puerto Rico. This project’s interactive maps, municipal-level dashboards, and
+          population change analyses provide actionable insights that could directly support their policy
+          models and strategic decision-making.
+        </p>
+        <p class="text-sm">
+          🔗 <a href="https://jp.pr.gov" target="_blank" rel="noopener" class="text-blue-600 underline">
+            Visit Puerto Rico Planning Board Website
+          </a>
+        </p>
+      </div>
     </section>
   </main>
 
@@ -204,14 +179,14 @@
     // Highlight active nav
     document.querySelectorAll('.nav-link').forEach(a=>{
       if (location.pathname.endsWith(a.getAttribute('href')) ||
-          (location.pathname === '/' && a.getAttribute('href') === 'pages.html')) {
+          (location.pathname === '/' && a.getAttribute('href') === 'about.html')) {
         a.classList.add('text-blue-600','font-semibold','border-blue-600');
         a.setAttribute('aria-current','page');
       }
     });
-    // Fill term/year nicely
+    // Fill term/year
     const d = new Date();
-    const month = d.getMonth(); // 0-11
+    const month = d.getMonth();
     const term = month <= 4 ? 'Spring' : (month <= 7 ? 'Summer' : 'Fall');
     document.getElementById('termYear').textContent = `${term} ${d.getFullYear()}`;
   </script>
