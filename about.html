@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Graduate Project — Population & Economic Dynamics in Puerto Rico</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <meta name="description" content="Graduate Independent Study project cover page for Population and Economic Dynamics in Puerto Rico (Rutgers University–Camden, Data Science M.S.)."/>
+  <style>
+    .card { background:#fff; border-radius:1rem; box-shadow:0 10px 15px -3px rgba(0,0,0,.1), 0 4px 6px -2px rgba(0,0,0,.05); }
+    .muted { color:#6b7280; }
+    .label { font-size:.85rem; color:#6b7280; }
+    .value { font-weight:700; }
+    /* Simple hero pattern */
+    .hero {
+      background: radial-gradient(1200px 600px at 20% -10%, rgba(239,68,68,.12), transparent 60%),
+                  radial-gradient(1200px 600px at 80% -10%, rgba(37,99,235,.10), transparent 60%),
+                  linear-gradient(180deg, #fafafa 0%, #f3f4f6 100%);
+    }
+    /* Timeline line */
+    .timeline::before {
+      content:""; position:absolute; left:1.15rem; top:0; bottom:0; width:2px; background:#e5e7eb;
+    }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-900 font-sans">
+  <!-- Top Nav -->
+  <nav class="bg-white shadow sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-center gap-6 text-sm sm:text-base">
+      <a href="index.html"   class="nav-link border-b-2 border-transparent">Home</a>
+      <a href="metrics.html" class="nav-link border-b-2 border-transparent">Metrics</a>
+      <a href="maps.html"    class="nav-link border-b-2 border-transparent">Maps</a>
+      <a href="charts.html"  class="nav-link border-b-2 border-transparent">Charts</a>
+      <a href="strategy.html"class="nav-link border-b-2 border-transparent">Strategy</a>
+      <a href="about.html"   class="nav-link border-b-2 border-transparent">About</a>
+    </div>
+  </nav>
+
+  <main class="max-w-6xl mx-auto px-4 py-10 space-y-10">
+
+    <!-- HERO -->
+    <header class="card hero p-8">
+      <div class="flex flex-col-reverse md:flex-row md:items-center md:justify-between gap-6">
+        <div class="max-w-2xl">
+          <p class="uppercase tracking-wide text-sm font-semibold text-gray-600">Graduate Independent Study</p>
+          <h1 class="mt-2 text-3xl sm:text-5xl font-extrabold leading-tight">
+            Population & Economic Dynamics in Puerto Rico
+          </h1>
+          <p class="mt-3 text-[17px] text-gray-700">
+            A graduate research project examining demographic shifts, out-migration, and sustainable development
+            strategies through linked data analysis and policy synthesis.
+          </p>
+        </div>
+
+        <!-- Rutgers wordmark (official logo variant; seal use is restricted) -->
+        <a class="shrink-0" href="https://www.rutgers.edu/" target="_blank" rel="noopener">
+          <img
+            src="https://upload.wikimedia.org/wikipedia/commons/4/49/Rutgers_University_logo.svg"
+            alt="Rutgers, The State University of New Jersey"
+            class="h-12 md:h-16"
+            loading="lazy"
+          />
+        </a>
+      </div>
+
+      <div class="mt-4 text-xs text-gray-500">
+        Note: Rutgers’ seal has restricted use; public pages should use the official Rutgers logo/signature instead. See Visual Identity guidelines linked below.
+      </div>
+    </header>
+
+    <!-- ACADEMIC & PROJECT INFO -->
+    <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Left: University & Program -->
+      <div class="card p-6 space-y-5">
+        <div>
+          <div class="label">University</div>
+          <div class="value">Rutgers, The State University of New Jersey — Camden</div>
+          <div class="muted text-sm">Camden, NJ</div>
+        </div>
+
+        <div>
+          <div class="label">Graduate Program</div>
+          <div class="value">
+            Data Science (M.S.), Rutgers University–Camden
+          </div>
+          <ul class="mt-1 text-sm text-blue-600 space-y-1">
+            <li><a class="underline" href="https://datascience.camden.rutgers.edu/" target="_blank" rel="noopener">Program site</a></li>
+            <li><a class="underline" href="https://graduateschool.camden.rutgers.edu/data-science-m-s/" target="_blank" rel="noopener">Graduate School overview</a></li>
+          </ul>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div class="p-4 rounded-xl bg-gray-50">
+            <div class="label">Course</div>
+            <div class="value">Independent Study</div>
+          </div>
+          <div class="p-4 rounded-xl bg-gray-50">
+            <div class="label">Term / Year</div>
+            <div class="value" id="termYear">—</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Middle: Student / Instructor -->
+      <div class="card p-6 space-y-5">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="p-4 rounded-xl bg-gray-50">
+            <div class="label">Student</div>
+            <div class="value">Jose Andres Riveraruiz</div>
+            <!-- Optional email; add yours if you want it visible -->
+            <div class="muted text-sm">rutgers email (optional)</div>
+          </div>
+          <div class="p-4 rounded-xl bg-gray-50">
+            <div class="label">Instructor</div>
+            <div class="value">Dr. Adam Okulicz-Kozaryn</div>
+            <div class="muted text-sm">Faculty Advisor</div>
+          </div>
+        </div>
+
+        <div class="p-4 rounded-xl bg-gray-50">
+          <div class="label">Project Type</div>
+          <div class="value">Graduate Research Project</div>
+          <p class="muted text-sm mt-1">Submitted in partial fulfillment of Independent Study requirements.</p>
+        </div>
+      </div>
+
+      <!-- Right: Quick Links -->
+      <aside class="card p-6">
+        <h3 class="text-lg font-semibold">Project Links</h3>
+        <div class="mt-3 grid grid-cols-1 gap-3">
+          <a class="p-4 rounded-xl bg-indigo-50 hover:bg-indigo-100 transition block" href="charts.html">
+            📊 <span class="font-semibold">Charts & Trends</span>
+          </a>
+          <a class="p-4 rounded-xl bg-sky-50 hover:bg-sky-100 transition block" href="maps.html">
+            🗺️ <span class="font-semibold">Interactive Maps</span>
+          </a>
+          <a class="p-4 rounded-xl bg-emerald-50 hover:bg-emerald-100 transition block" href="tables.html">
+            📋 <span class="font-semibold">Key Indicators</span>
+          </a>
+          <a class="p-4 rounded-xl bg-rose-50 hover:bg-rose-100 transition block" href="profiles.html">
+            🧭 <span class="font-semibold">Synthesis & Solutions</span>
+          </a>
+        </div>
+      </aside>
+    </section>
+
+    <!-- VISUAL ENHANCEMENT: SIMPLE TIMELINE -->
+    <section class="card p-6">
+      <h2 class="text-2xl font-bold">Project Timeline</h2>
+      <div class="relative timeline mt-5">
+        <ul class="space-y-6">
+          <li class="relative pl-10">
+            <span class="absolute left-2 top-1.5 w-4 h-4 bg-blue-600 rounded-full ring-4 ring-blue-100"></span>
+            <div class="font-semibold">Kickoff & Scoping</div>
+            <div class="muted text-sm">Topic selection, research questions, and dataset inventory.</div>
+          </li>
+          <li class="relative pl-10">
+            <span class="absolute left-2 top-1.5 w-4 h-4 bg-indigo-600 rounded-full ring-4 ring-indigo-100"></span>
+            <div class="font-semibold">Data Wrangling & EDA</div>
+            <div class="muted text-sm">Cleaning, merging, and exploratory analysis of population/economic data.</div>
+          </li>
+          <li class="relative pl-10">
+            <span class="absolute left-2 top-1.5 w-4 h-4 bg-emerald-600 rounded-full ring-4 ring-emerald-100"></span>
+            <div class="font-semibold">Modeling & Insight Generation</div>
+            <div class="muted text-sm">Trend modeling, migration/poverty mapping, and scenario testing.</div>
+          </li>
+          <li class="relative pl-10">
+            <span class="absolute left-2 top-1.5 w-4 h-4 bg-rose-600 rounded-full ring-4 ring-rose-100"></span>
+            <div class="font-semibold">Write-Up & Presentation</div>
+            <div class="muted text-sm">Synthesis, policy recommendations, and final deliverables.</div>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- REFERENCES / BRAND NOTE -->
+    <section class="card p-6">
+      <h2 class="text-2xl font-bold">References</h2>
+      <ul class="mt-3 text-sm leading-6 list-disc list-inside">
+        <li>
+          Rutgers–Camden Data Science (M.S.) program site — 
+          <a class="text-blue-600 underline" href="https://datascience.camden.rutgers.edu/" target="_blank" rel="noopener">datascience.camden.rutgers.edu</a>. :contentReference[oaicite:1]{index=1}
+        </li>
+        <li>
+          Graduate School–Camden overview: Data Science (M.S.) — 
+          <a class="text-blue-600 underline" href="https://graduateschool.camden.rutgers.edu/data-science-m-s/" target="_blank" rel="noopener">graduateschool.camden.rutgers.edu/data-science-m-s</a>. :contentReference[oaicite:2]{index=2}
+        </li>
+        <li>
+          Logo & visual identity guidance (use Rutgers logo/signature; seal use is restricted) — 
+          <a class="text-blue-600 underline" href="https://communications.rutgers.edu/services-resources/logos-signatures-and-visual-identity" target="_blank" rel="noopener">communications.rutgers.edu/logos-signatures-and-visual-identity</a>, 
+          and FAQ (“May I use the seal?”) — 
+          <a class="text-blue-600 underline" href="https://communications.rutgers.edu/faq" target="_blank" rel="noopener">communications.rutgers.edu/faq</a>. :contentReference[oaicite:3]{index=3}
+        </li>
+        <li>
+          Rutgers wordmark used above (SVG) — 
+          <a class="text-blue-600 underline" href="https://commons.wikimedia.org/wiki/File:Rutgers_University_with_the_state_university_logo.svg" target="_blank" rel="noopener">Wikimedia Commons file</a>.
+          (For official projects, prefer downloading assets via Rutgers identity site.) :contentReference[oaicite:4]{index=4}
+        </li>
+      </ul>
+    </section>
+  </main>
+
+  <script>
+    // Highlight active nav
+    document.querySelectorAll('.nav-link').forEach(a=>{
+      if (location.pathname.endsWith(a.getAttribute('href')) ||
+          (location.pathname === '/' && a.getAttribute('href') === 'pages.html')) {
+        a.classList.add('text-blue-600','font-semibold','border-blue-600');
+        a.setAttribute('aria-current','page');
+      }
+    });
+    // Fill term/year nicely
+    const d = new Date();
+    const month = d.getMonth(); // 0-11
+    const term = month <= 4 ? 'Spring' : (month <= 7 ? 'Summer' : 'Fall');
+    document.getElementById('termYear').textContent = `${term} ${d.getFullYear()}`;
+  </script>
+</body>
+</html>
