@@ -6,7 +6,15 @@
   <title>Puerto Rico — Metrics</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    /* Styles reused from index for the stats grid */
+    /* Match index.html card look for rounded "pill" hero */
+    .card {
+      background:#fff;
+      border-radius:1rem;
+      box-shadow:0 10px 15px -3px rgba(0,0,0,.1), 0 4px 6px -2px rgba(0,0,0,.05);
+      overflow:hidden; /* ensure gradient stays inside rounded corners */
+    }
+
+    /* Reused stat styles */
     .stat-card {
       display:flex; gap:.75rem; align-items:flex-start;
       background:#fff; border-radius:.75rem; padding:1rem;
@@ -21,7 +29,7 @@
     .stat-body a { font-size:.75rem; color:#2563eb; }
     .stat-section h2 { font-weight:600; font-size:1.125rem; margin-bottom:.5rem; }
 
-    /* Hero styling (same as index) */
+    /* Same hero gradient as homepage */
     .hero {
       background:
         radial-gradient(1200px 600px at 20% -10%, rgba(239,68,68,.12), transparent 60%),
@@ -44,7 +52,7 @@
   </nav>
 
   <main class="max-w-7xl mx-auto px-4 py-8 space-y-8">
-    <!-- HERO -->
+    <!-- HERO (now matches homepage style) -->
     <header class="card hero p-8">
       <p class="text-sm font-semibold text-gray-500 uppercase">Graduate Independent Study</p>
       <h1 class="mt-2 text-4xl sm:text-5xl font-extrabold leading-tight">Population & Economic Dynamics in Puerto Rico</h1>
@@ -147,7 +155,8 @@
     // highlight current link
     const links = document.querySelectorAll('.nav-link');
     links.forEach(a => {
-      if (location.pathname.endsWith(a.getAttribute('href'))) {
+      if (location.pathname.endsWith(a.getAttribute('href')) ||
+          (location.pathname === '/' && a.getAttribute('href') === 'metrics.html')) {
         a.classList.add('text-blue-600','font-semibold','border-blue-600');
         a.setAttribute('aria-current','page');
       }
