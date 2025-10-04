@@ -88,11 +88,15 @@
     <section class="card p-4">
       <div class="flex items-center justify-between gap-3">
         <div class="text-sm text-gray-700 font-medium">Map shading by</div>
-        <div class="inline-flex rounded-lg border bg-white shadow-sm overflow-hidden">
-          <button id="metricPct" type="button"
-            class="px-3 py-1.5 text-sm font-medium bg-blue-600 text-white"> % change </button>
-          <button id="metricAbs" type="button"
-            class="px-3 py-1.5 text-sm font-medium hover:bg-gray-50"> abs change </button>
+        <div class="flex items-center gap-2">
+          <div class="inline-flex rounded-lg border bg-white shadow-sm overflow-hidden">
+            <button id="metricPct" type="button"
+              class="px-3 py-1.5 text-sm font-medium bg-blue-600 text-white">% change</button>
+            <button id="metricAbs" type="button"
+              class="px-3 py-1.5 text-sm font-medium hover:bg-gray-50">abs change</button>
+          </div>
+          <button id="clearSel"
+            class="px-3 py-1.5 text-sm rounded-lg border bg-white hover:bg-gray-50">Clear selection</button>
         </div>
       </div>
       <div id="map" class="mt-3"></div>
@@ -161,7 +165,7 @@
     // Default % breaks (≤-10, -10–-6, -6–-3, -3–0, 0–2, >2)
     const PCT_BREAKS = [-10, -6, -3, 0, 2];
 
-    // Computed later from data
+    // Computed later from data for abs change
     let ABS_BREAKS = [-10000, -6000, -3000, 0, 1000];
 
     // Utility: color for a value given breaks
@@ -286,6 +290,11 @@
     let map, layer, fc, legend;
     let currentMode = 'pct'; // 'pct' | 'abs'
 
+    // Selection state (click-to-lock)
+    let lockedName = null;
+    let selectedLayer = null;
+    const selectedOutline = { weight: 4, color: '#111827', dashArray: '3', fillOpacity: 0.85 };
+
     (async function init(){
       // Load population rows
       const res = await fetch(POP_JSON, { cache:'no-store' });
@@ -304,7 +313,6 @@
       const gjRes = await fetch(GEOJSON_URL + (GEOJSON_URL.includes('?')?'&':'?') + 'cb=' + Date.now());
       fc = await gjRes.json();
 
-      // Build layer
       const hiStyle = { weight:3, color:'#111827', fillOpacity:0.9 };
 
       layer = L.geoJSON(fc, {
@@ -319,15 +327,36 @@
             : '';
           lyr.bindTooltip(name, { direction:'center', className:'leaflet-tooltip' });
           lyr.bindPopup(`<strong>${name}</strong>${geoid?`<br><small>GEOID: ${geoid}</small>`:''}${changeLine}`);
+
           lyr.on({
             mouseover: e => {
+              if (lockedName) return; // ignore hovers while locked
               e.target.setStyle(hiStyle);
               e.target.bringToFront?.();
               const c = e.target.getBounds().getCenter();
               updateDetails(name, statsForMunicipio(name), c);
             },
-            mouseout: e => layer.resetStyle(e.target),
-            click: e => map.fitBounds(e.target.getBounds(), { padding:[20,20] })
+            mouseout: e => {
+              if (lockedName) return; // keep selected outline when locked
+              layer.resetStyle(e.target);
+            },
+            click: e => {
+              const l = e.target;
+
+              // Remove previous selection outline
+              if (selectedLayer) layer.resetStyle(selectedLayer);
+
+              // Record and outline the new selection
+              selectedLayer = l;
+              lockedName = name;
+              l.setStyle(selectedOutline);
+
+              // Keep zoom-on-click
+              map.fitBounds(l.getBounds(), { padding:[20,20] });
+
+              const c = l.getBounds().getCenter();
+              updateDetails(name, statsForMunicipio(name), c);
+            }
           });
         }
       }).addTo(map);
@@ -335,7 +364,7 @@
       const b = layer.getBounds();
       if (b.isValid()) map.fitBounds(b, { padding:[15,15] });
 
-      // Compute ABS breaks from data (robust, data-driven)
+      // Compute ABS breaks from data (quantile-ish)
       computeAbsBreaks();
 
       // Legend control (up over the VI)
@@ -371,8 +400,9 @@
       })();
       updateDetails(initName, st0, null);
 
-      // Toggle UI
+      // Toggle UI + Clear selection
       wireMetricToggle();
+      wireClearSelection();
     })();
 
     // ---------- Metric toggle ----------
@@ -391,6 +421,9 @@
 
         // Restyle polygons
         layer.eachLayer(l => l.setStyle(styleForFeature(l.feature)));
+        // Preserve selection outline
+        if (selectedLayer) selectedLayer.setStyle(selectedOutline);
+
         // Update legend
         renderLegend();
       }
@@ -398,6 +431,16 @@
       btnPct.addEventListener('click', () => setActive('pct'));
       btnAbs.addEventListener('click', () => setActive('abs'));
       setActive(currentMode); // initialize classes
+    }
+
+    // Clear selection wiring
+    function wireClearSelection(){
+      function clearSelection(){
+        lockedName = null;
+        if (selectedLayer) { layer.resetStyle(selectedLayer); selectedLayer = null; }
+      }
+      document.getElementById('clearSel').addEventListener('click', clearSelection);
+      document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape') clearSelection(); });
     }
 
     // Style function based on current mode
