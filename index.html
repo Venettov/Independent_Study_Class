@@ -16,7 +16,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
   <style>
-    /* Cards + hero (matches the rest of your site) */
+    /* Cards + hero */
     .card {
       background:#fff;
       border-radius:1rem;
@@ -30,12 +30,11 @@
         linear-gradient(180deg, #fafafa 0%, #f3f4f6 100%);
     }
 
-    /* Map */
-    #map {
-      height: 60vh;
-      width: 100%;
-      border-radius: .75rem;
-    }
+    /* Map — reduced height to show more of the charts below without zooming out */
+    #map { height: 48vh; width: 100%; border-radius: .75rem; }
+    @media (min-width: 1280px) { #map { height: 46vh; } }  /* slightly shorter on wide screens */
+    @media (max-width: 640px)  { #map { height: 54vh; } }  /* a bit taller on small phones */
+
     .leaflet-tooltip {
       background: rgba(255,255,255,.95);
       border-color:#333;
@@ -47,9 +46,7 @@
     }
 
     /* Mini charts area */
-    .mini {
-      min-height: 260px;
-    }
+    .mini { min-height: 260px; }
   </style>
 </head>
 <body class="bg-gray-50 text-gray-900 font-sans">
@@ -148,11 +145,9 @@
     const pctFmt = (v) => `${(Number(v)||0).toFixed(2)}%`;
 
     // ---------------------- Choropleth scale ----------------------
-    // thresholds in percent; negative = decline
     const CHORO_BREAKS = [-10, -6, -3, 0, 2];
     //            <=-10     -10–-6    -6–-3      -3–0       0–2        >2
     const CHORO_COLORS = ['#7f1d1d', '#b91c1c', '#f97316', '#bbf7d0', '#22c55e', '#15803d'];
-    //                                       light green ↑ (emerald-200)
     function colorForPctChange(pct) {
       if (!Number.isFinite(pct)) return '#93c5fd';
       if (pct <= CHORO_BREAKS[0]) return CHORO_COLORS[0];
@@ -166,7 +161,6 @@
     // ---------------------- Helpers ----------------------
     function sanitizeName(s){ return String(s||'').replace(/^\s*[.\-•]\s*/, '').trim(); }
 
-    // detect header name for the geographic column in your JSON rows
     function detectGeoHeader(rows){
       const keys = Object.keys(rows[0]||{});
       const priority = ["col_1","Geographic Area","Geographic Area Name","Geographic Area:"];
@@ -216,7 +210,7 @@
     }
 
     function censusLink(name){
-      const g = '040XX00US72'; // Puerto Rico profile
+      const g = '040XX00US72';
       return `https://data.census.gov/profile/Puerto_Rico?g=${g}`;
     }
 
@@ -274,12 +268,10 @@
     let _rows = [], _geoHeader = null;
 
     (async function init(){
-      // Load population rows
       const res = await fetch(POP_JSON, { cache:'no-store' });
       _rows = await res.json();
       _geoHeader = detectGeoHeader(_rows);
 
-      // Init map
       const prBounds = L.latLngBounds([[17.85, -67.45],[18.55, -65.25]]);
       const map = L.map('map', { zoomSnap: .25 }).fitBounds(prBounds);
 
@@ -357,7 +349,7 @@
       };
       legend.addTo(map);
 
-      // Nudge the legend upward to sit over the Virgin Islands region
+      // Nudge the legend upward to sit over the Virgin Islands region (responsive)
       function moveLegend() {
         const el = legend.getContainer ? legend.getContainer() : legend._container;
         if (!el) return;
@@ -367,7 +359,7 @@
       map.on('resize', moveLegend);
       moveLegend();
 
-      // Initial details (Puerto Rico overall, if present)
+      // Initial details
       const initName = 'Puerto Rico';
       const st0 = statsForMunicipio(initName) || (function(){
         const f0 = (fc.features && fc.features[0]) || null;
