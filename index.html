@@ -150,8 +150,9 @@
     // ---------------------- Choropleth scale ----------------------
     // thresholds in percent; negative = decline
     const CHORO_BREAKS = [-10, -6, -3, 0, 2];
-    //            <=-10     -10–-6   -6–-3     -3–0      0–2      >2
-    const CHORO_COLORS = ['#7f1d1d', '#b91c1c', '#f97316', '#e5e7eb', '#22c55e', '#15803d'];
+    //            <=-10     -10–-6    -6–-3      -3–0       0–2        >2
+    const CHORO_COLORS = ['#7f1d1d', '#b91c1c', '#f97316', '#bbf7d0', '#22c55e', '#15803d'];
+    //                                       light green ↑ (emerald-200)
     function colorForPctChange(pct) {
       if (!Number.isFinite(pct)) return '#93c5fd';
       if (pct <= CHORO_BREAKS[0]) return CHORO_COLORS[0];
@@ -215,9 +216,7 @@
     }
 
     function censusLink(name){
-      const q = encodeURIComponent('P1');
-      const g = '040XX00US72'; // whole Puerto Rico by default
-      // For municipios, data.census.gov uses county-equivalents but not a stable simple URL across all; keep profile link:
+      const g = '040XX00US72'; // Puerto Rico profile
       return `https://data.census.gov/profile/Puerto_Rico?g=${g}`;
     }
 
@@ -358,10 +357,19 @@
       };
       legend.addTo(map);
 
+      // Nudge the legend upward to sit over the Virgin Islands region
+      function moveLegend() {
+        const el = legend.getContainer ? legend.getContainer() : legend._container;
+        if (!el) return;
+        el.style.marginBottom = Math.round(map.getSize().y * 0.25) + 'px'; // ~25% up from bottom
+        el.style.marginRight  = '8px';
+      }
+      map.on('resize', moveLegend);
+      moveLegend();
+
       // Initial details (Puerto Rico overall, if present)
       const initName = 'Puerto Rico';
       const st0 = statsForMunicipio(initName) || (function(){
-        // fallback: first municipio in the feature collection
         const f0 = (fc.features && fc.features[0]) || null;
         const nm = f0 ? (f0.properties.NAME || f0.properties.NAMELSAD || '—') : '—';
         return statsForMunicipio(nm);
