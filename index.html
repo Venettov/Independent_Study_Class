@@ -3,53 +3,53 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Puerto Rico Data — Graduate Project</title>
+  <title>Population & Economic Dynamics in Puerto Rico</title>
 
-  <!-- Tailwind + Leaflet -->
+  <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Leaflet -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 
   <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
   <style>
-    body { font-family: Inter, system-ui, sans-serif; background:#f3f4f6; }
-    .card { background:#fff; border-radius:1rem; box-shadow:0 10px 15px -3px rgba(0,0,0,.1), 0 4px 6px -2px rgba(0,0,0,.05); }
-    .hero {
-      background: radial-gradient(1200px 600px at 20% -10%, rgba(239,68,68,.12), transparent 60%),
-                  radial-gradient(1200px 600px at 80% -10%, rgba(37,99,235,.10), transparent 60%),
-                  linear-gradient(180deg, #fafafa 0%, #f3f4f6 100%);
+    /* Cards + hero (matches the rest of your site) */
+    .card {
+      background:#fff;
+      border-radius:1rem;
+      box-shadow:0 10px 15px -3px rgba(0,0,0,.1), 0 4px 6px -2px rgba(0,0,0,.05);
+      overflow:hidden;
     }
+    .hero {
+      background:
+        radial-gradient(1200px 600px at 20% -10%, rgba(239,68,68,.12), transparent 60%),
+        radial-gradient(1200px 600px at 80% -10%, rgba(37,99,235,.10), transparent 60%),
+        linear-gradient(180deg, #fafafa 0%, #f3f4f6 100%);
+    }
+
+    /* Map */
     #map {
-      height: 400px;
+      height: 60vh;
       width: 100%;
-      border-radius: 1rem;
-      box-shadow: 0 10px 15px -3px rgba(0,0,0,.1), 0 4px 6px -2px rgba(0,0,0,.05);
-      background: #e5e7eb;
+      border-radius: .75rem;
     }
     .leaflet-tooltip {
-      background: rgba(255,255,255,.95); border-color:#333; color:#333;
-      font-size:14px; font-weight:600; box-shadow:0 2px 5px rgba(0,0,0,.2); padding:5px 10px;
+      background: rgba(255,255,255,.95);
+      border-color:#333;
+      color:#111827;
+      font-size:14px;
+      font-weight:600;
+      box-shadow:0 2px 5px rgba(0,0,0,.2);
+      padding:5px 10px;
     }
-    /* Bigger mini chart cards + alignment */
-    .miniTitle { font-size:.925rem; font-weight:700; color:#374151; margin-bottom:.375rem; }
-    .miniCard { background:#f9fafb; border-radius:.75rem; padding:.75rem; height:280px; }
-    .miniCanvasWrap { height:240px; }
-    #trendBox, #pctBox { margin-top: 0 !important; }
-    .stat-card {
-      display:flex; gap:.75rem; align-items:flex-start;
-      background:#fff; border-radius:.75rem; padding:1rem;
-      box-shadow: 0 4px 10px rgba(0,0,0,.06);
+
+    /* Mini charts area */
+    .mini {
+      min-height: 260px;
     }
-    .stat-icon {
-      flex:none; display:flex; align-items:center; justify-content:center;
-      width:2.5rem; height:2.5rem; border-radius:.75rem; background:#f3f4f6; color:#6b7280;
-    }
-    .stat-body .label { font-size:.85rem; color:#6b7280; }
-    .stat-body .value { font-weight:800; font-size:1.5rem; line-height:1.1; }
-    .stat-body a { font-size:.75rem; color:#2563eb; }
-    .stat-section h2 { font-weight:600; font-size:1.125rem; margin-bottom:.5rem; }
   </style>
 </head>
 <body class="bg-gray-50 text-gray-900 font-sans">
@@ -57,7 +57,7 @@
   <!-- Nav -->
   <nav class="bg-white shadow sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-center gap-6 text-sm sm:text-base">
-      <a href="index.html"   class="nav-link border-b-2 border-transparent">Home</a>
+      <a href="index.html"   class="nav-link border-b-2 border-blue-600 text-blue-600 font-semibold">Home</a>
       <a href="metrics.html" class="nav-link border-b-2 border-transparent">Metrics</a>
       <a href="maps.html"    class="nav-link border-b-2 border-transparent">Maps</a>
       <a href="charts.html"  class="nav-link border-b-2 border-transparent">Charts</a>
@@ -68,402 +68,306 @@
 
   <main class="max-w-7xl mx-auto px-4 py-8 space-y-8">
 
-    <!-- Hero header (from about.html) -->
-    <header class="card hero p-8">
+    <!-- HERO -->
+    <header class="card hero p-8 sm:p-10 lg:p-12">
       <p class="text-sm font-semibold text-gray-500 uppercase">Graduate Independent Study</p>
-      <h1 class="mt-2 text-4xl sm:text-5xl font-extrabold leading-tight">Population & Economic Dynamics in Puerto Rico</h1>
+      <h1 class="mt-2 text-4xl sm:text-5xl font-extrabold leading-tight">
+        Population & Economic Dynamics in Puerto Rico
+      </h1>
       <p class="mt-3 text-lg text-gray-700">
-        A graduate research project examining demographic shifts, out-migration, and sustainable development strategies
-        through linked data analysis and policy synthesis.
+        A graduate research project examining demographic shifts, out-migration, and sustainable development
+        strategies through linked data analysis and policy synthesis.
       </p>
 
-      <!-- Hint preserved -->
       <div class="mt-5">
-        <div class="text-[15px] sm:text-base font-medium text-gray-800 bg-blue-50 border border-blue-200 rounded-md px-3 py-2 inline-flex items-center gap-2">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-            <path d="M18 10A8 8 0 11.001 10 8 8 0 0118 10zM9 7h2V5H9v2zm0 8h2V8H9v7z"/>
-          </svg>
+        <span class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-100 text-slate-800">
+          <span class="inline-flex w-5 h-5 items-center justify-center rounded-full bg-slate-800 text-white text-xs">i</span>
           Hover over the map to see county / municipality details
-        </div>
+        </span>
       </div>
     </header>
 
-    <!-- Map block -->
-    <section class="bg-white rounded-lg shadow-lg p-6">
+    <!-- MAP -->
+    <section class="card p-4">
       <div id="map"></div>
-      <pre id="errorMsg" class="hidden mt-3 text-sm text-red-600 whitespace-pre-wrap"></pre>
     </section>
 
-    <!-- Population details + mini charts -->
-    <aside class="bg-white rounded-lg shadow-lg p-6">
-      <h3 class="text-lg font-semibold mb-3">Population details</h3>
+    <!-- DETAILS -->
+    <section class="card p-6">
+      <h2 class="text-lg font-semibold mb-4">Population details</h2>
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Left text -->
+        <div>
+          <div class="text-sm">
+            <div>Municipio: <span id="d-name" class="font-semibold">Puerto Rico</span></div>
+            <div>Centroid: <span id="d-centroid" class="text-gray-600">—</span></div>
+          </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
-        <!-- LEFT -->
-        <div id="detailsCol" class="text-sm space-y-2 md:mt-6 lg:mt-8">
-          <div id="mcBody" class="hidden">
-            <div><span class="text-gray-500">Municipio:</span> <span id="mcName" class="font-semibold"></span></div>
+          <div class="mt-4 text-sm">
+            <div class="font-semibold text-gray-700">Population (Vintage 2024):</div>
+            <ul class="mt-1 space-y-1">
+              <li>2024: <span id="d-2024" class="font-semibold">—</span></li>
+              <li>Change since 2020: <span id="d-chg" class="font-semibold">—</span></li>
+              <li>2023→2024: <span id="d-2324" class="font-semibold">—</span></li>
+            </ul>
+          </div>
 
-            <div id="rowGeoid" class="hidden"><span class="text-gray-500">GEOID:</span> <span id="mcGeoid" class="font-mono"></span></div>
-            <div id="rowLand" class="hidden"><span class="text-gray-500">Land area:</span> <span id="mcLand"></span></div>
-            <div id="rowWater" class="hidden"><span class="text-gray-500">Water area:</span> <span id="mcWater"></span></div>
-
-            <div><span class="text-gray-500">Centroid:</span> <span id="mcCentroid"></span></div>
-
-            <div id="mcPopBox" class="mt-3 hidden">
-              <div class="text-gray-500">Population (Vintage 2024):</div>
-              <ul class="list-disc list-inside space-y-1">
-                <li><span class="text-gray-500">2024:</span> <span id="mcPop2024" class="font-medium"></span></li>
-                <li><span class="text-gray-500">Change since 2020:</span> <span id="mcPopDelta"></span></li>
-                <li><span class="text-gray-500">2023→2024:</span> <span id="mcPopYoY"></span></li>
-              </ul>
-            </div>
-
-            <div class="mt-3">
-              <a id="mcLink" class="text-blue-600 hover:underline hidden" target="_blank" rel="noopener">Open on data.census.gov ↗</a>
-            </div>
+          <div class="mt-4 text-sm">
+            <a id="d-census" class="text-blue-600 underline" href="#" target="_blank" rel="noopener">
+              Open on data.census.gov ↗
+            </a>
           </div>
         </div>
 
-        <!-- MIDDLE -->
-        <div id="trendBox" class="hidden">
-          <div class="miniTitle">Population trend (2020–2024)</div>
-          <div class="miniCard">
-            <div class="miniCanvasWrap"><canvas id="miniChart"></canvas></div>
+        <!-- Middle: line chart -->
+        <div>
+          <h3 class="font-semibold mb-2">Population trend (2020–2024)</h3>
+          <div class="mini bg-gray-50 rounded p-3">
+            <canvas id="lineChart"></canvas>
           </div>
         </div>
 
-        <!-- RIGHT -->
-        <div id="pctBox" class="hidden">
-          <div class="miniTitle">Annual % Change</div>
-          <div class="miniCard">
-            <div class="miniCanvasWrap"><canvas id="miniPctChart"></canvas></div>
+        <!-- Right: bar chart -->
+        <div>
+          <h3 class="font-semibold mb-2">Annual % Change</h3>
+          <div class="mini bg-gray-50 rounded p-3">
+            <canvas id="barChart"></canvas>
           </div>
         </div>
       </div>
-    </aside>
-    
+    </section>
   </main>
 
   <script>
-    // Highlight current nav link
-    document.querySelectorAll('.nav-link').forEach(a => {
-      if (location.pathname.endsWith(a.getAttribute('href')) || (location.pathname === '/' && a.getAttribute('href') === 'index.html')) {
-        a.classList.add('text-blue-600', 'font-semibold', 'border-blue-600');
-        a.setAttribute('aria-current', 'page');
-      }
-    });
+    // ---------------------- Data paths ----------------------
+    const GEOJSON_URL = './data/tl_2022_72_cousub/pr_municipalities.geojson';
+    const POP_JSON    = './data/population/prm-est2024-chg.json';
 
-    // ---- Utilities ----
+    // ---------------------- Formatters ----------------------
     const fmt = new Intl.NumberFormat('en-US');
-    const M2_PER_MI2 = 2589988.110336;
-    const stripDiacritics = s => String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-    const norm = s => stripDiacritics(String(s||'').trim()).toLowerCase();
-    const round = (n,d=2)=> Math.round(n*10**d)/10**d;
+    const pctFmt = (v) => `${(Number(v)||0).toFixed(2)}%`;
 
-    function centroidOf(feature) {
-      if (!feature) return null;
-      const b = L.geoJSON(feature).getBounds();
-      if (!b.isValid()) return null;
-      const c = b.getCenter();
-      return [c.lat, c.lng];
+    // ---------------------- Choropleth scale ----------------------
+    // thresholds in percent; negative = decline
+    const CHORO_BREAKS = [-10, -6, -3, 0, 2];
+    //            <=-10     -10–-6   -6–-3     -3–0      0–2      >2
+    const CHORO_COLORS = ['#7f1d1d', '#b91c1c', '#f97316', '#e5e7eb', '#22c55e', '#15803d'];
+    function colorForPctChange(pct) {
+      if (!Number.isFinite(pct)) return '#93c5fd';
+      if (pct <= CHORO_BREAKS[0]) return CHORO_COLORS[0];
+      if (pct <= CHORO_BREAKS[1]) return CHORO_COLORS[1];
+      if (pct <= CHORO_BREAKS[2]) return CHORO_COLORS[2];
+      if (pct <= CHORO_BREAKS[3]) return CHORO_COLORS[3];
+      if (pct <= CHORO_BREAKS[4]) return CHORO_COLORS[4];
+      return CHORO_COLORS[5];
     }
 
-    function censusLinkFor(props, name) {
-      const state = String(props.STATEFP || "72").padStart(2, "0");
-      const county = String(props.COUNTYFP || "").padStart(3, "0");
-      if (name === "Puerto Rico" || !county || county === "000") {
-        return `https://data.census.gov/profile?g=0400000US${state}`;
-      }
-      if (county && county !== "000") {
-        const geoid050 = `${state}${county}`;
-        return `https://data.census.gov/profile?g=0500000US${geoid050}`;
-      }
-      const geoid060 = String(props.GEOID || props.geoid || "");
-      if (geoid060.length === 10) {
-        return `https://data.census.gov/profile?g=0500000US${geoid060.slice(0,5)}`;
-      }
-      return null;
-    }
+    // ---------------------- Helpers ----------------------
+    function sanitizeName(s){ return String(s||'').replace(/^\s*[.\-•]\s*/, '').trim(); }
 
-    // ---- Population helpers (globals) ----
-    const POP_JSON = "data/population/prm-est2024-chg.json";
-    const YEARS = [2020, 2021, 2022, 2023, 2024];
-    let popRows = [], popGeoHeader = null, popByName = new Map();
-
-    const num = (v) => {
-      if (v == null) return NaN;
-      const s = String(v).replace(/\xa0/g,"").replace(/,/g,"").replace(/[^0-9.\-]/g,"");
-      return s ? Number(s) : NaN;
-    };
-
-    function detectGeoHeader(allRows){
-      const keys = Object.keys(allRows[0] || {});
+    // detect header name for the geographic column in your JSON rows
+    function detectGeoHeader(rows){
+      const keys = Object.keys(rows[0]||{});
       const priority = ["col_1","Geographic Area","Geographic Area Name","Geographic Area:"];
       for (const p of priority) if (keys.includes(p)) return p;
       for (const k of keys) {
-        const col = allRows.map(r => r[k]);
-        const strCount = col.filter(v => typeof v === "string").length;
-        const hasPR = col.some(v => typeof v === "string" && /puerto rico/i.test(v));
-        if (strCount >= 20 && hasPR) return k;
+        const col = rows.slice(0,40).map(r => r[k]);
+        const hasPR = col.some(v => typeof v === 'string' && /puerto rico/i.test(v));
+        if (hasPR) return k;
       }
-      return keys.find(k => /geographic|area|name/i.test(k)) || keys[0];
+      return keys[0];
     }
 
-    function valuesFor(row){
-      return YEARS.map(y => {
-        if (row.hasOwnProperty(String(y))) {
-          const v = num(row[String(y)]); if (Number.isFinite(v)) return v;
+    function valFromRow(row, y){
+      if (row.hasOwnProperty(String(y))) {
+        const n = Number(String(row[String(y)]).replace(/[, ]/g,''));
+        if (Number.isFinite(n)) return n;
+      }
+      const alt = `Population Estimate (as of July 1) | ${y}`;
+      if (row.hasOwnProperty(alt)) {
+        const n = Number(String(row[alt]).replace(/[, ]/g,''));
+        if (Number.isFinite(n)) return n;
+      }
+      if (y === 2020 && row.hasOwnProperty("April 1, 2020 Estimates Base")) {
+        const n = Number(String(row["April 1, 2020 Estimates Base"]).replace(/[, ]/g,''));
+        if (Number.isFinite(n)) return n;
+      }
+      return NaN;
+    }
+
+    const YEARS = [2020,2021,2022,2023,2024];
+
+    function statsForMunicipio(name){
+      name = sanitizeName(name);
+      const row = _rows.find(r => sanitizeName(r[_geoHeader]) === name);
+      if (!row) return null;
+      const vals = YEARS.map(y => valFromRow(row, y));
+      if (vals.some(v => !Number.isFinite(v))) return null;
+      const pop2020 = vals[0];
+      const pop2024 = vals[4];
+      const abs = pop2024 - pop2020;
+      const pctTot = (abs / pop2020) * 100;
+      const pctYear = [];
+      for (let i=1;i<YEARS.length;i++){
+        pctYear.push(((vals[i]-vals[i-1]) / vals[i-1]) * 100);
+      }
+      return { vals, abs, pctTot, pctYear, pop2024 };
+    }
+
+    function censusLink(name){
+      const q = encodeURIComponent('P1');
+      const g = '040XX00US72'; // whole Puerto Rico by default
+      // For municipios, data.census.gov uses county-equivalents but not a stable simple URL across all; keep profile link:
+      return `https://data.census.gov/profile/Puerto_Rico?g=${g}`;
+    }
+
+    // ---------------------- Charts ----------------------
+    let lineChart = null, barChart = null;
+    function drawCharts(name, st){
+      if (!st) return;
+      const ctxL = document.getElementById('lineChart').getContext('2d');
+      const ctxB = document.getElementById('barChart').getContext('2d');
+
+      if (lineChart) lineChart.destroy();
+      lineChart = new Chart(ctxL, {
+        type: 'line',
+        data: { labels: YEARS, datasets:[{ label:'Population', data: st.vals, tension:.2, pointRadius:4 }] },
+        options: {
+          plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label:(c)=>fmt.format(c.parsed.y) } } },
+          scales:{ y:{ ticks:{ callback:v=>fmt.format(v) } } },
+          maintainAspectRatio: false
         }
-        const comp = `Population Estimate (as of July 1) | ${y}`;
-        if (row.hasOwnProperty(comp)) {
-          const v = num(row[comp]); if (Number.isFinite(v)) return v;
+      });
+
+      const labels = ['2020→2021','2021→2022','2022→2023','2023→2024'];
+      if (barChart) barChart.destroy();
+      barChart = new Chart(ctxB, {
+        type: 'bar',
+        data: { labels, datasets:[{ label:'% change', data: st.pctYear.map(v=>+v.toFixed(2)) }] },
+        options: {
+          plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label:(c)=>pctFmt(c.parsed.y) } } },
+          scales:{ y:{ ticks:{ callback:v=>pctFmt(v) } } },
+          maintainAspectRatio: false
         }
-        if (y === 2020 && row.hasOwnProperty("April 1, 2020 Estimates Base")) {
-          const v = num(row["April 1, 2020 Estimates Base"]); if (Number.isFinite(v)) return v;
-        }
-        return NaN;
       });
     }
 
-    function sanitizeName(s){
-      return String(s||"").replace(/^\s*[.\-•]\s*/,"").replace(/\s+/g,' ').trim();
+    // ---------------------- DOM targets ----------------------
+    const dName = document.getElementById('d-name');
+    const dCent = document.getElementById('d-centroid');
+    const d2024 = document.getElementById('d-2024');
+    const dChg  = document.getElementById('d-chg');
+    const d2324 = document.getElementById('d-2324');
+    const dCenL = document.getElementById('d-census');
+
+    function updateDetails(name, st, centroid){
+      dName.textContent = name;
+      dCent.textContent = centroid ? `${centroid.lat.toFixed(4)}, ${centroid.lng.toFixed(4)}` : '—';
+      d2024.textContent = Number.isFinite(st?.pop2024) ? fmt.format(st.pop2024) : '—';
+      dChg.textContent  = st ? `${st.abs>0?'+':''}${fmt.format(st.abs)} (${pctFmt(st.pctTot)})` : '—';
+      const last = st && st.pctYear.length ? st.pctYear[st.pctYear.length-1] : NaN;
+      d2324.textContent = Number.isFinite(last) ? pctFmt(last) : '—';
+      dCenL.href = censusLink(name);
+      drawCharts(name, st);
     }
 
-    function buildPopLookup() {
-      popByName.clear();
-      for (const r of popRows) {
-        const raw = sanitizeName(r[popGeoHeader]);
-        if (!raw) continue;
-        popByName.set(norm(raw), r);
-        popByName.set(norm(stripDiacritics(raw)), r);
-      }
-    }
+    // ---------------------- Load data + map ----------------------
+    let _rows = [], _geoHeader = null;
 
-    function statsForMunicipio(name) {
-      const row = popByName.get(norm(name));
-      if (!row) return null;
-      const vals = valuesFor(row);
-      if (vals.some(v => !Number.isFinite(v))) return null;
-      const p2020 = vals[0], p2024 = vals[4];
-      const abs   = p2024 - p2020;
-      const pctTot = p2020 ? (abs / p2020) * 100 : NaN;
-      const yoy    = vals[3] ? ((p2024 - vals[3]) / vals[3]) * 100 : NaN;
-      return { p2024, abs, pctTot, yoy, series: vals };
-    }
+    (async function init(){
+      // Load population rows
+      const res = await fetch(POP_JSON, { cache:'no-store' });
+      _rows = await res.json();
+      _geoHeader = detectGeoHeader(_rows);
 
-    function percentSeries(vals){
-      const out = [];
-      for (let i=1;i<vals.length;i++){
-        const prev = vals[i-1], cur = vals[i];
-        if (Number.isFinite(prev) && Number.isFinite(cur)) {
-          out.push(+(((cur - prev) / prev) * 100).toFixed(2));
-        } else {
-          out.push(NaN);
-        }
-      }
-      return out;
-    }
-
-    document.addEventListener('DOMContentLoaded', async () => {
-      // Detail nodes
-      const mcBody = document.getElementById('mcBody');
-      const mcName = document.getElementById('mcName');
-      const mcGeoid = document.getElementById('mcGeoid');
-      const mcLand = document.getElementById('mcLand');
-      const mcWater = document.getElementById('mcWater');
-      const mcCentroid = document.getElementById('mcCentroid');
-      const rowGeoid = document.getElementById('rowGeoid');
-      const rowLand = document.getElementById('rowLand');
-      const rowWater = document.getElementById('rowWater');
-      const mcLink = document.getElementById('mcLink');
-
-      const mcPopBox = document.getElementById('mcPopBox');
-      const mcPop2024 = document.getElementById('mcPop2024');
-      const mcPopDelta = document.getElementById('mcPopDelta');
-      const mcPopYoY = document.getElementById('mcPopYoY');
-
-      // Chart elements
-      const trendBox = document.getElementById('trendBox');
-      const pctBox = document.getElementById('pctBox');
-      const miniChartCtx = document.getElementById('miniChart')?.getContext('2d') || null;
-      const miniPctChartCtx = document.getElementById('miniPctChart')?.getContext('2d') || null;
-      let miniChart = null, miniPctChart = null;
-
-      function safeMakeMiniChart(labels, data){
-        try {
-          if (!miniChartCtx || !window.Chart) return;
-          if (!miniChart) {
-            miniChart = new Chart(miniChartCtx, {
-              type: 'line',
-              data: { labels, datasets: [{ label: 'Population', data, tension: 0.3, pointRadius: 2, borderWidth: 2 }] },
-              options: {
-                responsive: true, maintainAspectRatio: false,
-                plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => c.parsed.y.toLocaleString() } } },
-                scales: {
-                  x: { ticks: { maxRotation: 0, autoSkip: true } },
-                  y: { ticks: { callback: v => Number(v).toLocaleString() } }
-                }
-              }
-            });
-          } else {
-            miniChart.data.labels = labels;
-            miniChart.data.datasets[0].data = data;
-            miniChart.update();
-          }
-          trendBox.classList.remove('hidden');
-        } catch (e) { console.error('Mini chart error:', e); trendBox.classList.add('hidden'); }
-      }
-
-      function safeMakePctChart(labels, data){
-        try {
-          if (!miniPctChartCtx || !window.Chart) return;
-          if (!miniPctChart) {
-            miniPctChart = new Chart(miniPctChartCtx, {
-              type: 'bar',
-              data: { labels, datasets: [{ label: '% change', data }] },
-              options: {
-                responsive: true, maintainAspectRatio: false,
-                plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => `${c.parsed.y.toFixed(2)}%` } } },
-                scales: { y: { ticks: { callback: v => `${v}%` } } }
-              }
-            });
-          } else {
-            miniPctChart.data.labels = labels;
-            miniPctChart.data.datasets[0].data = data;
-            miniPctChart.update();
-          }
-          pctBox.classList.remove('hidden');
-        } catch (e) { console.error('Mini pct chart error:', e); pctBox.classList.add('hidden'); }
-      }
-
-      function updateInfoPanel(props, feature) {
-        const name = props.NAME || props.NAMELSAD || props.name || 'Unknown';
-        const geoidProp = String(props.GEOID || props.geoid || "");
-        const aland = Number(props.ALAND || props.ALAND20 || 0);
-        const awater = Number(props.AWATER || props.AWATER20 || 0);
-
-        mcName.textContent = name;
-
-        if (geoidProp) { mcGeoid.textContent = geoidProp; rowGeoid.classList.remove('hidden'); }
-        else { mcGeoid.textContent = ''; rowGeoid.classList.add('hidden'); }
-
-        if (aland > 0) { mcLand.textContent = `${fmt.format(round(aland / M2_PER_MI2, 2))} sq mi`; rowLand.classList.remove('hidden'); }
-        else { rowLand.classList.add('hidden'); mcLand.textContent = ''; }
-
-        if (awater > 0) { mcWater.textContent = `${fmt.format(round(awater / M2_PER_MI2, 2))} sq mi`; rowWater.classList.remove('hidden'); }
-        else { rowWater.classList.add('hidden'); mcWater.textContent = ''; }
-
-        const c = centroidOf(feature);
-        mcCentroid.textContent = c ? `${round(c[0], 4)}, ${round(c[1], 4)}` : '—';
-
-        const link = censusLinkFor(props, name);
-        if (link) { mcLink.href = link; mcLink.classList.remove('hidden'); }
-        else { mcLink.removeAttribute('href'); mcLink.classList.add('hidden'); }
-
-        const st = statsForMunicipio(name);
-        if (st) {
-          mcPop2024.textContent = fmt.format(st.p2024);
-          const sign = st.abs > 0 ? '+' : '';
-          const pctStr = Number.isFinite(st.pctTot) ? ` (${st.pctTot.toFixed(2)}%)` : '';
-          mcPopDelta.textContent = `${sign}${fmt.format(st.abs)}${pctStr}`;
-          mcPopYoY.textContent = Number.isFinite(st.yoy) ? `${st.yoy.toFixed(2)}%` : '—';
-          mcPopBox.classList.remove('hidden');
-
-          // Charts
-          safeMakeMiniChart(YEARS, st.series);
-          const pctLabels = [ `${YEARS[0]}→${YEARS[1]}`, `${YEARS[1]}→${YEARS[2]}`, `${YEARS[2]}→${YEARS[3]}`, `${YEARS[3]}→${YEARS[4]}` ];
-          safeMakePctChart(pctLabels, percentSeries(st.series));
-        } else {
-          mcPopBox.classList.add('hidden');
-          trendBox.classList.add('hidden');
-          pctBox.classList.add('hidden');
-        }
-
-        mcBody.classList.remove('hidden');
-      }
-
-      // Load population file + build lookup
-      try {
-        const res = await fetch(POP_JSON, { cache: "no-store" });
-        if (res.ok) {
-          popRows = await res.json();
-          popGeoHeader = detectGeoHeader(popRows);
-          buildPopLookup();
-        }
-      } catch (e) {
-        console.warn('Population file load failed:', e);
-      }
-
-      // Leaflet map
+      // Init map
       const prBounds = L.latLngBounds([[17.85, -67.45],[18.55, -65.25]]);
-      const map = L.map('map').fitBounds(prBounds);
+      const map = L.map('map', { zoomSnap: .25 }).fitBounds(prBounds);
+
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors', minZoom: 7, maxZoom: 19
+        attribution: '&copy; OpenStreetMap contributors',
+        minZoom: 7, maxZoom: 19
       }).addTo(map);
 
-      // Prefill with Puerto Rico
-      updateInfoPanel({ NAME: 'Puerto Rico', STATEFP: '72', COUNTYFP: '000' }, null);
+      const gjRes = await fetch(GEOJSON_URL + (GEOJSON_URL.includes('?')?'&':'?') + 'cb=' + Date.now());
+      const fc = await gjRes.json();
 
-      // Load municipios GeoJSON
-      const geojsonUrl = './data/tl_2022_72_cousub/pr_municipalities.geojson';
-      const showError = (msg) => { const el = document.getElementById('errorMsg'); el.textContent = msg; el.classList.remove('hidden'); };
+      const hiStyle = { weight:3, color:'#111827', fillOpacity:0.9 };
 
-      try {
-        const url = geojsonUrl + (geojsonUrl.includes('?') ? '&' : '?') + 'cb=' + Date.now();
-        const res = await fetch(url);
-        if (!res.ok) throw new Error(`HTTP ${res.status} fetching ${url}`);
-        const fc = await res.json();
+      const layer = L.geoJSON(fc, {
+        style: (feature) => {
+          const p = feature.properties || {};
+          const name = p.NAME || p.NAMELSAD || p.name || 'Unknown';
+          const st = statsForMunicipio(name);
+          const col = colorForPctChange(st ? st.pctTot : NaN);
+          return { fillColor: col, weight: 1.2, color:'#111827', fillOpacity:.75 };
+        },
+        onEachFeature: (f, lyr) => {
+          const p = f.properties || {};
+          const name = p.NAME || p.NAMELSAD || p.name || 'Unknown';
+          const geoid = p.GEOID || p.geoid || '';
+          const st = statsForMunicipio(name);
+          const changeLine = st
+            ? `<br><small>2020→2024: ${st.abs>0?'+':''}${fmt.format(st.abs)} (${st.pctTot.toFixed(2)}%)</small>`
+            : '';
+          lyr.bindTooltip(name, { direction:'center', className:'leaflet-tooltip' });
+          lyr.bindPopup(`<strong>${name}</strong>${geoid?`<br><small>GEOID: ${geoid}</small>`:''}${changeLine}`);
 
-        const baseStyle = { fillColor:'#93c5fd', weight:1.2, color:'#111827', fillOpacity:0.7 };
-        const hiStyle   = { weight:3, color:'#374151', fillOpacity:0.9 };
+          lyr.on({
+            mouseover: e => {
+              e.target.setStyle(hiStyle);
+              e.target.bringToFront?.();
+              const c = e.target.getBounds().getCenter();
+              updateDetails(name, statsForMunicipio(name), c);
+            },
+            mouseout: e => layer.resetStyle(e.target),
+            click: e => map.fitBounds(e.target.getBounds(), { padding:[20,20] })
+          });
+        }
+      }).addTo(map);
 
-        const layer = L.geoJSON(fc, {
-          style: baseStyle,
-          onEachFeature: (feature, lyr) => {
-            const p = feature.properties || {};
-            const name = p.NAME || p.NAMELSAD || p.name || 'Unknown';
+      const b = layer.getBounds();
+      if (b.isValid()) map.fitBounds(b, { padding:[15,15] });
 
-            const aland = Number(p.ALAND || p.ALAND20 || 0);
-            const awater = Number(p.AWATER || p.AWATER20 || 0);
-            const landStr  = Number.isFinite(aland) && aland > 0 ? `Land: ${round(aland / M2_PER_MI2, 2)} mi²` : '';
-            const waterStr = Number.isFinite(awater) && awater > 0 ? `Water: ${round(awater / M2_PER_MI2, 2)} mi²` : '';
-            const sep = landStr && waterStr ? ' · ' : '';
-            const tooltipHtml =
-              `<div style="text-align:center;">
-                 <div style="font-weight:700">${name}</div>
-                 <div style="font-size:12px;opacity:.8">${landStr}${sep}${waterStr}</div>
-               </div>`;
+      // Choropleth legend
+      const legend = L.control({ position:'bottomright' });
+      legend.onAdd = function(){
+        const div = L.DomUtil.create('div', 'info legend');
+        div.style.background = 'white';
+        div.style.padding = '8px 10px';
+        div.style.borderRadius = '8px';
+        div.style.boxShadow = '0 2px 8px rgba(0,0,0,.15)';
+        div.style.font = '12px/1.3 system-ui,-apple-system,Segoe UI,Roboto,sans-serif';
+        const b = CHORO_BREAKS, c = CHORO_COLORS;
+        const row = (color, label) =>
+          `<div style="display:flex;align-items:center;gap:.5rem;margin:.2rem 0;">
+            <span style="display:inline-block;width:14px;height:14px;border-radius:3px;background:${color};
+                         border:1px solid rgba(0,0,0,.15)"></span>
+            <span>${label}</span>
+          </div>`;
+        div.innerHTML = `
+          <div style="font-weight:600;margin-bottom:.25rem">Change since 2020</div>
+          ${row(c[0], `≤ ${b[0]}%`)}
+          ${row(c[1], `${b[0]}% to ${b[1]}%`)}
+          ${row(c[2], `${b[1]}% to ${b[2]}%`)}
+          ${row(c[3], `${b[2]}% to ${b[3]}%`)}
+          ${row(c[4], `${b[3]}% to ${b[4]}%`)}
+          ${row(c[5], `> ${b[4]}%`)}
+        `;
+        return div;
+      };
+      legend.addTo(map);
 
-            lyr.bindTooltip(tooltipHtml, { direction: 'center', className: 'leaflet-tooltip' });
-
-            const deeplink = censusLinkFor(p, name);
-            const linkHtml = deeplink
-              ? `<br><a href="${deeplink}" target="_blank" rel="noopener" style="color:#2563eb;text-decoration:underline;">View on data.census.gov ↗</a>`
-              : '';
-            lyr.bindPopup(`<strong>${name}</strong>${linkHtml}`);
-
-            lyr.on({
-              mouseover: e => {
-                e.target.setStyle(hiStyle);
-                e.target.bringToFront?.();
-                updateInfoPanel(p, feature);
-              },
-              mouseout:  e => layer.resetStyle(e.target),
-              click:     e => map.fitBounds(e.target.getBounds(), { padding:[20,20] })
-            });
-          }
-        }).addTo(map);
-
-        const b = layer.getBounds();
-        if (b.isValid()) map.fitBounds(b, { padding: [15,15] });
-
-        window.addEventListener('resize', () => map.invalidateSize());
-      } catch (err) {
-        console.error(err);
-        showError(String(err));
-      }
-    });
+      // Initial details (Puerto Rico overall, if present)
+      const initName = 'Puerto Rico';
+      const st0 = statsForMunicipio(initName) || (function(){
+        // fallback: first municipio in the feature collection
+        const f0 = (fc.features && fc.features[0]) || null;
+        const nm = f0 ? (f0.properties.NAME || f0.properties.NAMELSAD || '—') : '—';
+        return statsForMunicipio(nm);
+      })();
+      updateDetails(initName, st0, null);
+    })();
   </script>
 </body>
 </html>
