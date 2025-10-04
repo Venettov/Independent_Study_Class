@@ -295,6 +295,9 @@
     let selectedLayer = null;
     const selectedOutline = { weight: 4, color: '#111827', dashArray: '3', fillOpacity: 0.85 };
 
+    // Store initial bounds globally so we can restore on "Clear selection"
+    let prBoundsGlobal = null;
+
     (async function init(){
       // Load population rows
       const res = await fetch(POP_JSON, { cache:'no-store' });
@@ -303,6 +306,7 @@
 
       // Map
       const prBounds = L.latLngBounds([[17.85, -67.45],[18.55, -65.25]]);
+      prBoundsGlobal = prBounds; // save for later resets
       map = L.map('map', { zoomSnap: .25 }).fitBounds(prBounds);
 
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -433,11 +437,12 @@
       setActive(currentMode); // initialize classes
     }
 
-    // Clear selection wiring
+    // Clear selection wiring (also zoom back to original bounds)
     function wireClearSelection(){
       function clearSelection(){
         lockedName = null;
         if (selectedLayer) { layer.resetStyle(selectedLayer); selectedLayer = null; }
+        if (prBoundsGlobal) map.fitBounds(prBoundsGlobal, { padding:[15,15] });
       }
       document.getElementById('clearSel').addEventListener('click', clearSelection);
       document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape') clearSelection(); });
