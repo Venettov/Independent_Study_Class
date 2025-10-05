@@ -31,7 +31,7 @@
 
   <main class="max-w-7xl mx-auto px-4 py-6 space-y-6">
 
-    <!-- HERO (standardized to match index/metrics/maps height) -->
+    <!-- HERO -->
     <header class="card hero p-6 sm:p-8 lg:p-10">
       <p class="text-sm font-semibold text-gray-500 uppercase">Graduate Independent Study</p>
       <h1 class="mt-2 text-4xl sm:text-5xl font-extrabold leading-tight">Charts</h1>
@@ -39,8 +39,6 @@
         Interactive 2020–2024 resident-population charts for Puerto Rico and its 78 municipios.
         Data are loaded from <code>data/population/prm-est2024-chg.json</code> (U.S. Census Bureau, Vintage 2024).
       </p>
-
-      <!-- Spacer to match index.html height -->
       <div class="mt-3">&nbsp;</div>
     </header>
     
@@ -123,7 +121,6 @@
     const FULL_JSON = "data/population/prm-est2024-chg.json";
     const YEARS = [2020, 2021, 2022, 2023, 2024];
 
-    // --- Official PR municipios (78) + "Puerto Rico"
     const VALID_MUNICIPIOS = [
       "Adjuntas","Aguada","Aguadilla","Aguas Buenas","Aibonito","Añasco","Arecibo","Arroyo",
       "Barceloneta","Barranquitas","Bayamón","Cabo Rojo","Caguas","Camuy","Canóvanas","Carolina",
@@ -139,7 +136,6 @@
     const stripDiacritics = s => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
     const VALID_LOOKUP = new Set(VALID_MUNICIPIOS.map(n => stripDiacritics(n).toLowerCase()));
 
-    // elements
     const statusEl   = document.getElementById("status");
     const prCtx      = document.getElementById("prChart").getContext("2d");
     const pctCtx     = document.getElementById("pctChart").getContext("2d");
@@ -164,7 +160,6 @@
       return s ? Number(s) : NaN;
     };
 
-    // Prefer 'col_1', else common headers, else heuristic
     function detectGeoHeader(allRows){
       const keys = Object.keys(allRows[0] || {});
       const priority = ["col_1","Geographic Area","Geographic Area Name","Geographic Area:"];
@@ -250,16 +245,25 @@
           responsive: true,
           plugins: {
             legend: { display: false },
-            tooltip: { callbacks: { label: (c)=> `${c.parsed.y.toFixed(2)}%` } }
+            tooltip: {
+              callbacks: {
+                label: (c) => `${c.parsed.y.toFixed(2)}%`
+              }
+            }
           },
-          scales: { y: { ticks: { callback: v => `${v}%` } } }
+          scales: {
+            y: {
+              ticks: {
+                callback: (v) => `${Number(v).toFixed(2)}%`
+              }
+            }
+          }
         }
       });
 
       setStatus("Done.");
     }
 
-    // ---------- custom dropdown ----------
     function openPicker(){
       pickerPanel.classList.remove("hidden");
       pickerSearch.focus();
@@ -303,7 +307,6 @@
     });
     document.addEventListener("keydown", (e)=>{ if (e.key === "Escape") closePicker(); });
 
-    // ---------- load data ----------
     async function fetchFull(){
       const res = await fetch(FULL_JSON, { cache: "no-store" });
       if (!res.ok) throw new Error("Could not fetch full JSON.");
