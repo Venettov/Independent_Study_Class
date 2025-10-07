@@ -5,14 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Population & Economic Dynamics in Puerto Rico</title>
 
-  <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- Leaflet -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 
-  <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
   <style>
@@ -51,7 +48,6 @@
 </head>
 <body class="bg-gray-50 text-gray-900 font-sans">
 
-  <!-- Nav -->
   <nav class="bg-white shadow sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-center gap-6 text-sm sm:text-base">
       <a href="index.html"   class="nav-link border-b-2 border-blue-600 text-blue-600 font-semibold">Home</a>
@@ -65,51 +61,50 @@
 
   <main class="max-w-7xl mx-auto px-4 py-8 space-y-8">
 
-    <!-- HERO -->
-    <header class="card hero p-8 sm:p-10 lg:p-12 relative flex flex-col justify-end">
-        <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between">
-            <div class="max-w-3xl">
-                <p class="text-sm font-semibold text-gray-500 uppercase">Graduate Independent Study</p>
-                <h1 class="mt-2 text-4xl sm:text-5xl font-extrabold leading-tight">
-                    Population & Economic Dynamics in Puerto Rico
-                </h1>
-                <p class="mt-3 text-lg text-gray-700">
-                    A graduate research project examining demographic shifts, out-migration, and sustainable development
-                    strategies through linked data analysis and policy synthesis.
-                </p>
+    <header class="card hero p-8 sm:p-10 lg:p-12 relative">
+      <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between">
+        <div class="max-w-3xl">
+          <p class="text-sm font-semibold text-gray-500 uppercase">Graduate Independent Study</p>
+          <h1 class="mt-2 text-4xl sm:text-5xl font-extrabold leading-tight">
+            Population & Economic Dynamics in Puerto Rico
+          </h1>
+          <p class="mt-3 text-lg text-gray-700">
+            A graduate research project examining demographic shifts, out-migration, and sustainable development
+            strategies through linked data analysis and policy synthesis.
+          </p>
 
-                <div class="mt-5">
-                    <span class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-100 text-slate-800">
-                        <span class="inline-flex w-5 h-5 items-center justify-center rounded-full bg-slate-800 text-white text-xs">i</span>
-                        Hover over the map to see county / municipality details
-                    </span>
-                </div>
-            </div>
+          <div class="mt-5">
+            <span class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-100 text-slate-800">
+              <span class="inline-flex w-5 h-5 items-center justify-center rounded-full bg-slate-800 text-white text-xs">i</span>
+              Hover over the map to see county / municipality details
+            </span>
+          </div>
         </div>
-    
-        <div class="mt-8 lg:mt-0 relative group ml-auto">
-            <div class="text-right">
-                <span class="text-sm font-semibold text-gray-700 cursor-pointer group-hover:text-blue-700 transition">
-                    Customer: Puerto Rico Planning Board
-                </span>
-            </div>
-            <div class="absolute right-0 mt-2 w-96 bg-white text-gray-800 p-4 rounded-lg shadow-xl border border-gray-200 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
-                <p class="text-gray-700 text-sm">
-                    The Planning Board oversees long-term economic development, demographic analysis, and land-use
-                    planning for Puerto Rico. This project’s interactive maps, municipal-level dashboards, and
-                    population change analyses provide actionable insights that could directly support their policy
-                    models and strategic decision-making.
-                </p>
-                <p class="text-sm mt-3">
-                    🔗 <a href="https://jp.pr.gov" target="_blank" rel="noopener" class="text-blue-600 underline">
-                        Visit Puerto Rico Planning Board Website
-                    </a>
-                </p>
-            </div>
+      </div>
+
+      <div class="absolute bottom-4 right-4 group">
+        <div class="text-right">
+          <span class="text-sm font-semibold text-gray-700 cursor-pointer group-hover:text-blue-700 transition">
+            Customer: Puerto Rico Planning Board
+          </span>
         </div>
+
+        <div class="absolute right-0 bottom-full mb-2 w-96 bg-white text-gray-800 p-4 rounded-lg shadow-xl border border-gray-200 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50">
+          <p class="text-gray-700 text-sm">
+            The Planning Board oversees long-term economic development, demographic analysis, and land-use
+            planning for Puerto Rico. This project’s interactive maps, municipal-level dashboards, and
+            population change analyses provide actionable insights that could directly support their policy
+            models and strategic decision-making.
+          </p>
+          <p class="text-sm mt-3">
+            🔗 <a href="https://jp.pr.gov" target="_blank" rel="noopener" class="text-blue-600 underline">
+              Visit Puerto Rico Planning Board Website
+            </a>
+          </p>
+        </div>
+      </div>
     </header>
 
-    <!-- MAP -->
     <section class="card p-4">
       <div class="flex items-center justify-between gap-3">
         <div class="text-sm text-gray-700 font-medium">Map shading by</div>
@@ -127,11 +122,9 @@
       <div id="map" class="mt-3"></div>
     </section>
 
-    <!-- DETAILS -->
     <section class="card p-6">
       <h2 class="text-lg font-semibold mb-4">Population details</h2>
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Left text -->
         <div>
           <div class="text-sm">
             <div>Municipio: <span id="d-name" class="font-semibold">Puerto Rico</span></div>
@@ -154,7 +147,6 @@
           </div>
         </div>
 
-        <!-- Middle: line chart -->
         <div>
           <h3 class="font-semibold mb-2">Population trend (2020–2024)</h3>
           <div class="mini bg-gray-50 rounded p-3">
@@ -162,7 +154,6 @@
           </div>
         </div>
 
-        <!-- Right: bar chart -->
         <div>
           <h3 class="font-semibold mb-2">Annual % Change</h3>
           <div class="mini bg-gray-50 rounded p-3">
