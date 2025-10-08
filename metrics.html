@@ -47,37 +47,32 @@
     <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-center gap-6 text-sm sm:text-base">
       <a href="index.html"   class="nav-link border-b-2 border-transparent">Home</a>
 
-      <!-- Metrics (Dropdown) -->
-      <div class="relative" id="metrics-dropdown-root">
+      <!-- Metrics (Dropdown - hover version) -->
+      <div class="relative group" id="metrics-dropdown-root">
         <button
           id="metrics-toggle"
           class="nav-link border-b-2 border-transparent inline-flex items-center gap-1"
-          aria-haspopup="true"
-          aria-expanded="false"
           type="button"
         >
           Metrics
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 transition-transform group-hover:rotate-180" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
             <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.24 4.5a.75.75 0 01-1.08 0l-4.24-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/>
           </svg>
         </button>
 
-        <!-- Updated dropdown menu -->
+        <!-- Menu appears on hover -->
         <div
           id="metrics-menu"
-          class="invisible opacity-0 pointer-events-none absolute right-0 mt-2 w-64 rounded-xl border border-gray-200 bg-white shadow-lg ring-1 ring-black/5 transition duration-150"
-          role="menu"
-          aria-labelledby="metrics-toggle"
-          tabindex="-1"
+          class="absolute right-0 mt-2 w-64 rounded-xl border border-gray-200 bg-white shadow-lg ring-1 ring-black/5 opacity-0 invisible group-hover:visible group-hover:opacity-100 group-hover:translate-y-0 translate-y-1 transition duration-150 ease-out"
         >
           <div class="py-2">
-            <a href="metrics/population.html" class="block px-4 py-2 hover:bg-gray-50" role="menuitem">Population</a>
-            <a href="metrics/employment.html" class="block px-4 py-2 hover:bg-gray-50" role="menuitem">Employment Rate</a>
-            <a href="metrics/establishments.html" class="block px-4 py-2 hover:bg-gray-50" role="menuitem">Employer Establishments</a>
-            <a href="metrics/income.html" class="block px-4 py-2 hover:bg-gray-50" role="menuitem">Household Income</a>
-            <a href="metrics/housing.html" class="block px-4 py-2 hover:bg-gray-50" role="menuitem">Housing Units</a>
-            <a href="metrics/education.html" class="block px-4 py-2 hover:bg-gray-50" role="menuitem">Education</a>
-            <a href="metrics/health.html" class="block px-4 py-2 hover:bg-gray-50" role="menuitem">Health</a>
+            <a href="metrics/population.html" class="block px-4 py-2 hover:bg-gray-50">Population</a>
+            <a href="metrics/employment.html" class="block px-4 py-2 hover:bg-gray-50">Employment Rate</a>
+            <a href="metrics/establishments.html" class="block px-4 py-2 hover:bg-gray-50">Employer Establishments</a>
+            <a href="metrics/income.html" class="block px-4 py-2 hover:bg-gray-50">Household Income</a>
+            <a href="metrics/housing.html" class="block px-4 py-2 hover:bg-gray-50">Housing Units</a>
+            <a href="metrics/education.html" class="block px-4 py-2 hover:bg-gray-50">Education</a>
+            <a href="metrics/health.html" class="block px-4 py-2 hover:bg-gray-50">Health</a>
           </div>
         </div>
       </div>
