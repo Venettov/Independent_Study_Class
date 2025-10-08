@@ -44,26 +44,6 @@
 
     /* Mini charts area */
     .mini { min-height: 260px; }
-
-    /* --- Metrics dropdown behavior --- */
-    #metrics-menu {
-      opacity: 0;
-      visibility: hidden;
-      transform: translateY(4px);
-      pointer-events: none;
-      transition: opacity .15s ease, transform .15s ease, visibility .15s ease;
-    }
-    #metrics-dropdown-root:hover #metrics-menu,
-    #metrics-dropdown-root.hovering #metrics-menu {
-      opacity: 1;
-      visibility: visible;
-      transform: translateY(0);
-      pointer-events: auto;
-    }
-    #metrics-dropdown-root:hover #metrics-chevron,
-    #metrics-dropdown-root.hovering #metrics-chevron {
-      transform: rotate(180deg);
-    }
   </style>
 </head>
 <body class="bg-gray-50 text-gray-900 font-sans">
@@ -71,31 +51,7 @@
   <nav class="bg-white shadow sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-center gap-6 text-sm sm:text-base">
       <a href="index.html"   class="nav-link border-b-2 border-blue-600 text-blue-600 font-semibold">Home</a>
-
-      <!-- Metrics dropdown (parent is a link, hover + persistence) -->
-      <div class="relative" id="metrics-dropdown-root">
-        <a href="metrics.html" class="nav-link border-b-2 border-transparent inline-flex items-center gap-1 cursor-pointer select-none">
-          Metrics
-          <svg id="metrics-chevron" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 transition-transform" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-            <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.24 4.5a.75.75 0 01-1.08 0l-4.24-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/>
-          </svg>
-        </a>
-
-        <div id="metrics-menu" class="absolute left-0 mt-2 w-64 rounded-xl border border-gray-200 bg-white shadow-lg ring-1 ring-black/5 z-50">
-          <div class="py-2">
-            <a href="metrics.html"               class="block px-4 py-2 hover:bg-gray-50 font-semibold">All Metrics Overview</a>
-            <div class="my-1 border-t border-gray-100"></div>
-            <a href="metrics/population.html"     class="block px-4 py-2 hover:bg-gray-50">Population</a>
-            <a href="metrics/employment.html"     class="block px-4 py-2 hover:bg-gray-50">Employment Rate</a>
-            <a href="metrics/establishments.html" class="block px-4 py-2 hover:bg-gray-50">Employer Establishments</a>
-            <a href="metrics/income.html"         class="block px-4 py-2 hover:bg-gray-50">Household Income</a>
-            <a href="metrics/housing.html"        class="block px-4 py-2 hover:bg-gray-50">Housing Units</a>
-            <a href="metrics/education.html"      class="block px-4 py-2 hover:bg-gray-50">Education</a>
-            <a href="metrics/health.html"         class="block px-4 py-2 hover:bg-gray-50">Health</a>
-          </div>
-        </div>
-      </div>
-
+      <a href="metrics.html" class="nav-link border-b-2 border-transparent">Metrics</a>
       <a href="maps.html"    class="nav-link border-b-2 border-transparent">Maps</a>
       <a href="charts.html"  class="nav-link border-b-2 border-transparent">Charts</a>
       <a href="strategy.html"class="nav-link border-b-2 border-transparent">Strategy</a>
@@ -106,23 +62,23 @@
   <main class="max-w-7xl mx-auto px-4 py-8 space-y-8">
 
     <header class="card hero p-6 sm:p-8 lg:p-10 relative">
-      <div class="flex flex-col lg:flex-row lg:flex-1 lg:items-start lg:justify-between">
-        <div>
-          <p class="text-sm font-semibold text-gray-500 uppercase">Graduate Independent Study</p>
-          <h1 class="mt-2 text-4xl sm:text-5xl font-extrabold leading-tight">
-            Population & Economic Dynamics in Puerto Rico
-          </h1>
-          <p class="mt-3 text-lg text-gray-700">
-            A graduate research project examining demographic shifts, out-migration, and sustainable development
-            strategies through linked data analysis and policy synthesis.
-          </p>
-          <div class="mt-5">
-            <span class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-100 text-slate-800">
-              <span class="inline-flex w-5 h-5 items-center justify-center rounded-full bg-slate-800 text-white text-xs">i</span>
-              Hover over the map to see county / municipality details
-            </span>
+      <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between">
+          <div>
+              <p class="text-sm font-semibold text-gray-500 uppercase">Graduate Independent Study</p>
+              <h1 class="mt-2 text-4xl sm:text-5xl font-extrabold leading-tight">
+                  Population & Economic Dynamics in Puerto Rico
+              </h1>
+              <p class="mt-3 text-lg text-gray-700">
+                  A graduate research project examining demographic shifts, out-migration, and sustainable development
+                  strategies through linked data analysis and policy synthesis.
+              </p>
+              <div class="mt-5">
+                  <span class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-100 text-slate-800">
+                      <span class="inline-flex w-5 h-5 items-center justify-center rounded-full bg-slate-800 text-white text-xs">i</span>
+                      Hover over the map to see county / municipality details
+                  </span>
+              </div>
           </div>
-        </div>
       </div>
 
       <div class="absolute bottom-4 right-4 group">
@@ -313,7 +269,6 @@
       });
 
       const labels = ['2020→2021','2021→2022','2022→2023','2023→2024'];
-      if (boxChart) boxChart.destroy();
       if (barChart) barChart.destroy();
       barChart = new Chart(ctxB, {
         type: 'bar',
@@ -573,27 +528,6 @@
       const p1 = q(pos, 0.5) ?? 100;
       ABS_BREAKS = [n1, n2, n3, 0, p1];
     }
-  </script>
-
-  <!-- Hover persistence script for Metrics dropdown -->
-  <script>
-    (function(){
-      const root = document.getElementById('metrics-dropdown-root');
-      if (!root) return;
-      let hoverTimeout;
-
-      function addHover(){ clearTimeout(hoverTimeout); root.classList.add('hovering'); }
-      function removeHover(){ hoverTimeout = setTimeout(() => root.classList.remove('hovering'), 300); }
-
-      root.addEventListener('mouseenter', addHover);
-      root.addEventListener('mouseleave', removeHover);
-
-      const menu = document.getElementById('metrics-menu');
-      if (menu) {
-        menu.addEventListener('mouseenter', addHover);
-        menu.addEventListener('mouseleave', removeHover);
-      }
-    })();
   </script>
 </body>
 </html>
