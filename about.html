@@ -47,17 +47,20 @@
     <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-center gap-6 text-sm sm:text-base">
       <a href="index.html"  class="nav-link border-b-2 border-transparent">Home</a>
 
-      <!-- Metrics dropdown -->
+      <!-- Metrics dropdown (parent is a link) -->
       <div class="relative" id="metrics-dropdown-root">
-        <div class="nav-link border-b-2 border-transparent inline-flex items-center gap-1 cursor-pointer select-none">
+        <a href="metrics.html" class="nav-link border-b-2 border-transparent inline-flex items-center gap-1 cursor-pointer select-none">
           Metrics
           <svg id="metrics-chevron" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 transition-transform" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
             <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.24 4.5a.75.75 0 01-1.08 0l-4.24-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/>
           </svg>
-        </div>
+        </a>
 
-        <div id="metrics-menu" class="absolute right-0 mt-2 w-64 rounded-xl border border-gray-200 bg-white shadow-lg ring-1 ring-black/5">
+        <div id="metrics-menu" class="absolute right-0 mt-2 w-64 rounded-xl border border-gray-200 bg-white shadow-lg ring-1 ring-black/5 z-50">
           <div class="py-2">
+            <!-- Optional: quick link to the overview page from within the menu -->
+            <a href="metrics.html"               class="block px-4 py-2 hover:bg-gray-50 font-semibold">All Metrics Overview</a>
+            <div class="my-1 border-t border-gray-100"></div>
             <a href="metrics/population.html"     class="block px-4 py-2 hover:bg-gray-50">Population</a>
             <a href="metrics/employment.html"     class="block px-4 py-2 hover:bg-gray-50">Employment Rate</a>
             <a href="metrics/establishments.html" class="block px-4 py-2 hover:bg-gray-50">Employer Establishments</a>
@@ -78,7 +81,7 @@
 
   <!-- unified container width/spacing -->
   <main class="max-w-7xl mx-auto px-4 py-6 space-y-6">
-    <!-- HERO -->
+    <!-- HERO (standardized) -->
     <header class="card hero p-6 sm:p-8 lg:p-10">
       <div>
         <p class="uppercase tracking-wide text-sm font-semibold text-gray-600">Graduate Independent Study</p>
@@ -93,14 +96,16 @@
       <div class="mt-3">&nbsp;</div>
     </header>
 
-    <!-- ACADEMIC INFO -->
+    <!-- ACADEMIC & PROJECT INFO -->
     <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Left: University & Program -->
       <div class="card p-6 space-y-5">
         <div>
           <div class="label">University</div>
           <div class="value">Rutgers, The State University of New Jersey — Camden</div>
           <div class="muted text-sm">Camden, NJ</div>
         </div>
+
         <div>
           <div class="label">Graduate Program</div>
           <div class="value">Data Science (M.S.), Rutgers University–Camden</div>
@@ -109,6 +114,7 @@
             <li><a class="underline" href="https://graduateschool.camden.rutgers.edu/data-science-m-s/" target="_blank" rel="noopener">Graduate School overview</a></li>
           </ul>
         </div>
+
         <div class="grid grid-cols-2 gap-4">
           <div class="p-4 rounded-xl bg-gray-50">
             <div class="label">Course</div>
@@ -121,6 +127,7 @@
         </div>
       </div>
 
+      <!-- Middle: Student / Instructor -->
       <div class="card p-6 space-y-5">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div class="p-4 rounded-xl bg-gray-50">
@@ -133,6 +140,7 @@
             <div class="muted text-sm">Faculty Advisor</div>
           </div>
         </div>
+
         <div class="p-4 rounded-xl bg-gray-50">
           <div class="label">Project Type</div>
           <div class="value">Graduate Research Project</div>
@@ -140,6 +148,7 @@
         </div>
       </div>
 
+      <!-- Right: Quick Links -->
       <aside class="card p-6">
         <h3 class="text-lg font-semibold">Project Links</h3>
         <div class="mt-3 grid grid-cols-1 gap-3">
@@ -164,10 +173,26 @@
       <h2 class="text-2xl font-bold">Project Timeline</h2>
       <div class="relative timeline mt-5">
         <ul class="space-y-6">
-          <li class="relative pl-10"><span class="absolute left-2 top-1.5 w-4 h-4 bg-blue-600 rounded-full ring-4 ring-blue-100"></span><div class="font-semibold">Kickoff & Scoping</div><div class="muted text-sm">Topic selection, research questions, and dataset inventory.</div></li>
-          <li class="relative pl-10"><span class="absolute left-2 top-1.5 w-4 h-4 bg-indigo-600 rounded-full ring-4 ring-indigo-100"></span><div class="font-semibold">Data Wrangling & EDA</div><div class="muted text-sm">Cleaning, merging, and exploratory analysis of population/economic data.</div></li>
-          <li class="relative pl-10"><span class="absolute left-2 top-1.5 w-4 h-4 bg-emerald-600 rounded-full ring-4 ring-emerald-100"></span><div class="font-semibold">Modeling & Insight Generation</div><div class="muted text-sm">Trend modeling, migration/poverty mapping, and scenario testing.</div></li>
-          <li class="relative pl-10"><span class="absolute left-2 top-1.5 w-4 h-4 bg-rose-600 rounded-full ring-4 ring-rose-100"></span><div class="font-semibold">Write-Up & Presentation</div><div class="muted text-sm">Synthesis, policy recommendations, and final deliverables.</div></li>
+          <li class="relative pl-10">
+            <span class="absolute left-2 top-1.5 w-4 h-4 bg-blue-600 rounded-full ring-4 ring-blue-100"></span>
+            <div class="font-semibold">Kickoff & Scoping</div>
+            <div class="muted text-sm">Topic selection, research questions, and dataset inventory.</div>
+          </li>
+          <li class="relative pl-10">
+            <span class="absolute left-2 top-1.5 w-4 h-4 bg-indigo-600 rounded-full ring-4 ring-indigo-100"></span>
+            <div class="font-semibold">Data Wrangling & EDA</div>
+            <div class="muted text-sm">Cleaning, merging, and exploratory analysis of population/economic data.</div>
+          </li>
+          <li class="relative pl-10">
+            <span class="absolute left-2 top-1.5 w-4 h-4 bg-emerald-600 rounded-full ring-4 ring-emerald-100"></span>
+            <div class="font-semibold">Modeling & Insight Generation</div>
+            <div class="muted text-sm">Trend modeling, migration/poverty mapping, and scenario testing.</div>
+          </li>
+          <li class="relative pl-10">
+            <span class="absolute left-2 top-1.5 w-4 h-4 bg-rose-600 rounded-full ring-4 ring-rose-100"></span>
+            <div class="font-semibold">Write-Up & Presentation</div>
+            <div class="muted text-sm">Synthesis, policy recommendations, and final deliverables.</div>
+          </li>
         </ul>
       </div>
     </section>
@@ -177,10 +202,12 @@
       <h2 class="text-2xl font-bold">Customer</h2>
       <div class="mt-4 space-y-3">
         <p><span class="font-semibold">Puerto Rico Planning Board (Junta de Planificación)</span></p>
-        <p class="text-gray-700">The Planning Board oversees long-term economic development, demographic analysis, and land-use
+        <p class="text-gray-700">
+          The Planning Board oversees long-term economic development, demographic analysis, and land-use
           planning for Puerto Rico. This project’s interactive maps, municipal-level dashboards, and
           population change analyses provide actionable insights that could directly support their policy
-          models and strategic decision-making.</p>
+          models and strategic decision-making.
+        </p>
         <p class="text-sm">🔗 <a href="https://jp.pr.gov" target="_blank" rel="noopener" class="text-blue-600 underline">Visit Puerto Rico Planning Board Website</a></p>
       </div>
     </section>
@@ -195,6 +222,7 @@
         a.setAttribute('aria-current','page');
       }
     });
+
     // Fill term/year
     const d = new Date();
     const month = d.getMonth();
