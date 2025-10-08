@@ -75,7 +75,7 @@
       <a href="../index.html"   class="nav-link border-b-2 border-transparent">Home</a>
 
       <div class="relative" id="metrics-dropdown-root">
-        <a href="../metrics.html" class="nav-link border-b-2 border-blue-600 text-blue-600 font-semibold inline-flex items-center gap-1 cursor-pointer select-none">
+        <a href="../metrics.html" class="nav-link border-b-2 border-transparent inline-flex items-center gap-1 cursor-pointer select-none">
           Metrics
           <svg id="metrics-chevron" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 transition-transform" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
             <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.24 4.5a.75.75 0 01-1.08 0l-4.24-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/>
@@ -188,6 +188,7 @@
               Open on data.census.gov ↗
             </a>
           </div>
+          <Image of a person looking through a magnifying glass at a map of Puerto Rico>
         </div>
 
         <div>
@@ -594,19 +595,31 @@
     
     // Highlights active nav link
     document.addEventListener('DOMContentLoaded', () => {
-      // Set the active class on the "Metrics" dropdown root
-      const metricsRoot = document.getElementById('metrics-dropdown-root');
-      const metricsLink = metricsRoot.querySelector('a');
-      metricsRoot.classList.add('nav-link', 'border-b-2', 'border-blue-600', 'text-blue-600', 'font-semibold');
-      metricsLink.removeAttribute('href'); // Remove href from the dropdown parent
-      metricsRoot.setAttribute('aria-current', 'page');
+      // Find the main "Metrics" nav link within the dropdown root
+      const metricsLink = document.querySelector('#metrics-dropdown-root > a');
+      
+      // Check if the current page is a child page within the metrics folder
+      const isMetricsSubPage = window.location.pathname.includes('/metrics/');
 
-      // Set the active class on the specific page link in the dropdown
-      const pathname = location.pathname.split('/').pop();
-      const populationLink = document.querySelector(`a[href='${pathname}']`);
-      if (populationLink) {
-        populationLink.classList.add('bg-gray-100');
-        populationLink.setAttribute('aria-current', 'page');
+      if (isMetricsSubPage) {
+        // If it's a sub-page, highlight the "Metrics" parent link
+        metricsLink.classList.add('border-b-2', 'border-blue-600', 'text-blue-600', 'font-semibold');
+        metricsLink.setAttribute('aria-current', 'page');
+        
+        // And highlight the specific sub-page link within the dropdown
+        const currentPathname = window.location.pathname.split('/').pop();
+        const subPageLink = document.querySelector(`#metrics-menu a[href="${currentPathname}"]`);
+        if (subPageLink) {
+          subPageLink.classList.add('bg-gray-100', 'font-semibold');
+        }
+      } else {
+        // If it's a top-level page, highlight the correct top-level link
+        document.querySelectorAll('.nav-link[href]').forEach(a => {
+          if (a.href.endsWith(window.location.pathname)) {
+            a.classList.add('border-b-2', 'border-blue-600', 'text-blue-600', 'font-semibold');
+            a.setAttribute('aria-current', 'page');
+          }
+        });
       }
     });
   </script>
