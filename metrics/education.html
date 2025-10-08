@@ -44,18 +44,61 @@
 
     /* Mini charts area */
     .mini { min-height: 260px; }
+
+    /* --- Dropdown base state & transitions --- */
+    #metrics-menu {
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(4px);
+      pointer-events: none;
+      transition: opacity .15s ease, transform .15s ease, visibility .15s ease;
+    }
+    /* Show menu when hovering root or while JS adds .hovering for grace period */
+    #metrics-dropdown-root:hover #metrics-menu,
+    #metrics-dropdown-root.hovering #metrics-menu {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+    /* Rotate chevron when open */
+    #metrics-dropdown-root:hover #metrics-chevron,
+    #metrics-dropdown-root.hovering #metrics-chevron {
+      transform: rotate(180deg);
+    }
   </style>
 </head>
 <body class="bg-gray-50 text-gray-900 font-sans">
 
   <nav class="bg-white shadow sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-center gap-6 text-sm sm:text-base">
-      <a href="index.html"   class="nav-link border-b-2 border-blue-600 text-blue-600 font-semibold">Home</a>
-      <a href="metrics.html" class="nav-link border-b-2 border-transparent">Metrics</a>
-      <a href="maps.html"    class="nav-link border-b-2 border-transparent">Maps</a>
-      <a href="charts.html"  class="nav-link border-b-2 border-transparent">Charts</a>
-      <a href="strategy.html"class="nav-link border-b-2 border-transparent">Strategy</a>
-      <a href="about.html"   class="nav-link border-b-2 border-transparent">About</a>
+      <a href="../index.html"   class="nav-link border-b-2 border-transparent">Home</a>
+
+      <div class="relative" id="metrics-dropdown-root">
+        <a href="../metrics.html" class="nav-link border-b-2 border-transparent inline-flex items-center gap-1 cursor-pointer select-none">
+          Metrics
+          <svg id="metrics-chevron" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 transition-transform" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.24 4.5a.75.75 0 01-1.08 0l-4.24-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/>
+          </svg>
+        </a>
+        <div id="metrics-menu" class="absolute right-0 mt-2 w-64 rounded-xl border border-gray-200 bg-white shadow-lg ring-1 ring-black/5 z-50">
+          <div class="py-2">
+            <a href="../metrics.html"               class="block px-4 py-2 hover:bg-gray-50 font-semibold">All Metrics Overview</a>
+            <div class="my-1 border-t border-gray-100"></div>
+            <a href="population.html"     class="block px-4 py-2 hover:bg-gray-50">Population</a>
+            <a href="employment.html"     class="block px-4 py-2 hover:bg-gray-50">Employment Rate</a>
+            <a href="establishments.html" class="block px-4 py-2 hover:bg-gray-50">Employer Establishments</a>
+            <a href="income.html"         class="block px-4 py-2 hover:bg-gray-50">Household Income</a>
+            <a href="housing.html"        class="block px-4 py-2 hover:bg-gray-50">Housing Units</a>
+            <a href="education.html"      class="block px-4 py-2 hover:bg-gray-50">Education</a>
+            <a href="health.html"         class="block px-4 py-2 hover:bg-gray-50">Health</a>
+          </div>
+        </div>
+      </div>
+
+      <a href="../charts.html"  class="nav-link border-b-2 border-transparent">Literature</a>
+      <a href="../strategy.html"class="nav-link border-b-2 border-transparent">Strategy</a>
+      <a href="../about.html"   class="nav-link border-b-2 border-transparent">About</a>
     </div>
   </nav>
 
@@ -144,6 +187,7 @@
               Open on data.census.gov ↗
             </a>
           </div>
+          <Image of a person looking through a magnifying glass at a map of Puerto Rico>
         </div>
 
         <div>
@@ -165,8 +209,8 @@
 
   <script>
     // ---------------------- Data paths ----------------------
-    const GEOJSON_URL = './data/tl_2022_72_cousub/pr_municipalities.geojson';
-    const POP_JSON    = './data/population/prm-est2024-chg.json';
+    const GEOJSON_URL = '../data/tl_2022_72_cousub/pr_municipalities.geojson';
+    const POP_JSON    = '../data/population/prm-est2024-chg.json';
 
     // ---------------------- Formatters ----------------------
     const fmt = new Intl.NumberFormat('en-US');
@@ -422,6 +466,7 @@
       // Toggle UI + Clear selection
       wireMetricToggle();
       wireClearSelection();
+      wireDropdown();
     })();
 
     // ---------- Metric toggle ----------
@@ -528,6 +573,54 @@
       const p1 = q(pos, 0.5) ?? 100;
       ABS_BREAKS = [n1, n2, n3, 0, p1];
     }
+    
+    // Dropdown functionality & active link
+    function wireDropdown() {
+      const root = document.getElementById('metrics-dropdown-root');
+      if (!root) return;
+      let hoverTimeout;
+      const menu = document.getElementById('metrics-menu');
+
+      function addHovering(){ clearTimeout(hoverTimeout); root.classList.add('hovering'); }
+      function removeHovering(){ hoverTimeout = setTimeout(()=>root.classList.remove('hovering'), 300); }
+
+      root.addEventListener('mouseenter', addHovering);
+      root.addEventListener('mouseleave', removeHovering);
+      if (menu) {
+        menu.addEventListener('mouseenter', addHovering);
+        menu.addEventListener('mouseleave', removeHovering);
+      }
+    }
+    
+    // Highlights active nav link
+    document.addEventListener('DOMContentLoaded', () => {
+      // Find the main "Metrics" nav link within the dropdown root
+      const metricsLink = document.querySelector('#metrics-dropdown-root > a');
+      
+      // Check if the current page is a child page within the metrics folder
+      const isMetricsSubPage = window.location.pathname.includes('/metrics/');
+
+      if (isMetricsSubPage) {
+        // If it's a sub-page, highlight the "Metrics" parent link
+        metricsLink.classList.add('border-b-2', 'border-blue-600', 'text-blue-600', 'font-semibold');
+        metricsLink.setAttribute('aria-current', 'page');
+        
+        // And highlight the specific sub-page link within the dropdown
+        const currentPathname = window.location.pathname.split('/').pop();
+        const subPageLink = document.querySelector(`#metrics-menu a[href="${currentPathname}"]`);
+        if (subPageLink) {
+          subPageLink.classList.add('bg-gray-100', 'font-semibold');
+        }
+      } else {
+        // If it's a top-level page, highlight the correct top-level link
+        document.querySelectorAll('.nav-link[href]').forEach(a => {
+          if (a.href.endsWith(window.location.pathname)) {
+            a.classList.add('border-b-2', 'border-blue-600', 'text-blue-600', 'font-semibold');
+            a.setAttribute('aria-current', 'page');
+          }
+        });
+      }
+    });
   </script>
 </body>
 </html>
