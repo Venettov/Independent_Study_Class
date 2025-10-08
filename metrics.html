@@ -36,6 +36,9 @@
         radial-gradient(1200px 600px at 80% -10%, rgba(37,99,235,.10), transparent 60%),
         linear-gradient(180deg, #fafafa 0%, #f3f4f6 100%);
     }
+
+    /* Smooth scrolling for anchor links */
+    html { scroll-behavior: smooth; }
   </style>
 </head>
 <body class="bg-gray-50 text-gray-900 font-sans">
@@ -43,7 +46,42 @@
   <nav class="bg-white shadow sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-center gap-6 text-sm sm:text-base">
       <a href="index.html"   class="nav-link border-b-2 border-transparent">Home</a>
-      <a href="metrics.html" class="nav-link border-b-2 border-transparent">Metrics</a>
+
+      <!-- Metrics (Dropdown) -->
+      <div class="relative" id="metrics-dropdown-root">
+        <button
+          id="metrics-toggle"
+          class="nav-link border-b-2 border-transparent inline-flex items-center gap-1"
+          aria-haspopup="true"
+          aria-expanded="false"
+          type="button"
+        >
+          Metrics
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.24 4.5a.75.75 0 01-1.08 0l-4.24-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/>
+          </svg>
+        </button>
+
+        <!-- Updated dropdown menu -->
+        <div
+          id="metrics-menu"
+          class="invisible opacity-0 pointer-events-none absolute right-0 mt-2 w-64 rounded-xl border border-gray-200 bg-white shadow-lg ring-1 ring-black/5 transition duration-150"
+          role="menu"
+          aria-labelledby="metrics-toggle"
+          tabindex="-1"
+        >
+          <div class="py-2">
+            <a href="metrics/population.html" class="block px-4 py-2 hover:bg-gray-50" role="menuitem">Population</a>
+            <a href="metrics/employment.html" class="block px-4 py-2 hover:bg-gray-50" role="menuitem">Employment Rate</a>
+            <a href="metrics/establishments.html" class="block px-4 py-2 hover:bg-gray-50" role="menuitem">Employer Establishments</a>
+            <a href="metrics/income.html" class="block px-4 py-2 hover:bg-gray-50" role="menuitem">Household Income</a>
+            <a href="metrics/housing.html" class="block px-4 py-2 hover:bg-gray-50" role="menuitem">Housing Units</a>
+            <a href="metrics/education.html" class="block px-4 py-2 hover:bg-gray-50" role="menuitem">Education</a>
+            <a href="metrics/health.html" class="block px-4 py-2 hover:bg-gray-50" role="menuitem">Health</a>
+          </div>
+        </div>
+      </div>
+
       <a href="maps.html"    class="nav-link border-b-2 border-transparent">Maps</a>
       <a href="charts.html"  class="nav-link border-b-2 border-transparent">Charts</a>
       <a href="strategy.html"class="nav-link border-b-2 border-transparent">Strategy</a>
@@ -67,7 +105,7 @@
     <!-- ===== Stats grid ===== -->
     <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
       <div class="space-y-6 stat-section">
-        <h2>Populations and People</h2>
+        <h2 id="total-population">Populations and People</h2>
         <div class="stat-card">
           <div class="stat-icon">👥</div>
           <div class="stat-body min-w-0">
@@ -77,7 +115,7 @@
           </div>
         </div>
 
-        <div class="stat-card">
+        <div class="stat-card" id="employment-rate">
           <div class="stat-icon">📈</div>
           <div class="stat-body min-w-0">
             <div class="label">Employment Rate</div>
@@ -86,7 +124,7 @@
           </div>
         </div>
 
-        <h2 class="mt-6">Business and Economy</h2>
+        <h2 class="mt-6" id="employer-establishments">Business and Economy</h2>
         <div class="stat-card">
           <div class="stat-icon">🏢</div>
           <div class="stat-body min-w-0">
@@ -98,7 +136,7 @@
       </div>
 
       <div class="space-y-6 stat-section">
-        <h2>Income and Poverty</h2>
+        <h2 id="household-income">Income and Poverty</h2>
         <div class="stat-card">
           <div class="stat-icon">💵</div>
           <div class="stat-body min-w-0">
@@ -108,7 +146,7 @@
           </div>
         </div>
 
-        <h2 class="mt-6">Housing</h2>
+        <h2 class="mt-6" id="housing-units">Housing</h2>
         <div class="stat-card">
           <div class="stat-icon">🏠</div>
           <div class="stat-body min-w-0">
@@ -130,7 +168,7 @@
       </div>
 
       <div class="space-y-6 stat-section">
-        <h2>Education</h2>
+        <h2 id="education">Education</h2>
         <div class="stat-card">
           <div class="stat-icon">🎓</div>
           <div class="stat-body min-w-0">
@@ -140,7 +178,7 @@
           </div>
         </div>
 
-        <h2 class="mt-6">Health</h2>
+        <h2 class="mt-6" id="health">Health</h2>
         <div class="stat-card">
           <div class="stat-icon">🏥</div>
           <div class="stat-body min-w-0">
@@ -155,14 +193,53 @@
   </main>
 
   <script>
-    // highlight current link
+    // highlight current link (treat Metrics as current page)
     const links = document.querySelectorAll('.nav-link');
     links.forEach(a => {
-      if (location.pathname.endsWith(a.getAttribute('href')) ||
-          (location.pathname === '/' && a.getAttribute('href') === 'metrics.html')) {
+      const href = a.getAttribute('href');
+      if (!href) return;
+      if (location.pathname.endsWith(href) ||
+          (location.pathname === '/' && href === 'metrics.html')) {
         a.classList.add('text-blue-600','font-semibold','border-blue-600');
         a.setAttribute('aria-current','page');
       }
+    });
+
+    // Dropdown behavior (click to toggle, click-outside/escape to close)
+    const root = document.getElementById('metrics-dropdown-root');
+    const toggle = document.getElementById('metrics-toggle');
+    const menu = document.getElementById('metrics-menu');
+
+    function openMenu() {
+      menu.classList.remove('invisible','opacity-0','pointer-events-none');
+      toggle.setAttribute('aria-expanded','true');
+    }
+    function closeMenu() {
+      menu.classList.add('invisible','opacity-0','pointer-events-none');
+      toggle.setAttribute('aria-expanded','false');
+    }
+    function isOpen() {
+      return !menu.classList.contains('invisible');
+    }
+
+    toggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      isOpen() ? closeMenu() : openMenu();
+    });
+
+    // Close when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!root.contains(e.target)) closeMenu();
+    });
+
+    // Close on Escape
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeMenu();
+    });
+
+    // Close menu after clicking an item (and keep smooth scroll)
+    menu.querySelectorAll('a[href^="#"]').forEach(a => {
+      a.addEventListener('click', () => closeMenu());
     });
   </script>
 </body>
