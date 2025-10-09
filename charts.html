@@ -4,8 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Puerto Rico — Literature</title>
+
+  <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
+
   <style>
     body { background:#f3f4f6; color:#111827; }
     .card { background:#fff; border-radius:1rem; box-shadow:0 10px 15px -3px rgba(0,0,0,.1), 0 4px 6px -2px rgba(0,0,0,.05); }
@@ -16,7 +18,7 @@
         linear-gradient(180deg, #fafafa 0%, #f3f4f6 100%);
     }
 
-    /* Dropdown behavior */
+    /* Dropdown behavior (hover to open, with forgiving persistence) */
     #metrics-menu {
       opacity: 0;
       visibility: hidden;
@@ -37,10 +39,12 @@
     }
   </style>
 </head>
+
 <body class="bg-gray-50 text-gray-900 font-sans">
+  <!-- Top Nav -->
   <nav class="bg-white shadow sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-center gap-6 text-sm sm:text-base">
-      <a href="index.html"   class="nav-link border-b-2 border-transparent">Home</a>
+      <a href="index.html" class="nav-link border-b-2 border-transparent">Home</a>
 
       <div class="relative" id="metrics-dropdown-root">
         <a href="metrics.html" class="nav-link border-b-2 border-transparent inline-flex items-center gap-1 cursor-pointer select-none">
@@ -63,313 +67,222 @@
           </div>
         </div>
       </div>
-      
-      <a href="charts.html"  class="nav-link border-b-2 border-transparent">Literature</a>
-      <a href="strategy.html"class="nav-link border-b-2 border-transparent">Strategy</a>
-      <a href="about.html"   class="nav-link border-b-2 border-transparent">About</a>
+
+      <a href="charts.html"   class="nav-link border-b-2 border-transparent">Literature</a>
+      <a href="strategy.html" class="nav-link border-b-2 border-transparent">Strategy</a>
+      <a href="about.html"    class="nav-link border-b-2 border-transparent">About</a>
     </div>
   </nav>
 
   <main class="max-w-7xl mx-auto px-4 py-6 space-y-6">
-
+    <!-- Hero -->
     <header class="card hero p-6 sm:p-8 lg:p-10">
       <p class="text-sm font-semibold text-gray-500 uppercase">Graduate Independent Study</p>
-      <h1 class="mt-2 text-4xl sm:text-5xl font-extrabold leading-tight">Population & Economic Dynamics in Puerto Rico</h1>
+      <h1 class="mt-2 text-4xl sm:text-5xl font-extrabold leading-tight">
+        Population & Economic Dynamics in Puerto Rico — Literature Review
+      </h1>
       <p class="mt-3 text-lg text-gray-700">
-        Literature analysis on Puerto Rico's population & economic changes.
+        A concise synthesis of peer-reviewed research, federal datasets, and policy analyses on demographic decline,
+        economic structure, housing pressures, and strategic development pathways.
       </p>
-      <div class="mt-3">&nbsp;</div>
     </header>
-    
-    <section class="card p-5">
-      <div class="flex flex-wrap items-center justify-center gap-3">
-        <span class="text-sm text-gray-600">Municipio:</span>
 
-        <div class="relative">
-          <button id="pickerBtn"
-                  class="w-72 px-3 py-2 rounded border bg-white text-sm flex items-center justify-between gap-3">
-            <span id="pickerLabel">Loading…</span>
-            <svg class="w-4 h-4 opacity-70" viewBox="0 0 20 20" fill="currentColor"><path d="M5.8 7l4.2 4.3L14.2 7 16 8.8l-6 6-6-6z"/></svg>
-          </button>
+    <!-- Key Takeaway Strip -->
+    <section class="grid md:grid-cols-3 gap-4">
+      <div class="card p-5 flex gap-3">
+        <svg class="w-6 h-6 mt-1 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3l9 4-9 4-9-4 9-4zm0 7l9 4-9 4-9-4 9-4zm0 7l9 4-9 4-9-4 9-4z"/></svg>
+        <div>
+          <h3 class="font-semibold">Demographic headwinds</h3>
+          <p class="text-sm text-gray-600">Very low fertility, rapid aging, and sustained out-migration reinforce one another.</p>
+        </div>
+      </div>
+      <div class="card p-5 flex gap-3">
+        <svg class="w-6 h-6 mt-1 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M3 12l18-9v6l-18 9V12zm0 4l18-9v6l-18 9v-6z"/></svg>
+        <div>
+          <h3 class="font-semibold">Economic fragility</h3>
+          <p class="text-sm text-gray-600">Post-936 industrial decline, lower wages, and a shrinking labor base depress growth.</p>
+        </div>
+      </div>
+      <div class="card p-5 flex gap-3">
+        <svg class="w-6 h-6 mt-1 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M4 10l8-6 8 6v10H4V10zm8 2l-4 3h8l-4-3z"/></svg>
+        <div>
+          <h3 class="font-semibold">Household stress</h3>
+          <p class="text-sm text-gray-600">High poverty and cost burdens intersect with environmental risk in housing.</p>
+        </div>
+      </div>
+    </section>
 
-          <div id="pickerPanel"
-               class="hidden absolute z-20 mt-1 w-80 bg-white border rounded-lg shadow-lg">
-            <div class="p-2 border-b">
-              <input id="pickerSearch" type="text" placeholder="Search municipio…"
-                     class="w-full px-2 py-1.5 rounded border bg-white text-sm">
-            </div>
-            <ul id="pickerList" class="max-h-64 overflow-auto py-1 text-sm"></ul>
+    <!-- Thematic Cards -->
+    <section class="grid lg:grid-cols-2 gap-6">
+      <!-- Population Dynamics -->
+      <article class="card p-6">
+        <div class="flex items-start gap-3">
+          <div class="rounded-xl bg-blue-50 text-blue-700 p-2">
+            <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12a5 5 0 100-10 5 5 0 000 10zm-7 9a7 7 0 0114 0H5z"/></svg>
+          </div>
+          <div>
+            <h2 class="text-xl font-semibold">Population Dynamics</h2>
+            <p class="mt-2 text-gray-700 text-sm leading-relaxed">
+              Research identifies **migration as the dominant driver of rapid aging**, amplified after major shocks.
+              A **very low total fertility rate** and a rising median age reduce future labor supply and increase dependency ratios.
+            </p>
+            <ul class="mt-3 grid sm:grid-cols-2 gap-2 text-sm">
+              <li class="bg-gray-50 rounded-lg px-3 py-2">Post-Maria migration spikes shifted age structure</li>
+              <li class="bg-gray-50 rounded-lg px-3 py-2">Working-age outflows reduce human capital locally</li>
+              <li class="bg-gray-50 rounded-lg px-3 py-2">Enrollment declines cascade into school closures</li>
+              <li class="bg-gray-50 rounded-lg px-3 py-2">Aging raises health and social-service demand</li>
+            </ul>
           </div>
         </div>
+      </article>
 
-        <button id="reloadBtn" class="px-3 py-2 rounded-lg bg-blue-600 text-white text-sm hover:bg-blue-700">
-          Reload
-        </button>
+      <!-- Economic Structure -->
+      <article class="card p-6">
+        <div class="flex items-start gap-3">
+          <div class="rounded-xl bg-amber-50 text-amber-700 p-2">
+            <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor"><path d="M3 13h2v-2H3v2zm4 0h14v-2H7v2zM3 17h18v-2H3v2zm0-8h18V7H3v2z"/></svg>
+          </div>
+          <div>
+            <h2 class="text-xl font-semibold">Economic Structure & Performance</h2>
+            <p class="mt-2 text-gray-700 text-sm leading-relaxed">
+              The **phase-out of Section 936** eroded manufacturing anchors and exposed structural weaknesses.
+              Wages trail the U.S. average, and a shrinking workforce constrains consumption and tax revenues.
+            </p>
+            <ul class="mt-3 grid sm:grid-cols-2 gap-2 text-sm">
+              <li class="bg-gray-50 rounded-lg px-3 py-2">Lower average wages limit household demand</li>
+              <li class="bg-gray-50 rounded-lg px-3 py-2">Employment losses concentrated in tradables</li>
+              <li class="bg-gray-50 rounded-lg px-3 py-2">Consumer spending contracted in the 2010s</li>
+              <li class="bg-gray-50 rounded-lg px-3 py-2">Small-firm formation & innovation are pivotal</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <!-- Poverty & Housing -->
+      <article class="card p-6">
+        <div class="flex items-start gap-3">
+          <div class="rounded-xl bg-rose-50 text-rose-700 p-2">
+            <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5A5.5 5.5 0 017.5 3h.03A5.5 5.5 0 0118 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+          </div>
+          <div>
+            <h2 class="text-xl font-semibold">Poverty, Inequality & Housing</h2>
+            <p class="mt-2 text-gray-700 text-sm leading-relaxed">
+              **Poverty remains pervasive** across municipios, with high child poverty and pronounced inequality.
+              Housing affordability is stressed and intersected by **hazard exposure** in vulnerable areas.
+            </p>
+            <ul class="mt-3 grid sm:grid-cols-2 gap-2 text-sm">
+              <li class="bg-gray-50 rounded-lg px-3 py-2">Cost-burdened households limit mobility</li>
+              <li class="bg-gray-50 rounded-lg px-3 py-2">Median incomes remain low relative to costs</li>
+              <li class="bg-gray-50 rounded-lg px-3 py-2">Exposure to landslide-prone terrain elevates risk</li>
+              <li class="bg-gray-50 rounded-lg px-3 py-2">Targeted rehabilitation & resilience are key</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <!-- Strategy Lens -->
+      <article class="card p-6">
+        <div class="flex items-start gap-3">
+          <div class="rounded-xl bg-emerald-50 text-emerald-700 p-2">
+            <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7l3-7z"/></svg>
+          </div>
+          <div>
+            <h2 class="text-xl font-semibold">Strategy Lens</h2>
+            <p class="mt-2 text-gray-700 text-sm leading-relaxed">
+              A durable path centers on **locally anchored sectors**, talent retention, and neighborhood-level inclusion.
+              Evidence points to pairing industrial strategy with human-capital and housing resilience.
+            </p>
+            <ol class="mt-3 list-decimal pl-5 space-y-2 text-sm">
+              <li><span class="font-medium">Rebuild tradables:</span> biomanufacturing adjacencies, tech-enabled services, and visitor economy with local capture.</li>
+              <li><span class="font-medium">Invest in skills:</span> workforce pipelines tied to employer demand and returning migrants.</li>
+              <li><span class="font-medium">Stabilize families:</span> affordable housing, childcare access, and school modernization in shrinking-enrollment zones.</li>
+              <li><span class="font-medium">Plan for risk:</span> resilience upgrades in high-susceptibility areas; target buy-downs and relocation where needed.</li>
+            </ol>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <!-- Evidence at a Glance -->
+    <section class="card p-6">
+      <h2 class="text-xl font-semibold">Evidence at a Glance</h2>
+      <div class="mt-4 grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="rounded-xl border p-4">
+          <p class="text-xs uppercase text-gray-500">Fertility</p>
+          <p class="text-2xl font-extrabold">Very low TFR</p>
+          <p class="text-sm text-gray-600 mt-1">Among the lowest globally; accelerates population aging.</p>
+        </div>
+        <div class="rounded-xl border p-4">
+          <p class="text-xs uppercase text-gray-500">Aging</p>
+          <p class="text-2xl font-extrabold">Median age ↑</p>
+          <p class="text-sm text-gray-600 mt-1">Aged structure raises care costs and dependency ratios.</p>
+        </div>
+        <div class="rounded-xl border p-4">
+          <p class="text-xs uppercase text-gray-500">Wages</p>
+          <p class="text-2xl font-extrabold">Below U.S.</p>
+          <p class="text-sm text-gray-600 mt-1">Lower earnings constrain consumption and savings.</p>
+        </div>
+        <div class="rounded-xl border p-4">
+          <p class="text-xs uppercase text-gray-500">Poverty</p>
+          <p class="text-2xl font-extrabold">High & pervasive</p>
+          <p class="text-sm text-gray-600 mt-1">Child poverty especially elevated; inequality remains high.</p>
+        </div>
       </div>
     </section>
 
-    <section class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <div class="bg-white rounded-lg shadow p-4">
-        <h2 id="lineTitle" class="text-lg font-semibold mb-3">Population (2020–2024)</h2>
-        <div class="aspect-video bg-gray-50 rounded p-3">
-          <canvas id="prChart"></canvas>
+    <!-- “So What?” Box -->
+    <section class="card p-6">
+      <h2 class="text-xl font-semibold">What this means for policy & practice</h2>
+      <div class="mt-3 grid md:grid-cols-3 gap-4">
+        <div class="rounded-lg bg-blue-50 p-4">
+          <h3 class="font-semibold">Talent</h3>
+          <p class="text-sm text-gray-700">Retain and attract working-age residents via career ladders and re-entry pathways for returnees.</p>
         </div>
-        <p id="status" class="mt-2 text-xs text-gray-500"></p>
-      </div>
-
-      <div class="bg-white rounded-lg shadow p-4">
-        <h2 id="barTitle" class="text-lg font-semibold mb-3">Annual % Change</h2>
-        <div class="aspect-video bg-gray-50 rounded p-3">
-          <canvas id="pctChart"></canvas>
+        <div class="rounded-lg bg-amber-50 p-4">
+          <h3 class="font-semibold">Firms</h3>
+          <p class="text-sm text-gray-700">Support clusters with supplier development, export help, and access to growth capital.</p>
+        </div>
+        <div class="rounded-lg bg-emerald-50 p-4">
+          <h3 class="font-semibold">Places</h3>
+          <p class="text-sm text-gray-700">Target neighborhood investments where poverty, school decline, and hazard exposure overlap.</p>
         </div>
       </div>
     </section>
 
-    <section class="bg-white rounded-lg shadow p-5">
-      <h2 class="text-lg font-semibold">File Sources</h2>
-      <ol class="list-decimal pl-6 mt-2 text-sm">
-        <li>
-          <a href="https://www.census.gov/data/datasets/time-series/demo/popest/2020s-total-puerto-rico-municipios.html"
-             class="text-blue-600 underline" target="_blank" rel="noopener noreferrer">
-            https://www.census.gov/data/datasets/time-series/demo/popest/2020s-total-puerto-rico-municipios.html
-          </a>
-        </li>
-      </ol>
-      <div class="mt-3 text-sm">
-        <span class="font-medium">Files:</span>
-        <ul class="list-disc pl-6 mt-1">
-          <li><code>prm-est2024-chg.xlsx</code></li>
-          <li><code>prm-est2024-pop.xlsx</code></li>
+    <!-- Sources (compact) -->
+    <section class="card p-6">
+      <h2 class="text-xl font-semibold">Selected Sources</h2>
+      <p class="text-sm text-gray-700 mt-2">
+        A full bibliography underpins this synthesis. Key references include peer-reviewed studies on migration and aging,
+        analyses of the Section 936 legacy, federal statistics on employment, wages, and demographics, and work on housing
+        affordability and hazard exposure.
+      </p>
+      <details class="mt-3">
+        <summary class="cursor-pointer text-blue-700 hover:underline text-sm">Show concise reference list</summary>
+        <ul class="mt-3 space-y-1 text-sm list-disc pl-6">
+          <li>Research brief on migration as the driver of rapid aging in Puerto Rico.</li>
+          <li>NY Fed analysis on causes & consequences of population decline.</li>
+          <li>GAO report on Section 936 and manufacturing anchors.</li>
+          <li>BEA prototype accounts on spending contraction.</li>
+          <li>Education studies on enrollment decline and school closures.</li>
+          <li>Assessments of poverty, inequality, and landslide susceptibility.</li>
         </ul>
-      </div>
+      </details>
     </section>
   </main>
 
-  <script defer>
-    // highlight nav
+  <script>
+    // Highlight active nav link
     document.querySelectorAll('.nav-link').forEach(a=>{
-      if (location.pathname.endsWith(a.getAttribute('href'))) {
+      const href = a.getAttribute('href');
+      if (href && (location.pathname.endsWith(href) || (location.pathname === '/' && href === 'index.html'))) {
         a.classList.add('text-blue-600','font-semibold','border-blue-600');
         a.setAttribute('aria-current','page');
       }
     });
 
-    const FULL_JSON = "data/population/prm-est2024-chg.json";
-    const YEARS = [2020, 2021, 2022, 2023, 2024];
-
-    const VALID_MUNICIPIOS = [
-      "Adjuntas","Aguada","Aguadilla","Aguas Buenas","Aibonito","Añasco","Arecibo","Arroyo",
-      "Barceloneta","Barranquitas","Bayamón","Cabo Rojo","Caguas","Camuy","Canóvanas","Carolina",
-      "Cataño","Cayey","Ceiba","Ciales","Cidra","Coamo","Comerío","Corozal","Culebra","Dorado",
-      "Fajardo","Florida","Guánica","Guayama","Guayanilla","Guaynabo","Gurabo","Hatillo",
-      "Hormigueros","Humacao","Isabela","Jayuya","Juana Díaz","Juncos","Lajas","Lares",
-      "Las Marías","Las Piedras","Loíza","Luquillo","Manatí","Maricao","Maunabo","Mayagüez",
-      "Moca","Morovis","Naguabo","Naranjito","Orocovis","Patillas","Peñuelas","Ponce",
-      "Quebradillas","Rincón","Río Grande","Sabana Grande","Salinas","San Germán","San Juan",
-      "San Lorenzo","San Sebastián","Santa Isabel","Toa Alta","Toa Baja","Trujillo Alto",
-      "Utuado","Vega Alta","Vega Baja","Vieques","Villalba","Yabucoa","Yauco","Puerto Rico"
-    ];
-    const stripDiacritics = s => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-    const VALID_LOOKUP = new Set(VALID_MUNICIPIOS.map(n => stripDiacritics(n).toLowerCase()));
-
-    const statusEl   = document.getElementById("status");
-    const prCtx      = document.getElementById("prChart").getContext("2d");
-    const pctCtx     = document.getElementById("pctChart").getContext("2d");
-    const lineTitle  = document.getElementById("lineTitle");
-    const barTitle   = document.getElementById("barTitle");
-    const pickerBtn  = document.getElementById("pickerBtn");
-    const pickerLabel= document.getElementById("pickerLabel");
-    const pickerPanel= document.getElementById("pickerPanel");
-    const pickerSearch = document.getElementById("pickerSearch");
-    const pickerList   = document.getElementById("pickerList");
-
-    let rows = [], geoHeader = null, municipios = [];
-    let lineChart = null, barChart = null;
-    let current = "Puerto Rico";
-
-    const setStatus = (m)=> statusEl.textContent = m || "";
-    const sanitizeName = (s)=> String(s||"").replace(/^\s*[.\-•]\s*/,"").trim();
-
-    const num = (v) => {
-      if (v == null) return NaN;
-      const s = String(v).replace(/\xa0/g,"").replace(/,/g,"").replace(/[^0-9.\-]/g,"");
-      return s ? Number(s) : NaN;
-    };
-
-    function detectGeoHeader(allRows){
-      const keys = Object.keys(allRows[0] || {});
-      const priority = ["col_1","Geographic Area","Geographic Area Name","Geographic Area:"];
-      for (const p of priority) if (keys.includes(p)) return p;
-
-      for (const k of keys) {
-        const col = allRows.map(r => r[k]);
-        const strCount = col.filter(v => typeof v === "string").length;
-        const hasPR = col.some(v => typeof v === "string" && /puerto rico/i.test(v));
-        if (strCount >= 20 && hasPR) return k;
-      }
-      return keys.find(k => /geographic|area|name/i.test(k)) || keys[0];
-    }
-
-    function extractMunicipios(){
-      const names = rows
-        .map(r => sanitizeName(r[geoHeader]).replace(/\s+/g,' ').trim())
-        .filter(Boolean);
-
-      const filtered = names.filter(n => VALID_LOOKUP.has(stripDiacritics(n).toLowerCase()));
-      const uniq = Array.from(new Set(filtered));
-      const sorted = uniq.sort((a,b)=> a.localeCompare(b,'es'));
-
-      const i = sorted.findIndex(n => stripDiacritics(n).toLowerCase() === 'puerto rico');
-      if (i > 0) { const pr = sorted.splice(i,1)[0]; sorted.unshift(pr); }
-
-      return sorted;
-    }
-
-    function rowFor(name){
-      return rows.find(r => sanitizeName(r[geoHeader]) === name);
-    }
-
-    function valuesFor(row){
-      return YEARS.map(y => {
-        if (row.hasOwnProperty(String(y))) {
-          const v = num(row[String(y)]); if (Number.isFinite(v)) return v;
-        }
-        const comp = `Population Estimate (as of July 1) | ${y}`;
-        if (row.hasOwnProperty(comp)) {
-          const v = num(row[comp]); if (Number.isFinite(v)) return v;
-        }
-        if (y === 2020 && row.hasOwnProperty("April 1, 2020 Estimates Base")) {
-          const v = num(row["April 1, 2020 Estimates Base"]); if (Number.isFinite(v)) return v;
-        }
-        return NaN;
-      });
-    }
-
-    function drawCharts(name){
-      const r = rowFor(name);
-      if (!r) { setStatus(`Could not find row for "${name}".`); return; }
-      const vals = valuesFor(r);
-      if (vals.some(v => !Number.isFinite(v))) { setStatus(`Missing values for ${name}.`); return; }
-
-      lineTitle.textContent = `${name} — Population (2020–2024)`;
-      barTitle.textContent  = `${name} — Annual % Change`;
-
-      if (lineChart) lineChart.destroy();
-      lineChart = new Chart(prCtx, {
-        type: "line",
-        data: { labels: YEARS, datasets: [{ label: "Population", data: vals, tension: 0.2, pointRadius: 4 }] },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: { display: false },
-            tooltip: { callbacks: { label: (c)=> c.parsed.y.toLocaleString() } }
-          },
-          scales: { y: { ticks: { callback: v => Number(v).toLocaleString() } } }
-        }
-      });
-
-      const labels = [], pct = [];
-      for (let i=1;i<YEARS.length;i++){
-        labels.push(`${YEARS[i-1]}→${YEARS[i]}`);
-        pct.push(+(((vals[i]-vals[i-1]) / vals[i-1]) * 100).toFixed(2));
-      }
-      if (barChart) barChart.destroy();
-      barChart = new Chart(pctCtx, {
-        type: "bar",
-        data: { labels, datasets: [{ label: "% change", data: pct }] },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: { display: false },
-            tooltip: {
-              callbacks: {
-                label: (c) => `${c.parsed.y.toFixed(2)}%`
-              }
-            }
-          },
-          scales: {
-            y: {
-              ticks: {
-                callback: (v) => `${Number(v).toFixed(2)}%`
-              }
-            }
-          }
-        }
-      });
-
-      setStatus("Done.");
-    }
-
-    function openPicker(){
-      pickerPanel.classList.remove("hidden");
-      pickerSearch.focus();
-      filterPicker();
-    }
-    function closePicker(){ pickerPanel.classList.add("hidden"); }
-
-    function filterPicker(){
-      const q = stripDiacritics(pickerSearch.value).toLowerCase().trim();
-      pickerList.innerHTML = "";
-      const items = q
-        ? municipios.filter(n => stripDiacritics(n).toLowerCase().includes(q))
-        : municipios;
-
-      for (const name of items){
-        const li = document.createElement("li");
-        li.innerHTML = `<button type="button" class="w-full text-left px-3 py-2 hover:bg-gray-100">${name}</button>`;
-        li.querySelector("button").addEventListener("click", ()=>{
-          current = name;
-          pickerLabel.textContent = name;
-          closePicker();
-          drawCharts(name);
-        });
-        pickerList.appendChild(li);
-      }
-      if (items.length === 0){
-        const empty = document.createElement("div");
-        empty.className = "px-3 py-2 text-gray-500";
-        empty.textContent = "No matches";
-        pickerList.appendChild(empty);
-      }
-    }
-
-    pickerBtn.addEventListener("click", (e)=>{
-      e.stopPropagation();
-      if (pickerPanel.classList.contains("hidden")) openPicker(); else closePicker();
-    });
-    pickerSearch.addEventListener("input", filterPicker);
-    document.addEventListener("click", (e)=>{
-      if (!pickerPanel.contains(e.target) && !pickerBtn.contains(e.target)) closePicker();
-    });
-    document.addEventListener("keydown", (e)=>{ if (e.key === "Escape") closePicker(); });
-
-    async function fetchFull(){
-      const res = await fetch(FULL_JSON, { cache: "no-store" });
-      if (!res.ok) throw new Error("Could not fetch full JSON.");
-      rows = await res.json();
-      geoHeader = detectGeoHeader(rows);
-      municipios = extractMunicipios();
-      current = municipios.includes("Puerto Rico") ? "Puerto Rico" : (municipios[0] || "Puerto Rico");
-      pickerLabel.textContent = current;
-      pickerSearch.value = "";
-      filterPicker();
-      drawCharts(current);
-    }
-
-    document.getElementById("reloadBtn")?.addEventListener("click", () => {
-      setStatus("Reloading…"); fetchFull().catch(e => setStatus(e.message));
-    });
-
-    window.addEventListener("load", ()=>{
-      if (location.protocol === "file:") {
-        setStatus("Open via a local server."); return;
-      }
-      setStatus("Loading data…");
-      fetchFull().catch(e => setStatus(e.message));
-    });
-    
-    // Dropdown functionality & active link
-    function wireDropdown() {
+    // Safer hover persistence for the Metrics dropdown
+    (function wireDropdown(){
       const root = document.getElementById('metrics-dropdown-root');
       if (!root) return;
       let hoverTimeout;
@@ -384,20 +297,7 @@
         menu.addEventListener('mouseenter', addHovering);
         menu.addEventListener('mouseleave', removeHovering);
       }
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-      // Highlight main nav links based on href
-      document.querySelectorAll('.nav-link').forEach(a => {
-        const href = a.getAttribute('href');
-        if (href && (location.pathname.endsWith(href) || (location.pathname === '/' && href === 'index.html'))) {
-          a.classList.add('text-blue-600', 'font-semibold', 'border-blue-600');
-          a.setAttribute('aria-current', 'page');
-        }
-      });
-      // Call the dropdown wire function
-      wireDropdown();
-    });
+    })();
   </script>
 </body>
 </html>
