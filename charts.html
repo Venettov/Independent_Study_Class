@@ -3,23 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Population & Economic Dynamics in Puerto Rico</title>
-
+  <title>Puerto Rico — Literature</title>
   <script src="https://cdn.tailwindcss.com"></script>
-
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
-
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
   <style>
-    /* Cards + hero */
-    .card {
-      background:#fff;
-      border-radius:1rem;
-      box-shadow:0 10px 15px -3px rgba(0,0,0,.1), 0 4px 6px -2px rgba(0,0,0,.05);
-      overflow:visible;
-    }
+    body { background:#f3f4f6; color:#111827; }
+    .card { background:#fff; border-radius:1rem; box-shadow:0 10px 15px -3px rgba(0,0,0,.1), 0 4px 6px -2px rgba(0,0,0,.05); }
     .hero {
       background:
         radial-gradient(1200px 600px at 20% -10%, rgba(239,68,68,.12), transparent 60%),
@@ -27,25 +16,7 @@
         linear-gradient(180deg, #fafafa 0%, #f3f4f6 100%);
     }
 
-    /* Map — trimmed height so charts show sooner */
-    #map { height: 48vh; width: 100%; border-radius: .75rem; }
-    @media (min-width: 1280px) { #map { height: 46vh; } }
-    @media (max-width: 640px)  { #map { height: 54vh; } }
-
-    .leaflet-tooltip {
-      background: rgba(255,255,255,.95);
-      border-color:#333;
-      color:#111827;
-      font-size:14px;
-      font-weight:600;
-      box-shadow:0 2px 5px rgba(0,0,0,.2);
-      padding:5px 10px;
-    }
-
-    /* Mini charts area */
-    .mini { min-height: 260px; }
-
-    /* --- Dropdown base state & transitions --- */
+    /* Dropdown behavior */
     #metrics-menu {
       opacity: 0;
       visibility: hidden;
@@ -53,7 +24,6 @@
       pointer-events: none;
       transition: opacity .15s ease, transform .15s ease, visibility .15s ease;
     }
-    /* Show menu when hovering root or while JS adds .hovering for grace period */
     #metrics-dropdown-root:hover #metrics-menu,
     #metrics-dropdown-root.hovering #metrics-menu {
       opacity: 1;
@@ -61,7 +31,6 @@
       transform: translateY(0);
       pointer-events: auto;
     }
-    /* Rotate chevron when open */
     #metrics-dropdown-root:hover #metrics-chevron,
     #metrics-dropdown-root.hovering #metrics-chevron {
       transform: rotate(180deg);
@@ -69,13 +38,12 @@
   </style>
 </head>
 <body class="bg-gray-50 text-gray-900 font-sans">
-
   <nav class="bg-white shadow sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-center gap-6 text-sm sm:text-base">
-      <a href="../index.html"   class="nav-link border-b-2 border-transparent">Home</a>
+      <a href="index.html"   class="nav-link border-b-2 border-transparent">Home</a>
 
       <div class="relative" id="metrics-dropdown-root">
-        <a href="../metrics.html" class="nav-link border-b-2 border-transparent inline-flex items-center gap-1 cursor-pointer select-none">
+        <a href="metrics.html" class="nav-link border-b-2 border-transparent inline-flex items-center gap-1 cursor-pointer select-none">
           Metrics
           <svg id="metrics-chevron" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 transition-transform" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
             <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.24 4.5a.75.75 0 01-1.08 0l-4.24-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/>
@@ -83,133 +51,324 @@
         </a>
         <div id="metrics-menu" class="absolute right-0 mt-2 w-64 rounded-xl border border-gray-200 bg-white shadow-lg ring-1 ring-black/5 z-50">
           <div class="py-2">
-            <a href="../metrics.html"               class="block px-4 py-2 hover:bg-gray-50 font-semibold">All Metrics Overview</a>
+            <a href="metrics.html"               class="block px-4 py-2 hover:bg-gray-50 font-semibold">All Metrics Overview</a>
             <div class="my-1 border-t border-gray-100"></div>
-            <a href="population.html"     class="block px-4 py-2 hover:bg-gray-50">Population</a>
-            <a href="employment.html"     class="block px-4 py-2 hover:bg-gray-50">Employment Rate</a>
-            <a href="establishments.html" class="block px-4 py-2 hover:bg-gray-50">Employer Establishments</a>
-            <a href="income.html"         class="block px-4 py-2 hover:bg-gray-50">Household Income</a>
-            <a href="housing.html"        class="block px-4 py-2 hover:bg-gray-50">Housing Units</a>
-            <a href="education.html"      class="block px-4 py-2 hover:bg-gray-50">Education</a>
-            <a href="health.html"         class="block px-4 py-2 hover:bg-gray-50">Health</a>
+            <a href="metrics/population.html"     class="block px-4 py-2 hover:bg-gray-50">Population</a>
+            <a href="metrics/employment.html"     class="block px-4 py-2 hover:bg-gray-50">Employment Rate</a>
+            <a href="metrics/establishments.html" class="block px-4 py-2 hover:bg-gray-50">Employer Establishments</a>
+            <a href="metrics/income.html"         class="block px-4 py-2 hover:bg-gray-50">Household Income</a>
+            <a href="metrics/housing.html"        class="block px-4 py-2 hover:bg-gray-50">Housing Units</a>
+            <a href="metrics/education.html"      class="block px-4 py-2 hover:bg-gray-50">Education</a>
+            <a href="metrics/health.html"         class="block px-4 py-2 hover:bg-gray-50">Health</a>
           </div>
         </div>
       </div>
-
-      <a href="../charts.html"  class="nav-link border-b-2 border-transparent">Literature</a>
-      <a href="../strategy.html"class="nav-link border-b-2 border-transparent">Strategy</a>
-      <a href="../about.html"   class="nav-link border-b-2 border-transparent">About</a>
+      
+      <a href="charts.html"  class="nav-link border-b-2 border-transparent">Literature</a>
+      <a href="strategy.html"class="nav-link border-b-2 border-transparent">Strategy</a>
+      <a href="about.html"   class="nav-link border-b-2 border-transparent">About</a>
     </div>
   </nav>
 
-  <main class="max-w-7xl mx-auto px-4 py-8 space-y-8">
+  <main class="max-w-7xl mx-auto px-4 py-6 space-y-6">
 
-    <header class="card hero p-6 sm:p-8 lg:p-10 relative">
-      <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between">
-          <div>
-              <p class="text-sm font-semibold text-gray-500 uppercase">Graduate Independent Study</p>
-              <h1 class="mt-2 text-4xl sm:text-5xl font-extrabold leading-tight">
-                  Population & Economic Dynamics in Puerto Rico
-              </h1>
-              <p class="mt-3 text-lg text-gray-700">
-                  A graduate research project examining demographic shifts, out-migration, and sustainable development
-                  strategies through linked data analysis and policy synthesis.
-              </p>
-              <div class="mt-5">
-                  <span class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-100 text-slate-800">
-                      <span class="inline-flex w-5 h-5 items-center justify-center rounded-full bg-slate-800 text-white text-xs">i</span>
-                      Literature Review
-                  </span>
-              </div>
-          </div>
-      </div>
-
-      <div class="absolute bottom-4 right-4 group">
-        <div class="text-right">
-          <span class="text-sm font-semibold text-gray-700 cursor-pointer group-hover:text-blue-700 transition">
-            Project Customer: Puerto Rico Planning Board
-          </span>
-        </div>
-
-        <div class="absolute right-0 bottom-full mb-2 w-96 bg-white text-gray-800 p-4 rounded-lg shadow-xl border border-gray-200 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50">
-          <p class="text-gray-700 text-sm">
-            The Planning Board oversees long-term economic development, demographic analysis, and land-use
-            planning for Puerto Rico. This project’s interactive maps, municipal-level dashboards, and
-            population change analyses provide actionable insights that could directly support their policy
-            models and strategic decision-making.
-          </p>
-          <p class="text-sm mt-3">
-            🔗 <a href="https://jp.pr.gov" target="_blank" rel="noopener" class="text-blue-600 underline">
-              Visit Puerto Rico Planning Board Website
-            </a>
-          </p>
-        </div>
-      </div>
+    <header class="card hero p-6 sm:p-8 lg:p-10">
+      <p class="text-sm font-semibold text-gray-500 uppercase">Graduate Independent Study</p>
+      <h1 class="mt-2 text-4xl sm:text-5xl font-extrabold leading-tight">Population & Economic Dynamics in Puerto Rico</h1>
+      <p class="mt-3 text-lg text-gray-700">
+        Literature analysis on Puerto Rico's population & economic changes.
+      </p>
+      <div class="mt-3">&nbsp;</div>
     </header>
+    
+    <section class="card p-5">
+      <div class="flex flex-wrap items-center justify-center gap-3">
+        <span class="text-sm text-gray-600">Municipio:</span>
 
-    <section class="card p-6 prose max-w-none">
-      <p class="lead">
-        Puerto Rico faces a complex, interconnected crisis of demographic decline and economic stagnation.
-        This literature review synthesizes key drivers of these challenges, including out-migration, low
-        fertility rates, and the legacy of economic policies.
-      </p>
+        <div class="relative">
+          <button id="pickerBtn"
+                  class="w-72 px-3 py-2 rounded border bg-white text-sm flex items-center justify-between gap-3">
+            <span id="pickerLabel">Loading…</span>
+            <svg class="w-4 h-4 opacity-70" viewBox="0 0 20 20" fill="currentColor"><path d="M5.8 7l4.2 4.3L14.2 7 16 8.8l-6 6-6-6z"/></svg>
+          </button>
 
-      <h2>The Drivers of Population Decline</h2>
-      <ul class="list-disc space-y-3">
-        <li>
-          <span class="font-semibold">Out-Migration:</span> The most dynamic factor in population loss is the
-          exodus of working-age residents, particularly intensified by Hurricane Maria. This trend has
-          resulted in sharp declines in student enrollment and has strained the labor force.
-        </li>
-        <li>
-          <span class="font-semibold">Demographic Changes:</span> The population is both shrinking and aging.
-          Puerto Rico has one of the world's lowest total fertility rates (TFR) at approximately 0.92,
-          and its median age of 45.4 is significantly higher than the U.S. mainland's.
-        </li>
-        <li>
-          <span class="font-semibold">Economic Headwinds:</span> The island’s unemployment rate remains higher
-          and its median wages are less than half of the U.S. national average. This wage gap, coupled
-          with a high cost-of-living relative to income, fuels out-migration.
-        </li>
-      </ul>
+          <div id="pickerPanel"
+               class="hidden absolute z-20 mt-1 w-80 bg-white border rounded-lg shadow-lg">
+            <div class="p-2 border-b">
+              <input id="pickerSearch" type="text" placeholder="Search municipio…"
+                     class="w-full px-2 py-1.5 rounded border bg-white text-sm">
+            </div>
+            <ul id="pickerList" class="max-h-64 overflow-auto py-1 text-sm"></ul>
+          </div>
+        </div>
 
-      <h2>Economic Factors & Social Impact</h2>
-      <ul class="list-disc space-y-3">
-        <li>
-          <span class="font-semibold">Depopulation & Contraction:</span> A smaller, older population places
-          immense strain on the economy, leading to a contraction in consumer spending and an erosion
-          of the tax base.
-        </li>
-        <li>
-          <span class="font-semibold">Poverty & Inequality:</span> Poverty is pervasive, affecting all 78
-          municipalities with rates over 20%. The GINI index, a measure of income inequality, is among
-          the highest in any U.S. jurisdiction.
-        </li>
-        <li>
-          <span class="font-semibold">The Legacy of Section 936:</span> The phase-out of the Section 936
-          tax credit, which once supported manufacturing, is linked to a period of weakening employment
-          and renewed out-migration.
-        </li>
-      </ul>
-
-      <h2>Strategic Solutions</h2>
-      <p class="mt-4">
-        Addressing these interconnected crises will require a strategic, long-term approach. The solution
-        lies in pivoting from externally dependent industries to fostering a robust, locally anchored
-        economy that can retain and attract talent. Data analysis can support this strategy by:
-      </p>
-      <ul class="list-disc space-y-1 mt-2">
-        <li>Modeling the fiscal impacts of continued out-migration.</li>
-        <li>Identifying new sectors to replace those lost after the Section 936 phase-out.</li>
-        <li>Mapping poverty and inequality to prioritize targeted investments.</li>
-        <li>Quantifying the social costs of population decline, such as school closures.</li>
-      </ul>
+        <button id="reloadBtn" class="px-3 py-2 rounded-lg bg-blue-600 text-white text-sm hover:bg-blue-700">
+          Reload
+        </button>
+      </div>
     </section>
 
+    <section class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="bg-white rounded-lg shadow p-4">
+        <h2 id="lineTitle" class="text-lg font-semibold mb-3">Population (2020–2024)</h2>
+        <div class="aspect-video bg-gray-50 rounded p-3">
+          <canvas id="prChart"></canvas>
+        </div>
+        <p id="status" class="mt-2 text-xs text-gray-500"></p>
+      </div>
+
+      <div class="bg-white rounded-lg shadow p-4">
+        <h2 id="barTitle" class="text-lg font-semibold mb-3">Annual % Change</h2>
+        <div class="aspect-video bg-gray-50 rounded p-3">
+          <canvas id="pctChart"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <section class="bg-white rounded-lg shadow p-5">
+      <h2 class="text-lg font-semibold">File Sources</h2>
+      <ol class="list-decimal pl-6 mt-2 text-sm">
+        <li>
+          <a href="https://www.census.gov/data/datasets/time-series/demo/popest/2020s-total-puerto-rico-municipios.html"
+             class="text-blue-600 underline" target="_blank" rel="noopener noreferrer">
+            https://www.census.gov/data/datasets/time-series/demo/popest/2020s-total-puerto-rico-municipios.html
+          </a>
+        </li>
+      </ol>
+      <div class="mt-3 text-sm">
+        <span class="font-medium">Files:</span>
+        <ul class="list-disc pl-6 mt-1">
+          <li><code>prm-est2024-chg.xlsx</code></li>
+          <li><code>prm-est2024-pop.xlsx</code></li>
+        </ul>
+      </div>
+    </section>
   </main>
 
-  <script>
-    // ---------------------- Dropdown functionality & active link ----------------------
+  <script defer>
+    // highlight nav
+    document.querySelectorAll('.nav-link').forEach(a=>{
+      if (location.pathname.endsWith(a.getAttribute('href'))) {
+        a.classList.add('text-blue-600','font-semibold','border-blue-600');
+        a.setAttribute('aria-current','page');
+      }
+    });
+
+    const FULL_JSON = "data/population/prm-est2024-chg.json";
+    const YEARS = [2020, 2021, 2022, 2023, 2024];
+
+    const VALID_MUNICIPIOS = [
+      "Adjuntas","Aguada","Aguadilla","Aguas Buenas","Aibonito","Añasco","Arecibo","Arroyo",
+      "Barceloneta","Barranquitas","Bayamón","Cabo Rojo","Caguas","Camuy","Canóvanas","Carolina",
+      "Cataño","Cayey","Ceiba","Ciales","Cidra","Coamo","Comerío","Corozal","Culebra","Dorado",
+      "Fajardo","Florida","Guánica","Guayama","Guayanilla","Guaynabo","Gurabo","Hatillo",
+      "Hormigueros","Humacao","Isabela","Jayuya","Juana Díaz","Juncos","Lajas","Lares",
+      "Las Marías","Las Piedras","Loíza","Luquillo","Manatí","Maricao","Maunabo","Mayagüez",
+      "Moca","Morovis","Naguabo","Naranjito","Orocovis","Patillas","Peñuelas","Ponce",
+      "Quebradillas","Rincón","Río Grande","Sabana Grande","Salinas","San Germán","San Juan",
+      "San Lorenzo","San Sebastián","Santa Isabel","Toa Alta","Toa Baja","Trujillo Alto",
+      "Utuado","Vega Alta","Vega Baja","Vieques","Villalba","Yabucoa","Yauco","Puerto Rico"
+    ];
+    const stripDiacritics = s => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    const VALID_LOOKUP = new Set(VALID_MUNICIPIOS.map(n => stripDiacritics(n).toLowerCase()));
+
+    const statusEl   = document.getElementById("status");
+    const prCtx      = document.getElementById("prChart").getContext("2d");
+    const pctCtx     = document.getElementById("pctChart").getContext("2d");
+    const lineTitle  = document.getElementById("lineTitle");
+    const barTitle   = document.getElementById("barTitle");
+    const pickerBtn  = document.getElementById("pickerBtn");
+    const pickerLabel= document.getElementById("pickerLabel");
+    const pickerPanel= document.getElementById("pickerPanel");
+    const pickerSearch = document.getElementById("pickerSearch");
+    const pickerList   = document.getElementById("pickerList");
+
+    let rows = [], geoHeader = null, municipios = [];
+    let lineChart = null, barChart = null;
+    let current = "Puerto Rico";
+
+    const setStatus = (m)=> statusEl.textContent = m || "";
+    const sanitizeName = (s)=> String(s||"").replace(/^\s*[.\-•]\s*/,"").trim();
+
+    const num = (v) => {
+      if (v == null) return NaN;
+      const s = String(v).replace(/\xa0/g,"").replace(/,/g,"").replace(/[^0-9.\-]/g,"");
+      return s ? Number(s) : NaN;
+    };
+
+    function detectGeoHeader(allRows){
+      const keys = Object.keys(allRows[0] || {});
+      const priority = ["col_1","Geographic Area","Geographic Area Name","Geographic Area:"];
+      for (const p of priority) if (keys.includes(p)) return p;
+
+      for (const k of keys) {
+        const col = allRows.map(r => r[k]);
+        const strCount = col.filter(v => typeof v === "string").length;
+        const hasPR = col.some(v => typeof v === "string" && /puerto rico/i.test(v));
+        if (strCount >= 20 && hasPR) return k;
+      }
+      return keys.find(k => /geographic|area|name/i.test(k)) || keys[0];
+    }
+
+    function extractMunicipios(){
+      const names = rows
+        .map(r => sanitizeName(r[geoHeader]).replace(/\s+/g,' ').trim())
+        .filter(Boolean);
+
+      const filtered = names.filter(n => VALID_LOOKUP.has(stripDiacritics(n).toLowerCase()));
+      const uniq = Array.from(new Set(filtered));
+      const sorted = uniq.sort((a,b)=> a.localeCompare(b,'es'));
+
+      const i = sorted.findIndex(n => stripDiacritics(n).toLowerCase() === 'puerto rico');
+      if (i > 0) { const pr = sorted.splice(i,1)[0]; sorted.unshift(pr); }
+
+      return sorted;
+    }
+
+    function rowFor(name){
+      return rows.find(r => sanitizeName(r[geoHeader]) === name);
+    }
+
+    function valuesFor(row){
+      return YEARS.map(y => {
+        if (row.hasOwnProperty(String(y))) {
+          const v = num(row[String(y)]); if (Number.isFinite(v)) return v;
+        }
+        const comp = `Population Estimate (as of July 1) | ${y}`;
+        if (row.hasOwnProperty(comp)) {
+          const v = num(row[comp]); if (Number.isFinite(v)) return v;
+        }
+        if (y === 2020 && row.hasOwnProperty("April 1, 2020 Estimates Base")) {
+          const v = num(row["April 1, 2020 Estimates Base"]); if (Number.isFinite(v)) return v;
+        }
+        return NaN;
+      });
+    }
+
+    function drawCharts(name){
+      const r = rowFor(name);
+      if (!r) { setStatus(`Could not find row for "${name}".`); return; }
+      const vals = valuesFor(r);
+      if (vals.some(v => !Number.isFinite(v))) { setStatus(`Missing values for ${name}.`); return; }
+
+      lineTitle.textContent = `${name} — Population (2020–2024)`;
+      barTitle.textContent  = `${name} — Annual % Change`;
+
+      if (lineChart) lineChart.destroy();
+      lineChart = new Chart(prCtx, {
+        type: "line",
+        data: { labels: YEARS, datasets: [{ label: "Population", data: vals, tension: 0.2, pointRadius: 4 }] },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { display: false },
+            tooltip: { callbacks: { label: (c)=> c.parsed.y.toLocaleString() } }
+          },
+          scales: { y: { ticks: { callback: v => Number(v).toLocaleString() } } }
+        }
+      });
+
+      const labels = [], pct = [];
+      for (let i=1;i<YEARS.length;i++){
+        labels.push(`${YEARS[i-1]}→${YEARS[i]}`);
+        pct.push(+(((vals[i]-vals[i-1]) / vals[i-1]) * 100).toFixed(2));
+      }
+      if (barChart) barChart.destroy();
+      barChart = new Chart(pctCtx, {
+        type: "bar",
+        data: { labels, datasets: [{ label: "% change", data: pct }] },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: (c) => `${c.parsed.y.toFixed(2)}%`
+              }
+            }
+          },
+          scales: {
+            y: {
+              ticks: {
+                callback: (v) => `${Number(v).toFixed(2)}%`
+              }
+            }
+          }
+        }
+      });
+
+      setStatus("Done.");
+    }
+
+    function openPicker(){
+      pickerPanel.classList.remove("hidden");
+      pickerSearch.focus();
+      filterPicker();
+    }
+    function closePicker(){ pickerPanel.classList.add("hidden"); }
+
+    function filterPicker(){
+      const q = stripDiacritics(pickerSearch.value).toLowerCase().trim();
+      pickerList.innerHTML = "";
+      const items = q
+        ? municipios.filter(n => stripDiacritics(n).toLowerCase().includes(q))
+        : municipios;
+
+      for (const name of items){
+        const li = document.createElement("li");
+        li.innerHTML = `<button type="button" class="w-full text-left px-3 py-2 hover:bg-gray-100">${name}</button>`;
+        li.querySelector("button").addEventListener("click", ()=>{
+          current = name;
+          pickerLabel.textContent = name;
+          closePicker();
+          drawCharts(name);
+        });
+        pickerList.appendChild(li);
+      }
+      if (items.length === 0){
+        const empty = document.createElement("div");
+        empty.className = "px-3 py-2 text-gray-500";
+        empty.textContent = "No matches";
+        pickerList.appendChild(empty);
+      }
+    }
+
+    pickerBtn.addEventListener("click", (e)=>{
+      e.stopPropagation();
+      if (pickerPanel.classList.contains("hidden")) openPicker(); else closePicker();
+    });
+    pickerSearch.addEventListener("input", filterPicker);
+    document.addEventListener("click", (e)=>{
+      if (!pickerPanel.contains(e.target) && !pickerBtn.contains(e.target)) closePicker();
+    });
+    document.addEventListener("keydown", (e)=>{ if (e.key === "Escape") closePicker(); });
+
+    async function fetchFull(){
+      const res = await fetch(FULL_JSON, { cache: "no-store" });
+      if (!res.ok) throw new Error("Could not fetch full JSON.");
+      rows = await res.json();
+      geoHeader = detectGeoHeader(rows);
+      municipios = extractMunicipios();
+      current = municipios.includes("Puerto Rico") ? "Puerto Rico" : (municipios[0] || "Puerto Rico");
+      pickerLabel.textContent = current;
+      pickerSearch.value = "";
+      filterPicker();
+      drawCharts(current);
+    }
+
+    document.getElementById("reloadBtn")?.addEventListener("click", () => {
+      setStatus("Reloading…"); fetchFull().catch(e => setStatus(e.message));
+    });
+
+    window.addEventListener("load", ()=>{
+      if (location.protocol === "file:") {
+        setStatus("Open via a local server."); return;
+      }
+      setStatus("Loading data…");
+      fetchFull().catch(e => setStatus(e.message));
+    });
+    
+    // Dropdown functionality & active link
     function wireDropdown() {
       const root = document.getElementById('metrics-dropdown-root');
       if (!root) return;
@@ -228,32 +387,14 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-      // Find the main "Metrics" nav link within the dropdown root
-      const metricsLink = document.querySelector('#metrics-dropdown-root > a');
-      
-      // Check if the current page is a child page within the metrics folder
-      const isMetricsSubPage = window.location.pathname.includes('/metrics/');
-
-      if (isMetricsSubPage) {
-        // If it's a sub-page, highlight the "Metrics" parent link
-        metricsLink.classList.add('border-b-2', 'border-blue-600', 'text-blue-600', 'font-semibold');
-        metricsLink.setAttribute('aria-current', 'page');
-        
-        // And highlight the specific sub-page link within the dropdown
-        const currentPathname = window.location.pathname.split('/').pop();
-        const subPageLink = document.querySelector(`#metrics-menu a[href="${currentPathname}"]`);
-        if (subPageLink) {
-          subPageLink.classList.add('bg-gray-100', 'font-semibold');
+      // Highlight main nav links based on href
+      document.querySelectorAll('.nav-link').forEach(a => {
+        const href = a.getAttribute('href');
+        if (href && (location.pathname.endsWith(href) || (location.pathname === '/' && href === 'index.html'))) {
+          a.classList.add('text-blue-600', 'font-semibold', 'border-blue-600');
+          a.setAttribute('aria-current', 'page');
         }
-      } else {
-        // If it's a top-level page, highlight the correct top-level link
-        document.querySelectorAll('.nav-link[href]').forEach(a => {
-          if (a.href.endsWith(window.location.pathname)) {
-            a.classList.add('border-b-2', 'border-blue-600', 'text-blue-600', 'font-semibold');
-            a.setAttribute('aria-current', 'page');
-          }
-        });
-      }
+      });
       // Call the dropdown wire function
       wireDropdown();
     });
