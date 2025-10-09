@@ -18,7 +18,7 @@
         linear-gradient(180deg, #fafafa 0%, #f3f4f6 100%);
     }
 
-    /* Dropdown hover behavior */
+    /* Dropdown behavior (hover to open, with forgiving persistence) */
     #metrics-menu {
       opacity: 0;
       visibility: hidden;
@@ -41,7 +41,7 @@
 </head>
 
 <body class="bg-gray-50 text-gray-900 font-sans">
-  <!-- Nav -->
+  <!-- Top Nav -->
   <nav class="bg-white shadow sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-center gap-6 text-sm sm:text-base">
       <a href="index.html" class="nav-link border-b-2 border-transparent">Home</a>
@@ -55,22 +55,22 @@
         </a>
         <div id="metrics-menu" class="absolute right-0 mt-2 w-64 rounded-xl border border-gray-200 bg-white shadow-lg ring-1 ring-black/5 z-50">
           <div class="py-2">
-            <a href="metrics.html" class="block px-4 py-2 hover:bg-gray-50 font-semibold">All Metrics Overview</a>
+            <a href="metrics.html"               class="block px-4 py-2 hover:bg-gray-50 font-semibold">All Metrics Overview</a>
             <div class="my-1 border-t border-gray-100"></div>
-            <a href="metrics/population.html" class="block px-4 py-2 hover:bg-gray-50">Population</a>
-            <a href="metrics/employment.html" class="block px-4 py-2 hover:bg-gray-50">Employment Rate</a>
+            <a href="metrics/population.html"     class="block px-4 py-2 hover:bg-gray-50">Population</a>
+            <a href="metrics/employment.html"     class="block px-4 py-2 hover:bg-gray-50">Employment Rate</a>
             <a href="metrics/establishments.html" class="block px-4 py-2 hover:bg-gray-50">Employer Establishments</a>
-            <a href="metrics/income.html" class="block px-4 py-2 hover:bg-gray-50">Household Income</a>
-            <a href="metrics/housing.html" class="block px-4 py-2 hover:bg-gray-50">Housing Units</a>
-            <a href="metrics/education.html" class="block px-4 py-2 hover:bg-gray-50">Education</a>
-            <a href="metrics/health.html" class="block px-4 py-2 hover:bg-gray-50">Health</a>
+            <a href="metrics/income.html"         class="block px-4 py-2 hover:bg-gray-50">Household Income</a>
+            <a href="metrics/housing.html"        class="block px-4 py-2 hover:bg-gray-50">Housing Units</a>
+            <a href="metrics/education.html"      class="block px-4 py-2 hover:bg-gray-50">Education</a>
+            <a href="metrics/health.html"         class="block px-4 py-2 hover:bg-gray-50">Health</a>
           </div>
         </div>
       </div>
 
-      <a href="charts.html" class="nav-link border-b-2 border-transparent">Literature</a>
+      <a href="charts.html"   class="nav-link border-b-2 border-transparent">Literature</a>
       <a href="strategy.html" class="nav-link border-b-2 border-transparent">Strategy</a>
-      <a href="about.html" class="nav-link border-b-2 border-transparent">About</a>
+      <a href="about.html"    class="nav-link border-b-2 border-transparent">About</a>
     </div>
   </nav>
 
@@ -82,133 +82,220 @@
         Population & Economic Dynamics in Puerto Rico — Literature Review
       </h1>
       <p class="mt-3 text-lg text-gray-700">
-        Synthesizing peer-reviewed research, government data, and policy analyses on demographic, economic,
-        and social transformations shaping Puerto Rico’s trajectory.
+        A concise synthesis of peer-reviewed research, federal datasets, and policy analyses on demographic decline,
+        economic structure, housing pressures, and strategic development pathways.
       </p>
     </header>
 
-    <!-- Cards -->
+    <!-- Key Takeaway Strip -->
+    <section class="grid md:grid-cols-3 gap-4">
+      <div class="card p-5 flex gap-3">
+        <svg class="w-6 h-6 mt-1 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3l9 4-9 4-9-4 9-4zm0 7l9 4-9 4-9-4 9-4zm0 7l9 4-9 4-9-4 9-4z"/></svg>
+        <div>
+          <h3 class="font-semibold">Demographic headwinds</h3>
+          <p class="text-sm text-gray-600">Very low fertility, rapid aging, and sustained out-migration reinforce one another.</p>
+        </div>
+      </div>
+      <div class="card p-5 flex gap-3">
+        <svg class="w-6 h-6 mt-1 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M3 12l18-9v6l-18 9V12zm0 4l18-9v6l-18 9v-6z"/></svg>
+        <div>
+          <h3 class="font-semibold">Economic fragility</h3>
+          <p class="text-sm text-gray-600">Post-936 industrial decline, lower wages, and a shrinking labor base depress growth.</p>
+        </div>
+      </div>
+      <div class="card p-5 flex gap-3">
+        <svg class="w-6 h-6 mt-1 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M4 10l8-6 8 6v10H4V10zm8 2l-4 3h8l-4-3z"/></svg>
+        <div>
+          <h3 class="font-semibold">Household stress</h3>
+          <p class="text-sm text-gray-600">High poverty and cost burdens intersect with environmental risk in housing.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Thematic Cards -->
     <section class="grid lg:grid-cols-2 gap-6">
       <!-- Population Dynamics -->
       <article class="card p-6">
-        <h2 class="text-xl font-semibold flex items-center gap-2">
-          Population Dynamics <sup>¹²</sup>
-        </h2>
-        <p class="mt-2 text-sm text-gray-700 leading-relaxed">
-          Migration has emerged as the key driver of rapid population aging¹, intensified after Hurricane Maria².
-          The island’s Total Fertility Rate stands at just 0.92³, among the lowest worldwide, while the median age
-          has surpassed 45⁴. Declines in enrollment reflect demographic shrinkage and youth out-migration⁵.
-        </p>
-
-        <details class="mt-4">
-          <summary class="cursor-pointer text-blue-700 hover:underline text-sm">Evidence Links</summary>
-          <ul class="mt-2 list-disc pl-6 text-sm space-y-1">
-            <li><a href="https://www.estadisticas.pr/files/ArticulosCientificos/Migration-is-the-driving-force-of-rapid-aging.pdf" target="_blank" class="text-blue-600 underline">¹ Matos-Moreno & Santos-Lozada (2022) – Migration & Aging</a></li>
-            <li><a href="https://www.pnas.org/doi/10.1073/pnas.2001671117" target="_blank" class="text-blue-600 underline">² Acosta et al. (2020) – Post-Maria Migration</a></li>
-            <li><a href="https://fred.stlouisfed.org/series/SPDYNTFRTINPRI" target="_blank" class="text-blue-600 underline">³ FRED (World Bank) – Fertility Rate</a></li>
-            <li><a href="https://www.census.gov/library/stories/2025/06/metro-areas-median-age.html" target="_blank" class="text-blue-600 underline">⁴ U.S. Census Bureau (2025) – Median Age</a></li>
-            <li><a href="https://bvirtualogp.pr.gov/ogp/Bvirtual/reogGubernamental/PDF/Informes%20y%20Estudios/RB2019-01.pdf" target="_blank" class="text-blue-600 underline">⁵ Hinojosa (2019) – School Closures</a></li>
-          </ul>
-        </details>
+        <div class="flex items-start gap-3">
+          <div class="rounded-xl bg-blue-50 text-blue-700 p-2">
+            <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12a5 5 0 100-10 5 5 0 000 10zm-7 9a7 7 0 0114 0H5z"/></svg>
+          </div>
+          <div>
+            <h2 class="text-xl font-semibold">Population Dynamics</h2>
+            <p class="mt-2 text-gray-700 text-sm leading-relaxed">
+              Research identifies **migration as the dominant driver of rapid aging**, amplified after major shocks.
+              A **very low total fertility rate** and a rising median age reduce future labor supply and increase dependency ratios.
+            </p>
+            <ul class="mt-3 grid sm:grid-cols-2 gap-2 text-sm">
+              <li class="bg-gray-50 rounded-lg px-3 py-2">Post-Maria migration spikes shifted age structure</li>
+              <li class="bg-gray-50 rounded-lg px-3 py-2">Working-age outflows reduce human capital locally</li>
+              <li class="bg-gray-50 rounded-lg px-3 py-2">Enrollment declines cascade into school closures</li>
+              <li class="bg-gray-50 rounded-lg px-3 py-2">Aging raises health and social-service demand</li>
+            </ul>
+          </div>
+        </div>
       </article>
 
       <!-- Economic Structure -->
       <article class="card p-6">
-        <h2 class="text-xl font-semibold flex items-center gap-2">
-          Economic Structure & Performance <sup>³⁴⁵</sup>
-        </h2>
-        <p class="mt-2 text-sm text-gray-700 leading-relaxed">
-          The phase-out of Section 936 undermined manufacturing stability³, eroding employment and fueling out-migration.
-          Studies highlight persistent wage gaps and weak consumer demand⁵. Economic contraction has limited tax capacity
-          and reinforced dependence on federal transfers.
-        </p>
-
-        <details class="mt-4">
-          <summary class="cursor-pointer text-blue-700 hover:underline text-sm">Evidence Links</summary>
-          <ul class="mt-2 list-disc pl-6 text-sm space-y-1">
-            <li><a href="https://www.gao.gov/assets/ggd-93-109.pdf" target="_blank" class="text-blue-600 underline">³ U.S. GAO (1993) – Section 936 Tax Credit</a></li>
-            <li><a href="https://www.newyorkfed.org/medialibrary/media/research/current_issues/ci20-4.pdf" target="_blank" class="text-blue-600 underline">⁴ Abel & Deitz (2014) – Population & Economy</a></li>
-            <li><a href="https://www.bea.gov/news/2019/prototype-economic-statistics-puerto-rico-2012-2017" target="_blank" class="text-blue-600 underline">⁵ BEA (2019) – Prototype Economic Statistics</a></li>
-          </ul>
-        </details>
+        <div class="flex items-start gap-3">
+          <div class="rounded-xl bg-amber-50 text-amber-700 p-2">
+            <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor"><path d="M3 13h2v-2H3v2zm4 0h14v-2H7v2zM3 17h18v-2H3v2zm0-8h18V7H3v2z"/></svg>
+          </div>
+          <div>
+            <h2 class="text-xl font-semibold">Economic Structure & Performance</h2>
+            <p class="mt-2 text-gray-700 text-sm leading-relaxed">
+              The **phase-out of Section 936** eroded manufacturing anchors and exposed structural weaknesses.
+              Wages trail the U.S. average, and a shrinking workforce constrains consumption and tax revenues.
+            </p>
+            <ul class="mt-3 grid sm:grid-cols-2 gap-2 text-sm">
+              <li class="bg-gray-50 rounded-lg px-3 py-2">Lower average wages limit household demand</li>
+              <li class="bg-gray-50 rounded-lg px-3 py-2">Employment losses concentrated in tradables</li>
+              <li class="bg-gray-50 rounded-lg px-3 py-2">Consumer spending contracted in the 2010s</li>
+              <li class="bg-gray-50 rounded-lg px-3 py-2">Small-firm formation & innovation are pivotal</li>
+            </ul>
+          </div>
+        </div>
       </article>
 
       <!-- Poverty & Housing -->
       <article class="card p-6">
-        <h2 class="text-xl font-semibold flex items-center gap-2">
-          Poverty, Inequality & Housing <sup>⁶⁷⁸⁹</sup>
-        </h2>
-        <p class="mt-2 text-sm text-gray-700 leading-relaxed">
-          Poverty remains pervasive⁶, with child poverty above 50%. Median household income lags national levels⁷,
-          while cost-burdened housing intensifies hardship⁸. One-third of residents live in areas highly susceptible to
-          landslides⁹, underscoring a need for integrated social and environmental resilience.
-        </p>
-
-        <details class="mt-4">
-          <summary class="cursor-pointer text-blue-700 hover:underline text-sm">Evidence Links</summary>
-          <ul class="mt-2 list-disc pl-6 text-sm space-y-1">
-            <li><a href="https://centropr.hunter.cuny.edu/app/uploads/2023/09/Pervasive-Poverty-PR-1.pdf" target="_blank" class="text-blue-600 underline">⁶ Vargas-Ramos et al. (2023) – Pervasive Poverty</a></li>
-            <li><a href="https://censusreporter.org/profiles/04000US72-puerto-rico/" target="_blank" class="text-blue-600 underline">⁷ Census Reporter (2023) – ACS Profile</a></li>
-            <li><a href="https://datausa.io/profile/geo/resident-commissioner-district-at-large-pr" target="_blank" class="text-blue-600 underline">⁸ DataUSA (2023) – Median Income & Housing</a></li>
-            <li><a href="https://hazards.colorado.edu/public-health-disaster-research/steep-risks" target="_blank" class="text-blue-600 underline">⁹ West et al. (2023) – Landslide Vulnerability</a></li>
-          </ul>
-        </details>
+        <div class="flex items-start gap-3">
+          <div class="rounded-xl bg-rose-50 text-rose-700 p-2">
+            <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5A5.5 5.5 0 017.5 3h.03A5.5 5.5 0 0118 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+          </div>
+          <div>
+            <h2 class="text-xl font-semibold">Poverty, Inequality & Housing</h2>
+            <p class="mt-2 text-gray-700 text-sm leading-relaxed">
+              **Poverty remains pervasive** across municipios, with high child poverty and pronounced inequality.
+              Housing affordability is stressed and intersected by **hazard exposure** in vulnerable areas.
+            </p>
+            <ul class="mt-3 grid sm:grid-cols-2 gap-2 text-sm">
+              <li class="bg-gray-50 rounded-lg px-3 py-2">Cost-burdened households limit mobility</li>
+              <li class="bg-gray-50 rounded-lg px-3 py-2">Median incomes remain low relative to costs</li>
+              <li class="bg-gray-50 rounded-lg px-3 py-2">Exposure to landslide-prone terrain elevates risk</li>
+              <li class="bg-gray-50 rounded-lg px-3 py-2">Targeted rehabilitation & resilience are key</li>
+            </ul>
+          </div>
+        </div>
       </article>
 
-      <!-- Strategy -->
+      <!-- Strategy Lens -->
       <article class="card p-6">
-        <h2 class="text-xl font-semibold flex items-center gap-2">
-          Strategy Lens & Policy Outlook <sup>¹⁰¹¹</sup>
-        </h2>
-        <p class="mt-2 text-sm text-gray-700 leading-relaxed">
-          Sustainable recovery depends on revitalizing locally anchored sectors, attracting talent, and strengthening
-          human-capital pipelines. Evidence emphasizes that workforce reintegration, education modernization, and
-          resilience investment must operate together to reverse demographic decline.
-        </p>
-
-        <details class="mt-4">
-          <summary class="cursor-pointer text-blue-700 hover:underline text-sm">Evidence Links</summary>
-          <ul class="mt-2 list-disc pl-6 text-sm space-y-1">
-            <li><a href="https://fred.stlouisfed.org/series/LAUST720000000000003A" target="_blank" class="text-blue-600 underline">¹⁰ FRED (BLS/LAUS) – Unemployment Rate 2024</a></li>
-            <li><a href="https://www.bls.gov/regions/northeast/news-release/countyemploymentandwages_puertorico.htm" target="_blank" class="text-blue-600 underline">¹¹ BLS (QCEW 2024) – Employment & Wages</a></li>
-          </ul>
-        </details>
+        <div class="flex items-start gap-3">
+          <div class="rounded-xl bg-emerald-50 text-emerald-700 p-2">
+            <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7l3-7z"/></svg>
+          </div>
+          <div>
+            <h2 class="text-xl font-semibold">Strategy Lens</h2>
+            <p class="mt-2 text-gray-700 text-sm leading-relaxed">
+              A durable path centers on **locally anchored sectors**, talent retention, and neighborhood-level inclusion.
+              Evidence points to pairing industrial strategy with human-capital and housing resilience.
+            </p>
+            <ol class="mt-3 list-decimal pl-5 space-y-2 text-sm">
+              <li><span class="font-medium">Rebuild tradables:</span> biomanufacturing adjacencies, tech-enabled services, and visitor economy with local capture.</li>
+              <li><span class="font-medium">Invest in skills:</span> workforce pipelines tied to employer demand and returning migrants.</li>
+              <li><span class="font-medium">Stabilize families:</span> affordable housing, childcare access, and school modernization in shrinking-enrollment zones.</li>
+              <li><span class="font-medium">Plan for risk:</span> resilience upgrades in high-susceptibility areas; target buy-downs and relocation where needed.</li>
+            </ol>
+          </div>
+        </div>
       </article>
     </section>
 
-    <!-- Sources -->
+    <!-- Evidence at a Glance -->
     <section class="card p-6">
-      <h2 class="text-xl font-semibold">Works Cited Summary</h2>
+      <h2 class="text-xl font-semibold">Evidence at a Glance</h2>
+      <div class="mt-4 grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="rounded-xl border p-4">
+          <p class="text-xs uppercase text-gray-500">Fertility</p>
+          <p class="text-2xl font-extrabold">Very low TFR</p>
+          <p class="text-sm text-gray-600 mt-1">Among the lowest globally; accelerates population aging.</p>
+        </div>
+        <div class="rounded-xl border p-4">
+          <p class="text-xs uppercase text-gray-500">Aging</p>
+          <p class="text-2xl font-extrabold">Median age ↑</p>
+          <p class="text-sm text-gray-600 mt-1">Aged structure raises care costs and dependency ratios.</p>
+        </div>
+        <div class="rounded-xl border p-4">
+          <p class="text-xs uppercase text-gray-500">Wages</p>
+          <p class="text-2xl font-extrabold">Below U.S.</p>
+          <p class="text-sm text-gray-600 mt-1">Lower earnings constrain consumption and savings.</p>
+        </div>
+        <div class="rounded-xl border p-4">
+          <p class="text-xs uppercase text-gray-500">Poverty</p>
+          <p class="text-2xl font-extrabold">High & pervasive</p>
+          <p class="text-sm text-gray-600 mt-1">Child poverty especially elevated; inequality remains high.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- “So What?” Box -->
+    <section class="card p-6">
+      <h2 class="text-xl font-semibold">What this means for policy & practice</h2>
+      <div class="mt-3 grid md:grid-cols-3 gap-4">
+        <div class="rounded-lg bg-blue-50 p-4">
+          <h3 class="font-semibold">Talent</h3>
+          <p class="text-sm text-gray-700">Retain and attract working-age residents via career ladders and re-entry pathways for returnees.</p>
+        </div>
+        <div class="rounded-lg bg-amber-50 p-4">
+          <h3 class="font-semibold">Firms</h3>
+          <p class="text-sm text-gray-700">Support clusters with supplier development, export help, and access to growth capital.</p>
+        </div>
+        <div class="rounded-lg bg-emerald-50 p-4">
+          <h3 class="font-semibold">Places</h3>
+          <p class="text-sm text-gray-700">Target neighborhood investments where poverty, school decline, and hazard exposure overlap.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Sources (compact) -->
+    <section class="card p-6">
+      <h2 class="text-xl font-semibold">Selected Sources</h2>
       <p class="text-sm text-gray-700 mt-2">
-        All data and interpretations are derived from U.S. federal datasets (BLS, BEA, Census Bureau), academic analyses
-        (PNAS, NY Fed, Population Research and Policy Review), and Puerto Rico–specific research (CentroPR, Natural Hazards Center).
+        A full bibliography underpins this synthesis. Key references include peer-reviewed studies on migration and aging,
+        analyses of the Section 936 legacy, federal statistics on employment, wages, and demographics, and work on housing
+        affordability and hazard exposure.
       </p>
+      <details class="mt-3">
+        <summary class="cursor-pointer text-blue-700 hover:underline text-sm">Show concise reference list</summary>
+        <ul class="mt-3 space-y-1 text-sm list-disc pl-6">
+          <li>Research brief on migration as the driver of rapid aging in Puerto Rico.</li>
+          <li>NY Fed analysis on causes & consequences of population decline.</li>
+          <li>GAO report on Section 936 and manufacturing anchors.</li>
+          <li>BEA prototype accounts on spending contraction.</li>
+          <li>Education studies on enrollment decline and school closures.</li>
+          <li>Assessments of poverty, inequality, and landslide susceptibility.</li>
+        </ul>
+      </details>
     </section>
   </main>
 
   <script>
-    // Highlight current nav
+    // Highlight active nav link
     document.querySelectorAll('.nav-link').forEach(a=>{
-      const href=a.getAttribute('href');
-      if(href&&(location.pathname.endsWith(href)||(location.pathname==='/'&&href==='index.html'))){
+      const href = a.getAttribute('href');
+      if (href && (location.pathname.endsWith(href) || (location.pathname === '/' && href === 'index.html'))) {
         a.classList.add('text-blue-600','font-semibold','border-blue-600');
         a.setAttribute('aria-current','page');
       }
     });
 
-    // Hover-persistent dropdown
+    // Safer hover persistence for the Metrics dropdown
     (function wireDropdown(){
-      const root=document.getElementById('metrics-dropdown-root');
-      if(!root)return;
+      const root = document.getElementById('metrics-dropdown-root');
+      if (!root) return;
       let hoverTimeout;
-      const menu=document.getElementById('metrics-menu');
-      function addHovering(){clearTimeout(hoverTimeout);root.classList.add('hovering');}
-      function removeHovering(){hoverTimeout=setTimeout(()=>root.classList.remove('hovering'),300);}
-      root.addEventListener('mouseenter',addHovering);
-      root.addEventListener('mouseleave',removeHovering);
-      if(menu){
-        menu.addEventListener('mouseenter',addHovering);
-        menu.addEventListener('mouseleave',removeHovering);
+      const menu = document.getElementById('metrics-menu');
+
+      function addHovering(){ clearTimeout(hoverTimeout); root.classList.add('hovering'); }
+      function removeHovering(){ hoverTimeout = setTimeout(()=>root.classList.remove('hovering'), 300); }
+
+      root.addEventListener('mouseenter', addHovering);
+      root.addEventListener('mouseleave', removeHovering);
+      if (menu) {
+        menu.addEventListener('mouseenter', addHovering);
+        menu.addEventListener('mouseleave', removeHovering);
       }
     })();
   </script>
