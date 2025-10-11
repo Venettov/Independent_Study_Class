@@ -2,301 +2,295 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Puerto Rico — Literature</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Literature Review — Population & Economic Dynamics in Puerto Rico</title>
 
-  <!-- Tailwind -->
+  <!-- Meta: SEO & share cards -->
+  <meta name="description" content="Synthesis of peer‑reviewed and institutional research connecting population decline, economic structure, poverty/housing, and policy strategy in Puerto Rico." />
+  <meta property="og:title" content="Literature Review — Population & Economic Dynamics in Puerto Rico" />
+  <meta property="og:description" content="Concise synthesis linking demographics, economy, poverty/housing, and policy strategy with cited sources and takeaways." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://venettov.github.io/Independent_Study_Class/literature.html" />
+
+  <!-- TailwindCSS -->
   <script src="https://cdn.tailwindcss.com"></script>
 
   <style>
-    body { background:#f3f4f6; color:#111827; }
-    .card { background:#fff; border-radius:1rem; box-shadow:0 10px 15px -3px rgba(0,0,0,.1), 0 4px 6px -2px rgba(0,0,0,.05); }
-    .hero {
-      background:
-        radial-gradient(1200px 600px at 20% -10%, rgba(239,68,68,.12), transparent 60%),
-        radial-gradient(1200px 600px at 80% -10%, rgba(37,99,235,.10), transparent 60%),
-        linear-gradient(180deg, #fafafa 0%, #f3f4f6 100%);
-    }
-
-    /* Dropdown behavior (hover to open, with forgiving persistence) */
-    #metrics-menu {
-      opacity: 0;
-      visibility: hidden;
-      transform: translateY(4px);
-      pointer-events: none;
-      transition: opacity .15s ease, transform .15s ease, visibility .15s ease;
-    }
-    #metrics-dropdown-root:hover #metrics-menu,
-    #metrics-dropdown-root.hovering #metrics-menu {
-      opacity: 1;
-      visibility: visible;
-      transform: translateY(0);
-      pointer-events: auto;
-    }
-    #metrics-dropdown-root:hover #metrics-chevron,
-    #metrics-dropdown-root.hovering #metrics-chevron {
-      transform: rotate(180deg);
-    }
+    .card{background:#fff;border-radius:1rem;box-shadow:0 10px 15px -3px rgba(0,0,0,.1),0 4px 6px -2px rgba(0,0,0,.05)}
+    .prose-tight p{margin-top:.5rem;margin-bottom:.5rem}
+    /* Improve focus visibility */
+    .focus-ring:focus{outline:3px solid rgba(59,130,246,.7);outline-offset:2px}
   </style>
 </head>
+<body class="bg-slate-50 text-slate-800">
+  <!-- ========================= NAVBAR ========================= -->
+  <header class="bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/70 sticky top-0 z-50 shadow-sm">
+    <nav class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8" aria-label="Primary">
+      <div class="flex h-14 items-center justify-between">
+        <!-- Brand -->
+        <a href="index.html" class="text-sm font-semibold tracking-wide text-slate-700 hover:text-slate-900 focus-ring rounded">Population & Economic Dynamics in Puerto Rico</a>
 
-<body class="bg-gray-50 text-gray-900 font-sans">
-  <!-- Top Nav -->
-  <nav class="bg-white shadow sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-center gap-6 text-sm sm:text-base">
-      <a href="index.html" class="nav-link border-b-2 border-transparent">Home</a>
+        <!-- Menu -->
+        <div class="relative" id="nav-root">
+          <ul class="flex items-center gap-6 text-sm">
+            <li><a href="index.html" class="nav-link text-slate-700 hover:text-blue-700 focus-ring rounded px-1 py-0.5">Home</a></li>
 
-      <div class="relative" id="metrics-dropdown-root">
-        <a href="metrics.html" class="nav-link border-b-2 border-transparent inline-flex items-center gap-1 cursor-pointer select-none">
-          Metrics
-          <svg id="metrics-chevron" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 transition-transform" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-            <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.24 4.5a.75.75 0 01-1.08 0l-4.24-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/>
-          </svg>
-        </a>
-        <div id="metrics-menu" class="absolute right-0 mt-2 w-64 rounded-xl border border-gray-200 bg-white shadow-lg ring-1 ring-black/5 z-50">
-          <div class="py-2">
-            <a href="metrics.html"               class="block px-4 py-2 hover:bg-gray-50 font-semibold">All Metrics Overview</a>
-            <div class="my-1 border-t border-gray-100"></div>
-            <a href="metrics/population.html"     class="block px-4 py-2 hover:bg-gray-50">Population</a>
-            <a href="metrics/employment.html"     class="block px-4 py-2 hover:bg-gray-50">Employment Rate</a>
-            <a href="metrics/establishments.html" class="block px-4 py-2 hover:bg-gray-50">Employer Establishments</a>
-            <a href="metrics/income.html"         class="block px-4 py-2 hover:bg-gray-50">Household Income</a>
-            <a href="metrics/housing.html"        class="block px-4 py-2 hover:bg-gray-50">Housing Units</a>
-            <a href="metrics/education.html"      class="block px-4 py-2 hover:bg-gray-50">Education</a>
-            <a href="metrics/health.html"         class="block px-4 py-2 hover:bg-gray-50">Health</a>
-          </div>
+            <!-- Metrics with hover+focus dropdown (a11y-enhanced) -->
+            <li class="relative">
+              <button id="metrics-trigger" class="focus-ring rounded px-1 py-0.5 text-slate-700 hover:text-blue-700 flex items-center gap-1" aria-haspopup="menu" aria-expanded="false" aria-controls="metrics-menu">Metrics
+                <svg aria-hidden="true" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M5.23 7.21a.75.75 0 011.06.02L10 10.939l3.71-3.71a.75.75 0 011.08 1.04l-4.24 4.25a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z"/></svg>
+              </button>
+              <div id="metrics-menu" role="menu" aria-label="Metrics submenu" class="invisible opacity-0 pointer-events-none absolute right-0 mt-2 w-56 origin-top-right rounded-xl border border-slate-200 bg-white shadow-lg ring-1 ring-black/5 transition duration-150 ease-out">
+                <ul class="py-2">
+                  <li><a role="menuitem" href="metrics.html" class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 focus-ring">Metrics Overview</a></li>
+                  <li><a role="menuitem" href="metrics/population.html" class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 focus-ring">Population</a></li>
+                  <li><a role="menuitem" href="metrics/economy.html" class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 focus-ring">Economy</a></li>
+                  <li><a role="menuitem" href="metrics/poverty.html" class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 focus-ring">Poverty & Housing</a></li>
+                </ul>
+              </div>
+            </li>
+
+            <li><a href="literature.html" class="nav-link text-blue-700 border-b-2 border-blue-600 font-semibold rounded px-1 py-0.5" aria-current="page">Literature</a></li>
+            <li><a href="strategy.html" class="nav-link text-slate-700 hover:text-blue-700 focus-ring rounded px-1 py-0.5">Strategy</a></li>
+            <li><a href="about.html" class="nav-link text-slate-700 hover:text-blue-700 focus-ring rounded px-1 py-0.5">About</a></li>
+          </ul>
         </div>
       </div>
+    </nav>
+  </header>
 
-      <a href="charts.html"   class="nav-link border-b-2 border-transparent">Literature</a>
-      <a href="strategy.html" class="nav-link border-b-2 border-transparent">Strategy</a>
-      <a href="about.html"    class="nav-link border-b-2 border-transparent">About</a>
+  <!-- ========================= HERO ========================= -->
+  <section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mt-6">
+    <div class="card overflow-hidden">
+      <div class="bg-gradient-to-r from-sky-50 to-blue-50 p-6 sm:p-8">
+        <div class="flex items-center gap-2 text-xs uppercase tracking-wide text-slate-500">
+          <span class="inline-flex items-center gap-1"><span class="inline-block h-2 w-2 rounded-full bg-blue-500" aria-hidden="true"></span> Literature</span>
+          <span>•</span>
+          <span>Graduate Project</span>
+        </div>
+        <h1 class="mt-3 text-2xl sm:text-3xl font-extrabold text-slate-900">Evidence from Demography, Economy, and Place</h1>
+        <p class="mt-3 max-w-3xl text-slate-700">This page synthesizes research linking population decline, the island’s economic structure, poverty/housing conditions, and strategy options. Key claims are annotated with superscripts that map to <em>Selected Sources</em> below.</p>
+      </div>
     </div>
-  </nav>
+  </section>
 
-  <main class="max-w-7xl mx-auto px-4 py-6 space-y-6">
-    <!-- Hero -->
-    <header class="card hero p-6 sm:p-8 lg:p-10">
-      <p class="text-sm font-semibold text-gray-500 uppercase">Graduate Independent Study</p>
-      <h1 class="mt-2 text-4xl sm:text-5xl font-extrabold leading-tight">
-        Population & Economic Dynamics in Puerto Rico — Literature Review
-      </h1>
-      <p class="mt-3 text-lg text-gray-700">
-        A concise synthesis of peer-reviewed research, federal datasets, and policy analyses on demographic decline,
-        economic structure, housing pressures, and strategic development pathways.
-      </p>
-    </header>
+  <!-- ========================= KEY TAKEAWAYS ========================= -->
+  <section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mt-6">
+    <div class="grid gap-4 sm:grid-cols-3">
+      <article class="card p-5">
+        <h2 class="text-sm font-semibold text-slate-900">Population Dynamics¹</h2>
+        <p class="prose-tight text-sm text-slate-600">Low fertility + aging + out‑migration reinforce decline; the working‑age share shrinks, pressuring services and growth.</p>
+      </article>
+      <article class="card p-5">
+        <h2 class="text-sm font-semibold text-slate-900">Economic Structure²</h2>
+        <p class="prose-tight text-sm text-slate-600">Post‑936 industrial shifts, exposure to shocks, and sectoral concentration limit wage growth and local multipliers.</p>
+      </article>
+      <article class="card p-5">
+        <h2 class="text-sm font-semibold text-slate-900">Poverty & Housing³</h2>
+        <p class="prose-tight text-sm text-slate-600">Persistent poverty, housing vulnerability, and uneven recovery shape labor supply, migration decisions, and place quality.</p>
+      </article>
+    </div>
+  </section>
 
-    <!-- Key Takeaway Strip -->
-    <section class="grid md:grid-cols-3 gap-4">
-      <div class="card p-5 flex gap-3">
-        <svg class="w-6 h-6 mt-1 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3l9 4-9 4-9-4 9-4zm0 7l9 4-9 4-9-4 9-4zm0 7l9 4-9 4-9-4 9-4z"/></svg>
-        <div>
-          <h3 class="font-semibold">Demographic headwinds</h3>
-          <p class="text-sm text-gray-600">Very low fertility, rapid aging, and sustained out-migration reinforce one another.</p>
-        </div>
-      </div>
-      <div class="card p-5 flex gap-3">
-        <svg class="w-6 h-6 mt-1 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M3 12l18-9v6l-18 9V12zm0 4l18-9v6l-18 9v-6z"/></svg>
-        <div>
-          <h3 class="font-semibold">Economic fragility</h3>
-          <p class="text-sm text-gray-600">Post-936 industrial decline, lower wages, and a shrinking labor base depress growth.</p>
-        </div>
-      </div>
-      <div class="card p-5 flex gap-3">
-        <svg class="w-6 h-6 mt-1 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M4 10l8-6 8 6v10H4V10zm8 2l-4 3h8l-4-3z"/></svg>
-        <div>
-          <h3 class="font-semibold">Household stress</h3>
-          <p class="text-sm text-gray-600">High poverty and cost burdens intersect with environmental risk in housing.</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- Thematic Cards -->
-    <section class="grid lg:grid-cols-2 gap-6">
-      <!-- Population Dynamics -->
+  <!-- ========================= THEMATIC CARDS ========================= -->
+  <section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mt-6">
+    <div class="grid gap-6 lg:grid-cols-2">
+      <!-- Population -->
       <article class="card p-6">
-        <div class="flex items-start gap-3">
-          <div class="rounded-xl bg-blue-50 text-blue-700 p-2">
-            <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12a5 5 0 100-10 5 5 0 000 10zm-7 9a7 7 0 0114 0H5z"/></svg>
-          </div>
-          <div>
-            <h2 class="text-xl font-semibold">Population Dynamics</h2>
-            <p class="mt-2 text-gray-700 text-sm leading-relaxed">
-              Research identifies **migration as the dominant driver of rapid aging**, amplified after major shocks.
-              A **very low total fertility rate** and a rising median age reduce future labor supply and increase dependency ratios.
-            </p>
-            <ul class="mt-3 grid sm:grid-cols-2 gap-2 text-sm">
-              <li class="bg-gray-50 rounded-lg px-3 py-2">Post-Maria migration spikes shifted age structure</li>
-              <li class="bg-gray-50 rounded-lg px-3 py-2">Working-age outflows reduce human capital locally</li>
-              <li class="bg-gray-50 rounded-lg px-3 py-2">Enrollment declines cascade into school closures</li>
-              <li class="bg-gray-50 rounded-lg px-3 py-2">Aging raises health and social-service demand</li>
-            </ul>
-          </div>
+        <h3 class="text-lg font-semibold text-slate-900">Population (Signals & Mechanisms)¹</h3>
+        <div class="prose-tight text-slate-700 text-sm mt-2 space-y-2">
+          <p>Population decline emerges from <strong>low TFR</strong>, <strong>aging</strong>, and <strong>net out‑migration</strong>. Shocks (e.g., 2017 hurricanes) amplify moves by younger cohorts seeking wages and stability. The feedback loop—smaller labor force → weaker demand → fewer local opportunities—can entrench decline.</p>
+          <p><span class="align-super text-xs">¹</span> See sources 1–3.</p>
         </div>
       </article>
 
-      <!-- Economic Structure -->
+      <!-- Economy -->
       <article class="card p-6">
-        <div class="flex items-start gap-3">
-          <div class="rounded-xl bg-amber-50 text-amber-700 p-2">
-            <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor"><path d="M3 13h2v-2H3v2zm4 0h14v-2H7v2zM3 17h18v-2H3v2zm0-8h18V7H3v2z"/></svg>
-          </div>
-          <div>
-            <h2 class="text-xl font-semibold">Economic Structure & Performance</h2>
-            <p class="mt-2 text-gray-700 text-sm leading-relaxed">
-              The **phase-out of Section 936** eroded manufacturing anchors and exposed structural weaknesses.
-              Wages trail the U.S. average, and a shrinking workforce constrains consumption and tax revenues.
-            </p>
-            <ul class="mt-3 grid sm:grid-cols-2 gap-2 text-sm">
-              <li class="bg-gray-50 rounded-lg px-3 py-2">Lower average wages limit household demand</li>
-              <li class="bg-gray-50 rounded-lg px-3 py-2">Employment losses concentrated in tradables</li>
-              <li class="bg-gray-50 rounded-lg px-3 py-2">Consumer spending contracted in the 2010s</li>
-              <li class="bg-gray-50 rounded-lg px-3 py-2">Small-firm formation & innovation are pivotal</li>
-            </ul>
-          </div>
+        <h3 class="text-lg font-semibold text-slate-900">Economic Structure (Constraints)²</h3>
+        <div class="prose-tight text-slate-700 text-sm mt-2 space-y-2">
+          <p>Legacy of tax‑incentivized manufacturing and its phase‑out reduced anchors; limited tradable diversification, high logistics costs, and capital flight challenge productivity. Strategic bets should expand <em>tradable services</em> and <em>value‑added niches</em> that leverage talent and diaspora ties.</p>
+          <p><span class="align-super text-xs">²</span> See sources 4–6.</p>
         </div>
       </article>
 
       <!-- Poverty & Housing -->
       <article class="card p-6">
-        <div class="flex items-start gap-3">
-          <div class="rounded-xl bg-rose-50 text-rose-700 p-2">
-            <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5A5.5 5.5 0 017.5 3h.03A5.5 5.5 0 0118 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-          </div>
-          <div>
-            <h2 class="text-xl font-semibold">Poverty, Inequality & Housing</h2>
-            <p class="mt-2 text-gray-700 text-sm leading-relaxed">
-              **Poverty remains pervasive** across municipios, with high child poverty and pronounced inequality.
-              Housing affordability is stressed and intersected by **hazard exposure** in vulnerable areas.
-            </p>
-            <ul class="mt-3 grid sm:grid-cols-2 gap-2 text-sm">
-              <li class="bg-gray-50 rounded-lg px-3 py-2">Cost-burdened households limit mobility</li>
-              <li class="bg-gray-50 rounded-lg px-3 py-2">Median incomes remain low relative to costs</li>
-              <li class="bg-gray-50 rounded-lg px-3 py-2">Exposure to landslide-prone terrain elevates risk</li>
-              <li class="bg-gray-50 rounded-lg px-3 py-2">Targeted rehabilitation & resilience are key</li>
-            </ul>
-          </div>
+        <h3 class="text-lg font-semibold text-slate-900">Poverty & Housing (Household Constraints)³</h3>
+        <div class="prose-tight text-slate-700 text-sm mt-2 space-y-2">
+          <p>High poverty and housing fragility affect labor mobility and health. Recovery dollars improved stock unevenly; permitting, insurance, and hazard exposure remain frictions. Better targeting and resilient infill can reduce displacement and commute burdens.</p>
+          <p><span class="align-super text-xs">³</span> See sources 7–9.</p>
         </div>
       </article>
 
       <!-- Strategy Lens -->
       <article class="card p-6">
-        <div class="flex items-start gap-3">
-          <div class="rounded-xl bg-emerald-50 text-emerald-700 p-2">
-            <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7l3-7z"/></svg>
-          </div>
-          <div>
-            <h2 class="text-xl font-semibold">Strategy Lens</h2>
-            <p class="mt-2 text-gray-700 text-sm leading-relaxed">
-              A durable path centers on **locally anchored sectors**, talent retention, and neighborhood-level inclusion.
-              Evidence points to pairing industrial strategy with human-capital and housing resilience.
-            </p>
-            <ol class="mt-3 list-decimal pl-5 space-y-2 text-sm">
-              <li><span class="font-medium">Rebuild tradables:</span> biomanufacturing adjacencies, tech-enabled services, and visitor economy with local capture.</li>
-              <li><span class="font-medium">Invest in skills:</span> workforce pipelines tied to employer demand and returning migrants.</li>
-              <li><span class="font-medium">Stabilize families:</span> affordable housing, childcare access, and school modernization in shrinking-enrollment zones.</li>
-              <li><span class="font-medium">Plan for risk:</span> resilience upgrades in high-susceptibility areas; target buy-downs and relocation where needed.</li>
-            </ol>
-          </div>
+        <h3 class="text-lg font-semibold text-slate-900">Strategy Lens (What Works)</h3>
+        <div class="prose-tight text-slate-700 text-sm mt-2 space-y-2">
+          <p>Combine <strong>Talent</strong> (skills, retention, return migration), <strong>Firms</strong> (tradables, finance, permitting), and <strong>Places</strong> (housing, transport, resilience) to shift expectations. Pilot in a few metros; measure spillovers and iterate.</p>
         </div>
       </article>
-    </section>
+    </div>
+  </section>
 
-    <!-- Evidence at a Glance -->
-    <section class="card p-6">
-      <h2 class="text-xl font-semibold">Evidence at a Glance</h2>
-      <div class="mt-4 grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div class="rounded-xl border p-4">
-          <p class="text-xs uppercase text-gray-500">Fertility</p>
-          <p class="text-2xl font-extrabold">Very low TFR</p>
-          <p class="text-sm text-gray-600 mt-1">Among the lowest globally; accelerates population aging.</p>
+  <!-- ========================= EVIDENCE AT A GLANCE ========================= -->
+  <section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mt-6">
+    <div class="card p-6">
+      <div class="flex items-center justify-between">
+        <h3 class="text-lg font-semibold text-slate-900">Evidence at a Glance</h3>
+        <a href="strategy.html" class="text-sm text-blue-700 hover:underline focus-ring rounded">See strategy →</a>
+      </div>
+      <div class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div class="rounded-xl border border-slate-200 p-4 bg-white">
+          <div class="text-xs text-slate-500">Demography¹</div>
+          <div class="mt-1 text-2xl font-bold">Aging + Out‑migration</div>
+          <p class="text-xs text-slate-600 mt-1">Working‑age share falling in many municipios.</p>
         </div>
-        <div class="rounded-xl border p-4">
-          <p class="text-xs uppercase text-gray-500">Aging</p>
-          <p class="text-2xl font-extrabold">Median age ↑</p>
-          <p class="text-sm text-gray-600 mt-1">Aged structure raises care costs and dependency ratios.</p>
+        <div class="rounded-xl border border-slate-200 p-4 bg-white">
+          <div class="text-xs text-slate-500">Economy²</div>
+          <div class="mt-1 text-2xl font-bold">Thin Tradables</div>
+          <p class="text-xs text-slate-600 mt-1">Concentration risk; slow wage growth.</p>
         </div>
-        <div class="rounded-xl border p-4">
-          <p class="text-xs uppercase text-gray-500">Wages</p>
-          <p class="text-2xl font-extrabold">Below U.S.</p>
-          <p class="text-sm text-gray-600 mt-1">Lower earnings constrain consumption and savings.</p>
+        <div class="rounded-xl border border-slate-200 p-4 bg-white">
+          <div class="text-xs text-slate-500">Poverty³</div>
+          <div class="mt-1 text-2xl font-bold">Persistent</div>
+          <p class="text-xs text-slate-600 mt-1">Household constraints interact with place quality.</p>
         </div>
-        <div class="rounded-xl border p-4">
-          <p class="text-xs uppercase text-gray-500">Poverty</p>
-          <p class="text-2xl font-extrabold">High & pervasive</p>
-          <p class="text-sm text-gray-600 mt-1">Child poverty especially elevated; inequality remains high.</p>
+        <div class="rounded-xl border border-slate-200 p-4 bg-white">
+          <div class="text-xs text-slate-500">Policy</div>
+          <div class="mt-1 text-2xl font-bold">Targeted Bets</div>
+          <p class="text-xs text-slate-600 mt-1">Talent × Firms × Places → measurable spillovers.</p>
         </div>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <!-- “So What?” Box -->
-    <section class="card p-6">
-      <h2 class="text-xl font-semibold">What this means for policy & practice</h2>
-      <div class="mt-3 grid md:grid-cols-3 gap-4">
-        <div class="rounded-lg bg-blue-50 p-4">
-          <h3 class="font-semibold">Talent</h3>
-          <p class="text-sm text-gray-700">Retain and attract working-age residents via career ladders and re-entry pathways for returnees.</p>
+  <!-- ========================= SO WHAT (POLICY BOX) ========================= -->
+  <section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mt-6">
+    <div class="card p-6">
+      <h3 class="text-lg font-semibold text-slate-900">So What? Policy Levers</h3>
+      <div class="mt-3 grid gap-4 md:grid-cols-3 text-sm text-slate-700">
+        <div class="rounded-lg border border-slate-200 p-4">
+          <h4 class="font-semibold">Talent</h4>
+          <ul class="mt-2 list-disc pl-5 space-y-1">
+            <li>Stack credentials aligned to tradables</li>
+            <li>Return‑migration & remote hubs</li>
+            <li>Childcare & eldercare supports</li>
+          </ul>
         </div>
-        <div class="rounded-lg bg-amber-50 p-4">
-          <h3 class="font-semibold">Firms</h3>
-          <p class="text-sm text-gray-700">Support clusters with supplier development, export help, and access to growth capital.</p>
+        <div class="rounded-lg border border-slate-200 p-4">
+          <h4 class="font-semibold">Firms</h4>
+          <ul class="mt-2 list-disc pl-5 space-y-1">
+            <li>Permitting/financing fast lanes</li>
+            <li>Diaspora customer pipelines</li>
+            <li>Export services platforms</li>
+          </ul>
         </div>
-        <div class="rounded-lg bg-emerald-50 p-4">
-          <h3 class="font-semibold">Places</h3>
-          <p class="text-sm text-gray-700">Target neighborhood investments where poverty, school decline, and hazard exposure overlap.</p>
+        <div class="rounded-lg border border-slate-200 p-4">
+          <h4 class="font-semibold">Places</h4>
+          <ul class="mt-2 list-disc pl-5 space-y-1">
+            <li>Resilient infill & main‑street revival</li>
+            <li>Transit/EV micro‑mobility connectors</li>
+            <li>Hazard‑aware housing upgrades</li>
+          </ul>
         </div>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <!-- Sources (compact) -->
-    <section class="card p-6">
-      <h2 class="text-xl font-semibold">Selected Sources</h2>
-      <p class="text-sm text-gray-700 mt-2">
-        A full bibliography underpins this synthesis. Key references include peer-reviewed studies on migration and aging,
-        analyses of the Section 936 legacy, federal statistics on employment, wages, and demographics, and work on housing
-        affordability and hazard exposure.
-      </p>
-      <details class="mt-3">
-        <summary class="cursor-pointer text-blue-700 hover:underline text-sm">Show concise reference list</summary>
-        <ul class="mt-3 space-y-1 text-sm list-disc pl-6">
-          <li>Research brief on migration as the driver of rapid aging in Puerto Rico.</li>
-          <li>NY Fed analysis on causes & consequences of population decline.</li>
-          <li>GAO report on Section 936 and manufacturing anchors.</li>
-          <li>BEA prototype accounts on spending contraction.</li>
-          <li>Education studies on enrollment decline and school closures.</li>
-          <li>Assessments of poverty, inequality, and landslide susceptibility.</li>
-        </ul>
+  <!-- ========================= SELECTED SOURCES ========================= -->
+  <section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mt-6 mb-12">
+    <div class="card p-6">
+      <details>
+        <summary class="cursor-pointer select-none text-lg font-semibold text-slate-900">Selected Sources (compact)</summary>
+        <div class="mt-3 text-sm text-slate-700 space-y-2">
+          <ol class="list-decimal pl-5 space-y-1">
+            <li id="src-1">Demography overview (placeholder): Author, Title, Year. Publisher/Working Paper. <a class="text-blue-700 hover:underline" href="#" target="_blank" rel="noopener noreferrer">Open</a></li>
+            <li id="src-2">Out‑migration & labor composition: Author, Title, Year. <a class="text-blue-700 hover:underline" href="#" target="_blank" rel="noopener noreferrer">Open</a></li>
+            <li id="src-3">Shock‑driven migration post‑2017: Author, Title, Year. <a class="text-blue-700 hover:underline" href="#" target="_blank" rel="noopener noreferrer">Open</a></li>
+            <li id="src-4">Economic structure & 936 legacy: Author, Title, Year. <a class="text-blue-700 hover:underline" href="#" target="_blank" rel="noopener noreferrer">Open</a></li>
+            <li id="src-5">Sector concentration/wages: Author, Title, Year. <a class="text-blue-700 hover:underline" href="#" target="_blank" rel="noopener noreferrer">Open</a></li>
+            <li id="src-6">Tradables and productivity: Author, Title, Year. <a class="text-blue-700 hover:underline" href="#" target="_blank" rel="noopener noreferrer">Open</a></li>
+            <li id="src-7">Poverty trends & spatial inequality: Author, Title, Year. <a class="text-blue-700 hover:underline" href="#" target="_blank" rel="noopener noreferrer">Open</a></li>
+            <li id="src-8">Housing vulnerability & recovery: Author, Title, Year. <a class="text-blue-700 hover:underline" href="#" target="_blank" rel="noopener noreferrer">Open</a></li>
+            <li id="src-9">Permitting/insurance constraints: Author, Title, Year. <a class="text-blue-700 hover:underline" href="#" target="_blank" rel="noopener noreferrer">Open</a></li>
+          </ol>
+          <p class="text-xs text-slate-500">Replace placeholders with full citations (authors, titles, years, URLs/DOIs). Optionally link superscripts ¹–³ to <code>#src-1</code>, <code>#src-4</code>, and <code>#src-7</code>.</p>
+        </div>
       </details>
-    </section>
-  </main>
+    </div>
+  </section>
 
+  <!-- ========================= FOOTER ========================= -->
+  <footer class="pb-10">
+    <p class="text-center text-xs text-slate-500">© <span id="year"></span> Population & Economic Dynamics in Puerto Rico</p>
+  </footer>
+
+  <!-- ========================= SCRIPTS ========================= -->
   <script>
-    // Highlight active nav link
-    document.querySelectorAll('.nav-link').forEach(a=>{
-      const href = a.getAttribute('href');
-      if (href && (location.pathname.endsWith(href) || (location.pathname === '/' && href === 'index.html'))) {
-        a.classList.add('text-blue-600','font-semibold','border-blue-600');
-        a.setAttribute('aria-current','page');
-      }
-    });
+    // Dynamic year
+    document.getElementById('year').textContent = new Date().getFullYear();
 
-    // Safer hover persistence for the Metrics dropdown
-    (function wireDropdown(){
-      const root = document.getElementById('metrics-dropdown-root');
-      if (!root) return;
-      let hoverTimeout;
+    // Active link highlighter (robust to subpaths)
+    (function(){
+      const here = location.pathname.split('/').pop() || 'index.html';
+      document.querySelectorAll('.nav-link').forEach(a => {
+        const href = a.getAttribute('href');
+        if (href && href.endsWith(here)) {
+          a.classList.add('text-blue-700','border-b-2','border-blue-600','font-semibold');
+          a.setAttribute('aria-current','page');
+        }
+      });
+    })();
+
+    // Metrics dropdown: hover + focus + keyboard access
+    (function(){
+      const trigger = document.getElementById('metrics-trigger');
       const menu = document.getElementById('metrics-menu');
+      let open = false; let hoverTimeout;
 
-      function addHovering(){ clearTimeout(hoverTimeout); root.classList.add('hovering'); }
-      function removeHovering(){ hoverTimeout = setTimeout(()=>root.classList.remove('hovering'), 300); }
+      const show = () => {
+        open = true;
+        trigger.setAttribute('aria-expanded','true');
+        menu.classList.remove('invisible','opacity-0','pointer-events-none');
+        menu.classList.add('opacity-100');
+      };
+      const hide = () => {
+        open = false;
+        trigger.setAttribute('aria-expanded','false');
+        menu.classList.add('invisible','opacity-0','pointer-events-none');
+        menu.classList.remove('opacity-100');
+      };
 
-      root.addEventListener('mouseenter', addHovering);
-      root.addEventListener('mouseleave', removeHovering);
-      if (menu) {
-        menu.addEventListener('mouseenter', addHovering);
-        menu.addEventListener('mouseleave', removeHovering);
-      }
+      // Hover: forgiving with small delay so users can traverse the gap
+      trigger.addEventListener('mouseenter', () => { clearTimeout(hoverTimeout); show(); });
+      trigger.addEventListener('mouseleave', () => { hoverTimeout = setTimeout(hide, 120); });
+      menu.addEventListener('mouseenter', () => { clearTimeout(hoverTimeout); show(); });
+      menu.addEventListener('mouseleave', () => { hoverTimeout = setTimeout(hide, 120); });
+
+      // Focus in/out for keyboard users
+      trigger.addEventListener('focus', show);
+      trigger.addEventListener('blur', () => setTimeout(() => { if(!menu.contains(document.activeElement)) hide(); }, 10));
+      menu.addEventListener('focusout', () => setTimeout(() => { if(!menu.contains(document.activeElement) && document.activeElement !== trigger) hide(); }, 10));
+
+      // Keyboard support
+      trigger.addEventListener('keydown', (e) => {
+        const items = [...menu.querySelectorAll('[role="menuitem"]')];
+        if (['Enter',' '].includes(e.key)) { e.preventDefault(); open ? hide() : show(); if (items[0]) items[0].focus(); }
+        if (e.key === 'ArrowDown') { e.preventDefault(); show(); if (items[0]) items[0].focus(); }
+        if (e.key === 'ArrowUp') { e.preventDefault(); show(); if (items[items.length-1]) items[items.length-1].focus(); }
+        if (e.key === 'Escape') { hide(); trigger.focus(); }
+      });
+      menu.addEventListener('keydown', (e) => {
+        const items = [...menu.querySelectorAll('[role="menuitem"]')];
+        const i = items.indexOf(document.activeElement);
+        if (e.key === 'Escape') { hide(); trigger.focus(); }
+        if (e.key === 'ArrowDown') { e.preventDefault(); (items[i+1] || items[0])?.focus(); }
+        if (e.key === 'ArrowUp') { e.preventDefault(); (items[i-1] || items[items.length-1])?.focus(); }
+        if (e.key === 'Tab' && !e.shiftKey && i === items.length-1) { hide(); }
+      });
+
+      // Close on outside click
+      document.addEventListener('click', (e) => { if (!trigger.contains(e.target) && !menu.contains(e.target)) hide(); });
     })();
   </script>
 </body>
