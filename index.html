@@ -177,7 +177,8 @@
             <div class="font-semibold text-gray-700">Population (Vintage 2024):</div>
             <ul class="mt-1 space-y-1">
               <li>2024: <span id="d-2024" class="font-semibold">—</span></li>
-              <li>Change since 2020: <span id="d-chg" class="font-semibold">—</span></li>
+              <!-- UPDATED: since 2010 -->
+              <li>Change since 2010: <span id="d-chg" class="font-semibold">—</span></li>
               <li>2023→2024: <span id="d-2324" class="font-semibold">—</span></li>
             </ul>
           </div>
@@ -209,8 +210,7 @@
   <script>
     // ---------------------- Data paths ----------------------
     const GEOJSON_URL = './data/tl_2022_72_cousub/pr_municipalities.geojson';
-    // UPDATED to 2010–2024 JSON
-    const POP_JSON    = './data/population/prm-est2010_2024.json';
+    const POP_JSON    = './data/population/prm-est2010_2024.json'; // UPDATED dataset
 
     // ---------------------- Years (expanded) ----------------------
     const YEARS = [2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024];
@@ -221,7 +221,6 @@
     const signed = (n) => (n > 0 ? '+' : '') + fmt.format(n);
 
     // ---------------------- Choropleth colors ----------------------
-    // 6-bin palette (deep red → orange → light green → green)
     const CHORO_COLORS = ['#7f1d1d', '#b91c1c', '#f97316', '#bbf7d0', '#22c55e', '#15803d'];
 
     // Default % breaks (≤-10, -10–-6, -6–-3, -3–0, 0–2, >2)
@@ -230,60 +229,42 @@
     // Computed later from data for abs change
     let ABS_BREAKS = [-10000, -6000, -3000, 0, 1000];
 
-    // ---------------------- Data access helpers (JSON 2010–2024) ----------------------
-    // JSON rows look like: { Municipio, "2010": ..., ..., "2024": ..., Change_*, ... }
+    // ---------------------- Helpers ----------------------
     function sanitizeName(s){ return String(s||'').trim(); }
-
     function valFromRow(row, y){
       const v = row?.[String(y)];
       const n = Number(v);
       return Number.isFinite(n) ? n : NaN;
     }
 
-    // ---------------------- Global state ----------------------
-    let _rows = [];          // loaded JSON rows
-    let map, layer, fc, legend;
-    let currentMode = 'pct'; // 'pct' | 'abs'
-
-    // Selection state (click-to-lock)
-    let lockedName = null;
-    let selectedLayer = null;
-    const selectedOutline = { weight: 4, color: '#111827', dashArray: '3', fillOpacity: 0.85 };
-
-    // Store initial bounds globally so we can restore on "Clear selection"
-    let prBoundsGlobal = null;
-
-    // Compute per-municipio stats using 2010–2024 series, but %/abs change remain since 2020 (for choropleth)
+    // ---------------------- Stats (now baseline = 2010) ----------------------
     function statsForMunicipio(name){
       name = sanitizeName(name);
-      // Match by municipio label
       const row = _rows.find(r => sanitizeName(r.Municipio) === name) ||
-                  // Fallbacks: some GeoJSONs have NAMELSAD (e.g., "Adjuntas Municipio")
-                  _rows.find(r => sanitizeName(r.Municipio) === name.replace(/\\s*Municipio$/,''));
+                  _rows.find(r => sanitizeName(r.Municipio) === name.replace(/\s*Municipio$/,''));
       if (!row) return null;
 
       const vals = YEARS.map(y => valFromRow(row, y));
       if (vals.some(v => !Number.isFinite(v))) return null;
 
-      // Change since 2020 for choropleth coloring
-      const idx2020 = YEARS.indexOf(2020);
+      const idx2010 = YEARS.indexOf(2010);
       const idx2024 = YEARS.indexOf(2024);
-      const pop2020 = vals[idx2020];
+      const pop2010 = vals[idx2010];
       const pop2024 = vals[idx2024];
-      const abs = pop2024 - pop2020;
-      const pctTot = (abs / pop2020) * 100;
 
-      // Annual % changes across entire span (2010→2011 ... 2023→2024)
+      const abs = pop2024 - pop2010;
+      const pctTot = (abs / pop2010) * 100;
+
+      // Annual % changes (2010→2011 … 2023→2024)
       const pctYear = [];
       for (let i=1;i<YEARS.length;i++){
         pctYear.push(((vals[i]-vals[i-1]) / vals[i-1]) * 100);
       }
-
       return { vals, abs, pctTot, pctYear, pop2024 };
     }
 
     function censusLink(name){
-      const g = '040XX00US72'; // Puerto Rico profile (you can later swap to municipio-specific if desired)
+      const g = '040XX00US72'; // Puerto Rico profile
       return `https://data.census.gov/profile/Puerto_Rico?g=${g}`;
     }
 
@@ -305,7 +286,6 @@
         }
       });
 
-      // 2011→2012 ... 2023→2024 (i.e., YEARS[1:] vs YEARS[:-1])
       const labels = YEARS.slice(1).map((y,i)=> `${YEARS[i]}→${y}`);
       if (barChart) barChart.destroy();
       barChart = new Chart(ctxB, {
@@ -338,7 +318,14 @@
       drawCharts(name, st);
     }
 
-    // ---------------------- Load data + map ----------------------
+    // ---------------------- Map + data ----------------------
+    let _rows = [], map, layer, fc, legend;
+    let currentMode = 'pct'; // 'pct' | 'abs'
+    let lockedName = null;
+    let selectedLayer = null;
+    const selectedOutline = { weight: 4, color: '#111827', dashArray: '3', fillOpacity: 0.85 };
+    let prBoundsGlobal = null;
+
     (async function init(){
       // Load population rows (2010–2024 JSON)
       const res = await fetch(POP_JSON, { cache:'no-store' });
@@ -346,7 +333,7 @@
 
       // Map
       const prBounds = L.latLngBounds([[17.85, -67.45],[18.55, -65.25]]);
-      prBoundsGlobal = prBounds; // save for later resets
+      prBoundsGlobal = prBounds;
       map = L.map('map', { zoomSnap: .25 }).fitBounds(prBounds);
 
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -365,39 +352,33 @@
           const p = f.properties || {};
           const name = p.NAME || p.NAMELSAD || p.name || 'Unknown';
           const geoid = p.GEOID || p.geoid || '';
-          const st = statsForMunicipio(name.replace(/\\s*Municipio$/,''));
+          const shortName = name.replace(/\s*Municipio$/,'');
+          const st = statsForMunicipio(shortName);
           const changeLine = st
-            ? `<br><small>2020→2024: ${signed(st.abs)} (${st.pctTot.toFixed(2)}%)</small>`
+            ? `<br><small>2010→2024: ${signed(st.abs)} (${st.pctTot.toFixed(2)}%)</small>`
             : '';
           lyr.bindTooltip(name, { direction:'center', className:'leaflet-tooltip' });
           lyr.bindPopup(`<strong>${name}</strong>${geoid?`<br><small>GEOID: ${geoid}</small>`:''}${changeLine}`);
 
           lyr.on({
             mouseover: e => {
-              if (lockedName) return; // ignore hovers while locked
+              if (lockedName) return;
               e.target.setStyle(hiStyle);
               e.target.bringToFront?.();
               const c = e.target.getBounds().getCenter();
-              updateDetails(name.replace(/\\s*Municipio$/,''), statsForMunicipio(name.replace(/\\s*Municipio$/,'')), c);
+              updateDetails(shortName, statsForMunicipio(shortName), c);
             },
             mouseout: e => {
-              if (lockedName) return; // keep selected outline when locked
+              if (lockedName) return;
               layer.resetStyle(e.target);
             },
             click: e => {
               const l = e.target;
-
-              // Remove previous selection outline
               if (selectedLayer) layer.resetStyle(selectedLayer);
-
-              // Record and outline the new selection
               selectedLayer = l;
-              lockedName = name.replace(/\\s*Municipio$/,'');
+              lockedName = shortName;
               l.setStyle(selectedOutline);
-
-              // Keep zoom-on-click
               map.fitBounds(l.getBounds(), { padding:[20,20] });
-
               const c = l.getBounds().getCenter();
               updateDetails(lockedName, statsForMunicipio(lockedName), c);
             }
@@ -408,10 +389,10 @@
       const b = layer.getBounds();
       if (b.isValid()) map.fitBounds(b, { padding:[15,15] });
 
-      // Compute ABS breaks from data (quantile-ish)
+      // Compute ABS breaks from data (uses 2010 baseline via st.abs)
       computeAbsBreaks();
 
-      // Legend control (up over the VI)
+      // Legend control
       legend = L.control({ position:'bottomright' });
       legend.onAdd = function(){
         const div = L.DomUtil.create('div', 'info legend');
@@ -429,22 +410,17 @@
       function moveLegend() {
         const el = legend._div;
         if (!el) return;
-        el.style.marginBottom = Math.round(map.getSize().y * 0.25) + 'px'; // ~25% up from bottom
+        el.style.marginBottom = Math.round(map.getSize().y * 0.25) + 'px';
         el.style.marginRight  = '8px';
       }
       map.on('resize', moveLegend);
       moveLegend();
 
-      // Initial details (Puerto Rico)
+      // Initial details
       const initName = 'Puerto Rico';
-      const st0 = statsForMunicipio(initName) || (function(){
-        const f0 = (fc.features && fc.features[0]) || null;
-        const nm = f0 ? (f0.properties.NAME || f0.properties.NAMELSAD || '—') : '—';
-        return statsForMunicipio(nm.replace(/\\s*Municipio$/,''));
-      })();
-      updateDetails(initName, st0, null);
+      updateDetails(initName, statsForMunicipio(initName), null);
 
-      // Toggle UI + Clear selection + Dropdown hover grace
+      // UI wiring
       wireMetricToggle();
       wireClearSelection();
       wireDropdown();
@@ -464,21 +440,17 @@
         btnAbs.classList.toggle('text-white', mode==='abs');
         btnAbs.classList.toggle('hover:bg-gray-50', mode!=='abs');
 
-        // Restyle polygons
         layer.eachLayer(l => l.setStyle(styleForFeature(l.feature)));
-        // Preserve selection outline
         if (selectedLayer) selectedLayer.setStyle(selectedOutline);
-
-        // Update legend
         renderLegend();
       }
 
       btnPct.addEventListener('click', () => setActive('pct'));
       btnAbs.addEventListener('click', () => setActive('abs'));
-      setActive(currentMode); // initialize classes
+      setActive(currentMode);
     }
 
-    // Clear selection wiring (also zoom back to original bounds)
+    // Clear selection + reset zoom
     function wireClearSelection(){
       function clearSelection(){
         lockedName = null;
@@ -492,8 +464,8 @@
     // Style function based on current mode
     function styleForFeature(feature){
       const p = feature.properties || {};
-      const name = p.NAME || p.NAMELSAD || p.name || 'Unknown';
-      const st = statsForMunicipio(name.replace(/\\s*Municipio$/,''));
+      const name = (p.NAME || p.NAMELSAD || p.name || 'Unknown').replace(/\s*Municipio$/,'');
+      const st = statsForMunicipio(name);
       const value = !st ? NaN : (currentMode === 'pct' ? st.pctTot : st.abs);
       const breaks = (currentMode === 'pct') ? PCT_BREAKS : ABS_BREAKS;
       const col = colorFor(value, breaks);
@@ -511,11 +483,11 @@
       return CHORO_COLORS[5];
     }
 
-    // Legend render (updates title + ranges)
+    // Legend render (UPDATED titles to 2010 baseline)
     function renderLegend(){
       if (!legend || !legend._div) return;
       const breaks = (currentMode === 'pct') ? PCT_BREAKS : ABS_BREAKS;
-      const title  = (currentMode === 'pct') ? 'Change since 2020 — %' : 'Change since 2020 — people';
+      const title  = (currentMode === 'pct') ? 'Change since 2010 — %' : 'Change since 2010 — people';
 
       const labels = [];
       function row(color, label) {
@@ -525,7 +497,6 @@
                   <span>${label}</span>
                 </div>`;
       }
-      // Build range labels
       const fmtRange = (a,b) => (currentMode==='pct')
           ? `${a}% to ${b}%`
           : `${signed(a)} to ${signed(b)}`;
@@ -546,8 +517,8 @@
       const values = [];
       (fc.features || []).forEach(f => {
         const p = f.properties || {};
-        const name = p.NAME || p.NAMELSAD || p.name || 'Unknown';
-        const st = statsForMunicipio(name.replace(/\\s*Municipio$/,''));
+        const name = (p.NAME || p.NAMELSAD || p.name || 'Unknown').replace(/\s*Municipio$/,'');
+        const st = statsForMunicipio(name);
         if (st && Number.isFinite(st.abs)) values.push(st.abs);
       });
       const neg = values.filter(v => v < 0).sort((a,b)=>a-b);
