@@ -1,0 +1,65 @@
+{
+  "name": "Puerto Rico",
+  "series": [
+    {
+      "year": 2010,
+      "population": 3724465
+    },
+    {
+      "year": 2011,
+      "population": 3693464
+    },
+    {
+      "year": 2012,
+      "population": 3661045
+    },
+    {
+      "year": 2013,
+      "population": 3631427
+    },
+    {
+      "year": 2014,
+      "population": 3585017
+    },
+    {
+      "year": 2015,
+      "population": 3535167
+    },
+    {
+      "year": 2016,
+      "population": 3480432
+    },
+    {
+      "year": 2017,
+      "population": 3410837
+    },
+    {
+      "year": 2018,
+      "population": 3290690
+    },
+    {
+      "year": 2019,
+      "population": 3302691
+    },
+    {
+      "year": 2020,
+      "population": 3281590
+    },
+    {
+      "year": 2021,
+      "population": 3262711
+    },
+    {
+      "year": 2022,
+      "population": 3220137
+    },
+    {
+      "year": 2023,
+      "population": 3203792
+    },
+    {
+      "year": 2024,
+      "population": 3203295
+    }
+  ]
+}
