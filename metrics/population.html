@@ -42,26 +42,18 @@
       padding:5px 10px;
     }
 
-    /* Mini charts area */
     .mini { min-height: 260px; }
 
-    /* --- Dropdown base state & transitions --- */
+    /* Dropdown show-on-hover */
     #metrics-menu {
-      opacity: 0;
-      visibility: hidden;
-      transform: translateY(4px);
+      opacity: 0; visibility: hidden; transform: translateY(4px);
       pointer-events: none;
       transition: opacity .15s ease, transform .15s ease, visibility .15s ease;
     }
-    /* Show menu when hovering root or while JS adds .hovering for grace period */
     #metrics-dropdown-root:hover #metrics-menu,
     #metrics-dropdown-root.hovering #metrics-menu {
-      opacity: 1;
-      visibility: visible;
-      transform: translateY(0);
-      pointer-events: auto;
+      opacity: 1; visibility: visible; transform: translateY(0); pointer-events: auto;
     }
-    /* Rotate chevron when open */
     #metrics-dropdown-root:hover #metrics-chevron,
     #metrics-dropdown-root.hovering #metrics-chevron {
       transform: rotate(180deg);
@@ -72,10 +64,10 @@
 
   <nav class="bg-white shadow sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-center gap-6 text-sm sm:text-base">
-      <a href="../index.html"   class="nav-link border-b-2 border-transparent">Home</a>
+      <a href="../index.html" class="nav-link border-b-2 border-transparent">Home</a>
 
       <div class="relative" id="metrics-dropdown-root">
-        <a href="../metrics.html" class="nav-link border-b-2 border-transparent inline-flex items-center gap-1 cursor-pointer select-none">
+        <a href="../metrics.html" class="nav-link border-b-2 border-blue-600 text-blue-600 font-semibold inline-flex items-center gap-1 cursor-pointer select-none" aria-current="page">
           Metrics
           <svg id="metrics-chevron" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 transition-transform" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
             <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.24 4.5a.75.75 0 01-1.08 0l-4.24-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/>
@@ -83,9 +75,9 @@
         </a>
         <div id="metrics-menu" class="absolute right-0 mt-2 w-64 rounded-xl border border-gray-200 bg-white shadow-lg ring-1 ring-black/5 z-50">
           <div class="py-2">
-            <a href="../metrics.html"               class="block px-4 py-2 hover:bg-gray-50 font-semibold">All Metrics Overview</a>
+            <a href="../metrics.html" class="block px-4 py-2 hover:bg-gray-50 font-semibold">All Metrics Overview</a>
             <div class="my-1 border-t border-gray-100"></div>
-            <a href="population.html"     class="block px-4 py-2 hover:bg-gray-50">Population</a>
+            <a href="population.html"     class="block px-4 py-2 bg-gray-100 font-semibold">Population</a>
             <a href="employment.html"     class="block px-4 py-2 hover:bg-gray-50">Employment Rate</a>
             <a href="establishments.html" class="block px-4 py-2 hover:bg-gray-50">Employer Establishments</a>
             <a href="income.html"         class="block px-4 py-2 hover:bg-gray-50">Household Income</a>
@@ -96,32 +88,31 @@
         </div>
       </div>
 
-      <a href="../literature.html"  class="nav-link border-b-2 border-transparent">Literature</a>
-      <a href="../strategy.html"class="nav-link border-b-2 border-transparent">Strategy</a>
-      <a href="../about.html"   class="nav-link border-b-2 border-transparent">About</a>
+      <a href="../literature.html" class="nav-link border-b-2 border-transparent">Literature</a>
+      <a href="../strategy.html"   class="nav-link border-b-2 border-transparent">Strategy</a>
+      <a href="../about.html"      class="nav-link border-b-2 border-transparent">About</a>
     </div>
   </nav>
 
   <main class="max-w-7xl mx-auto px-4 py-8 space-y-8">
-
     <header class="card hero p-6 sm:p-8 lg:p-10 relative">
       <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between">
-          <div>
-              <p class="text-sm font-semibold text-gray-500 uppercase">Graduate Independent Study</p>
-              <h1 class="mt-2 text-4xl sm:text-5xl font-extrabold leading-tight">
-                  Population & Economic Dynamics in Puerto Rico
-              </h1>
-              <p class="mt-3 text-lg text-gray-700">
-                  A graduate research project examining demographic shifts, out-migration, and sustainable development
-                  strategies through linked data analysis and policy synthesis.
-              </p>
-              <div class="mt-5">
-                  <span class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-100 text-slate-800">
-                      <span class="inline-flex w-5 h-5 items-center justify-center rounded-full bg-slate-800 text-white text-xs">i</span>
-                      Hover over the map to see county / municipality details
-                  </span>
-              </div>
+        <div>
+          <p class="text-sm font-semibold text-gray-500 uppercase">Graduate Independent Study</p>
+          <h1 class="mt-2 text-4xl sm:text-5xl font-extrabold leading-tight">
+            Population & Economic Dynamics in Puerto Rico
+          </h1>
+          <p class="mt-3 text-lg text-gray-700">
+            A graduate research project examining demographic shifts, out-migration, and sustainable development
+            strategies through linked data analysis and policy synthesis.
+          </p>
+          <div class="mt-5">
+            <span class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-100 text-slate-800">
+              <span class="inline-flex w-5 h-5 items-center justify-center rounded-full bg-slate-800 text-white text-xs">i</span>
+              Hover over the map to see county / municipality details
+            </span>
           </div>
+        </div>
       </div>
     </header>
 
@@ -130,13 +121,10 @@
         <div class="text-sm text-gray-700 font-medium">Map shading by</div>
         <div class="flex items-center gap-2">
           <div class="inline-flex rounded-lg border bg-white shadow-sm overflow-hidden">
-            <button id="metricPct" type="button"
-              class="px-3 py-1.5 text-sm font-medium bg-blue-600 text-white">% change</button>
-            <button id="metricAbs" type="button"
-              class="px-3 py-1.5 text-sm font-medium hover:bg-gray-50">abs change</button>
+            <button id="metricPct" type="button" class="px-3 py-1.5 text-sm font-medium bg-blue-600 text-white">% change</button>
+            <button id="metricAbs" type="button" class="px-3 py-1.5 text-sm font-medium hover:bg-gray-50">abs change</button>
           </div>
-          <button id="clearSel"
-            class="px-3 py-1.5 text-sm rounded-lg border bg-white hover:bg-gray-50">Clear selection</button>
+          <button id="clearSel" class="px-3 py-1.5 text-sm rounded-lg border bg-white hover:bg-gray-50">Clear selection</button>
         </div>
       </div>
       <div id="map" class="mt-3"></div>
@@ -155,7 +143,8 @@
             <div class="font-semibold text-gray-700">Population (Vintage 2024):</div>
             <ul class="mt-1 space-y-1">
               <li>2024: <span id="d-2024" class="font-semibold">—</span></li>
-              <li>Change since 2020: <span id="d-chg" class="font-semibold">—</span></li>
+              <!-- UPDATED: since 2010 -->
+              <li>Change since 2010: <span id="d-chg" class="font-semibold">—</span></li>
               <li>2023→2024: <span id="d-2324" class="font-semibold">—</span></li>
             </ul>
           </div>
@@ -165,11 +154,10 @@
               Open on data.census.gov ↗
             </a>
           </div>
-          <Image of a person looking through a magnifying glass at a map of Puerto Rico>
         </div>
 
         <div>
-          <h3 class="font-semibold mb-2">Population trend (2020–2024)</h3>
+          <h3 class="font-semibold mb-2">Population trend (2010–2024)</h3>
           <div class="mini bg-gray-50 rounded p-3">
             <canvas id="lineChart"></canvas>
           </div>
@@ -193,8 +181,8 @@
         </ul>
         <p>Specific files used:</p>
         <ul class="list-disc list-inside">
-          <li>prm-est2024-chg.xlsx</li>
-          <li>prm-est2024-pop.xlsx</li>
+          <li>prm-est2010_2024.json (site build)</li>
+          <li>prm-est2010_2024.csv (analysis)</li>
         </ul>
       </div>
     </section>
@@ -203,7 +191,11 @@
   <script>
     // ---------------------- Data paths ----------------------
     const GEOJSON_URL = '../data/tl_2022_72_cousub/pr_municipalities.geojson';
-    const POP_JSON    = '../data/population/prm-est2024-chg.json';
+    // UPDATED to 2010–2024 JSON (relative to /metrics/)
+    const POP_JSON    = '../data/population/prm-est2010_2024.json';
+
+    // ---------------------- Years (expanded) ----------------------
+    const YEARS = [2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024];
 
     // ---------------------- Formatters ----------------------
     const fmt = new Intl.NumberFormat('en-US');
@@ -211,14 +203,9 @@
     const signed = (n) => (n > 0 ? '+' : '') + fmt.format(n);
 
     // ---------------------- Choropleth colors ----------------------
-    // 6-bin palette (deep red → orange → light green → green)
     const CHORO_COLORS = ['#7f1d1d', '#b91c1c', '#f97316', '#bbf7d0', '#22c55e', '#15803d'];
-
-    // Default % breaks (≤-10, -10–-6, -6–-3, -3–0, 0–2, >2)
-    const PCT_BREAKS = [-10, -6, -3, 0, 2];
-
-    // Computed later from data for abs change
-    let ABS_BREAKS = [-10000, -6000, -3000, 0, 1000];
+    const PCT_BREAKS = [-10, -6, -3, 0, 2]; // default % breaks
+    let ABS_BREAKS = [-10000, -6000, -3000, 0, 1000]; // recomputed from data
 
     // Utility: color for a value given breaks
     function colorFor(value, breaks) {
@@ -232,49 +219,27 @@
     }
 
     // ---------------------- Helpers ----------------------
-    function sanitizeName(s){ return String(s||'').replace(/^\s*[.\-•]\s*/, '').trim(); }
+    const sanitizeName = s => String(s||'').trim();
+    const yearVal = (row,y) => {
+      const v = row?.[String(y)];
+      const n = Number(v);
+      return Number.isFinite(n) ? n : NaN;
+    };
 
-    function detectGeoHeader(rows){
-      const keys = Object.keys(rows[0]||{});
-      const priority = ["col_1","Geographic Area","Geographic Area Name","Geographic Area:"];
-      for (const p of priority) if (keys.includes(p)) return p;
-      for (const k of keys) {
-        const col = rows.slice(0,40).map(r => r[k]);
-        const hasPR = col.some(v => typeof v === 'string' && /puerto rico/i.test(v));
-        if (hasPR) return k;
-      }
-      return keys[0];
-    }
-
-    function valFromRow(row, y){
-      if (row.hasOwnProperty(String(y))) {
-        const n = Number(String(row[String(y)]).replace(/[, ]/g,''));
-        if (Number.isFinite(n)) return n;
-      }
-      const alt = `Population Estimate (as of July 1) | ${y}`;
-      if (row.hasOwnProperty(alt)) {
-        const n = Number(String(row[alt]).replace(/[, ]/g,''));
-        if (Number.isFinite(n)) return n;
-      }
-      if (y === 2020 && row.hasOwnProperty("April 1, 2020 Estimates Base")) {
-        const n = Number(String(row["April 1, 2020 Estimates Base"]).replace(/[, ]/g,''));
-        if (Number.isFinite(n)) return n;
-      }
-      return NaN;
-    }
-
-    const YEARS = [2020,2021,2022,2023,2024];
-
+    // Stats (baseline = 2010)
     function statsForMunicipio(name){
-      name = sanitizeName(name);
-      const row = _rows.find(r => sanitizeName(r[_geoHeader]) === name);
+      const key = sanitizeName(name).replace(/\s*Municipio$/,'');
+      const row = _rows.find(r => sanitizeName(r.Municipio) === key);
       if (!row) return null;
-      const vals = YEARS.map(y => valFromRow(row, y));
+
+      const vals = YEARS.map(y => yearVal(row,y));
       if (vals.some(v => !Number.isFinite(v))) return null;
-      const pop2020 = vals[0];
-      const pop2024 = vals[4];
-      const abs = pop2024 - pop2020;
-      const pctTot = (abs / pop2020) * 100;
+
+      const pop2010 = vals[YEARS.indexOf(2010)];
+      const pop2024 = vals[YEARS.indexOf(2024)];
+      const abs = pop2024 - pop2010;
+      const pctTot = (abs / pop2010) * 100;
+
       const pctYear = [];
       for (let i=1;i<YEARS.length;i++){
         pctYear.push(((vals[i]-vals[i-1]) / vals[i-1]) * 100);
@@ -283,12 +248,12 @@
     }
 
     function censusLink(name){
-      const g = '040XX00US72'; // Puerto Rico profile
+      const g = '040XX00US72';
       return `https://data.census.gov/profile/Puerto_Rico?g=${g}`;
     }
 
     // ---------------------- Charts ----------------------
-    let lineChart = null, barChart = null;
+    let lineChart=null, barChart=null;
     function drawCharts(name, st){
       if (!st) return;
       const ctxL = document.getElementById('lineChart').getContext('2d');
@@ -297,28 +262,28 @@
       if (lineChart) lineChart.destroy();
       lineChart = new Chart(ctxL, {
         type: 'line',
-        data: { labels: YEARS, datasets:[{ label:'Population', data: st.vals, tension:.2, pointRadius:4 }] },
+        data: { labels: YEARS, datasets:[{ label:'Population', data: st.vals, tension:.2, pointRadius:3 }] },
         options: {
           plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label:(c)=>fmt.format(c.parsed.y) } } },
           scales:{ y:{ ticks:{ callback:v=>fmt.format(v) } } },
-          maintainAspectRatio: false
+          maintainAspectRatio:false
         }
       });
 
-      const labels = ['2020→2021','2021→2022','2022→2023','2023→2024'];
+      const labels = YEARS.slice(1).map((y,i)=> `${YEARS[i]}→${y}`);
       if (barChart) barChart.destroy();
       barChart = new Chart(ctxB, {
-        type: 'bar',
-        data: { labels, datasets:[{ label:'% change', data: st.pctYear.map(v=>+v.toFixed(2)) }] },
-        options: {
+        type:'bar',
+        data:{ labels, datasets:[{ label:'% change', data: st.pctYear.map(v=>+v.toFixed(2)) }] },
+        options:{
           plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label:(c)=>pctFmt(c.parsed.y) } } },
           scales:{ y:{ ticks:{ callback:v=>pctFmt(v) } } },
-          maintainAspectRatio: false
+          maintainAspectRatio:false
         }
       });
     }
 
-    // ---------------------- DOM targets ----------------------
+    // ---------------------- DOM & details ----------------------
     const dName = document.getElementById('d-name');
     const dCent = document.getElementById('d-centroid');
     const d2024 = document.getElementById('d-2024');
@@ -327,7 +292,7 @@
     const dCenL = document.getElementById('d-census');
 
     function updateDetails(name, st, centroid){
-      dName.textContent = name;
+      dName.textContent = name.replace(/\s*Municipio$/,'');
       dCent.textContent = centroid ? `${centroid.lat.toFixed(4)}, ${centroid.lng.toFixed(4)}` : '—';
       d2024.textContent = Number.isFinite(st?.pop2024) ? fmt.format(st.pop2024) : '—';
       dChg.textContent  = st ? `${signed(st.abs)} (${pctFmt(st.pctTot)})` : '—';
@@ -337,29 +302,22 @@
       drawCharts(name, st);
     }
 
-    // ---------------------- Load data + map ----------------------
-    let _rows = [], _geoHeader = null;
-    let map, layer, fc, legend;
-    let currentMode = 'pct'; // 'pct' | 'abs'
-
-    // Selection state (click-to-lock)
-    let lockedName = null;
-    let selectedLayer = null;
+    // ---------------------- Map + data ----------------------
+    let _rows = [], map, layer, fc, legend;
+    let currentMode = 'pct';
+    let lockedName = null, selectedLayer = null;
     const selectedOutline = { weight: 4, color: '#111827', dashArray: '3', fillOpacity: 0.85 };
-
-    // Store initial bounds globally so we can restore on "Clear selection"
     let prBoundsGlobal = null;
 
     (async function init(){
-      // Load population rows
+      // Load population rows (2010–2024 JSON)
       const res = await fetch(POP_JSON, { cache:'no-store' });
       _rows = await res.json();
-      _geoHeader = detectGeoHeader(_rows);
 
       // Map
       const prBounds = L.latLngBounds([[17.85, -67.45],[18.55, -65.25]]);
-      prBoundsGlobal = prBounds; // save for later resets
-      map = L.map('map', { zoomSnap: .25 }).fitBounds(prBounds);
+      prBoundsGlobal = prBounds;
+      map = L.map('map', { zoomSnap:.25 }).fitBounds(prBounds);
 
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap contributors',
@@ -375,43 +333,37 @@
         style: (feature) => styleForFeature(feature),
         onEachFeature: (f, lyr) => {
           const p = f.properties || {};
-          const name = p.NAME || p.NAMELSAD || p.name || 'Unknown';
+          const rawName = p.NAME || p.NAMELSAD || p.name || 'Unknown';
+          const name = rawName.replace(/\s*Municipio$/,'');
           const geoid = p.GEOID || p.geoid || '';
           const st = statsForMunicipio(name);
           const changeLine = st
-            ? `<br><small>2020→2024: ${signed(st.abs)} (${st.pctTot.toFixed(2)}%)</small>`
+            ? `<br><small>2010→2024: ${signed(st.abs)} (${st.pctTot.toFixed(2)}%)</small>`
             : '';
-          lyr.bindTooltip(name, { direction:'center', className:'leaflet-tooltip' });
-          lyr.bindPopup(`<strong>${name}</strong>${geoid?`<br><small>GEOID: ${geoid}</small>`:''}${changeLine}`);
+          lyr.bindTooltip(rawName, { direction:'center', className:'leaflet-tooltip' });
+          lyr.bindPopup(`<strong>${rawName}</strong>${geoid?`<br><small>GEOID: ${geoid}</small>`:''}${changeLine}`);
 
           lyr.on({
             mouseover: e => {
-              if (lockedName) return; // ignore hovers while locked
+              if (lockedName) return;
               e.target.setStyle(hiStyle);
               e.target.bringToFront?.();
               const c = e.target.getBounds().getCenter();
               updateDetails(name, statsForMunicipio(name), c);
             },
             mouseout: e => {
-              if (lockedName) return; // keep selected outline when locked
+              if (lockedName) return;
               layer.resetStyle(e.target);
             },
             click: e => {
               const l = e.target;
-
-              // Remove previous selection outline
               if (selectedLayer) layer.resetStyle(selectedLayer);
-
-              // Record and outline the new selection
               selectedLayer = l;
               lockedName = name;
               l.setStyle(selectedOutline);
-
-              // Keep zoom-on-click
               map.fitBounds(l.getBounds(), { padding:[20,20] });
-
               const c = l.getBounds().getCenter();
-              updateDetails(name, statsForMunicipio(name), c);
+              updateDetails(lockedName, statsForMunicipio(lockedName), c);
             }
           });
         }
@@ -420,10 +372,9 @@
       const b = layer.getBounds();
       if (b.isValid()) map.fitBounds(b, { padding:[15,15] });
 
-      // Compute ABS breaks from data (quantile-ish)
       computeAbsBreaks();
 
-      // Legend control (up over the VI)
+      // Legend
       legend = L.control({ position:'bottomright' });
       legend.onAdd = function(){
         const div = L.DomUtil.create('div', 'info legend');
@@ -441,7 +392,7 @@
       function moveLegend() {
         const el = legend._div;
         if (!el) return;
-        el.style.marginBottom = Math.round(map.getSize().y * 0.25) + 'px'; // ~25% up from bottom
+        el.style.marginBottom = Math.round(map.getSize().y * 0.25) + 'px';
         el.style.marginRight  = '8px';
       }
       map.on('resize', moveLegend);
@@ -449,20 +400,15 @@
 
       // Initial details
       const initName = 'Puerto Rico';
-      const st0 = statsForMunicipio(initName) || (function(){
-        const f0 = (fc.features && fc.features[0]) || null;
-        const nm = f0 ? (f0.properties.NAME || f0.properties.NAMELSAD || '—') : '—';
-        return statsForMunicipio(nm);
-      })();
-      updateDetails(initName, st0, null);
+      updateDetails(initName, statsForMunicipio(initName), null);
 
-      // Toggle UI + Clear selection
+      // UI wiring
       wireMetricToggle();
       wireClearSelection();
       wireDropdown();
     })();
 
-    // ---------- Metric toggle ----------
+    // Metric toggle
     function wireMetricToggle(){
       const btnPct = document.getElementById('metricPct');
       const btnAbs = document.getElementById('metricAbs');
@@ -476,21 +422,17 @@
         btnAbs.classList.toggle('text-white', mode==='abs');
         btnAbs.classList.toggle('hover:bg-gray-50', mode!=='abs');
 
-        // Restyle polygons
         layer.eachLayer(l => l.setStyle(styleForFeature(l.feature)));
-        // Preserve selection outline
         if (selectedLayer) selectedLayer.setStyle(selectedOutline);
-
-        // Update legend
         renderLegend();
       }
 
       btnPct.addEventListener('click', () => setActive('pct'));
       btnAbs.addEventListener('click', () => setActive('abs'));
-      setActive(currentMode); // initialize classes
+      setActive(currentMode);
     }
 
-    // Clear selection wiring (also zoom back to original bounds)
+    // Clear selection + reset zoom
     function wireClearSelection(){
       function clearSelection(){
         lockedName = null;
@@ -501,10 +443,10 @@
       document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape') clearSelection(); });
     }
 
-    // Style function based on current mode
+    // Style function
     function styleForFeature(feature){
       const p = feature.properties || {};
-      const name = p.NAME || p.NAMELSAD || p.name || 'Unknown';
+      const name = (p.NAME || p.NAMELSAD || p.name || 'Unknown').replace(/\s*Municipio$/,'');
       const st = statsForMunicipio(name);
       const value = !st ? NaN : (currentMode === 'pct' ? st.pctTot : st.abs);
       const breaks = (currentMode === 'pct') ? PCT_BREAKS : ABS_BREAKS;
@@ -512,24 +454,21 @@
       return { fillColor: col, weight: 1.2, color:'#111827', fillOpacity:.75 };
     }
 
-    // Legend render (updates title + ranges)
+    // Legend (baseline text UPDATED to 2010)
     function renderLegend(){
       if (!legend || !legend._div) return;
       const breaks = (currentMode === 'pct') ? PCT_BREAKS : ABS_BREAKS;
-      const title  = (currentMode === 'pct') ? 'Change since 2020 — %' : 'Change since 2020 — people';
+      const title  = (currentMode === 'pct') ? 'Change since 2010 — %' : 'Change since 2010 — people';
 
       const labels = [];
-      function row(color, label) {
-        return `<div style="display:flex;align-items:center;gap:.5rem;margin:.2rem 0;">
-                  <span style="display:inline-block;width:14px;height:14px;border-radius:3px;background:${color};
-                               border:1px solid rgba(0,0,0,.15)"></span>
-                  <span>${label}</span>
-                </div>`;
-      }
-      // Build range labels
-      const fmtRange = (a,b) => (currentMode==='pct')
-          ? `${a}% to ${b}%`
-          : `${signed(a)} to ${signed(b)}`;
+      const row = (color, label) =>
+        `<div style="display:flex;align-items:center;gap:.5rem;margin:.2rem 0;">
+           <span style="display:inline-block;width:14px;height:14px;border-radius:3px;background:${color};
+                        border:1px solid rgba(0,0,0,.15)"></span>
+           <span>${label}</span>
+         </div>`;
+
+      const fmtRange = (a,b) => (currentMode==='pct') ? `${a}% to ${b}%` : `${signed(a)} to ${signed(b)}`;
 
       labels.push(`<div style="font-weight:600;margin-bottom:.25rem">${title}</div>`);
       labels.push(row(CHORO_COLORS[0], (currentMode==='pct') ? `≤ ${breaks[0]}%` : `≤ ${signed(breaks[0])}`));
@@ -542,12 +481,12 @@
       legend._div.innerHTML = labels.join('');
     }
 
-    // Compute ABS breaks from current data (quantile-ish, robust)
+    // Recompute ABS breaks from data (uses 2010 baseline via st.abs)
     function computeAbsBreaks(){
       const values = [];
       (fc.features || []).forEach(f => {
         const p = f.properties || {};
-        const name = p.NAME || p.NAMELSAD || p.name || 'Unknown';
+        const name = (p.NAME || p.NAMELSAD || p.name || 'Unknown').replace(/\s*Municipio$/,'');
         const st = statsForMunicipio(name);
         if (st && Number.isFinite(st.abs)) values.push(st.abs);
       });
@@ -566,17 +505,15 @@
       const p1 = q(pos, 0.5) ?? 100;
       ABS_BREAKS = [n1, n2, n3, 0, p1];
     }
-    
-    // Dropdown functionality & active link
+
+    // Dropdown persistence on hover
     function wireDropdown() {
       const root = document.getElementById('metrics-dropdown-root');
       if (!root) return;
       let hoverTimeout;
       const menu = document.getElementById('metrics-menu');
-
       function addHovering(){ clearTimeout(hoverTimeout); root.classList.add('hovering'); }
       function removeHovering(){ hoverTimeout = setTimeout(()=>root.classList.remove('hovering'), 300); }
-
       root.addEventListener('mouseenter', addHovering);
       root.addEventListener('mouseleave', removeHovering);
       if (menu) {
@@ -584,35 +521,12 @@
         menu.addEventListener('mouseleave', removeHovering);
       }
     }
-    
-    // Highlights active nav link
-    document.addEventListener('DOMContentLoaded', () => {
-      // Find the main "Metrics" nav link within the dropdown root
-      const metricsLink = document.querySelector('#metrics-dropdown-root > a');
-      
-      // Check if the current page is a child page within the metrics folder
-      const isMetricsSubPage = window.location.pathname.includes('/metrics/');
 
-      if (isMetricsSubPage) {
-        // If it's a sub-page, highlight the "Metrics" parent link
-        metricsLink.classList.add('border-b-2', 'border-blue-600', 'text-blue-600', 'font-semibold');
-        metricsLink.setAttribute('aria-current', 'page');
-        
-        // And highlight the specific sub-page link within the dropdown
-        const currentPathname = window.location.pathname.split('/').pop();
-        const subPageLink = document.querySelector(`#metrics-menu a[href="${currentPathname}"]`);
-        if (subPageLink) {
-          subPageLink.classList.add('bg-gray-100', 'font-semibold');
-        }
-      } else {
-        // If it's a top-level page, highlight the correct top-level link
-        document.querySelectorAll('.nav-link[href]').forEach(a => {
-          if (a.href.endsWith(window.location.pathname)) {
-            a.classList.add('border-b-2', 'border-blue-600', 'text-blue-600', 'font-semibold');
-            a.setAttribute('aria-current', 'page');
-          }
-        });
-      }
+    // Highlight active subpage in menu (optional)
+    document.addEventListener('DOMContentLoaded', () => {
+      const currentPathname = window.location.pathname.split('/').pop();
+      const subPageLink = document.querySelector(`#metrics-menu a[href="${currentPathname}"]`);
+      if (subPageLink) subPageLink.classList.add('bg-gray-100','font-semibold');
     });
   </script>
 </body>
