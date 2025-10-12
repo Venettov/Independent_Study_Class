@@ -1,0 +1,366 @@
+[
+  {
+    "name": "Puerto Rico",
+    "series": []
+  },
+  {
+    "name": "(X) Not applicable.",
+    "series": []
+  },
+  {
+    "name": ".Adjuntas",
+    "series": []
+  },
+  {
+    "name": ".Aguada",
+    "series": []
+  },
+  {
+    "name": ".Aguadilla",
+    "series": []
+  },
+  {
+    "name": ".Aguas Buenas",
+    "series": []
+  },
+  {
+    "name": ".Aibonito",
+    "series": []
+  },
+  {
+    "name": ".Arecibo",
+    "series": []
+  },
+  {
+    "name": ".Arroyo",
+    "series": []
+  },
+  {
+    "name": ".Añasco",
+    "series": []
+  },
+  {
+    "name": ".Barceloneta",
+    "series": []
+  },
+  {
+    "name": ".Barranquitas",
+    "series": []
+  },
+  {
+    "name": ".Bayamón",
+    "series": []
+  },
+  {
+    "name": ".Cabo Rojo",
+    "series": []
+  },
+  {
+    "name": ".Caguas",
+    "series": []
+  },
+  {
+    "name": ".Camuy",
+    "series": []
+  },
+  {
+    "name": ".Canóvanas",
+    "series": []
+  },
+  {
+    "name": ".Carolina",
+    "series": []
+  },
+  {
+    "name": ".Cataño",
+    "series": []
+  },
+  {
+    "name": ".Cayey",
+    "series": []
+  },
+  {
+    "name": ".Ceiba",
+    "series": []
+  },
+  {
+    "name": ".Ciales",
+    "series": []
+  },
+  {
+    "name": ".Cidra",
+    "series": []
+  },
+  {
+    "name": ".Coamo",
+    "series": []
+  },
+  {
+    "name": ".Comerío",
+    "series": []
+  },
+  {
+    "name": ".Corozal",
+    "series": []
+  },
+  {
+    "name": ".Culebra",
+    "series": []
+  },
+  {
+    "name": ".Dorado",
+    "series": []
+  },
+  {
+    "name": ".Fajardo",
+    "series": []
+  },
+  {
+    "name": ".Florida",
+    "series": []
+  },
+  {
+    "name": ".Guayama",
+    "series": []
+  },
+  {
+    "name": ".Guayanilla",
+    "series": []
+  },
+  {
+    "name": ".Guaynabo",
+    "series": []
+  },
+  {
+    "name": ".Gurabo",
+    "series": []
+  },
+  {
+    "name": ".Guánica",
+    "series": []
+  },
+  {
+    "name": ".Hatillo",
+    "series": []
+  },
+  {
+    "name": ".Hormigueros",
+    "series": []
+  },
+  {
+    "name": ".Humacao",
+    "series": []
+  },
+  {
+    "name": ".Isabela",
+    "series": []
+  },
+  {
+    "name": ".Jayuya",
+    "series": []
+  },
+  {
+    "name": ".Juana Díaz",
+    "series": []
+  },
+  {
+    "name": ".Juncos",
+    "series": []
+  },
+  {
+    "name": ".Lajas",
+    "series": []
+  },
+  {
+    "name": ".Lares",
+    "series": []
+  },
+  {
+    "name": ".Las Marías",
+    "series": []
+  },
+  {
+    "name": ".Las Piedras",
+    "series": []
+  },
+  {
+    "name": ".Loíza",
+    "series": []
+  },
+  {
+    "name": ".Luquillo",
+    "series": []
+  },
+  {
+    "name": ".Manatí",
+    "series": []
+  },
+  {
+    "name": ".Maricao",
+    "series": []
+  },
+  {
+    "name": ".Maunabo",
+    "series": []
+  },
+  {
+    "name": ".Mayagüez",
+    "series": []
+  },
+  {
+    "name": ".Moca",
+    "series": []
+  },
+  {
+    "name": ".Morovis",
+    "series": []
+  },
+  {
+    "name": ".Naguabo",
+    "series": []
+  },
+  {
+    "name": ".Naranjito",
+    "series": []
+  },
+  {
+    "name": ".Orocovis",
+    "series": []
+  },
+  {
+    "name": ".Patillas",
+    "series": []
+  },
+  {
+    "name": ".Peñuelas",
+    "series": []
+  },
+  {
+    "name": ".Ponce",
+    "series": []
+  },
+  {
+    "name": ".Quebradillas",
+    "series": []
+  },
+  {
+    "name": ".Rincón",
+    "series": []
+  },
+  {
+    "name": ".Río Grande",
+    "series": []
+  },
+  {
+    "name": ".Sabana Grande",
+    "series": []
+  },
+  {
+    "name": ".Salinas",
+    "series": []
+  },
+  {
+    "name": ".San Germán",
+    "series": []
+  },
+  {
+    "name": ".San Juan",
+    "series": []
+  },
+  {
+    "name": ".San Lorenzo",
+    "series": []
+  },
+  {
+    "name": ".San Sebastián",
+    "series": []
+  },
+  {
+    "name": ".Santa Isabel",
+    "series": []
+  },
+  {
+    "name": ".Toa Alta",
+    "series": []
+  },
+  {
+    "name": ".Toa Baja",
+    "series": []
+  },
+  {
+    "name": ".Trujillo Alto",
+    "series": []
+  },
+  {
+    "name": ".Utuado",
+    "series": []
+  },
+  {
+    "name": ".Vega Alta",
+    "series": []
+  },
+  {
+    "name": ".Vega Baja",
+    "series": []
+  },
+  {
+    "name": ".Vieques",
+    "series": []
+  },
+  {
+    "name": ".Villalba",
+    "series": []
+  },
+  {
+    "name": ".Yabucoa",
+    "series": []
+  },
+  {
+    "name": ".Yauco",
+    "series": []
+  },
+  {
+    "name": "2010-2020 Intercensal Estimates data products are associated with Data Management System projects P-6000042, P-7501659, and P-7527355. The U.S. Census Bureau reviewed these data products for unauthorized disclosure of confidential information and approved the disclosure avoidance practices applied to this release (CBDRB-FY24-0481).",
+    "series": []
+  },
+  {
+    "name": "Annual and Cumulative Estimates of Resident Population Change for Municipios in Puerto Rico and Municipio Rankings: April 1, 2020 to July 1, 2024 (PRM-EST2024-CHG)",
+    "series": []
+  },
+  {
+    "name": "Dash (-) represents zero or rounds to zero.",
+    "series": []
+  },
+  {
+    "name": "Intercensal Estimates of the Resident Population for Puerto Rico Municipios: April 1, 2010 to April 1, 2020 (PRM-EST2020INT-POP-72)",
+    "series": []
+  },
+  {
+    "name": "Note: The estimates are developed from a base that integrates the 2020 Census and Vintage 2020 estimates. For population estimates methodology statements, see https://www.census.gov/programs-surveys/popest/technical-documentation/methodology.html. All geographic boundaries for the 2024 population estimates series are as of January 1, 2024.",
+    "series": []
+  },
+  {
+    "name": "Release Date: March 2025",
+    "series": []
+  },
+  {
+    "name": "Release Date: November 2024",
+    "series": []
+  },
+  {
+    "name": "Source: U.S. Census Bureau, Population Division",
+    "series": []
+  },
+  {
+    "name": "Suggested Citation:",
+    "series": []
+  },
+  {
+    "name": "The April 1, 2010 population estimates base reflects changes to the 2010 Census population from the Count Question Resolution program, legal boundary updates, and other geographic program revisions. The data source for April 1, 2020 is the 2020 Census count featuring the application of disclosure avoidance to protect confidentiality. For population estimates methodology statements, see https://www.census.gov/programs-surveys/popest/technical-documentation/methodology.html. All geographic boundaries for the 2010-2020 Intercensal Estimates series are as of 2020.",
+    "series": []
+  },
+  {
+    "name": "The Census Bureau has reviewed this data product to ensure appropriate access, use, and disclosure avoidance protection of the confidential source data used to produce this product (Data Management System (DMS) number:  P-6000042 and P-7501659. Disclosure Review Board (DRB) approval number: CBDRB-FY25-0078).",
+    "series": []
+  }
+]
