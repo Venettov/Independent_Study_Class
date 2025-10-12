@@ -190,7 +190,7 @@
         </div>
 
         <div>
-          <h3 class="font-semibold mb-2">Population trend (2020–2024)</h3>
+          <h3 class="font-semibold mb-2">Population trend (2010–2024)</h3>
           <div class="mini bg-gray-50 rounded p-3">
             <canvas id="lineChart"></canvas>
           </div>
@@ -209,7 +209,11 @@
   <script>
     // ---------------------- Data paths ----------------------
     const GEOJSON_URL = './data/tl_2022_72_cousub/pr_municipalities.geojson';
-    const POP_JSON    = './data/population/prm-est2024-chg.json';
+    // UPDATED to 2010–2024 JSON
+    const POP_JSON    = './data/population/prm-est2010_2024.json';
+
+    // ---------------------- Years (expanded) ----------------------
+    const YEARS = [2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024];
 
     // ---------------------- Formatters ----------------------
     const fmt = new Intl.NumberFormat('en-US');
@@ -226,70 +230,60 @@
     // Computed later from data for abs change
     let ABS_BREAKS = [-10000, -6000, -3000, 0, 1000];
 
-    // Utility: color for a value given breaks
-    function colorFor(value, breaks) {
-      if (!Number.isFinite(value)) return '#93c5fd';
-      if (value <= breaks[0]) return CHORO_COLORS[0];
-      if (value <= breaks[1]) return CHORO_COLORS[1];
-      if (value <= breaks[2]) return CHORO_COLORS[2];
-      if (value <= breaks[3]) return CHORO_COLORS[3];
-      if (value <= breaks[4]) return CHORO_COLORS[4];
-      return CHORO_COLORS[5];
-    }
-
-    // ---------------------- Helpers ----------------------
-    function sanitizeName(s){ return String(s||'').replace(/^\s*[.\-•]\s*/, '').trim(); }
-
-    function detectGeoHeader(rows){
-      const keys = Object.keys(rows[0]||{});
-      const priority = ["col_1","Geographic Area","Geographic Area Name","Geographic Area:"];
-      for (const p of priority) if (keys.includes(p)) return p;
-      for (const k of keys) {
-        const col = rows.slice(0,40).map(r => r[k]);
-        const hasPR = col.some(v => typeof v === 'string' && /puerto rico/i.test(v));
-        if (hasPR) return k;
-      }
-      return keys[0];
-    }
+    // ---------------------- Data access helpers (JSON 2010–2024) ----------------------
+    // JSON rows look like: { Municipio, "2010": ..., ..., "2024": ..., Change_*, ... }
+    function sanitizeName(s){ return String(s||'').trim(); }
 
     function valFromRow(row, y){
-      if (row.hasOwnProperty(String(y))) {
-        const n = Number(String(row[String(y)]).replace(/[, ]/g,''));
-        if (Number.isFinite(n)) return n;
-      }
-      const alt = `Population Estimate (as of July 1) | ${y}`;
-      if (row.hasOwnProperty(alt)) {
-        const n = Number(String(row[alt]).replace(/[, ]/g,''));
-        if (Number.isFinite(n)) return n;
-      }
-      if (y === 2020 && row.hasOwnProperty("April 1, 2020 Estimates Base")) {
-        const n = Number(String(row["April 1, 2020 Estimates Base"]).replace(/[, ]/g,''));
-        if (Number.isFinite(n)) return n;
-      }
-      return NaN;
+      const v = row?.[String(y)];
+      const n = Number(v);
+      return Number.isFinite(n) ? n : NaN;
     }
 
-    const YEARS = [2020,2021,2022,2023,2024];
+    // ---------------------- Global state ----------------------
+    let _rows = [];          // loaded JSON rows
+    let map, layer, fc, legend;
+    let currentMode = 'pct'; // 'pct' | 'abs'
 
+    // Selection state (click-to-lock)
+    let lockedName = null;
+    let selectedLayer = null;
+    const selectedOutline = { weight: 4, color: '#111827', dashArray: '3', fillOpacity: 0.85 };
+
+    // Store initial bounds globally so we can restore on "Clear selection"
+    let prBoundsGlobal = null;
+
+    // Compute per-municipio stats using 2010–2024 series, but %/abs change remain since 2020 (for choropleth)
     function statsForMunicipio(name){
       name = sanitizeName(name);
-      const row = _rows.find(r => sanitizeName(r[_geoHeader]) === name);
+      // Match by municipio label
+      const row = _rows.find(r => sanitizeName(r.Municipio) === name) ||
+                  // Fallbacks: some GeoJSONs have NAMELSAD (e.g., "Adjuntas Municipio")
+                  _rows.find(r => sanitizeName(r.Municipio) === name.replace(/\\s*Municipio$/,''));
       if (!row) return null;
+
       const vals = YEARS.map(y => valFromRow(row, y));
       if (vals.some(v => !Number.isFinite(v))) return null;
-      const pop2020 = vals[0];
-      const pop2024 = vals[4];
+
+      // Change since 2020 for choropleth coloring
+      const idx2020 = YEARS.indexOf(2020);
+      const idx2024 = YEARS.indexOf(2024);
+      const pop2020 = vals[idx2020];
+      const pop2024 = vals[idx2024];
       const abs = pop2024 - pop2020;
       const pctTot = (abs / pop2020) * 100;
+
+      // Annual % changes across entire span (2010→2011 ... 2023→2024)
       const pctYear = [];
       for (let i=1;i<YEARS.length;i++){
         pctYear.push(((vals[i]-vals[i-1]) / vals[i-1]) * 100);
       }
+
       return { vals, abs, pctTot, pctYear, pop2024 };
     }
 
     function censusLink(name){
-      const g = '040XX00US72'; // Puerto Rico profile
+      const g = '040XX00US72'; // Puerto Rico profile (you can later swap to municipio-specific if desired)
       return `https://data.census.gov/profile/Puerto_Rico?g=${g}`;
     }
 
@@ -303,7 +297,7 @@
       if (lineChart) lineChart.destroy();
       lineChart = new Chart(ctxL, {
         type: 'line',
-        data: { labels: YEARS, datasets:[{ label:'Population', data: st.vals, tension:.2, pointRadius:4 }] },
+        data: { labels: YEARS, datasets:[{ label:'Population', data: st.vals, tension:.2, pointRadius:3 }] },
         options: {
           plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label:(c)=>fmt.format(c.parsed.y) } } },
           scales:{ y:{ ticks:{ callback:v=>fmt.format(v) } } },
@@ -311,7 +305,8 @@
         }
       });
 
-      const labels = ['2020→2021','2021→2022','2022→2023','2023→2024'];
+      // 2011→2012 ... 2023→2024 (i.e., YEARS[1:] vs YEARS[:-1])
+      const labels = YEARS.slice(1).map((y,i)=> `${YEARS[i]}→${y}`);
       if (barChart) barChart.destroy();
       barChart = new Chart(ctxB, {
         type: 'bar',
@@ -344,23 +339,10 @@
     }
 
     // ---------------------- Load data + map ----------------------
-    let _rows = [], _geoHeader = null;
-    let map, layer, fc, legend;
-    let currentMode = 'pct'; // 'pct' | 'abs'
-
-    // Selection state (click-to-lock)
-    let lockedName = null;
-    let selectedLayer = null;
-    const selectedOutline = { weight: 4, color: '#111827', dashArray: '3', fillOpacity: 0.85 };
-
-    // Store initial bounds globally so we can restore on "Clear selection"
-    let prBoundsGlobal = null;
-
     (async function init(){
-      // Load population rows
+      // Load population rows (2010–2024 JSON)
       const res = await fetch(POP_JSON, { cache:'no-store' });
       _rows = await res.json();
-      _geoHeader = detectGeoHeader(_rows);
 
       // Map
       const prBounds = L.latLngBounds([[17.85, -67.45],[18.55, -65.25]]);
@@ -383,7 +365,7 @@
           const p = f.properties || {};
           const name = p.NAME || p.NAMELSAD || p.name || 'Unknown';
           const geoid = p.GEOID || p.geoid || '';
-          const st = statsForMunicipio(name);
+          const st = statsForMunicipio(name.replace(/\\s*Municipio$/,''));
           const changeLine = st
             ? `<br><small>2020→2024: ${signed(st.abs)} (${st.pctTot.toFixed(2)}%)</small>`
             : '';
@@ -396,7 +378,7 @@
               e.target.setStyle(hiStyle);
               e.target.bringToFront?.();
               const c = e.target.getBounds().getCenter();
-              updateDetails(name, statsForMunicipio(name), c);
+              updateDetails(name.replace(/\\s*Municipio$/,''), statsForMunicipio(name.replace(/\\s*Municipio$/,'')), c);
             },
             mouseout: e => {
               if (lockedName) return; // keep selected outline when locked
@@ -410,14 +392,14 @@
 
               // Record and outline the new selection
               selectedLayer = l;
-              lockedName = name;
+              lockedName = name.replace(/\\s*Municipio$/,'');
               l.setStyle(selectedOutline);
 
               // Keep zoom-on-click
               map.fitBounds(l.getBounds(), { padding:[20,20] });
 
               const c = l.getBounds().getCenter();
-              updateDetails(name, statsForMunicipio(name), c);
+              updateDetails(lockedName, statsForMunicipio(lockedName), c);
             }
           });
         }
@@ -453,19 +435,19 @@
       map.on('resize', moveLegend);
       moveLegend();
 
-      // Initial details
+      // Initial details (Puerto Rico)
       const initName = 'Puerto Rico';
       const st0 = statsForMunicipio(initName) || (function(){
         const f0 = (fc.features && fc.features[0]) || null;
         const nm = f0 ? (f0.properties.NAME || f0.properties.NAMELSAD || '—') : '—';
-        return statsForMunicipio(nm);
+        return statsForMunicipio(nm.replace(/\\s*Municipio$/,''));
       })();
       updateDetails(initName, st0, null);
 
-      // Toggle UI + Clear selection
+      // Toggle UI + Clear selection + Dropdown hover grace
       wireMetricToggle();
       wireClearSelection();
-      wireDropdown(); // New function for the dropdown
+      wireDropdown();
     })();
 
     // ---------- Metric toggle ----------
@@ -511,11 +493,22 @@
     function styleForFeature(feature){
       const p = feature.properties || {};
       const name = p.NAME || p.NAMELSAD || p.name || 'Unknown';
-      const st = statsForMunicipio(name);
+      const st = statsForMunicipio(name.replace(/\\s*Municipio$/,''));
       const value = !st ? NaN : (currentMode === 'pct' ? st.pctTot : st.abs);
       const breaks = (currentMode === 'pct') ? PCT_BREAKS : ABS_BREAKS;
       const col = colorFor(value, breaks);
       return { fillColor: col, weight: 1.2, color:'#111827', fillOpacity:.75 };
+    }
+
+    // Utility: color for a value given breaks
+    function colorFor(value, breaks) {
+      if (!Number.isFinite(value)) return '#93c5fd';
+      if (value <= breaks[0]) return CHORO_COLORS[0];
+      if (value <= breaks[1]) return CHORO_COLORS[1];
+      if (value <= breaks[2]) return CHORO_COLORS[2];
+      if (value <= breaks[3]) return CHORO_COLORS[3];
+      if (value <= breaks[4]) return CHORO_COLORS[4];
+      return CHORO_COLORS[5];
     }
 
     // Legend render (updates title + ranges)
@@ -554,7 +547,7 @@
       (fc.features || []).forEach(f => {
         const p = f.properties || {};
         const name = p.NAME || p.NAMELSAD || p.name || 'Unknown';
-        const st = statsForMunicipio(name);
+        const st = statsForMunicipio(name.replace(/\\s*Municipio$/,''));
         if (st && Number.isFinite(st.abs)) values.push(st.abs);
       });
       const neg = values.filter(v => v < 0).sort((a,b)=>a-b);
@@ -572,7 +565,7 @@
       const p1 = q(pos, 0.5) ?? 100;
       ABS_BREAKS = [n1, n2, n3, 0, p1];
     }
-    
+
     // Dropdown functionality
     function wireDropdown() {
       const root = document.getElementById('metrics-dropdown-root');
