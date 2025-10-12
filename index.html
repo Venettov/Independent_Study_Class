@@ -16,13 +16,21 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
   <style>
-    .card { background:#fff; border-radius:1rem; box-shadow:0 10px 15px -3px rgba(0,0,0,.1), 0 4px 6px -2px rgba(0,0,0,.05); overflow:visible; }
+    /* Cards + hero */
+    .card {
+      background:#fff;
+      border-radius:1rem;
+      box-shadow:0 10px 15px -3px rgba(0,0,0,.1), 0 4px 6px -2px rgba(0,0,0,.05);
+      overflow:visible;
+    }
     .hero {
       background:
         radial-gradient(1200px 600px at 20% -10%, rgba(239,68,68,.12), transparent 60%),
         radial-gradient(1200px 600px at 80% -10%, rgba(37,99,235,.10), transparent 60%),
         linear-gradient(180deg, #fafafa 0%, #f3f4f6 100%);
     }
+
+    /* Map — trimmed height so charts show sooner */
     #map { height: 48vh; width: 100%; border-radius: .75rem; }
     @media (min-width: 1280px) { #map { height: 46vh; } }
     @media (max-width: 640px)  { #map { height: 54vh; } }
@@ -36,23 +44,43 @@
       box-shadow:0 2px 5px rgba(0,0,0,.2);
       padding:5px 10px;
     }
+
     .mini { min-height: 260px; }
 
-    /* Dropdown */
-    #metrics-menu{opacity:0;visibility:hidden;transform:translateY(4px);pointer-events:none;transition:opacity .15s,transform .15s,visibility .15s}
-    #metrics-dropdown-root:hover #metrics-menu,#metrics-dropdown-root.hovering #metrics-menu{opacity:1;visibility:visible;transform:translateY(0);pointer-events:auto}
-    #metrics-dropdown-root:hover #metrics-chevron,#metrics-dropdown-root.hovering #metrics-chevron{transform:rotate(180deg)}
+    /* Dropdown base state & transitions */
+    #metrics-menu {
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(4px);
+      pointer-events: none;
+      transition: opacity .15s ease, transform .15s ease, visibility .15s ease;
+    }
+    #metrics-dropdown-root:hover #metrics-menu,
+    #metrics-dropdown-root.hovering #metrics-menu {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+    #metrics-dropdown-root:hover #metrics-chevron,
+    #metrics-dropdown-root.hovering #metrics-chevron {
+      transform: rotate(180deg);
+    }
   </style>
 </head>
 <body class="bg-gray-50 text-gray-900 font-sans">
+
   <!-- Top nav -->
   <nav class="bg-white shadow sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-center gap-6 text-sm sm:text-base">
       <a href="index.html" class="nav-link border-b-2 border-blue-600 text-blue-600 font-semibold">Home</a>
+
       <div class="relative" id="metrics-dropdown-root">
         <a href="metrics.html" class="nav-link border-b-2 border-transparent inline-flex items-center gap-1 cursor-pointer select-none">
           Metrics
-          <svg id="metrics-chevron" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 transition-transform" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.24 4.5a.75.75 0 01-1.08 0l-4.24-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+          <svg id="metrics-chevron" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 transition-transform" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.24 4.5a.75.75 0 01-1.08 0l-4.24-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/>
+          </svg>
         </a>
         <div id="metrics-menu" class="absolute right-0 mt-2 w-64 rounded-xl border border-gray-200 bg-white shadow-lg ring-1 ring-black/5 z-50">
           <div class="py-2">
@@ -68,6 +96,7 @@
           </div>
         </div>
       </div>
+
       <a href="literature.html" class="nav-link border-b-2 border-transparent">Literature</a>
       <a href="strategy.html"   class="nav-link border-b-2 border-transparent">Strategy</a>
       <a href="about.html"      class="nav-link border-b-2 border-transparent">About</a>
@@ -75,13 +104,19 @@
   </nav>
 
   <main class="max-w-7xl mx-auto px-4 py-8 space-y-8">
+
     <!-- Hero -->
     <header class="card hero p-6 sm:p-8 lg:p-10 relative">
       <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between">
         <div>
           <p class="text-sm font-semibold text-gray-500 uppercase">Graduate Independent Study</p>
-          <h1 class="mt-2 text-4xl sm:text-5xl font-extrabold leading-tight">Population & Economic Dynamics in Puerto Rico</h1>
-          <p class="mt-3 text-lg text-gray-700">A graduate research project examining demographic shifts, out-migration, and sustainable development strategies through linked data analysis and policy synthesis.</p>
+          <h1 class="mt-2 text-4xl sm:text-5xl font-extrabold leading-tight">
+            Population & Economic Dynamics in Puerto Rico
+          </h1>
+          <p class="mt-3 text-lg text-gray-700">
+            A graduate research project examining demographic shifts, out-migration, and sustainable development
+            strategies through linked data analysis and policy synthesis.
+          </p>
           <div class="mt-5">
             <span class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-100 text-slate-800">
               <span class="inline-flex w-5 h-5 items-center justify-center rounded-full bg-slate-800 text-white text-xs">i</span>
@@ -90,13 +125,21 @@
           </div>
         </div>
       </div>
+
       <div class="absolute bottom-4 right-4 group">
         <div class="text-right">
-          <span class="text-sm font-semibold text-gray-700 cursor-pointer group-hover:text-blue-700 transition">Project Customer: Puerto Rico Planning Board</span>
+          <span class="text-sm font-semibold text-gray-700 cursor-pointer group-hover:text-blue-700 transition">
+            Project Customer: Puerto Rico Planning Board
+          </span>
         </div>
         <div class="absolute right-0 bottom-full mb-2 w-96 bg-white text-gray-800 p-4 rounded-lg shadow-xl border border-gray-200 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50">
-          <p class="text-gray-700 text-sm">The Planning Board oversees long-term economic development, demographic analysis, and land-use planning for Puerto Rico. This project’s interactive maps, municipal dashboards, and population change analyses provide actionable insights for policy.</p>
-          <p class="text-sm mt-3">🔗 <a href="https://jp.pr.gov" target="_blank" rel="noopener" class="text-blue-600 underline">Visit Puerto Rico Planning Board Website</a></p>
+          <p class="text-gray-700 text-sm">
+            The Planning Board oversees long-term economic development, demographic analysis, and land-use planning for Puerto Rico.
+            This project’s interactive maps, municipal dashboards, and population change analyses provide actionable insights for policy.
+          </p>
+          <p class="text-sm mt-3">
+            🔗 <a href="https://jp.pr.gov" target="_blank" rel="noopener" class="text-blue-600 underline">Visit Puerto Rico Planning Board Website</a>
+          </p>
         </div>
       </div>
     </header>
@@ -136,11 +179,9 @@
           </div>
 
           <div class="mt-4 text-sm">
-            <a id="d-census" class="text-blue-600 underline" href="#" target="_blank" rel="noopener">Open on data.census.gov ↗</a>
-          </div>
-
-          <div id="d-note" class="mt-3 text-xs text-amber-700 hidden">
-            Note: This municipio’s series begins after 2010. Stats use the earliest year available.
+            <a id="d-census" class="text-blue-600 underline" href="#" target="_blank" rel="noopener">
+              Open on data.census.gov ↗
+            </a>
           </div>
         </div>
 
@@ -162,20 +203,20 @@
   </main>
 
   <script>
-    // ---------- Paths & constants ----------
+    // ---------------------- Paths & constants ----------------------
     const GEOJSON_URL = './data/tl_2022_72_cousub/pr_municipalities.geojson';
-    const POP_JSON    = './data/population/pr_pr_2010_2024.json';
-    const BASELINE_YEAR = 2010;
+    const POP_JSON    = './data/population/pr_pr_2010_2024.json'; // UPDATED path (repo root → data/population/)
+    const BASELINE_YEAR = 2010;                   // Map and summary are relative to this year
 
-    // ---------- Formatters ----------
-    const fmt  = new Intl.NumberFormat('en-US');
-    const pct2 = (v) => `${(Number(v)||0).toFixed(2)}%`;
-    const signed = (n) => (n>0?'+':'') + fmt.format(n);
+    // ---------------------- Formatters ----------------------
+    const fmt    = new Intl.NumberFormat('en-US');
+    const pct2   = (v) => `${(Number(v)||0).toFixed(2)}%`;
+    const signed = (n) => (n > 0 ? '+' : '') + fmt.format(n);
 
-    // ---------- Colors / breaks ----------
-    const CHORO_COLORS = ['#7f1d1d', '#b91c1c', '#f97316', '#bbf7d0', '#22c55e', '#15803d'];
-    const PCT_BREAKS = [-10, -6, -3, 0, 2];
-    let ABS_BREAKS = [-10000, -6000, -3000, 0, 1000];
+    // ---------------------- Choropleth colors ----------------------
+    const CHORO_COLORS = ['#7f1d1d', '#b91c1c', '#f97316', '#bbf7d0', '#22c55e', '#15803d']; // deep red → green
+    const PCT_BREAKS = [-10, -6, -3, 0, 2]; // ≤-10, -10–-6, -6–-3, -3–0, 0–2, >2
+    let ABS_BREAKS = [-10000, -6000, -3000, 0, 1000]; // computed later from data
 
     function colorFor(value, breaks) {
       if (!Number.isFinite(value)) return '#93c5fd';
@@ -187,108 +228,85 @@
       return CHORO_COLORS[5];
     }
 
-    // ---------- Data holders ----------
-    const seriesByName = new Map(); // name -> [{year, population}]
-    let YEARS = []; // global domain (will be 2010..2024)
+    // ---------------------- Data holders ----------------------
+    // Map: municipio name -> [{year, population}, ...] sorted by year
+    const seriesByName = new Map();
+    let YEARS = []; // full domain from dataset (expect 2010..2024)
 
-    // ---------- Helpers ----------
-    const dNote = document.getElementById('d-note');
-    function showNote(show){ dNote.classList.toggle('hidden', !show); }
+    // ---------------------- Helpers ----------------------
     function sanitizeName(s){ return String(s||'').replace(/^\s*[.\-•]\s*/, '').trim(); }
 
-    function censusLink(name){ return `https://data.census.gov/profile/Puerto_Rico?g=040XX00US72`; }
-
-    // Align a municipio’s data to the full global domain (fill missing with null for charts)
-    function alignToDomain(arr, yearsDomain) {
-      const byYear = new Map(arr.map(d => [Number(d.year), Number(d.population)]));
-      return yearsDomain.map(y => ({
-        year: y,
-        population: byYear.has(y) ? byYear.get(y) : null
-      }));
+    function censusLink(name){
+      // Simple profile link (swap to municipio-level if you add proper geo IDs)
+      const g = '040XX00US72';
+      return `https://data.census.gov/profile/Puerto_Rico?g=${g}`;
     }
 
-    // Stats relative to 2010 if present; otherwise earliest available year for that municipio.
     function statsForMunicipio(name){
       const nm = sanitizeName(name);
-      const raw = seriesByName.get(nm);
-      if (!raw || !raw.length) return null;
+      const arr = seriesByName.get(nm);
+      if (!arr || !arr.length) return null;
 
-      const aligned = alignToDomain([...raw].sort((a,b)=>a.year-b.year), YEARS);
-      const years = aligned.map(d=>d.year);
-      const vals  = aligned.map(d=>d.population);
+      const srt = [...arr].sort((a,b)=>a.year-b.year);
+      const years = srt.map(d=>d.year);
+      const vals  = srt.map(d=>Number(d.population));
 
       const latestIdx = vals.length - 1;
       const latestYear = years[latestIdx];
-      const latest = vals[latestIdx];
+      const baseIdx = years.indexOf(BASELINE_YEAR);
+      if (baseIdx === -1) return null;
 
-      const baseIdx2010 = years.indexOf(BASELINE_YEAR);
-      // find first non-null value
-      let firstIdx = vals.findIndex(v => v !== null && Number.isFinite(v));
-      if (firstIdx === -1) return null;
-
-      const has2010 = baseIdx2010 !== -1 && vals[baseIdx2010] !== null;
-      const baseIdx = has2010 ? baseIdx2010 : firstIdx;
-      const baseYearUsed = years[baseIdx];
       const base = vals[baseIdx];
+      const latest = vals[latestIdx];
+      const abs = latest - base;
+      const pctTot = (abs / base) * 100;
 
-      // Build YoY % using only consecutive non-null pairs
       const pctYear = [];
       for (let i=1;i<vals.length;i++){
-        const a = vals[i-1], b = vals[i];
-        if (a !== null && b !== null) pctYear.push(((b-a)/a)*100);
-        else pctYear.push(null);
+        const prev = vals[i-1];
+        pctYear.push(((vals[i]-prev)/prev)*100);
       }
 
-      const abs = (latest!==null && base!==null) ? (latest - base) : null;
-      const pctTot = (latest!==null && base) ? ((latest - base) / base) * 100 : null;
+      const lastPair = `${years[years.length-2]}→${years[years.length-1]}`;
+      const lastPct  = pctYear[pctYear.length-1];
 
-      // last valid YoY pair label/value
-      let lastPair = '—', lastPct = null;
-      for (let i=pctYear.length-1;i>=0;i--){
-        if (pctYear[i] !== null) { lastPair = `${years[i]}→${years[i+1]}`; lastPct = pctYear[i]; break; }
-      }
-
-      return { years, vals, pctYear, latest, latestYear, lastPair, lastPct, abs, pctTot, baseYearUsed };
+      return { years, vals, abs, pctTot, pctYear, latest, latestYear, lastPair, lastPct };
     }
 
-    // ---------- Charts ----------
+    // ---------------------- Charts ----------------------
     let lineChart = null, barChart = null;
-
     function drawCharts(name, st){
       if (!st) return;
       const ctxL = document.getElementById('lineChart').getContext('2d');
       const ctxB = document.getElementById('barChart').getContext('2d');
 
-      // Build line data (nulls render as gaps)
       if (lineChart) lineChart.destroy();
       lineChart = new Chart(ctxL, {
         type: 'line',
-        data: { labels: st.years, datasets:[{ label:'Population', data: st.vals, spanGaps:false, tension:.2, pointRadius:2 }] },
+        data: { labels: st.years, datasets:[{ label:'Population', data: st.vals, tension:.2, pointRadius:3 }] },
         options: {
-          plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label:(c)=> c.parsed.y==null ? 'No data' : fmt.format(c.parsed.y) } } },
-          scales:{ y:{ ticks:{ callback:v=>fmt.format(v) } }, x:{ ticks:{ autoSkip:true } } },
+          plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label:(c)=>fmt.format(c.parsed.y) } } },
+          scales:{ y:{ ticks:{ callback:v=>fmt.format(v) } } },
           maintainAspectRatio: false
         }
       });
 
-      // YoY % labels across full domain (year-1 → year)
       const labels = [];
       for (let i=1;i<st.years.length;i++){ labels.push(`${st.years[i-1]}→${st.years[i]}`); }
-      const barData = st.pctYear.map(v => v==null ? null : +v.toFixed(2));
 
       if (barChart) barChart.destroy();
       barChart = new Chart(ctxB, {
         type: 'bar',
-        data: { labels, datasets:[{ label:'% change', data: barData }] },
+        data: { labels, datasets:[{ label:'% change', data: st.pctYear.map(v=>+v.toFixed(2)) }] },
         options: {
-          plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label:(c)=> c.parsed.y==null ? 'No data' : pct2(c.parsed.y) } } },
+          plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label:(c)=>pct2(c.parsed.y) } } },
           scales:{ y:{ ticks:{ callback:v=>pct2(v) } } },
           maintainAspectRatio: false
         }
       });
     }
 
-    // ---------- DOM ----------
+    // ---------------------- DOM targets ----------------------
     const dName   = document.getElementById('d-name');
     const dCent   = document.getElementById('d-centroid');
     const dLatest = document.getElementById('d-latest');
@@ -298,34 +316,33 @@
     const dPair   = document.getElementById('d-lastpair');
     const dLastPct= document.getElementById('d-lastpct');
     const dCenL   = document.getElementById('d-census');
-    const trendTitle = document.getElementById('trendTitle');
 
     function updateDetails(name, st, centroid){
       dName.textContent = name;
       dCent.textContent = centroid ? `${centroid.lat.toFixed(4)}, ${centroid.lng.toFixed(4)}` : '—';
+
       if (st){
-        dLatestY.textContent = st.latestYear ?? '—';
-        dLatest.textContent  = (st.latest==null) ? '—' : fmt.format(st.latest);
-        dBaseY.textContent   = st.baseYearUsed ?? BASELINE_YEAR;
-        dChg.textContent     = (st.abs==null || st.pctTot==null) ? '—' : `${signed(st.abs)} (${pct2(st.pctTot)})`;
-        dPair.textContent    = st.lastPair ?? '—';
-        dLastPct.textContent = (st.lastPct==null) ? '—' : pct2(st.lastPct);
-        showNote(st.baseYearUsed !== BASELINE_YEAR);
+        dLatestY.textContent = st.latestYear;
+        dLatest.textContent  = fmt.format(st.latest);
+        dBaseY.textContent   = BASELINE_YEAR;
+        dChg.textContent     = `${signed(st.abs)} (${pct2(st.pctTot)})`;
+        dPair.textContent    = st.lastPair;
+        dLastPct.textContent = pct2(st.lastPct);
       } else {
         dLatestY.textContent = '—';
         dLatest.textContent  = '—';
         dChg.textContent     = '—';
         dPair.textContent    = '—';
         dLastPct.textContent = '—';
-        showNote(false);
       }
+
       dCenL.href = censusLink(name);
       drawCharts(name, st);
     }
 
-    // ---------- Map ----------
+    // ---------------------- Map + interactivity ----------------------
     let map, layer, fc, legend;
-    let currentMode = 'pct';
+    let currentMode = 'pct'; // 'pct' | 'abs'
     let lockedName = null;
     let selectedLayer = null;
     const selectedOutline = { weight: 4, color: '#111827', dashArray: '3', fillOpacity: 0.85 };
@@ -335,9 +352,7 @@
       const p = feature.properties || {};
       const name = p.NAME || p.NAMELSAD || p.name || 'Unknown';
       const st = statsForMunicipio(name);
-      const value = (!st || st.abs==null || st.pctTot==null)
-        ? NaN
-        : (currentMode === 'pct' ? st.pctTot : st.abs);
+      const value = !st ? NaN : (currentMode === 'pct' ? st.pctTot : st.abs);
       const breaks = (currentMode === 'pct') ? PCT_BREAKS : ABS_BREAKS;
       const col = colorFor(value, breaks);
       return { fillColor: col, weight: 1.2, color:'#111827', fillOpacity:.75 };
@@ -346,18 +361,28 @@
     function renderLegend(){
       if (!legend || !legend._div) return;
       const breaks = (currentMode === 'pct') ? PCT_BREAKS : ABS_BREAKS;
-      const title  = (currentMode === 'pct') ? `Change since ${BASELINE_YEAR} — %` : `Change since ${BASELINE_YEAR} — people`;
+      const title  = (currentMode === 'pct')
+        ? `Change since ${BASELINE_YEAR} — %`
+        : `Change since ${BASELINE_YEAR} — people`;
+
+      const parts = [];
+      const block = (color, label) =>
+        `<div style="display:flex;align-items:center;gap:.5rem;margin:.2rem 0;">
+           <span style="display:inline-block;width:14px;height:14px;border-radius:3px;background:${color};
+                        border:1px solid rgba(0,0,0,.15)"></span>
+           <span>${label}</span>
+         </div>`;
       const fmtRange = (a,b) => (currentMode==='pct') ? `${a}% to ${b}%` : `${signed(a)} to ${signed(b)}`;
-      const row = (c,t)=>`<div style="display:flex;align-items:center;gap:.5rem;margin:.2rem 0;"><span style="display:inline-block;width:14px;height:14px;border-radius:3px;background:${c};border:1px solid rgba(0,0,0,.15)"></span><span>${t}</span></div>`;
-      legend._div.innerHTML = [
-        `<div style="font-weight:600;margin-bottom:.25rem">${title}</div>`,
-        row(CHORO_COLORS[0], (currentMode==='pct') ? `≤ ${breaks[0]}%` : `≤ ${signed(breaks[0])}`),
-        row(CHORO_COLORS[1], fmtRange(breaks[0], breaks[1])),
-        row(CHORO_COLORS[2], fmtRange(breaks[1], breaks[2])),
-        row(CHORO_COLORS[3], fmtRange(breaks[2], breaks[3])),
-        row(CHORO_COLORS[4], fmtRange(breaks[3], breaks[4])),
-        row(CHORO_COLORS[5], (currentMode==='pct') ? `> ${breaks[4]}%` : `> ${signed(breaks[4])}`)
-      ].join('');
+
+      parts.push(`<div style="font-weight:600;margin-bottom:.25rem">${title}</div>`);
+      parts.push(block(CHORO_COLORS[0], (currentMode==='pct') ? `≤ ${breaks[0]}%` : `≤ ${signed(breaks[0])}`));
+      parts.push(block(CHORO_COLORS[1], fmtRange(breaks[0], breaks[1])));
+      parts.push(block(CHORO_COLORS[2], fmtRange(breaks[1], breaks[2])));
+      parts.push(block(CHORO_COLORS[3], fmtRange(breaks[2], breaks[3])));
+      parts.push(block(CHORO_COLORS[4], fmtRange(breaks[3], breaks[4])));
+      parts.push(block(CHORO_COLORS[5], (currentMode==='pct') ? `> ${breaks[4]}%` : `> ${signed(breaks[4])}`));
+
+      legend._div.innerHTML = parts.join('');
     }
 
     function computeAbsBreaks(){
@@ -366,26 +391,42 @@
         const p = f.properties || {};
         const name = p.NAME || p.NAMELSAD || p.name || 'Unknown';
         const st = statsForMunicipio(name);
-        if (st && st.abs!=null) values.push(st.abs);
+        if (st && Number.isFinite(st.abs)) values.push(st.abs);
       });
-      const neg = values.filter(v=>v<0).sort((a,b)=>a-b);
-      const pos = values.filter(v=>v>0).sort((a,b)=>a-b);
-      const q = (arr,t)=>{ if(!arr.length) return null; const i=(arr.length-1)*t, lo=Math.floor(i), hi=Math.ceil(i); return lo===hi?arr[lo]:arr[lo]*(hi-i)+arr[hi]*(i-lo); };
-      const n1 = q(neg,0.2) ?? -1000, n2 = q(neg,0.5) ?? -500, n3 = q(neg,0.8) ?? -100, p1 = q(pos,0.5) ?? 100;
-      ABS_BREAKS = [n1,n2,n3,0,p1];
+      const neg = values.filter(v => v < 0).sort((a,b)=>a-b);
+      const pos = values.filter(v => v > 0).sort((a,b)=>a-b);
+      const q = (arr, t) => {
+        if (!arr.length) return null;
+        const i = (arr.length - 1) * t;
+        const lo = Math.floor(i), hi = Math.ceil(i);
+        if (lo === hi) return arr[lo];
+        return arr[lo] * (hi - i) + arr[hi] * (i - lo);
+      };
+      const n1 = q(neg, 0.2) ?? -1000;
+      const n2 = q(neg, 0.5) ?? -500;
+      const n3 = q(neg, 0.8) ?? -100;
+      const p1 = q(pos, 0.5) ?? 100;
+      ABS_BREAKS = [n1, n2, n3, 0, p1];
     }
 
     function wireMetricToggle(){
       const btnPct = document.getElementById('metricPct');
       const btnAbs = document.getElementById('metricAbs');
+
       function setActive(mode){
         currentMode = mode;
-        btnPct.classList.toggle('bg-blue-600', mode==='pct'); btnPct.classList.toggle('text-white', mode==='pct'); btnPct.classList.toggle('hover:bg-gray-50', mode!=='pct');
-        btnAbs.classList.toggle('bg-blue-600', mode==='abs'); btnAbs.classList.toggle('text-white', mode==='abs'); btnAbs.classList.toggle('hover:bg-gray-50', mode!=='abs');
+        btnPct.classList.toggle('bg-blue-600', mode==='pct');
+        btnPct.classList.toggle('text-white', mode==='pct');
+        btnPct.classList.toggle('hover:bg-gray-50', mode!=='pct');
+        btnAbs.classList.toggle('bg-blue-600', mode==='abs');
+        btnAbs.classList.toggle('text-white', mode==='abs');
+        btnAbs.classList.toggle('hover:bg-gray-50', mode!=='abs');
+
         layer.eachLayer(l => l.setStyle(styleForFeature(l.feature)));
         if (selectedLayer) selectedLayer.setStyle(selectedOutline);
         renderLegend();
       }
+
       btnPct.addEventListener('click', () => setActive('pct'));
       btnAbs.addEventListener('click', () => setActive('abs'));
       setActive(currentMode);
@@ -406,43 +447,50 @@
       if (!root) return;
       let hoverTimeout;
       const menu = document.getElementById('metrics-menu');
-      function add(){ clearTimeout(hoverTimeout); root.classList.add('hovering'); }
-      function rem(){ hoverTimeout = setTimeout(()=>root.classList.remove('hovering'), 300); }
-      root.addEventListener('mouseenter', add); root.addEventListener('mouseleave', rem);
-      if (menu) { menu.addEventListener('mouseenter', add); menu.addEventListener('mouseleave', rem); }
+      function addHovering(){ clearTimeout(hoverTimeout); root.classList.add('hovering'); }
+      function removeHovering(){ hoverTimeout = setTimeout(()=>root.classList.remove('hovering'), 300); }
+      root.addEventListener('mouseenter', addHovering);
+      root.addEventListener('mouseleave', removeHovering);
+      if (menu) {
+        menu.addEventListener('mouseenter', addHovering);
+        menu.addEventListener('mouseleave', removeHovering);
+      }
     }
 
-    // ---------- Boot ----------
+    // ---------------------- Boot ----------------------
     (async function init(){
-      // 1) Load population JSON (cache-busted)
-      const res = await fetch(POP_JSON + (POP_JSON.includes('?')?'&':'?') + 'cb=' + Date.now(), { cache:'no-store' });
+      // 1) Load population JSON (2010–2024)
+      // Accepts:
+      //   A) [{ name: "Aguada", series:[{year:2010,population:...}, ...] }, ...]
+      //   B) { "<name>": [{year:..., population:...}, ...], ... }
+      //   C) Single object { name, series }
+      const res = await fetch(POP_JSON, { cache:'no-store' });
       const raw = await res.json();
 
-      // Accept array, single object, or dict-of-arrays
       if (Array.isArray(raw)) {
-        raw.forEach(obj => { if (obj?.name && Array.isArray(obj.series)) seriesByName.set(sanitizeName(obj.name), obj.series.map(d=>({year:+d.year, population: d.population==null?null:+d.population}))); });
-      } else if (raw?.name && Array.isArray(raw.series)) {
-        seriesByName.set(sanitizeName(raw.name), raw.series.map(d=>({year:+d.year, population: d.population==null?null:+d.population})));
+        raw.forEach(obj => {
+          if (obj && obj.name && Array.isArray(obj.series)) {
+            seriesByName.set(sanitizeName(obj.name), obj.series.map(d=>({year:+d.year, population:+d.population})));
+          }
+        });
+      } else if (raw && raw.name && Array.isArray(raw.series)) {
+        seriesByName.set(sanitizeName(raw.name), raw.series.map(d=>({year:+d.year, population:+d.population})));
       } else if (raw && typeof raw === 'object') {
         for (const [k,v] of Object.entries(raw)) {
-          if (Array.isArray(v)) seriesByName.set(sanitizeName(k), v.map(d=>({year:+d.year, population: d.population==null?null:+d.population})));
+          if (Array.isArray(v)) {
+            seriesByName.set(sanitizeName(k), v.map(d=>({year:+d.year, population:+d.population})));
+          }
         }
       }
 
-      // 2) Build global YEARS (full domain)
+      // Establish global YEARS from union of series
       const yearSet = new Set();
       for (const arr of seriesByName.values()) arr.forEach(d => yearSet.add(+d.year));
       YEARS = Array.from(yearSet).sort((a,b)=>a-b);
-      if (YEARS.length) {
-        const first = Math.min(...YEARS), last = Math.max(...YEARS);
-        // Force domain to start at 2010 if present anywhere; otherwise start at first available
-        const start = YEARS.includes(2010) ? 2010 : first;
-        YEARS = Array.from({length: (last - start + 1)}, (_,i)=> start + i);
-        const tt = document.getElementById('trendTitle');
-        if (tt) tt.textContent = `Population trend (${YEARS[0]}–${YEARS[YEARS.length-1]})`;
-      }
+      const trendTitle = document.getElementById('trendTitle');
+      if (trendTitle && YEARS.length) trendTitle.textContent = `Population trend (${YEARS[0]}–${YEARS[YEARS.length-1]})`;
 
-      // 3) Map
+      // 2) Map
       const prBounds = L.latLngBounds([[17.85, -67.45],[18.55, -65.25]]);
       prBoundsGlobal = prBounds;
       map = L.map('map', { zoomSnap: .25 }).fitBounds(prBounds);
@@ -463,8 +511,8 @@
           const p = f.properties || {};
           const name = p.NAME || p.NAMELSAD || p.name || 'Unknown';
           const st = statsForMunicipio(name);
-          const changeLine = (st && st.abs!=null && st.pctTot!=null)
-            ? `<br><small>Since ${st.baseYearUsed}: ${signed(st.abs)} (${pct2(st.pctTot)})</small>`
+          const changeLine = st
+            ? `<br><small>Since ${BASELINE_YEAR}: ${signed(st.abs)} (${st.pctTot.toFixed(2)}%)</small>`
             : '';
           lyr.bindTooltip(name, { direction:'center', className:'leaflet-tooltip' });
           lyr.bindPopup(`<strong>${name}</strong>${changeLine}`);
@@ -483,9 +531,18 @@
             },
             click: e => {
               const l = e.target;
+
+              // Remove previous selection outline
               if (selectedLayer) layer.resetStyle(selectedLayer);
-              selectedLayer = l; lockedName = name; l.setStyle(selectedOutline);
+
+              // Record and outline the new selection
+              selectedLayer = l;
+              lockedName = name;
+              l.setStyle(selectedOutline);
+
+              // Zoom to selection
               map.fitBounds(l.getBounds(), { padding:[20,20] });
+
               const c = l.getBounds().getCenter();
               updateDetails(name, statsForMunicipio(name), c);
             }
@@ -496,25 +553,42 @@
       const b = layer.getBounds();
       if (b.isValid()) map.fitBounds(b, { padding:[15,15] });
 
-      // 4) Abs breaks & legend
+      // 3) Compute ABS breaks from data relative to BASELINE_YEAR
       computeAbsBreaks();
+
+      // 4) Legend control (positioned above VI)
       legend = L.control({ position:'bottomright' });
       legend.onAdd = function(){
         const div = L.DomUtil.create('div', 'info legend');
-        div.style.background = 'white'; div.style.padding = '8px 10px'; div.style.borderRadius = '8px';
-        div.style.boxShadow = '0 2px 8px rgba(0,0,0,.15)'; div.style.font = '12px/1.3 system-ui,-apple-system,Segoe UI,Roboto,sans-serif';
-        legend._div = div; renderLegend(); return div;
+        div.style.background = 'white';
+        div.style.padding = '8px 10px';
+        div.style.borderRadius = '8px';
+        div.style.boxShadow = '0 2px 8px rgba(0,0,0,.15)';
+        div.style.font = '12px/1.3 system-ui,-apple-system,Segoe UI,Roboto,sans-serif';
+        legend._div = div;
+        renderLegend();
+        return div;
       };
       legend.addTo(map);
-      function moveLegend(){ const el=legend._div; if(!el) return; el.style.marginBottom = Math.round(map.getSize().y * 0.25) + 'px'; el.style.marginRight='8px'; }
-      map.on('resize', moveLegend); moveLegend();
 
-      // 5) Initial details (prefer Puerto Rico aggregate if present)
-      const initName = seriesByName.has('Puerto Rico') ? 'Puerto Rico' : (fc.features?.[0]?.properties?.NAME || 'Puerto Rico');
+      function moveLegend() {
+        const el = legend._div;
+        if (!el) return;
+        el.style.marginBottom = Math.round(map.getSize().y * 0.25) + 'px';
+        el.style.marginRight  = '8px';
+      }
+      map.on('resize', moveLegend);
+      moveLegend();
+
+      // 5) Initial details
+      const initName = seriesByName.has('Puerto Rico') ? 'Puerto Rico'
+                        : (fc.features?.[0]?.properties?.NAME || 'Puerto Rico');
       updateDetails(initName, statsForMunicipio(initName), null);
 
-      // 6) UI wiring
-      wireMetricToggle(); wireClearSelection(); wireDropdown();
+      // 6) Wire UI
+      wireMetricToggle();
+      wireClearSelection();
+      wireDropdown();
     })();
   </script>
 </body>
