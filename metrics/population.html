@@ -13,7 +13,6 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
   <style>
-    /* Cards + hero */
     .card {
       background:#fff;
       border-radius:1rem;
@@ -26,8 +25,6 @@
         radial-gradient(1200px 600px at 80% -10%, rgba(37,99,235,.10), transparent 60%),
         linear-gradient(180deg, #fafafa 0%, #f3f4f6 100%);
     }
-
-    /* Map — trimmed height so charts show sooner */
     #map { height: 48vh; width: 100%; border-radius: .75rem; }
     @media (min-width: 1280px) { #map { height: 46vh; } }
     @media (max-width: 640px)  { #map { height: 54vh; } }
@@ -48,7 +45,7 @@
     #metrics-menu {
       opacity: 0; visibility: hidden; transform: translateY(4px);
       pointer-events: none;
-      transition: opacity .15s ease, transform .15s ease, visibility .15s ease;
+      transition: opacity .15s ease, transform .15s ease, visibility .15s ease.
     }
     #metrics-dropdown-root:hover #metrics-menu,
     #metrics-dropdown-root.hovering #metrics-menu {
@@ -143,7 +140,6 @@
             <div class="font-semibold text-gray-700">Population (Vintage 2024):</div>
             <ul class="mt-1 space-y-1">
               <li>2024: <span id="d-2024" class="font-semibold">—</span></li>
-              <!-- UPDATED: since 2010 -->
               <li>Change since 2010: <span id="d-chg" class="font-semibold">—</span></li>
               <li>2023→2024: <span id="d-2324" class="font-semibold">—</span></li>
             </ul>
@@ -176,49 +172,46 @@
       <h2 class="text-lg font-semibold mb-4">File Sources</h2>
       <div class="space-y-4">
         <p>Data for this project was derived from the U.S. Census Bureau:</p>
-        <ul>
-          <li><a href="https://www.census.gov/data/datasets/time-series/demo/popest/2020s-total-puerto-rico-municipios.html" target="_blank" rel="noopener" class="text-blue-600 underline">2020s Census Estimates - Puerto Rico Municipalities</a></li>
+        <ul class="list-disc list-inside space-y-1">
+          <li>
+            <a href="https://www.census.gov/data/datasets/time-series/demo/popest/2020s-total-puerto-rico-municipios.html"
+               target="_blank" rel="noopener" class="text-blue-600 underline">
+              2020s Census Estimates – Puerto Rico Municipalities
+            </a>
+          </li>
+          <li>
+            <a href="https://www.census.gov/data/tables/time-series/demo/popest/intercensal-2010-2020-puerto-rico-municipios.html"
+               target="_blank" rel="noopener" class="text-blue-600 underline">
+              Intercensal Estimates 2010–2020 – Puerto Rico Municipalities
+            </a>
+            <span class="text-gray-600"> (download: <em>prm-est2020int-pop-72.xlsx</em>)</span>
+          </li>
         </ul>
+
         <p>Specific files used:</p>
         <ul class="list-disc list-inside">
           <li>prm-est2010_2024.json (site build)</li>
           <li>prm-est2010_2024.csv (analysis)</li>
+          <li>prm-est2020int-pop-72.xlsx (2010–2020 intercensal)</li>
         </ul>
       </div>
     </section>
   </main>
 
   <script>
-    // ---------------------- Data paths ----------------------
     const GEOJSON_URL = '../data/tl_2022_72_cousub/pr_municipalities.geojson';
-    // UPDATED to 2010–2024 JSON (relative to /metrics/)
     const POP_JSON    = '../data/population/prm-est2010_2024.json';
 
-    // ---------------------- Years (expanded) ----------------------
     const YEARS = [2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024];
 
-    // ---------------------- Formatters ----------------------
     const fmt = new Intl.NumberFormat('en-US');
     const pctFmt = (v) => `${(Number(v)||0).toFixed(2)}%`;
     const signed = (n) => (n > 0 ? '+' : '') + fmt.format(n);
 
-    // ---------------------- Choropleth colors ----------------------
     const CHORO_COLORS = ['#7f1d1d', '#b91c1c', '#f97316', '#bbf7d0', '#22c55e', '#15803d'];
-    const PCT_BREAKS = [-10, -6, -3, 0, 2]; // default % breaks
-    let ABS_BREAKS = [-10000, -6000, -3000, 0, 1000]; // recomputed from data
+    const PCT_BREAKS = [-10, -6, -3, 0, 2];
+    let ABS_BREAKS = [-10000, -6000, -3000, 0, 1000];
 
-    // Utility: color for a value given breaks
-    function colorFor(value, breaks) {
-      if (!Number.isFinite(value)) return '#93c5fd';
-      if (value <= breaks[0]) return CHORO_COLORS[0];
-      if (value <= breaks[1]) return CHORO_COLORS[1];
-      if (value <= breaks[2]) return CHORO_COLORS[2];
-      if (value <= breaks[3]) return CHORO_COLORS[3];
-      if (value <= breaks[4]) return CHORO_COLORS[4];
-      return CHORO_COLORS[5];
-    }
-
-    // ---------------------- Helpers ----------------------
     const sanitizeName = s => String(s||'').trim();
     const yearVal = (row,y) => {
       const v = row?.[String(y)];
@@ -226,7 +219,6 @@
       return Number.isFinite(n) ? n : NaN;
     };
 
-    // Stats (baseline = 2010)
     function statsForMunicipio(name){
       const key = sanitizeName(name).replace(/\s*Municipio$/,'');
       const row = _rows.find(r => sanitizeName(r.Municipio) === key);
@@ -252,7 +244,6 @@
       return `https://data.census.gov/profile/Puerto_Rico?g=${g}`;
     }
 
-    // ---------------------- Charts ----------------------
     let lineChart=null, barChart=null;
     function drawCharts(name, st){
       if (!st) return;
@@ -283,7 +274,6 @@
       });
     }
 
-    // ---------------------- DOM & details ----------------------
     const dName = document.getElementById('d-name');
     const dCent = document.getElementById('d-centroid');
     const d2024 = document.getElementById('d-2024');
@@ -302,7 +292,6 @@
       drawCharts(name, st);
     }
 
-    // ---------------------- Map + data ----------------------
     let _rows = [], map, layer, fc, legend;
     let currentMode = 'pct';
     let lockedName = null, selectedLayer = null;
@@ -310,11 +299,9 @@
     let prBoundsGlobal = null;
 
     (async function init(){
-      // Load population rows (2010–2024 JSON)
       const res = await fetch(POP_JSON, { cache:'no-store' });
       _rows = await res.json();
 
-      // Map
       const prBounds = L.latLngBounds([[17.85, -67.45],[18.55, -65.25]]);
       prBoundsGlobal = prBounds;
       map = L.map('map', { zoomSnap:.25 }).fitBounds(prBounds);
@@ -374,7 +361,6 @@
 
       computeAbsBreaks();
 
-      // Legend
       legend = L.control({ position:'bottomright' });
       legend.onAdd = function(){
         const div = L.DomUtil.create('div', 'info legend');
@@ -398,17 +384,14 @@
       map.on('resize', moveLegend);
       moveLegend();
 
-      // Initial details
       const initName = 'Puerto Rico';
       updateDetails(initName, statsForMunicipio(initName), null);
 
-      // UI wiring
       wireMetricToggle();
       wireClearSelection();
       wireDropdown();
     })();
 
-    // Metric toggle
     function wireMetricToggle(){
       const btnPct = document.getElementById('metricPct');
       const btnAbs = document.getElementById('metricAbs');
@@ -432,7 +415,6 @@
       setActive(currentMode);
     }
 
-    // Clear selection + reset zoom
     function wireClearSelection(){
       function clearSelection(){
         lockedName = null;
@@ -443,7 +425,6 @@
       document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape') clearSelection(); });
     }
 
-    // Style function
     function styleForFeature(feature){
       const p = feature.properties || {};
       const name = (p.NAME || p.NAMELSAD || p.name || 'Unknown').replace(/\s*Municipio$/,'');
@@ -454,7 +435,16 @@
       return { fillColor: col, weight: 1.2, color:'#111827', fillOpacity:.75 };
     }
 
-    // Legend (baseline text UPDATED to 2010)
+    function colorFor(value, breaks) {
+      if (!Number.isFinite(value)) return '#93c5fd';
+      if (value <= breaks[0]) return CHORO_COLORS[0];
+      if (value <= breaks[1]) return CHORO_COLORS[1];
+      if (value <= breaks[2]) return CHORO_COLORS[2];
+      if (value <= breaks[3]) return CHORO_COLORS[3];
+      if (value <= breaks[4]) return CHORO_COLORS[4];
+      return CHORO_COLORS[5];
+    }
+
     function renderLegend(){
       if (!legend || !legend._div) return;
       const breaks = (currentMode === 'pct') ? PCT_BREAKS : ABS_BREAKS;
@@ -481,7 +471,6 @@
       legend._div.innerHTML = labels.join('');
     }
 
-    // Recompute ABS breaks from data (uses 2010 baseline via st.abs)
     function computeAbsBreaks(){
       const values = [];
       (fc.features || []).forEach(f => {
@@ -506,7 +495,6 @@
       ABS_BREAKS = [n1, n2, n3, 0, p1];
     }
 
-    // Dropdown persistence on hover
     function wireDropdown() {
       const root = document.getElementById('metrics-dropdown-root');
       if (!root) return;
@@ -522,7 +510,6 @@
       }
     }
 
-    // Highlight active subpage in menu (optional)
     document.addEventListener('DOMContentLoaded', () => {
       const currentPathname = window.location.pathname.split('/').pop();
       const subPageLink = document.querySelector(`#metrics-menu a[href="${currentPathname}"]`);
