@@ -192,6 +192,7 @@
   </main>
 
   <script>
+    // **CRITICAL PATH CHECK:** These paths must be correct relative to employment.html
     const GEOJSON_URL = '../data/tl_2022_72_cousub/pr_municipalities.geojson';
     const DATA_JSON   = '../data/municipios_acs_s2301_2010_2023.json';
 
@@ -255,7 +256,7 @@
     };
 
     function statsForMunicipio(name, metricKey){
-      // Special case for the overall Puerto Rico average
+      // Special case: Use 'PUERTORICO' key only if the input name is exactly 'Puerto Rico'
       const mapNameKey = (name === 'Puerto Rico') ? 'PUERTORICO' : sanitizeName(name);
       
       const municipioData = _rows[mapNameKey];
@@ -263,6 +264,7 @@
 
       const vals = YEARS.map(y => yearVal(municipioData, y, metricKey));
       
+      // If any year is missing data, return null to signify incomplete stats
       if (vals.some(v => !Number.isFinite(v))) return null;
 
       const val2010 = vals[YEARS.indexOf(2010)];
