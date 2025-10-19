@@ -1,199 +1,217 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Employment & Labor Force – Puerto Rico</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Employment and Labor Force — Puerto Rico</title>
 
-<!-- Tailwind -->
-<script src="https://cdn.tailwindcss.com"></script>
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
 
-<!-- Leaflet -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  <!-- Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 
-<!-- Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
-<style>
-  .card { background:#fff; border-radius:1rem; box-shadow:0 10px 15px -3px rgba(0,0,0,.1),0 4px 6px -2px rgba(0,0,0,.05); }
-  #map { height: 50vh; width: 100%; border-radius: .75rem; }
-  .leaflet-tooltip { background: rgba(255,255,255,.95); font-size:14px; font-weight:600; padding:5px 10px; }
-  .mini { min-height: 260px; }
-</style>
+  <style>
+    body { background:#f9fafb; }
+    .card { background:#fff; border-radius:1rem; box-shadow:0 10px 15px -3px rgba(0,0,0,.1), 0 4px 6px -2px rgba(0,0,0,.05); }
+    #map { height: 55vh; width: 100%; border-radius: 1rem; }
+    .mini { min-height: 260px; }
+    .leaflet-tooltip { background: rgba(255,255,255,.95); font-size:14px; font-weight:600; padding:6px 10px; }
+  </style>
 </head>
 
-<body class="bg-gray-50 text-gray-900 font-sans">
-
-<main class="max-w-7xl mx-auto px-4 py-8 space-y-8">
-  <header class="card p-8 bg-gradient-to-r from-sky-50 to-slate-100">
-    <h1 class="text-4xl font-extrabold">Employment & Labor Force in Puerto Rico</h1>
-    <p class="mt-3 text-gray-700">
-      This interactive map shows unemployment rates and labor force participation for all 78 municipios.
-      Hover for quick stats, click for detailed time trends (2010–2023).
+<body class="text-gray-900">
+  <!-- Hero -->
+  <section class="card mx-auto mt-6 max-w-7xl p-8 bg-gradient-to-r from-sky-50 to-slate-100">
+    <h1 class="text-4xl font-extrabold">Employment and Labor Force in Puerto Rico (2010–2023)</h1>
+    <p class="mt-3 text-gray-700 leading-relaxed">
+      This interactive dashboard visualizes employment and unemployment trends across Puerto Rico’s 78 municipios.
+      Hover over the map to view unemployment, employment-to-population, and labor force participation rates, or click a municipio to explore its trend.
     </p>
-  </header>
-
-  <!-- MAP SECTION -->
-  <section class="card p-4">
-    <div class="flex items-center justify-between">
-      <h2 class="text-lg font-semibold">Unemployment Rate by Municipio (2023)</h2>
-      <button id="clearSel" class="px-3 py-1.5 text-sm border rounded-lg bg-white hover:bg-gray-50">Clear Selection</button>
-    </div>
-    <div id="map" class="mt-3"></div>
   </section>
 
-  <!-- DETAILS + CHARTS -->
-  <section class="card p-6">
-    <h2 class="text-lg font-semibold mb-4">Municipio Employment Details</h2>
+  <!-- Map -->
+  <section class="card mx-auto mt-8 max-w-7xl p-6">
+    <div class="flex items-center justify-between">
+      <h2 class="text-xl font-semibold">Unemployment Rate by Municipio (2023)</h2>
+      <button id="resetBtn" class="px-3 py-1.5 text-sm border rounded-lg bg-white hover:bg-gray-50">Reset View</button>
+    </div>
+    <div id="map" class="mt-4"></div>
+  </section>
+
+  <!-- Municipio Detail & Charts -->
+  <section class="card mx-auto mt-8 max-w-7xl p-6">
+    <h2 class="text-xl font-semibold mb-4">Municipio Employment Details</h2>
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <div>
         <p><span class="font-semibold">Municipio:</span> <span id="d-name">Puerto Rico</span></p>
         <p><span class="font-semibold">Unemployment (2023):</span> <span id="d-rate">—</span></p>
-        <p><span class="font-semibold">Employment/Pop Ratio:</span> <span id="d-epr">—</span></p>
+        <p><span class="font-semibold">Employment/Population:</span> <span id="d-epr">—</span></p>
         <p><span class="font-semibold">Labor Force Participation:</span> <span id="d-lfp">—</span></p>
       </div>
-
       <div>
         <h3 class="font-semibold mb-2">Unemployment Rate Trend (2010–2023)</h3>
-        <div class="mini bg-gray-50 rounded p-3"><canvas id="lineChart"></canvas></div>
+        <div class="mini bg-gray-50 rounded p-3"><canvas id="chartUnemp"></canvas></div>
       </div>
-
       <div>
         <h3 class="font-semibold mb-2">Employment/Population Ratio Trend</h3>
-        <div class="mini bg-gray-50 rounded p-3"><canvas id="barChart"></canvas></div>
+        <div class="mini bg-gray-50 rounded p-3"><canvas id="chartEPR"></canvas></div>
       </div>
+    </div>
+    <div class="mt-6">
+      <h3 class="font-semibold mb-2">Labor Force Participation Trend</h3>
+      <div class="mini bg-gray-50 rounded p-3"><canvas id="chartLFP"></canvas></div>
     </div>
   </section>
 
-  <!-- Islandwide BLS -->
-  <section class="card p-6">
-    <h2 class="text-lg font-semibold mb-3">Puerto Rico Annual Unemployment Rate (BLS)</h2>
-    <div class="bg-gray-50 rounded p-3"><canvas id="islandChart"></canvas></div>
+  <!-- BLS Islandwide Trend -->
+  <section class="card mx-auto mt-8 max-w-7xl p-6">
+    <h2 class="text-xl font-semibold mb-4">Islandwide Unemployment Rate — BLS (2010–2024)</h2>
+    <div class="bg-gray-50 rounded p-3"><canvas id="chartBLS"></canvas></div>
   </section>
-</main>
+
+  <!-- Top 10 Comparison -->
+  <section class="card mx-auto mt-8 max-w-7xl p-6 mb-10">
+    <h2 class="text-xl font-semibold mb-4">Top 10 Municipios — Lowest and Highest Unemployment (2023)</h2>
+    <div class="bg-gray-50 rounded p-3"><canvas id="chartTop10"></canvas></div>
+  </section>
+
+  <!-- Sources -->
+  <footer class="mx-auto max-w-7xl text-sm text-gray-600 mt-6 mb-10">
+    <p class="mt-2">
+      <strong>Sources:</strong><br>
+      U.S. Census Bureau, American Community Survey (ACS) 5-Year Subject Table S2301 (Employment Status, 2010–2023).<br>
+      U.S. Bureau of Labor Statistics, Local Area Unemployment Statistics (LAUS), via FRED (PRUR, LAUST720000000000003A).
+    </p>
+  </footer>
 
 <script>
-const GEOJSON_URL = "../data/tl_2022_72_cousub/pr_municipalities.geojson";
-const EMP_JSON = "../data/employment/municipios_acs_s2301_2010_2023.json";
+const DATA_JSON = "../data/employment/municipios_acs_s2301_2010_2023.json";
 const BLS_CSV = "../data/employment/puertorico_bls_unemployment_2010_2024_annual.csv";
+const GEO_URL = "../data/tl_2022_72_cousub/pr_municipalities.geojson";
 
+let acsData = [], blsData = [];
 const fmt = new Intl.NumberFormat('en-US', { maximumFractionDigits: 1 });
-const COLORS = ['#7f1d1d','#b91c1c','#f97316','#fde68a','#bbf7d0','#22c55e','#15803d'];
 
-let map, geoLayer, acsData = [], blsData = [];
-
-fetch(EMP_JSON).then(r=>r.json()).then(data=>{
+fetch(DATA_JSON).then(r=>r.json()).then(data=>{
   acsData = data;
-  return fetch(GEOJSON_URL);
+  return fetch(GEO_URL);
 }).then(r=>r.json()).then(geo=>{
   initMap(geo);
   loadBLS();
 });
 
-function initMap(geo){
-  map = L.map('map').setView([18.2,-66.4],8);
-
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
-    attribution:'© OpenStreetMap'
-  }).addTo(map);
-
-  geoLayer = L.geoJSON(geo,{
-    style: f => ({
-      color:'#333', weight:0.5, fillOpacity:0.8,
-      fillColor: colorFor(getRate(f.properties.NAMELSAD))
-    }),
-    onEachFeature:(f,l)=>{
-      const name = f.properties.NAMELSAD;
-      const rec = getLatest(name);
-      const tip = rec ?
-        `<b>${name}</b><br>
-         Unemp: ${fmt.format(rec.unemployment_rate_pct)}%<br>
-         Emp/Pop: ${fmt.format(rec.emp_pop_ratio_pct)}%<br>
-         LFP: ${fmt.format(rec.labor_force_participation_pct)}%` :
-        `<b>${name}</b><br>No data`;
-      l.bindTooltip(tip);
-      l.on('click',()=>updateMunicipio(name));
-    }
-  }).addTo(map);
+function normalizeName(name){
+  return name.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
 }
 
 function getLatest(name){
-  const arr = acsData.filter(d => d.municipio.normalize("NFD").replace(/[\u0300-\u036f]/g,"") === name.normalize("NFD").replace(/[\u0300-\u036f]/g,""));
-  if(!arr.length) return null;
+  const arr = acsData.filter(d=>normalizeName(d.municipio)===normalizeName(name));
   return arr.find(d=>d.year===2023);
 }
-function getRate(name){
-  const d = getLatest(name);
-  return d ? d.unemployment_rate_pct : null;
+
+function colorScale(v){
+  if(v==null) return "#cbd5e1";
+  if(v<10) return "#16a34a";
+  if(v<15) return "#a3e635";
+  if(v<20) return "#fde047";
+  if(v<25) return "#f97316";
+  if(v<30) return "#dc2626";
+  return "#7f1d1d";
 }
 
-function colorFor(v){
-  if(v==null) return '#cbd5e1';
-  if(v<10) return COLORS[5];
-  if(v<15) return COLORS[4];
-  if(v<20) return COLORS[3];
-  if(v<25) return COLORS[2];
-  if(v<30) return COLORS[1];
-  return COLORS[0];
+function initMap(geo){
+  const map = L.map("map").setView([18.2,-66.4],8);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{ attribution:"© OpenStreetMap" }).addTo(map);
+
+  const layer = L.geoJSON(geo,{
+    style:f=>{
+      const rec = getLatest(f.properties.NAMELSAD);
+      const rate = rec ? rec.unemployment_rate_pct : null;
+      return { color:"#333", weight:0.3, fillOpacity:0.8, fillColor:colorScale(rate) };
+    },
+    onEachFeature:(f,l)=>{
+      const name = f.properties.NAMELSAD;
+      const rec = getLatest(name);
+      const tip = rec ? `<b>${name}</b><br>Unemployment: ${fmt.format(rec.unemployment_rate_pct)}%<br>Emp/Pop: ${fmt.format(rec.emp_pop_ratio_pct)}%<br>LFP: ${fmt.format(rec.labor_force_participation_pct)}%` : `<b>${name}</b><br>No data`;
+      l.bindTooltip(tip);
+      l.on("click",()=>updateCharts(name));
+    }
+  }).addTo(map);
+
+  document.getElementById("resetBtn").onclick=()=>map.setView([18.2,-66.4],8);
 }
 
-function updateMunicipio(name){
-  const recs = acsData.filter(d => d.municipio.normalize("NFD").replace(/[\u0300-\u036f]/g,"") === name.normalize("NFD").replace(/[\u0300-\u036f]/g,""));
+function updateCharts(name){
+  const recs = acsData.filter(d=>normalizeName(d.municipio)===normalizeName(name)).sort((a,b)=>a.year-b.year);
   if(!recs.length) return;
   const last = recs[recs.length-1];
-  document.getElementById('d-name').textContent = name;
-  document.getElementById('d-rate').textContent = fmt.format(last.unemployment_rate_pct)+"%";
-  document.getElementById('d-epr').textContent = fmt.format(last.emp_pop_ratio_pct)+"%";
-  document.getElementById('d-lfp').textContent = fmt.format(last.labor_force_participation_pct)+"%";
-  drawCharts(recs);
-}
+  document.getElementById("d-name").textContent=name;
+  document.getElementById("d-rate").textContent=fmt.format(last.unemployment_rate_pct)+"%";
+  document.getElementById("d-epr").textContent=fmt.format(last.emp_pop_ratio_pct)+"%";
+  document.getElementById("d-lfp").textContent=fmt.format(last.labor_force_participation_pct)+"%";
 
-function drawCharts(recs){
   const years = recs.map(r=>r.year);
   const unemp = recs.map(r=>r.unemployment_rate_pct);
   const epr = recs.map(r=>r.emp_pop_ratio_pct);
+  const lfp = recs.map(r=>r.labor_force_participation_pct);
 
-  const ctxL = document.getElementById('lineChart').getContext('2d');
-  const ctxB = document.getElementById('barChart').getContext('2d');
-  if(window.lineC) window.lineC.destroy();
-  if(window.barC) window.barC.destroy();
+  drawChart("chartUnemp", "line", years, unemp, "#ef4444", "Unemployment %");
+  drawChart("chartEPR", "bar", years, epr, "#3b82f6", "Employment/Pop %");
+  drawChart("chartLFP", "line", years, lfp, "#10b981", "Labor Force Participation %");
+}
 
-  window.lineC = new Chart(ctxL,{
-    type:'line',
-    data:{ labels: years, datasets:[{label:'Unemployment %',data:unemp,borderColor:'#ef4444',fill:false,tension:.3}] },
-    options:{ plugins:{legend:{display:false}}, scales:{y:{ticks:{callback:v=>v+"%"}}}, maintainAspectRatio:false }
-  });
-
-  window.barC = new Chart(ctxB,{
-    type:'bar',
-    data:{ labels: years, datasets:[{label:'Employment/Pop %',data:epr,backgroundColor:'#3b82f6'}] },
-    options:{ plugins:{legend:{display:false}}, scales:{y:{ticks:{callback:v=>v+"%"}}}, maintainAspectRatio:false }
+function drawChart(id, type, labels, data, color, label){
+  const ctx=document.getElementById(id).getContext("2d");
+  if(window[id]) window[id].destroy();
+  window[id]=new Chart(ctx,{
+    type:type,
+    data:{labels:labels,datasets:[{label:label,data:data,borderColor:color,backgroundColor:color+"80",fill:type!=="bar",tension:.3}]},
+    options:{plugins:{legend:{display:false}},scales:{y:{ticks:{callback:v=>v+"%"}}},maintainAspectRatio:false}
   });
 }
 
 function loadBLS(){
   fetch(BLS_CSV).then(r=>r.text()).then(txt=>{
-    const rows = txt.trim().split(/\r?\n/).slice(1);
-    const data = rows.map(r=>{
-      const [date,val] = r.split(',');
-      return { year:+date.slice(0,4), value:+val };
+    const rows=txt.trim().split(/\r?\n/).slice(1);
+    blsData=rows.map(r=>{
+      const [date,val]=r.split(",");
+      return {year:+date.slice(0,4),value:+val};
     }).filter(d=>d.year>=2010);
-    drawIslandChart(data);
+    drawBLS();
+    drawTop10();
   });
 }
 
-function drawIslandChart(data){
-  const ctx = document.getElementById('islandChart').getContext('2d');
+function drawBLS(){
+  const ctx=document.getElementById("chartBLS").getContext("2d");
   new Chart(ctx,{
-    type:'line',
-    data:{ labels:data.map(d=>d.year), datasets:[{label:'Unemployment % (BLS)', data:data.map(d=>d.value), borderColor:'#10b981', tension:.3}] },
-    options:{ plugins:{legend:{display:false}}, scales:{y:{ticks:{callback:v=>v+"%"}}}, maintainAspectRatio:false }
+    type:"line",
+    data:{labels:blsData.map(d=>d.year),datasets:[{label:"Unemployment % (BLS)",data:blsData.map(d=>d.value),borderColor:"#16a34a",tension:.3,fill:false}]},
+    options:{plugins:{legend:{display:false}},scales:{y:{ticks:{callback:v=>v+"%"}}},maintainAspectRatio:false}
   });
 }
 
-document.getElementById('clearSel').onclick=()=>{ map.setView([18.2,-66.4],8); };
-</script>
+function drawTop10(){
+  const yr2023=acsData.filter(d=>d.year===2023 && d.unemployment_rate_pct!=null);
+  const sorted=[...yr2023].sort((a,b)=>a.unemployment_rate_pct-b.unemployment_rate_pct);
+  const low=sorted.slice(0,10);
+  const high=sorted.slice(-10).reverse();
 
+  const labels=[...low.map(d=>"↓ "+d.municipio),...high.map(d=>"↑ "+d.municipio)];
+  const values=[...low.map(d=>d.unemployment_rate_pct),...high.map(d=>d.unemployment_rate_pct)];
+
+  const ctx=document.getElementById("chartTop10").getContext("2d");
+  new Chart(ctx,{
+    type:"bar",
+    data:{labels:labels,datasets:[{label:"Unemployment % (2023)",data:values,backgroundColor:labels.map(l=>l.startsWith("↓")?"#10b981":"#dc2626")}]},
+    options:{plugins:{legend:{display:false}},scales:{y:{ticks:{callback:v=>v+"%"}}},maintainAspectRatio:false}
+  });
+}
+</script>
 </body>
 </html>
