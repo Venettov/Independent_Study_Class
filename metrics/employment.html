@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Employment Rate & Economic Dynamics in Puerto Rico</title>
+  <title>Employment & Economic Dynamics in Puerto Rico</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
 
@@ -114,8 +114,10 @@
     </header>
 
     <section class="card p-4">
-      <div class="flex items-center justify-between gap-3 flex-wrap"> <div class="text-sm text-gray-700 font-medium">Map shading by</div>
-        <div class="flex items-center gap-2 flex-wrap"> <div class="inline-flex rounded-lg border bg-white shadow-sm overflow-hidden">
+      <div class="flex items-center justify-between gap-3 flex-wrap"> 
+        <div class="text-sm text-gray-700 font-medium">Map shading by</div>
+        <div class="flex items-center gap-2 flex-wrap"> 
+          <div class="inline-flex rounded-lg border bg-white shadow-sm overflow-hidden">
             <button id="metricEmploymentRate" type="button" class="px-3 py-1.5 text-sm font-medium bg-blue-600 text-white">Employment Rate</button>
             <button id="metricUnemploymentRate" type="button" class="px-3 py-1.5 text-sm font-medium hover:bg-gray-50">Unemployment Rate</button>
             <button id="metricLFPR" type="button" class="px-3 py-1.5 text-sm font-medium hover:bg-gray-50">Labor Force Part.</button>
@@ -191,7 +193,8 @@
 
   <script>
     const GEOJSON_URL = '../data/tl_2022_72_cousub/pr_municipalities.geojson';
-    const DATA_JSON   = '../data/employment/municipios_acs_s2301_2010_2023.json'; // ASSUMED PATH FOR NEW DATA
+    // Data path is assumed correct
+    const DATA_JSON   = '../data/municipios_acs_s2301_2010_2023.json';
 
     const YEARS = [2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023];
 
@@ -200,74 +203,75 @@
     const signed = (n) => (n > 0 ? '+' : '') + fmt.format(n);
 
     // --- CHOROPLETH COLORS AND BREAKS ---
-    // Using a divergent scale: Green for "good" (high employment, low unemployment, high LFPR)
-    // Red for "bad" (low employment, high unemployment, low LFPR)
-    // The direction of "good" depends on the metric.
+    const GREEN_RED_COLORS = ['#dc2626', '#fca5a5', '#d1d5db', '#6ee7b7', '#10b981', '#047857'];
+    const RED_GREEN_COLORS = [...GREEN_RED_COLORS].reverse();
 
-    const GREEN_RED_COLORS = ['#dc2626', '#fca5a5', '#d1d5db', '#6ee7b7', '#10b981', '#047857']; // Red -> Gray -> Green
-    const RED_GREEN_COLORS = [...GREEN_RED_COLORS].reverse(); // Green -> Gray -> Red (for unemployment)
-
-    // Default breaks - these will be dynamically adjusted
-    let EMPLOYMENT_RATE_BREAKS    = [40, 45, 50, 55, 60]; // Example: for Employment Rate
-    let UNEMPLOYMENT_RATE_BREAKS  = [15, 12, 9, 6, 3];    // Example: for Unemployment Rate (reversed logic for colors)
-    let LFPR_BREAKS               = [50, 52, 54, 56, 58]; // Example: for Labor Force Participation Rate
+    let EMPLOYMENT_RATE_BREAKS    = [40, 45, 50, 55, 60];
+    let UNEMPLOYMENT_RATE_BREAKS  = [15, 12, 9, 6, 3];
+    let LFPR_BREAKS               = [50, 52, 54, 56, 58];
 
     const METRIC_CONFIGS = {
       'EmploymentRate': {
         label: 'Employment Rate (% of Pop 16+ Employed)',
-        key: 'EmploymentRate',
-        colors: GREEN_RED_COLORS, // Higher is better (green)
+        key: 'emp_pop_ratio_pct',
+        colors: GREEN_RED_COLORS,
         breaks: EMPLOYMENT_RATE_BREAKS,
         chartLabel: 'Employment Rate %',
         tooltipSuffix: '%',
-        isInverse: false, // Normal color mapping (low value = red, high value = green)
+        isInverse: false,
       },
       'UnemploymentRate': {
         label: 'Unemployment Rate (% of Labor Force)',
-        key: 'UnemploymentRate',
-        colors: RED_GREEN_COLORS, // Lower is better (green)
+        key: 'unemployment_rate_pct',
+        colors: RED_GREEN_COLORS,
         breaks: UNEMPLOYMENT_RATE_BREAKS,
         chartLabel: 'Unemployment Rate %',
         tooltipSuffix: '%',
-        isInverse: true, // Inverted color mapping (low value = green, high value = red)
+        isInverse: true,
       },
       'LFPR': {
         label: 'Labor Force Participation Rate (% of Pop 16+ in Labor Force)',
-        key: 'LFPR',
-        colors: GREEN_RED_COLORS, // Higher is better (green)
+        key: 'labor_force_participation_pct',
+        colors: GREEN_RED_COLORS,
         breaks: LFPR_BREAKS,
         chartLabel: 'Labor Force Part. Rate %',
         tooltipSuffix: '%',
-        isInverse: false, // Normal color mapping
+        isInverse: false,
       }
     };
 
-    let currentMetric = 'EmploymentRate'; // Default to Employment Rate
+    let currentMetric = 'EmploymentRate';
 
-    const sanitizeName = s => String(s||'').trim();
+    const sanitizeName = s => {
+      let str = String(s || '').trim();
+      str = str.replace(/\s*Municipio$/i, '');
+      // Normalize to handle accented characters (like 'ñ' in Añasco)
+      str = str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      return str.toUpperCase().replace(/\s/g, '');
+    };
 
-    // Modified yearVal to get specific sub-metric
-    const yearVal = (row, y, metricKey) => {
-      const yearData = row?.[String(y)];
-      if (!yearData) return NaN;
-      const v = yearData[metricKey]; // Access the nested metric
+    const yearVal = (municipioData, y, metricKey) => {
+      // Access the nested metric key from the restructured object
+      const v = municipioData?.[String(y)]?.[metricKey];
       const n = Number(v);
       return Number.isFinite(n) ? n : NaN;
     };
 
-    // Modified statsForMunicipio to pass metricKey
     function statsForMunicipio(name, metricKey){
-      const key = sanitizeName(name).replace(/\s*Municipio$/,'');
-      const row = _rows.find(r => sanitizeName(r.Municipio) === key);
-      if (!row) return null;
+      const mapNameKey = sanitizeName(name);
+      
+      // Look up the pre-processed municipality object
+      const municipioData = _rows[mapNameKey];
+      if (!municipioData) return null;
 
-      const vals = YEARS.map(y => yearVal(row, y, metricKey));
+      // Extract values from the restructured object
+      const vals = YEARS.map(y => yearVal(municipioData, y, metricKey));
       if (vals.some(v => !Number.isFinite(v))) return null;
 
       const val2010 = vals[YEARS.indexOf(2010)];
       const val2023 = vals[YEARS.indexOf(2023)];
-      const abs = val2023 - val2010; // Absolute rate change (e.g., +1.5 pp)
-      const pctTot = (abs / val2010) * 100; // Relative percentage change in the rate
+      const abs = val2023 - val2010;
+      const pctTot = (abs / val2010) * 100;
 
       const annualChange = [];
       for (let i = 1; i < YEARS.length; i++) {
@@ -282,6 +286,7 @@
     }
 
     let lineChart = null, barChart = null;
+    
     function drawCharts(name, st, metricKey){
       if (!st) return;
       const config = METRIC_CONFIGS[metricKey];
@@ -339,19 +344,65 @@
       detailsMetricTitle.textContent = `${config.label} details`;
       currentMetricLabel.textContent = `${config.label} (2023):`;
       lineChartTitle.textContent = `${config.label} trend (2010–2023)`;
-      barChartTitle.textContent = `Annual Rate Change (${config.tooltipSuffix})`; // Clarify bar chart title
+      barChartTitle.textContent = `Annual Rate Change (${config.tooltipSuffix})`;
 
       drawCharts(name, st, currentMetric);
     }
 
-    let _rows = [], map, layer, fc, legend;
+
+    let _rows = {}, map, layer, fc, legend; // _rows is initialized as an object {}
     let lockedName = null, selectedLayer = null;
     const selectedOutline = { weight: 4, color: '#111827', dashArray: '3', fillOpacity: 0.85 };
     let prBoundsGlobal = null;
 
     (async function init(){
       const res = await fetch(DATA_JSON, { cache:'no-store' });
-      _rows = await res.json();
+      const rawData = await res.json();
+
+      // Restructure the data from a flat array into a map keyed by sanitized municipality name
+      _rows = rawData.reduce((acc, curr) => {
+          const key = sanitizeName(curr.municipio);
+          if (!acc[key]) {
+              acc[key] = { Municipio: curr.municipio };
+          }
+          // Nest the metric data under the year key
+          acc[key][String(curr.year)] = {
+              unemployment_rate_pct: curr.unemployment_rate_pct,
+              emp_pop_ratio_pct: curr.emp_pop_ratio_pct,
+              labor_force_participation_pct: curr.labor_force_participation_pct
+          };
+          return acc;
+      }, {});
+      
+      // Calculate and store 'Puerto Rico' (overall) aggregated stats for initial view
+      _rows['PUERTORICO'] = rawData.reduce((acc, curr) => {
+          const year = String(curr.year);
+          if (!acc[year]) {
+              acc[year] = {
+                  unemployment_rate_pct: [],
+                  emp_pop_ratio_pct: [],
+                  labor_force_participation_pct: []
+              };
+          }
+          acc[year].unemployment_rate_pct.push(curr.unemployment_rate_pct);
+          acc[year].emp_pop_ratio_pct.push(curr.emp_pop_ratio_pct);
+          acc[year].labor_force_participation_pct.push(curr.labor_force_participation_pct);
+          return acc;
+      }, { Municipio: 'Puerto Rico' });
+      
+      // Average the metrics for 'Puerto Rico' for each year
+      for (const year of YEARS) {
+          const y = String(year);
+          if (_rows['PUERTORICO'][y] && Array.isArray(_rows['PUERTORICO'][y].unemployment_rate_pct)) {
+              const count = _rows['PUERTORICO'][y].unemployment_rate_pct.length;
+              _rows['PUERTORICO'][y] = {
+                  unemployment_rate_pct: _rows['PUERTORICO'][y].unemployment_rate_pct.reduce((a, b) => a + b, 0) / count,
+                  emp_pop_ratio_pct: _rows['PUERTORICO'][y].emp_pop_ratio_pct.reduce((a, b) => a + b, 0) / count,
+                  labor_force_participation_pct: _rows['PUERTORICO'][y].labor_force_participation_pct.reduce((a, b) => a + b, 0) / count,
+              };
+          }
+      }
+
 
       const prBounds = L.latLngBounds([[17.85, -67.45],[18.55, -65.25]]);
       prBoundsGlobal = prBounds;
@@ -374,9 +425,9 @@
           const rawName = p.NAME || p.NAMELSAD || p.name || 'Unknown';
           const name = rawName.replace(/\s*Municipio$/,'');
           const geoid = p.GEOID || p.geoid || '';
-          const st = statsForMunicipio(name, currentMetric); // Pass currentMetric
-          const config = METRIC_CONFIGS[currentMetric];
-
+          
+          const st = statsForMunicipio(name, currentMetric);
+          
           const changeLine = st
             ? `<br><small>2010→2023: ${signed(st.abs)} pp (${st.pctTot.toFixed(2)}%)</small>`
             : '';
@@ -389,7 +440,7 @@
               e.target.setStyle(hiStyle);
               e.target.bringToFront?.();
               const c = e.target.getBounds().getCenter();
-              updateDetails(name, statsForMunicipio(name, currentMetric), c); // Pass currentMetric
+              updateDetails(name, statsForMunicipio(name, currentMetric), c);
             },
             mouseout: e => {
               if (lockedName) return;
@@ -403,7 +454,7 @@
               l.setStyle(selectedOutline);
               map.fitBounds(l.getBounds(), { padding:[20,20] });
               const c = l.getBounds().getCenter();
-              updateDetails(lockedName, statsForMunicipio(lockedName, currentMetric), c); // Pass currentMetric
+              updateDetails(lockedName, statsForMunicipio(lockedName, currentMetric), c);
             }
           });
         }
@@ -412,7 +463,7 @@
       const b = layer.getBounds();
       if (b.isValid()) map.fitBounds(b, { padding:[15,15] });
 
-      // Calculate initial breaks for all metrics
+      // Compute breaks only after data is loaded and restructured
       computeMetricBreaks('EmploymentRate');
       computeMetricBreaks('UnemploymentRate');
       computeMetricBreaks('LFPR');
@@ -441,14 +492,13 @@
       moveLegend();
 
       const initName = 'Puerto Rico';
-      updateDetails(initName, statsForMunicipio(initName, currentMetric), null); // Pass currentMetric
+      updateDetails(initName, statsForMunicipio('PUERTORICO', currentMetric), null);
 
-      wireMetricToggles(); // Call the new toggle function
+      wireMetricToggles();
       wireClearSelection();
       wireDropdown();
     })();
 
-    // NEW FUNCTION TO HANDLE MULTIPLE METRIC TOGGLES
     function wireMetricToggles(){
       const buttons = {
         'EmploymentRate': document.getElementById('metricEmploymentRate'),
@@ -469,16 +519,16 @@
         if (selectedLayer) selectedLayer.setStyle(selectedOutline);
         renderLegend();
 
-        // Update details panel with current metric's info
         const name = lockedName || 'Puerto Rico';
         const c = selectedLayer ? selectedLayer.getBounds().getCenter() : null;
-        updateDetails(name, statsForMunicipio(name, currentMetric), c);
+        const lookupName = (name === 'Puerto Rico') ? 'PUERTORICO' : name; 
+        updateDetails(name, statsForMunicipio(lookupName, currentMetric), c);
       }
 
       for (const key in buttons) {
         buttons[key].addEventListener('click', () => setActive(key));
       }
-      setActive(currentMetric); // Set initial active metric
+      setActive(currentMetric);
     }
 
     function wireClearSelection(){
@@ -486,8 +536,7 @@
         lockedName = null;
         if (selectedLayer) { layer.resetStyle(selectedLayer); selectedLayer = null; }
         if (prBoundsGlobal) map.fitBounds(prBoundsGlobal, { padding:[15,15] });
-        // After clearing selection, update details for Puerto Rico (overall)
-        updateDetails('Puerto Rico', statsForMunicipio('Puerto Rico', currentMetric), null);
+        updateDetails('Puerto Rico', statsForMunicipio('PUERTORICO', currentMetric), null);
       }
       document.getElementById('clearSel').addEventListener('click', clearSelection);
       document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape') clearSelection(); });
@@ -499,7 +548,6 @@
       const st = statsForMunicipio(name, currentMetric);
       const config = METRIC_CONFIGS[currentMetric];
 
-      // For map shading, we use the 2023 value of the selected metric
       const value = st ? st.val2023 : NaN;
       const breaks = config.breaks;
       const colors = config.colors;
@@ -507,25 +555,24 @@
       return { fillColor: col, weight: 1.2, color:'#111827', fillOpacity:.75 };
     }
 
-    // Modified colorFor to handle inverse logic
     function colorFor(value, breaks, colors, isInverse = false) {
-      if (!Number.isFinite(value)) return '#93c5fd'; // light blue for no data
+      if (!Number.isFinite(value)) return '#93c5fd';
 
       let idx;
-      if (isInverse) { // For metrics where lower is better (e.g., Unemployment Rate)
-        if (value >= breaks[0]) idx = 0; // Highest value gets first (worst) color
+      if (isInverse) {
+        if (value >= breaks[0]) idx = 0;
         else if (value >= breaks[1]) idx = 1;
         else if (value >= breaks[2]) idx = 2;
         else if (value >= breaks[3]) idx = 3;
         else if (value >= breaks[4]) idx = 4;
-        else idx = 5; // Lowest value gets last (best) color
-      } else { // For metrics where higher is better (e.g., Employment Rate, LFPR)
-        if (value <= breaks[0]) idx = 0; // Lowest value gets first (worst) color
+        else idx = 5;
+      } else {
+        if (value <= breaks[0]) idx = 0;
         else if (value <= breaks[1]) idx = 1;
         else if (value <= breaks[2]) idx = 2;
         else if (value <= breaks[3]) idx = 3;
         else if (value <= breaks[4]) idx = 4;
-        else idx = 5; // Highest value gets last (best) color
+        else idx = 5;
       }
       return colors[idx];
     }
@@ -548,15 +595,14 @@
 
       labels.push(`<div style="font-weight:600;margin-bottom:.25rem">${title}</div>`);
 
-      // Determine min/max values for legend display based on whether it's inverse
-      if (isInverse) { // Example: Unemployment Rate (lowest % is best)
+      if (isInverse) {
         labels.push(row(colors[0], `> ${fmt.format(breaks[0])}${config.tooltipSuffix}`));
         labels.push(row(colors[1], `${fmt.format(breaks[1])}–${fmt.format(breaks[0])}${config.tooltipSuffix}`));
         labels.push(row(colors[2], `${fmt.format(breaks[2])}–${fmt.format(breaks[1])}${config.tooltipSuffix}`));
         labels.push(row(colors[3], `${fmt.format(breaks[3])}–${fmt.format(breaks[2])}${config.tooltipSuffix}`));
         labels.push(row(colors[4], `${fmt.format(breaks[4])}–${fmt.format(breaks[3])}${config.tooltipSuffix}`));
         labels.push(row(colors[5], `≤ ${fmt.format(breaks[4])}${config.tooltipSuffix}`));
-      } else { // Example: Employment Rate, LFPR (highest % is best)
+      } else {
         labels.push(row(colors[0], `≤ ${fmt.format(breaks[0])}${config.tooltipSuffix}`));
         labels.push(row(colors[1], `${fmt.format(breaks[0])}–${fmt.format(breaks[1])}${config.tooltipSuffix}`));
         labels.push(row(colors[2], `${fmt.format(breaks[1])}–${fmt.format(breaks[2])}${config.tooltipSuffix}`));
@@ -568,23 +614,18 @@
       legend._div.innerHTML = labels.join('');
     }
 
-    // Function to calculate custom breaks for a given metric
     function computeMetricBreaks(metricKey){
       const values = [];
       (fc.features || []).forEach(f => {
         const p = f.properties || {};
         const name = (p.NAME || p.NAMELSAD || p.name || 'Unknown').replace(/\s*Municipio$/,'');
         const st = statsForMunicipio(name, metricKey);
-        if (st && Number.isFinite(st.val2023)) values.push(st.val2023); // Use 2023 value for breaks
+        if (st && Number.isFinite(st.val2023)) values.push(st.val2023);
       });
       if (!values.length) return;
 
       values.sort((a,b)=>a-b);
-      const min = values[0];
-      const max = values[values.length - 1];
-      const range = max - min;
-
-      // Simple quantile-based breaks
+      
       const q = (arr, t) => {
         if (!arr.length) return NaN;
         const i = (arr.length - 1) * t;
@@ -594,17 +635,15 @@
       };
 
       const breaks = [
-        q(values, 0.1), // 10th percentile
-        q(values, 0.3), // 30th percentile
-        q(values, 0.5), // 50th percentile (median)
-        q(values, 0.7), // 70th percentile
-        q(values, 0.9)  // 90th percentile
-      ].map(v => parseFloat(v.toFixed(1))); // Round to one decimal place
+        q(values, 0.1),
+        q(values, 0.3),
+        q(values, 0.5),
+        q(values, 0.7),
+        q(values, 0.9)
+      ].map(v => parseFloat(v.toFixed(1)));
 
       METRIC_CONFIGS[metricKey].breaks = breaks;
 
-      // If it's an inverse metric (like unemployment), the breaks should be in descending order
-      // for the `colorFor` function to map them correctly with the `isInverse` flag.
       if (METRIC_CONFIGS[metricKey].isInverse) {
         METRIC_CONFIGS[metricKey].breaks.reverse();
       }
