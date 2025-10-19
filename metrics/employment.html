@@ -193,7 +193,6 @@
 
   <script>
     const GEOJSON_URL = '../data/tl_2022_72_cousub/pr_municipalities.geojson';
-    // Data path is assumed correct
     const DATA_JSON   = '../data/municipios_acs_s2301_2010_2023.json';
 
     const YEARS = [2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023];
@@ -245,13 +244,11 @@
     const sanitizeName = s => {
       let str = String(s || '').trim();
       str = str.replace(/\s*Municipio$/i, '');
-      // Normalize to handle accented characters (like 'ñ' in Añasco)
       str = str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
       return str.toUpperCase().replace(/\s/g, '');
     };
 
     const yearVal = (municipioData, y, metricKey) => {
-      // Access the nested metric key from the restructured object
       const v = municipioData?.[String(y)]?.[metricKey];
       const n = Number(v);
       return Number.isFinite(n) ? n : NaN;
@@ -260,11 +257,9 @@
     function statsForMunicipio(name, metricKey){
       const mapNameKey = sanitizeName(name);
       
-      // Look up the pre-processed municipality object
       const municipioData = _rows[mapNameKey];
       if (!municipioData) return null;
 
-      // Extract values from the restructured object
       const vals = YEARS.map(y => yearVal(municipioData, y, metricKey));
       if (vals.some(v => !Number.isFinite(v))) return null;
 
@@ -350,7 +345,7 @@
     }
 
 
-    let _rows = {}, map, layer, fc, legend; // _rows is initialized as an object {}
+    let _rows = {}, map, layer, fc, legend;
     let lockedName = null, selectedLayer = null;
     const selectedOutline = { weight: 4, color: '#111827', dashArray: '3', fillOpacity: 0.85 };
     let prBoundsGlobal = null;
@@ -359,13 +354,12 @@
       const res = await fetch(DATA_JSON, { cache:'no-store' });
       const rawData = await res.json();
 
-      // Restructure the data from a flat array into a map keyed by sanitized municipality name
+      // STEP 1: Restructure data (Group by Municipality)
       _rows = rawData.reduce((acc, curr) => {
           const key = sanitizeName(curr.municipio);
           if (!acc[key]) {
               acc[key] = { Municipio: curr.municipio };
           }
-          // Nest the metric data under the year key
           acc[key][String(curr.year)] = {
               unemployment_rate_pct: curr.unemployment_rate_pct,
               emp_pop_ratio_pct: curr.emp_pop_ratio_pct,
@@ -374,7 +368,7 @@
           return acc;
       }, {});
       
-      // Calculate and store 'Puerto Rico' (overall) aggregated stats for initial view
+      // Calculate and store 'Puerto Rico' (overall) aggregated stats
       _rows['PUERTORICO'] = rawData.reduce((acc, curr) => {
           const year = String(curr.year);
           if (!acc[year]) {
@@ -390,7 +384,6 @@
           return acc;
       }, { Municipio: 'Puerto Rico' });
       
-      // Average the metrics for 'Puerto Rico' for each year
       for (const year of YEARS) {
           const y = String(year);
           if (_rows['PUERTORICO'][y] && Array.isArray(_rows['PUERTORICO'][y].unemployment_rate_pct)) {
@@ -403,7 +396,7 @@
           }
       }
 
-
+      // STEP 2: Initialize Map
       const prBounds = L.latLngBounds([[17.85, -67.45],[18.55, -65.25]]);
       prBoundsGlobal = prBounds;
       map = L.map('map', { zoomSnap:.25 }).fitBounds(prBounds);
@@ -415,9 +408,15 @@
 
       const gjRes = await fetch(GEOJSON_URL + (GEOJSON_URL.includes('?')?'&':'?') + 'cb=' + Date.now());
       fc = await gjRes.json();
+      
+      // STEP 3: Compute Breaks BEFORE Map Layer is added
+      computeMetricBreaks('EmploymentRate');
+      computeMetricBreaks('UnemploymentRate');
+      computeMetricBreaks('LFPR');
 
+      // STEP 4: Add GeoJSON Layer to Map
       const hiStyle = { weight:3, color:'#111827', fillOpacity:0.9 };
-
+      
       layer = L.geoJSON(fc, {
         style: (feature) => styleForFeature(feature),
         onEachFeature: (f, lyr) => {
@@ -463,11 +462,7 @@
       const b = layer.getBounds();
       if (b.isValid()) map.fitBounds(b, { padding:[15,15] });
 
-      // Compute breaks only after data is loaded and restructured
-      computeMetricBreaks('EmploymentRate');
-      computeMetricBreaks('UnemploymentRate');
-      computeMetricBreaks('LFPR');
-
+      // STEP 5: Initialize Legend and Details
       legend = L.control({ position:'bottomright' });
       legend.onAdd = function(){
         const div = L.DomUtil.create('div', 'info legend');
