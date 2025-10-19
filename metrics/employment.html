@@ -192,7 +192,6 @@
   </main>
 
   <script>
-    // **CRITICAL PATH CHECK:** Ensure these paths are correct relative to employment.html
     const GEOJSON_URL = '../data/tl_2022_72_cousub/pr_municipalities.geojson';
     const DATA_JSON   = '../data/municipios_acs_s2301_2010_2023.json';
 
@@ -256,7 +255,8 @@
     };
 
     function statsForMunicipio(name, metricKey){
-      const mapNameKey = sanitizeName(name);
+      // Special case for the overall Puerto Rico average
+      const mapNameKey = (name === 'Puerto Rico') ? 'PUERTORICO' : sanitizeName(name);
       
       const municipioData = _rows[mapNameKey];
       if (!municipioData) return null;
@@ -358,7 +358,6 @@
         const res = await fetch(DATA_JSON, { cache:'no-store' });
         if (!res.ok) {
             console.error(`Failed to load data: ${DATA_JSON} status: ${res.status}`);
-            // Do not alert here, let the subsequent map loading reveal the failure cleanly.
         } else {
             rawData = await res.json();
         }
@@ -507,7 +506,7 @@
       moveLegend();
 
       const initName = 'Puerto Rico';
-      updateDetails(initName, statsForMunicipio('PUERTORICO', currentMetric), null);
+      updateDetails(initName, statsForMunicipio(initName, currentMetric), null);
 
       wireMetricToggles();
       wireClearSelection();
@@ -536,8 +535,7 @@
 
         const name = lockedName || 'Puerto Rico';
         const c = selectedLayer ? selectedLayer.getBounds().getCenter() : null;
-        const lookupName = (name === 'Puerto Rico') ? 'PUERTORICO' : name; 
-        updateDetails(name, statsForMunicipio(lookupName, currentMetric), c);
+        updateDetails(name, statsForMunicipio(name, currentMetric), c);
       }
 
       for (const key in buttons) {
@@ -551,7 +549,7 @@
         lockedName = null;
         if (selectedLayer) { layer.resetStyle(selectedLayer); selectedLayer = null; }
         if (prBoundsGlobal) map.fitBounds(prBoundsGlobal, { padding:[15,15] });
-        updateDetails('Puerto Rico', statsForMunicipio('PUERTORICO', currentMetric), null);
+        updateDetails('Puerto Rico', statsForMunicipio('Puerto Rico', currentMetric), null);
       }
       document.getElementById('clearSel').addEventListener('click', clearSelection);
       document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape') clearSelection(); });
