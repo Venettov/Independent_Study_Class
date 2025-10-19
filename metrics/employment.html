@@ -192,6 +192,7 @@
   </main>
 
   <script>
+    // **CRITICAL PATH CHECK:** Ensure these paths are correct relative to employment.html
     const GEOJSON_URL = '../data/tl_2022_72_cousub/pr_municipalities.geojson';
     const DATA_JSON   = '../data/municipios_acs_s2301_2010_2023.json';
 
@@ -262,7 +263,6 @@
 
       const vals = YEARS.map(y => yearVal(municipioData, y, metricKey));
       
-      // If any year is missing data, return null to signify incomplete stats
       if (vals.some(v => !Number.isFinite(v))) return null;
 
       const val2010 = vals[YEARS.indexOf(2010)];
@@ -353,48 +353,60 @@
     let prBoundsGlobal = null;
 
     (async function init(){
-      const res = await fetch(DATA_JSON, { cache:'no-store' });
-      const rawData = await res.json();
+      let rawData = [];
+      try {
+        const res = await fetch(DATA_JSON, { cache:'no-store' });
+        if (!res.ok) {
+            console.error(`Failed to load data: ${DATA_JSON} status: ${res.status}`);
+            // Do not alert here, let the subsequent map loading reveal the failure cleanly.
+        } else {
+            rawData = await res.json();
+        }
+      } catch (error) {
+        console.error("Error fetching data JSON (check path and JSON syntax):", error);
+      }
 
-      // STEP 1: Restructure data (Group by Municipality)
-      _rows = rawData.reduce((acc, curr) => {
-          const key = sanitizeName(curr.municipio);
-          if (!acc[key]) {
-              acc[key] = { Municipio: curr.municipio };
-          }
-          acc[key][String(curr.year)] = {
-              unemployment_rate_pct: curr.unemployment_rate_pct,
-              emp_pop_ratio_pct: curr.emp_pop_ratio_pct,
-              labor_force_participation_pct: curr.labor_force_participation_pct
-          };
-          return acc;
-      }, {});
-      
-      // Calculate and store 'Puerto Rico' (overall) aggregated stats
-      _rows['PUERTORICO'] = rawData.reduce((acc, curr) => {
-          const year = String(curr.year);
-          if (!acc[year]) {
-              acc[year] = {
-                  unemployment_rate_pct: [],
-                  emp_pop_ratio_pct: [],
-                  labor_force_participation_pct: []
+      // STEP 1: Restructure data (Only if data was loaded successfully)
+      if (rawData.length > 0) {
+          _rows = rawData.reduce((acc, curr) => {
+              const key = sanitizeName(curr.municipio);
+              if (!acc[key]) {
+                  acc[key] = { Municipio: curr.municipio };
+              }
+              acc[key][String(curr.year)] = {
+                  unemployment_rate_pct: curr.unemployment_rate_pct,
+                  emp_pop_ratio_pct: curr.emp_pop_ratio_pct,
+                  labor_force_participation_pct: curr.labor_force_participation_pct
               };
-          }
-          acc[year].unemployment_rate_pct.push(curr.unemployment_rate_pct);
-          acc[year].emp_pop_ratio_pct.push(curr.emp_pop_ratio_pct);
-          acc[year].labor_force_participation_pct.push(curr.labor_force_participation_pct);
-          return acc;
-      }, { Municipio: 'Puerto Rico' });
-      
-      for (const year of YEARS) {
-          const y = String(year);
-          if (_rows['PUERTORICO'][y] && Array.isArray(_rows['PUERTORICO'][y].unemployment_rate_pct)) {
-              const count = _rows['PUERTORICO'][y].unemployment_rate_pct.length;
-              _rows['PUERTORICO'][y] = {
-                  unemployment_rate_pct: _rows['PUERTORICO'][y].unemployment_rate_pct.reduce((a, b) => a + b, 0) / count,
-                  emp_pop_ratio_pct: _rows['PUERTORICO'][y].emp_pop_ratio_pct.reduce((a, b) => a + b, 0) / count,
-                  labor_force_participation_pct: _rows['PUERTORICO'][y].labor_force_participation_pct.reduce((a, b) => a + b, 0) / count,
-              };
+              return acc;
+          }, {});
+          
+          // Calculate and store 'Puerto Rico' (overall) aggregated stats
+          _rows['PUERTORICO'] = rawData.reduce((acc, curr) => {
+              const year = String(curr.year);
+              if (!acc[year]) {
+                  acc[year] = {
+                      unemployment_rate_pct: [],
+                      emp_pop_ratio_pct: [],
+                      labor_force_participation_pct: []
+                  };
+              }
+              acc[year].unemployment_rate_pct.push(curr.unemployment_rate_pct);
+              acc[year].emp_pop_ratio_pct.push(curr.emp_pop_ratio_pct);
+              acc[year].labor_force_participation_pct.push(curr.labor_force_participation_pct);
+              return acc;
+          }, { Municipio: 'Puerto Rico' });
+          
+          for (const year of YEARS) {
+              const y = String(year);
+              if (_rows['PUERTORICO'][y] && Array.isArray(_rows['PUERTORICO'][y].unemployment_rate_pct)) {
+                  const count = _rows['PUERTORICO'][y].unemployment_rate_pct.length;
+                  _rows['PUERTORICO'][y] = {
+                      unemployment_rate_pct: _rows['PUERTORICO'][y].unemployment_rate_pct.reduce((a, b) => a + b, 0) / count,
+                      emp_pop_ratio_pct: _rows['PUERTORICO'][y].emp_pop_ratio_pct.reduce((a, b) => a + b, 0) / count,
+                      labor_force_participation_pct: _rows['PUERTORICO'][y].labor_force_participation_pct.reduce((a, b) => a + b, 0) / count,
+                  };
+              }
           }
       }
 
@@ -408,10 +420,16 @@
         minZoom: 7, maxZoom: 19
       }).addTo(map);
 
+      // Load GeoJSON
       const gjRes = await fetch(GEOJSON_URL + (GEOJSON_URL.includes('?')?'&':'?') + 'cb=' + Date.now());
-      fc = await gjRes.json();
+      if (!gjRes.ok) {
+          console.error(`Failed to load GeoJSON: ${GEOJSON_URL} status: ${gjRes.status}`);
+          fc = { "type": "FeatureCollection", "features": [] }; 
+      } else {
+          fc = await gjRes.json();
+      }
       
-      // STEP 3: Compute Breaks BEFORE Map Layer is added
+      // STEP 3: Compute Breaks (Only effective if data was loaded)
       computeMetricBreaks('EmploymentRate');
       computeMetricBreaks('UnemploymentRate');
       computeMetricBreaks('LFPR');
@@ -420,7 +438,6 @@
       const hiStyle = { weight:3, color:'#111827', fillOpacity:0.9 };
       
       layer = L.geoJSON(fc, {
-        // NOTE: The style function must be highly robust against null data
         style: (feature) => styleForFeature(feature),
         onEachFeature: (f, lyr) => {
           const p = f.properties || {};
@@ -545,7 +562,6 @@
       const name = (p.NAME || p.NAMELSAD || p.name || 'Unknown').replace(/\s*Municipio$/,'');
       const st = statsForMunicipio(name, currentMetric);
       
-      // CRITICAL FIX: If stats are null, return a neutral style to prevent Leaflet crash
       if (!st) {
         return { fillColor: '#93c5fd', weight: 1.2, color:'#111827', fillOpacity:.5 }; 
       }
