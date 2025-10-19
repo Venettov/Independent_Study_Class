@@ -261,6 +261,8 @@
       if (!municipioData) return null;
 
       const vals = YEARS.map(y => yearVal(municipioData, y, metricKey));
+      
+      // If any year is missing data, return null to signify incomplete stats
       if (vals.some(v => !Number.isFinite(v))) return null;
 
       const val2010 = vals[YEARS.indexOf(2010)];
@@ -418,6 +420,7 @@
       const hiStyle = { weight:3, color:'#111827', fillOpacity:0.9 };
       
       layer = L.geoJSON(fc, {
+        // NOTE: The style function must be highly robust against null data
         style: (feature) => styleForFeature(feature),
         onEachFeature: (f, lyr) => {
           const p = f.properties || {};
@@ -541,9 +544,15 @@
       const p = feature.properties || {};
       const name = (p.NAME || p.NAMELSAD || p.name || 'Unknown').replace(/\s*Municipio$/,'');
       const st = statsForMunicipio(name, currentMetric);
+      
+      // CRITICAL FIX: If stats are null, return a neutral style to prevent Leaflet crash
+      if (!st) {
+        return { fillColor: '#93c5fd', weight: 1.2, color:'#111827', fillOpacity:.5 }; 
+      }
+
       const config = METRIC_CONFIGS[currentMetric];
 
-      const value = st ? st.val2023 : NaN;
+      const value = st.val2023;
       const breaks = config.breaks;
       const colors = config.colors;
       const col = colorFor(value, breaks, colors, config.isInverse);
