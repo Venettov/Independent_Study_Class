@@ -199,24 +199,17 @@
 
   <script>
     const GEOJSON_URL = '../data/tl_2022_72_cousub/pr_municipalities.geojson';
-    // Use the new income JSON file from the data/household_income folder
     const INCOME_JSON = '../data/household_income/municipios_acs_s1901_median_income_2010_2023_wide.json';
 
-    // The data provided goes from 2010 to 2023
     const YEARS = [2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023];
 
-    // Format for currency and percentage
     const fmt = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
     const pctFmt = (v) => `${(Number(v)||0).toFixed(2)}%`;
-    // Change signed to use currency format
     const signed = (n) => (n > 0 ? '+' : '') + fmt.format(n);
 
-    // Color breaks for choropleth map
     const CHORO_COLORS = ['#7f1d1d', '#b91c1c', '#f97316', '#bbf7d0', '#22c55e', '#15803d'];
-    // Adjusted breaks for median income % change (Nominal USD)
     const PCT_BREAKS = [20, 30, 40, 50, 60]; 
-    // Adjusted breaks for absolute change in USD (Nominal)
-    let ABS_BREAKS = [3000, 5000, 7000, 9000, 11000]; // Enforced fixed breaks for consistency
+    let ABS_BREAKS = [3000, 5000, 7000, 9000, 11000]; 
     
     const sanitizeName = s => String(s||'').trim();
     const yearVal = (row,y) => {
@@ -255,7 +248,6 @@
     }
 
     function censusLink(name){
-      // This link is generic for the subject table S1901
       return `https://data.census.gov/cedsci/table?g=0400000US72&tid=ACSST5Y2023.S1901`;
     }
 
@@ -271,10 +263,9 @@
         data: { labels: YEARS, datasets:[{ label:'Median Household Income', data: st.vals, tension:.2, pointRadius:3 }] },
         options: {
           plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label:(c)=>fmt.format(c.parsed.y) } } },
-          // Use a custom callback for Y-axis ticks to display as currency (thousands)
           scales:{ 
             y:{ ticks:{ callback:v=>`${fmt.format(v).replace('$','')}` } }, 
-            x:{ ticks:{ maxRotation: 90, minRotation: 90 } } // Rotate x labels for long years
+            x:{ ticks:{ maxRotation: 90, minRotation: 90 } }
           },
           maintainAspectRatio:false
         }
@@ -293,7 +284,6 @@
       });
     }
 
-    // New element IDs match the updated HTML (d-2023 and d-2223)
     const dName = document.getElementById('d-name');
     const dCent = document.getElementById('d-centroid');
     const d2023 = document.getElementById('d-2023');
@@ -305,11 +295,8 @@
       dName.textContent = name.replace(/\s*Municipio$/,'');
       dCent.textContent = centroid ? `${centroid.lat.toFixed(4)}, ${centroid.lng.toFixed(4)}` : '—';
       
-      // Use the latest value (val2023)
       d2023.textContent = Number.isFinite(st?.val2023) ? fmt.format(st.val2023) : '—';
-      // Use cumulative change from statsForMunicipio
       dChg.textContent  = st ? `${signed(st.abs)} (${pctFmt(st.pctTot)})` : '—';
-      // Use the last year's percentage change (2022->2023)
       const lastPct = st && st.pctYear.length ? st.pctYear[st.pctYear.length-1] : NaN;
       d2223.textContent = Number.isFinite(lastPct) ? pctFmt(lastPct) : '—';
       
@@ -324,7 +311,6 @@
     let prBoundsGlobal = null;
 
     (async function init(){
-      // Fetch the income JSON
       const res = await fetch(INCOME_JSON, { cache:'no-store' });
       _rows = await res.json();
 
@@ -347,11 +333,11 @@
         onEachFeature: (f, lyr) => {
           const p = f.properties || {};
           const rawName = p.NAME || p.NAMELSAD || p.name || 'Unknown';
-          // Normalize the name before getting stats for the tooltip
+          const geoid = p.GEOID || p.geoid || '';
+          
           const statsName = rawName.replace(/\s*Municipio$/,'');
           const stTip = statsForMunicipio(statsName);
           
-          // Use median income change for tooltip
           const changeLine = stTip
             ? `<br><small>2010→2023: ${signed(stTip.abs)} (${stTip.pctTot.toFixed(2)}%)</small>`
             : '';
@@ -365,7 +351,6 @@
               e.target.setStyle(hiStyle);
               e.target.bringToFront?.();
               const c = e.target.getBounds().getCenter();
-              // Pass the normalized name for correct lookup
               updateDetails(statsName, statsForMunicipio(statsName), c);
             },
             mouseout: e => {
@@ -459,13 +444,19 @@
     function styleForFeature(feature){
       const p = feature.properties || {};
       const rawName = (p.NAME || p.NAMELSAD || p.name || 'Unknown');
-      // Normalize the name before getting stats
       const name = rawName.replace(/\s*Municipio$/,''); 
       const st = statsForMunicipio(name);
-      // Use the pre-calculated cumulative values
-      const value = !st ? NaN : (currentMode === 'pct' ? st.pctTot : st.abs);
+      
+      // Return a safe default style if stats are missing
+      if (!st) {
+        // Use a near-transparent fill so the map boundary is still drawn clearly
+        return { fillColor: '#93c5fd', weight: 1.2, color:'#111827', fillOpacity:.15 }; 
+      }
+
+      const value = (currentMode === 'pct' ? st.pctTot : st.abs);
       const breaks = (currentMode === 'pct') ? PCT_BREAKS : ABS_BREAKS;
       const col = colorFor(value, breaks);
+      
       return { fillColor: col, weight: 1.2, color:'#111827', fillOpacity:.75 };
     }
 
@@ -482,7 +473,6 @@
     function renderLegend(){
       if (!legend || !legend._div) return;
       const breaks = (currentMode === 'pct') ? PCT_BREAKS : ABS_BREAKS;
-      // Update title to reflect income change since 2010
       const title  = (currentMode === 'pct') ? 'Income Change 2010–2023 — %' : 'Income Change 2010–2023 — $';
 
       const labels = [];
@@ -495,7 +485,6 @@
       
       const formatBreak = (val, isPct) => {
         if (isPct) return `${Math.round(val)}%`;
-        // Format absolute breaks as signed thousands, e.g., +$10k
         return `${val > 0 ? '+' : ''}$${Math.round(val/1000)}k`;
       };
       const fmtRange = (a,b,isPct) => `${formatBreak(a, isPct)} to ${formatBreak(b, isPct)}`;
@@ -513,36 +502,8 @@
     }
 
     function computeAbsBreaks(){
-      const values = [];
-      // Loop through the new JSON data rows
-      _rows.forEach(row => {
-        if (!row.metadata && Number.isFinite(row.Cum_Change_2010_2023)) {
-          values.push(row.Cum_Change_2010_2023);
-        }
-      });
-      
-      // Calculate quartiles for dynamic breaks
-      values.sort((a,b)=>a-b);
-      const q = (arr, t) => {
-        if (!arr.length) return null;
-        const i = (arr.length - 1) * t;
-        const lo = Math.floor(i), hi = Math.ceil(i);
-        if (lo === hi) return arr[lo];
-        return arr[lo] * (hi - i) + arr[hi] * (i - lo);
-      };
-
-      // Recalculating based on the actual distribution of nominal income change:
-      const n1 = q(values, 0.2) ?? 3000;
-      const n2 = q(values, 0.4) ?? 5000;
-      const n3 = q(values, 0.6) ?? 7000;
-      const n4 = q(values, 0.8) ?? 9000;
-      
-      // ABS_BREAKS = [3000, 5000, 7000, 9000, 11000] are good default quantiles for this data
-      ABS_BREAKS = [n1, n2, n3, n4, Infinity].map(v => v === Infinity ? v : Math.round(v));
-      // Ensure the breaks array has exactly 5 numeric values + Infinity if needed, or stick to the fixed list
-      if (ABS_BREAKS.length < 5 || ABS_BREAKS[3] === Infinity) {
-          ABS_BREAKS = [3000, 5000, 7000, 9000, 11000];
-      }
+      // Using a simple, fixed set of breaks for nominal income dollar change (2010-2023)
+      ABS_BREAKS = [3000, 5000, 7000, 9000, 11000];
     }
 
     function wireDropdown() {
