@@ -5,14 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Employment & Labor Dynamics in Puerto Rico</title>
 
-  <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- Leaflet -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 
-  <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
   <style>
@@ -62,7 +59,6 @@
 </head>
 <body class="bg-gray-50 text-gray-900 font-sans">
 
-  <!-- Top Nav -->
   <nav class="bg-white shadow sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-center gap-6 text-sm sm:text-base">
       <a href="../index.html" class="nav-link border-b-2 border-transparent">Home</a>
@@ -95,9 +91,7 @@
     </div>
   </nav>
 
-  <!-- Main -->
   <main class="max-w-7xl mx-auto px-4 py-8 space-y-8">
-    <!-- Hero -->
     <header class="card hero p-6 sm:p-8 lg:p-10 relative">
       <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between">
         <div>
@@ -118,14 +112,14 @@
       </div>
     </header>
 
-    <!-- Map + Controls -->
     <section class="card p-4">
       <div class="flex items-center justify-between gap-3">
         <div class="text-sm text-gray-700 font-medium">Map shading by</div>
         <div class="flex items-center gap-2">
           <div class="inline-flex rounded-lg border bg-white shadow-sm overflow-hidden">
-            <button id="metricEmp" type="button" class="px-3 py-1.5 text-sm font-medium bg-blue-600 text-white">Employment</button>
-            <button id="metricUnemp" type="button" class="px-3 py-1.5 text-sm font-medium hover:bg-gray-50">Unemployment</button>
+            <button id="metricEmp" type="button" class="px-3 py-1.5 text-sm font-medium hover:bg-gray-50">Employment-Pop Ratio</button>
+            <button id="metricUnemp" type="button" class="px-3 py-1.5 text-sm font-medium hover:bg-gray-50">Unemployment Rate</button>
+            <button id="metricLabor" type="button" class="px-3 py-1.5 text-sm font-medium hover:bg-gray-50">Labor Force Part.</button>
           </div>
           <button id="clearSel" class="px-3 py-1.5 text-sm rounded-lg border bg-white hover:bg-gray-50">Clear selection</button>
         </div>
@@ -133,7 +127,6 @@
       <div id="map" class="mt-3"></div>
     </section>
 
-    <!-- Details + Charts -->
     <section class="card p-6">
       <h2 class="text-lg font-semibold mb-4">Employment details</h2>
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -160,22 +153,39 @@
         </div>
 
         <div>
-          <h3 class="font-semibold mb-2">Employment trend (2010–2023)</h3>
+          <h3 class="font-semibold mb-2">Employment-Pop Ratio Trend (2010–2023)</h3>
           <div class="mini bg-gray-50 rounded p-3">
-            <canvas id="lineChart"></canvas>
+            <canvas id="lineChartEmpPop"></canvas>
           </div>
         </div>
 
         <div>
-          <h3 class="font-semibold mb-2">Unemployment trend (2010–2023)</h3>
+          <h3 class="font-semibold mb-2">Labor Force Participation Trend (2010–2023)</h3>
           <div class="mini bg-gray-50 rounded p-3">
-            <canvas id="barChart"></canvas>
+            <canvas id="lineChartLabor"></canvas>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Sources -->
+    <section class="card p-6">
+        <h2 class="text-lg font-semibold mb-4">Unemployment Rate Changes</h2>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div>
+                <h3 class="font-semibold mb-2">Unemployment Rate Trend (2010–2023)</h3>
+                <div class="mini bg-gray-50 rounded p-3">
+                    <canvas id="barChartUnemp"></canvas>
+                </div>
+            </div>
+            <div>
+                <h3 class="font-semibold mb-2">Annual Unemployment Change (2022–2023)</h3>
+                <div class="mini bg-gray-50 rounded p-3">
+                    <canvas id="barChartAnnualChange"></canvas>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <section class="card p-6">
       <h2 class="text-lg font-semibold mb-4">File Sources</h2>
       <div class="space-y-4">
@@ -208,8 +218,9 @@
 
     // Choropleth colors
     const CHORO_COLORS = ['#7f1d1d', '#b91c1c', '#f97316', '#bbf7d0', '#22c55e', '#15803d'];
-    const EMP_BREAKS   = [30, 33, 36, 39, 42]; // employment-pop ratio % bins
-    const UNEMP_BREAKS = [5, 10, 15, 20, 25];  // unemployment rate % bins
+    const EMP_BREAKS   = [30, 33, 36, 39, 42]; // employment-pop ratio % bins (Higher is better)
+    const UNEMP_BREAKS = [5, 10, 15, 20, 25];  // unemployment rate % bins (Lower is better)
+    const LABOR_BREAKS = [35, 38, 41, 44, 47]; // labor force participation % bins (Higher is better)
 
     const sanitizeName = s => String(s||'').trim();
 
@@ -225,19 +236,48 @@
 
       return { empVals, unempVals, laborVals, row };
     }
-
-    function colorFor(value, breaks) {
+    
+    // NEW/MODIFIED: Added mode parameter to handle color direction
+    function colorFor(value, breaks, mode) {
       if (!Number.isFinite(value)) return '#93c5fd';
-      if (value <= breaks[0]) return CHORO_COLORS[0];
-      if (value <= breaks[1]) return CHORO_COLORS[1];
-      if (value <= breaks[2]) return CHORO_COLORS[2];
-      if (value <= breaks[3]) return CHORO_COLORS[3];
-      if (value <= breaks[4]) return CHORO_COLORS[4];
-      return CHORO_COLORS[5];
+      const isHigherBetter = (mode === 'emp' || mode === 'labor');
+      
+      let colors = [...CHORO_COLORS];
+      if (isHigherBetter) colors = colors.reverse();
+      
+      if (value <= breaks[0]) return colors[0];
+      if (value <= breaks[1]) return colors[1];
+      if (value <= breaks[2]) return colors[2];
+      if (value <= breaks[3]) return colors[3];
+      if (value <= breaks[4]) return colors[4];
+      return colors[5];
+    }
+    
+    // NEW: Function to get array of all municipality names (excluding PR aggregate)
+    function getAllMunicipios() {
+        return _rows.filter(r => r.Municipio !== 'Puerto Rico').map(r => r.Municipio).sort();
+    }
+    
+    // NEW: Function to prepare data for the Annual Change Bar Chart
+    function prepareAnnualChangeData() {
+        const municipios = getAllMunicipios();
+        const data = municipios.map(name => {
+            const row = _rows.find(r => r.Municipio === name);
+            return {
+                name: name.replace(/\s*Municipio$/,''),
+                change: Number(row.Change_2022_2023) // Absolute change
+            };
+        }).sort((a, b) => a.change - b.change); // Sort by change: most negative (best) at top
+
+        return {
+            labels: data.map(d => d.name),
+            values: data.map(d => d.change)
+        };
     }
 
     // ---- Charts + Details ----
-    let lineChart=null, barChart=null;
+    // MODIFIED: Renamed and added new chart variables
+    let lineChartEmpPop=null, lineChartLabor=null, barChartUnemp=null, barChartAnnualChange=null;
     const dName = document.getElementById('d-name');
     const dCent = document.getElementById('d-centroid');
     const dEmp  = document.getElementById('d-emppop');
@@ -245,15 +285,20 @@
     const dLab  = document.getElementById('d-labor');
     const dCenL = document.getElementById('d-census');
 
+    // MODIFIED: Consolidated all chart drawing logic
     function drawCharts(name, st){
       if (!st) return;
-      const ctxL = document.getElementById('lineChart').getContext('2d');
-      const ctxB = document.getElementById('barChart').getContext('2d');
-
-      if (lineChart) lineChart.destroy();
-      if (barChart)  barChart.destroy();
-
-      lineChart = new Chart(ctxL, {
+      
+      const ctxL_EmpPop = document.getElementById('lineChartEmpPop').getContext('2d');
+      const ctxL_Labor  = document.getElementById('lineChartLabor').getContext('2d');
+      const ctxB_Unemp  = document.getElementById('barChartUnemp').getContext('2d');
+      
+      if (lineChartEmpPop) lineChartEmpPop.destroy();
+      if (lineChartLabor) lineChartLabor.destroy();
+      if (barChartUnemp) barChartUnemp.destroy();
+      
+      // 1. Employment-Pop Ratio Trend (Line Chart)
+      lineChartEmpPop = new Chart(ctxL_EmpPop, {
         type: 'line',
         data: {
           labels: YEARS,
@@ -270,14 +315,36 @@
           maintainAspectRatio:false
         }
       });
+      
+      // 2. Labor Force Participation Trend (Line Chart)
+      lineChartLabor = new Chart(ctxL_Labor, {
+        type: 'line',
+        data: {
+          labels: YEARS,
+          datasets:[{
+            label:'Labor Force Participation (%)',
+            data: st.laborVals,
+            tension:.25,
+            pointRadius:3,
+            borderColor: 'rgb(21, 128, 61)' // A distinct green color
+          }]
+        },
+        options: {
+          plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label:(c)=>`${fmt.format(c.parsed.y)}%` } } },
+          scales:{ y:{ ticks:{ callback:v=>`${v}%` } } },
+          maintainAspectRatio:false
+        }
+      });
 
-      barChart = new Chart(ctxB, {
+      // 3. Unemployment Rate Trend (Bar Chart)
+      barChartUnemp = new Chart(ctxB_Unemp, {
         type:'bar',
         data:{
           labels: YEARS,
           datasets:[{
             label:'Unemployment rate (%)',
-            data: st.unempVals
+            data: st.unempVals,
+            backgroundColor: 'rgba(239, 68, 68, 0.7)' // Reddish color
           }]
         },
         options:{
@@ -286,6 +353,44 @@
           maintainAspectRatio:false
         }
       });
+      
+      // 4. Annual Unemployment Change Bar Chart (All Municipios)
+      const changeData = prepareAnnualChangeData();
+      const ctxB_AnnualChange = document.getElementById('barChartAnnualChange').getContext('2d');
+      if (barChartAnnualChange) barChartAnnualChange.destroy();
+      
+      // Assign different colors for positive/negative change
+      const colors = changeData.values.map(v => v < 0 ? 'rgb(34, 197, 94)' : 'rgb(239, 68, 68)');
+
+      barChartAnnualChange = new Chart(ctxB_AnnualChange, {
+        type: 'bar',
+        data: {
+            labels: changeData.labels,
+            datasets: [{
+                label: 'Absolute Change in Unemployment Rate (2022 to 2023)',
+                data: changeData.values,
+                backgroundColor: colors
+            }]
+        },
+        options: {
+            indexAxis: 'y', // Horizontal bars
+            plugins: {
+                legend: { display: false },
+                tooltip: { callbacks: { label: (c) => `${c.parsed.x < 0 ? 'Decreased' : 'Increased'} by ${fmt.format(Math.abs(c.parsed.x))} pp` } }
+            },
+            scales: {
+                x: {
+                    title: { display: true, text: 'Change in Percentage Points (pp)' },
+                    stacked: true
+                },
+                y: {
+                    stacked: true,
+                    ticks: { autoSkip: true, maxRotation: 0, minRotation: 0 }
+                }
+            },
+            maintainAspectRatio: false
+        }
+    });
     }
 
     function updateDetails(name, st, centroid){
@@ -300,7 +405,8 @@
 
     // ---- Map + Legend ----
     let _rows = [], map, layer, fc, legend;
-    let currentMode = 'emp'; // 'emp' = employment-pop; 'unemp' = unemployment
+    // MODIFIED: Added 'labor' as a possible mode
+    let currentMode = 'emp'; // 'emp' = employment-pop; 'unemp' = unemployment; 'labor' = labor force participation
     let lockedName = null, selectedLayer = null;
     const selectedOutline = { weight: 4, color: '#111827', dashArray: '3', fillOpacity: 0.85 };
     let prBoundsGlobal = null;
@@ -309,25 +415,49 @@
       const p = feature.properties || {};
       const name = (p.NAME || p.NAMELSAD || p.name || 'Unknown').replace(/\s*Municipio$/,'');
       const st = statsForMunicipio(name);
-      let value = NaN, breaks = EMP_BREAKS;
+      let value = NaN, breaks = EMP_BREAKS, mode = currentMode;
+      
       if (st && st.row) {
         if (currentMode === 'emp') {
           value = st.row.EmpPop_2023;
           breaks = EMP_BREAKS;
-        } else {
+        } else if (currentMode === 'unemp') {
           value = st.row.Unemp_2023;
           breaks = UNEMP_BREAKS;
+        } else if (currentMode === 'labor') {
+          value = st.row.LaborForce_2023;
+          breaks = LABOR_BREAKS;
         }
       }
-      const col = colorFor(value, breaks);
+      
+      const col = colorFor(value, breaks, mode); 
       return { fillColor: col, weight: 1.2, color:'#111827', fillOpacity:.75 };
     }
 
+    // MODIFIED: Updated Legend logic for 3 modes
     function renderLegend(){
       if (!legend || !legend._div) return;
-      const title  = currentMode === 'emp' ? 'Employment-population ratio (%)' : 'Unemployment rate (%)';
-      const breaks = currentMode === 'emp' ? EMP_BREAKS : UNEMP_BREAKS;
+      
+      let title, breaks, isHigherBetter;
 
+      if (currentMode === 'emp') {
+          title = 'Employment-population ratio (%)';
+          breaks = EMP_BREAKS;
+          isHigherBetter = true;
+      } else if (currentMode === 'unemp') {
+          title = 'Unemployment rate (%)';
+          breaks = UNEMP_BREAKS;
+          isHigherBetter = false;
+      } else { // 'labor'
+          title = 'Labor Force Participation (%)';
+          breaks = LABOR_BREAKS;
+          isHigherBetter = true;
+      }
+      
+      let colors = [...CHORO_COLORS];
+      // Flip colors if higher values are "better" (emp-pop ratio, LFP)
+      if (isHigherBetter) colors = colors.reverse();
+      
       const rows = [];
       const row = (color, label) =>
         `<div style="display:flex;align-items:center;gap:.5rem;margin:.2rem 0;">
@@ -338,34 +468,51 @@
 
       const fmtRange = (a,b) => `${a}% – ${b}%`;
       rows.push(`<div style="font-weight:600;margin-bottom:.25rem">${title}</div>`);
-      rows.push(row(CHORO_COLORS[0], `≤ ${breaks[0]}%`));
-      rows.push(row(CHORO_COLORS[1], fmtRange(breaks[0], breaks[1])));
-      rows.push(row(CHORO_COLORS[2], fmtRange(breaks[1], breaks[2])));
-      rows.push(row(CHORO_COLORS[3], fmtRange(breaks[2], breaks[3])));
-      rows.push(row(CHORO_COLORS[4], fmtRange(breaks[3], breaks[4])));
-      rows.push(row(CHORO_COLORS[5], `> ${breaks[4]}%`));
+      // Logic for the first and last bin labels:
+      // If higher is better, the lowest color (index 0) is <= min break.
+      // If lower is better (unemp), the lowest color is >= max break.
+      rows.push(row(colors[0], isHigherBetter ? `≤ ${breaks[0]}%` : `> ${breaks[4]}%`));
+      rows.push(row(colors[1], fmtRange(breaks[0], breaks[1])));
+      rows.push(row(colors[2], fmtRange(breaks[1], breaks[2])));
+      rows.push(row(colors[3], fmtRange(breaks[2], breaks[3])));
+      rows.push(row(colors[4], fmtRange(breaks[3], breaks[4])));
+      rows.push(row(colors[5], isHigherBetter ? `> ${breaks[4]}%` : `≤ ${breaks[0]}%`));
 
       legend._div.innerHTML = rows.join('');
     }
 
+    // MODIFIED: Updated metric toggle logic for 3 modes
     function wireMetricToggle(){
       const btnEmp = document.getElementById('metricEmp');
       const btnUn  = document.getElementById('metricUnemp');
+      const btnLab = document.getElementById('metricLabor');
+      
       function setMode(mode){
         currentMode = mode;
+        
         btnEmp.classList.toggle('bg-blue-600', mode==='emp');
         btnEmp.classList.toggle('text-white', mode==='emp');
         btnEmp.classList.toggle('hover:bg-gray-50', mode!=='emp');
+        
         btnUn.classList.toggle('bg-blue-600', mode==='unemp');
         btnUn.classList.toggle('text-white', mode==='unemp');
         btnUn.classList.toggle('hover:bg-gray-50', mode!=='unemp');
+        
+        btnLab.classList.toggle('bg-blue-600', mode==='labor');
+        btnLab.classList.toggle('text-white', mode==='labor');
+        btnLab.classList.toggle('hover:bg-gray-50', mode!=='labor');
+
         layer.eachLayer(l => l.setStyle(styleForFeature(l.feature)));
         if (selectedLayer) selectedLayer.setStyle(selectedOutline);
         renderLegend();
       }
+      
+      // Set initial mode
+      setMode(currentMode); 
+      
       btnEmp.addEventListener('click', ()=>setMode('emp'));
       btnUn.addEventListener('click', ()=>setMode('unemp'));
-      setMode(currentMode);
+      btnLab.addEventListener('click', ()=>setMode('labor'));
     }
 
     function wireClearSelection(){
@@ -373,6 +520,8 @@
         lockedName = null;
         if (selectedLayer) { layer.resetStyle(selectedLayer); selectedLayer = null; }
         if (prBoundsGlobal) map.fitBounds(prBoundsGlobal, { padding:[15,15] });
+        // Reset details to Puerto Rico aggregate
+        updateDetails('Puerto Rico', statsForMunicipio('Puerto Rico'), null); 
       }
       document.getElementById('clearSel').addEventListener('click', clearSelection);
       document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape') clearSelection(); });
@@ -419,9 +568,15 @@
           const rawName = p.NAME || p.NAMELSAD || p.name || 'Unknown';
           const name = rawName.replace(/\s*Municipio$/,'');
           const st = statsForMunicipio(name);
-          const line = st?.row
-            ? `<br><small>Emp-Pop 2023: ${fmt.format(st.row.EmpPop_2023)}% | Unemp 2023: ${fmt.format(st.row.Unemp_2023)}%</small>`
-            : '';
+          
+          let line = '';
+          if (st && st.row) {
+              const emp = fmt.format(st.row.EmpPop_2023);
+              const unemp = fmt.format(st.row.Unemp_2023);
+              const labor = fmt.format(st.row.LaborForce_2023);
+              line = `<br><small>Emp-Pop 2023: ${emp}% | Unemp 2023: ${unemp}% | LFP 2023: ${labor}%</small>`;
+          }
+          
           lyr.bindTooltip(rawName, { direction:'center', className:'leaflet-tooltip' });
           lyr.bindPopup(`<strong>${rawName}</strong>${line}`);
 
