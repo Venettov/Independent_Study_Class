@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Employment — Puerto Rico Metrics</title>
+  <title>Employment & Labor Dynamics in Puerto Rico</title>
 
   <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -16,536 +16,470 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
   <style>
-    html, body { height: 100%; }
-    .card { background:#fff; border-radius:1rem; box-shadow:0 10px 15px -3px rgba(0,0,0,.1), 0 4px 6px -2px rgba(0,0,0,.05); }
-    .hero { background: linear-gradient(180deg, #0ea5e9 0%, #0284c7 100%); }
-    .hero h1, .hero p { color: #f0f9ff; }
-    #map { width: 100%; height: 540px; border-radius: 1rem; }
-    .legend { background: white; padding: .5rem .75rem; border-radius: .5rem; line-height: 1.2; box-shadow: 0 2px 8px rgba(0,0,0,.12); }
-    .legend i { display:inline-block; width:14px; height:14px; margin-right:6px; border-radius:3px; vertical-align:middle; }
-    .leaflet-control-container .leaflet-top.leaflet-right { top: 80px; } /* move zoom under our header */
-    .metric-pill { cursor:pointer; }
-    .sticky-subnav { position: sticky; top: 0; z-index: 40; }
-    /* dropdown hover behavior preserved from your other pages */
-    .group:hover .group-hover:block { display:block; }
+    .card {
+      background:#fff;
+      border-radius:1rem;
+      box-shadow:0 10px 15px -3px rgba(0,0,0,.1), 0 4px 6px -2px rgba(0,0,0,.05);
+      overflow:visible;
+    }
+    .hero {
+      background:
+        radial-gradient(1200px 600px at 20% -10%, rgba(239,68,68,.12), transparent 60%),
+        radial-gradient(1200px 600px at 80% -10%, rgba(37,99,235,.10), transparent 60%),
+        linear-gradient(180deg, #fafafa 0%, #f3f4f6 100%);
+    }
+    #map { height: 48vh; width: 100%; border-radius: .75rem; }
+    @media (min-width: 1280px) { #map { height: 46vh; } }
+    @media (max-width: 640px)  { #map { height: 54vh; } }
+
+    .leaflet-tooltip {
+      background: rgba(255,255,255,.95);
+      border-color:#333;
+      color:#111827;
+      font-size:14px;
+      font-weight:600;
+      box-shadow:0 2px 5px rgba(0,0,0,.2);
+      padding:5px 10px;
+    }
+
+    .mini { min-height: 260px; }
+
+    /* Dropdown show-on-hover */
+    #metrics-menu {
+      opacity: 0; visibility: hidden; transform: translateY(4px);
+      pointer-events: none;
+      transition: opacity .15s ease, transform .15s ease, visibility .15s ease;
+    }
+    #metrics-dropdown-root:hover #metrics-menu,
+    #metrics-dropdown-root.hovering #metrics-menu {
+      opacity: 1; visibility: visible; transform: translateY(0); pointer-events: auto;
+    }
+    #metrics-dropdown-root:hover #metrics-chevron,
+    #metrics-dropdown-root.hovering #metrics-chevron {
+      transform: rotate(180deg);
+    }
   </style>
 </head>
-<body class="bg-slate-50 text-slate-800">
-  <!-- Top Banner / Nav (kept consistent with your site) -->
-  <header class="hero">
-    <div class="max-w-7xl mx-auto px-4 py-8">
-      <div class="flex items-center justify-between">
-        <div class="text-2xl font-semibold text-white">Population & Economic Dynamics in Puerto Rico</div>
-        <nav class="hidden md:flex items-center gap-6 text-sky-50">
-          <a href="../index.html" class="hover:underline">Home</a>
+<body class="bg-gray-50 text-gray-900 font-sans">
 
-          <!-- Metrics dropdown with hover persistence -->
-          <div class="relative group">
-            <a href="../metrics.html" class="hover:underline">Metrics</a>
-            <div class="absolute left-0 mt-2 w-56 card p-2 hidden group-hover:block"
-                 onmouseenter="this.classList.add('block')"
-                 onmouseleave="this.classList.remove('block')">
-              <a href="./population.html" class="block px-3 py-2 rounded hover:bg-slate-100">Population</a>
-              <a href="./employment.html" class="block px-3 py-2 rounded hover:bg-slate-100 font-semibold">Employment</a>
-              <a href="./metrics.html" class="block px-3 py-2 rounded hover:bg-slate-100">All Metrics</a>
-              <!-- add other metric pages here as you build them -->
-            </div>
+  <!-- Top Nav -->
+  <nav class="bg-white shadow sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-center gap-6 text-sm sm:text-base">
+      <a href="../index.html" class="nav-link border-b-2 border-transparent">Home</a>
+
+      <div class="relative" id="metrics-dropdown-root">
+        <a href="../metrics.html" class="nav-link border-b-2 border-blue-600 text-blue-600 font-semibold inline-flex items-center gap-1 cursor-pointer select-none" aria-current="page">
+          Metrics
+          <svg id="metrics-chevron" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 transition-transform" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.24 4.5a.75.75 0 01-1.08 0l-4.24-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/>
+          </svg>
+        </a>
+        <div id="metrics-menu" class="absolute right-0 mt-2 w-64 rounded-xl border border-gray-200 bg-white shadow-lg ring-1 ring-black/5 z-50">
+          <div class="py-2">
+            <a href="../metrics.html" class="block px-4 py-2 hover:bg-gray-50 font-semibold">All Metrics Overview</a>
+            <div class="my-1 border-t border-gray-100"></div>
+            <a href="population.html"     class="block px-4 py-2 hover:bg-gray-50">Population</a>
+            <a href="employment.html"     class="block px-4 py-2 bg-gray-100 font-semibold">Employment Rate</a>
+            <a href="establishments.html" class="block px-4 py-2 hover:bg-gray-50">Employer Establishments</a>
+            <a href="income.html"         class="block px-4 py-2 hover:bg-gray-50">Household Income</a>
+            <a href="housing.html"        class="block px-4 py-2 hover:bg-gray-50">Housing Units</a>
+            <a href="education.html"      class="block px-4 py-2 hover:bg-gray-50">Education</a>
+            <a href="health.html"         class="block px-4 py-2 hover:bg-gray-50">Health</a>
           </div>
-
-          <a href="../charts.html" class="hover:underline">Charts</a>
-          <a href="../strategy.html" class="hover:underline">Strategy</a>
-          <a href="../about.html" class="hover:underline">About</a>
-          <a href="../literature.html" class="hover:underline">Literature</a>
-        </nav>
+        </div>
       </div>
 
-      <div class="mt-6">
-        <h1 class="text-3xl md:text-4xl font-bold">Employment & Unemployment (ACS S2301)</h1>
-        <p class="mt-2 text-sky-100">Explore employment rate, unemployment rate, labor force participation, and the employment-population ratio across Puerto Rico’s municipios (2010–2023).</p>
-      </div>
+      <a href="../literature.html" class="nav-link border-b-2 border-transparent">Literature</a>
+      <a href="../strategy.html"   class="nav-link border-b-2 border-transparent">Strategy</a>
+      <a href="../about.html"      class="nav-link border-b-2 border-transparent">About</a>
     </div>
-  </header>
-  <!-- Sticky sub-nav with metric pills -->
-  <div class="sticky-subnav bg-white/80 backdrop-blur border-b border-slate-200">
-    <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center gap-2">
-      <span class="text-sm text-slate-600 mr-2">Map metric:</span>
-      <button class="metric-pill px-3 py-1.5 rounded-full bg-sky-100 text-sky-800 hover:bg-sky-200"
-              data-metric="employment_rate">Employment rate</button>
-      <button class="metric-pill px-3 py-1.5 rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200"
-              data-metric="unemployment_rate">Unemployment rate</button>
-      <button class="metric-pill px-3 py-1.5 rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200"
-              data-metric="labor_force_participation_rate">Labor force participation</button>
-      <button class="metric-pill px-3 py-1.5 rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200"
-              data-metric="employment_population_ratio">Employment-population ratio</button>
+  </nav>
 
-      <div class="ml-auto flex items-center gap-3">
-        <label class="text-sm text-slate-600">Year</label>
-        <select id="yearSelect" class="px-3 py-1.5 rounded border border-slate-300 bg-white">
-          <!-- filled via JS (2010 → 2023) -->
-        </select>
-        <button id="clearSelection" class="px-3 py-1.5 rounded bg-slate-100 hover:bg-slate-200 text-slate-700">Clear selection</button>
+  <!-- Main -->
+  <main class="max-w-7xl mx-auto px-4 py-8 space-y-8">
+    <!-- Hero -->
+    <header class="card hero p-6 sm:p-8 lg:p-10 relative">
+      <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between">
+        <div>
+          <p class="text-sm font-semibold text-gray-500 uppercase">Graduate Independent Study</p>
+          <h1 class="mt-2 text-4xl sm:text-5xl font-extrabold leading-tight">
+            Employment & Labor Dynamics in Puerto Rico
+          </h1>
+          <p class="mt-3 text-lg text-gray-700">
+            A graduate research project examining employment trends, labor force participation, and unemployment shifts across Puerto Rico’s municipalities.
+          </p>
+          <div class="mt-5">
+            <span class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-100 text-slate-800">
+              <span class="inline-flex w-5 h-5 items-center justify-center rounded-full bg-slate-800 text-white text-xs">i</span>
+              Hover over the map to see municipality employment metrics
+            </span>
+          </div>
+        </div>
       </div>
-    </div>
-  </div>
+    </header>
 
-  <!-- Map & right info panel -->
-  <main class="max-w-7xl mx-auto px-4 py-6">
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <div class="lg:col-span-2 card p-3">
-        <div id="map"></div>
+    <!-- Map + Controls -->
+    <section class="card p-4">
+      <div class="flex items-center justify-between gap-3">
+        <div class="text-sm text-gray-700 font-medium">Map shading by</div>
+        <div class="flex items-center gap-2">
+          <div class="inline-flex rounded-lg border bg-white shadow-sm overflow-hidden">
+            <button id="metricEmp" type="button" class="px-3 py-1.5 text-sm font-medium bg-blue-600 text-white">Employment</button>
+            <button id="metricUnemp" type="button" class="px-3 py-1.5 text-sm font-medium hover:bg-gray-50">Unemployment</button>
+          </div>
+          <button id="clearSel" class="px-3 py-1.5 text-sm rounded-lg border bg-white hover:bg-gray-50">Clear selection</button>
+        </div>
       </div>
+      <div id="map" class="mt-3"></div>
+    </section>
 
-      <aside class="card p-5">
-        <h2 class="text-xl font-semibold mb-1">Municipio details</h2>
-        <p class="text-sm text-slate-600 mb-4">Click a municipio on the map to lock selection. Use the selector below to switch metrics.</p>
+    <!-- Details + Charts -->
+    <section class="card p-6">
+      <h2 class="text-lg font-semibold mb-4">Employment details</h2>
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div>
+          <div class="text-sm">
+            <div>Municipio: <span id="d-name" class="font-semibold">Puerto Rico</span></div>
+            <div>Centroid: <span id="d-centroid" class="text-gray-600">—</span></div>
+          </div>
 
-        <div class="space-y-2">
-          <div class="flex items-center justify-between">
-            <span class="text-slate-600">Selected</span>
-            <span id="selName" class="font-medium">—</span>
+          <div class="mt-4 text-sm">
+            <div class="font-semibold text-gray-700">Latest Values (2023):</div>
+            <ul class="mt-1 space-y-1">
+              <li>Employment-population ratio: <span id="d-emppop" class="font-semibold">—</span></li>
+              <li>Unemployment rate: <span id="d-unemp" class="font-semibold">—</span></li>
+              <li>Labor force participation: <span id="d-labor" class="font-semibold">—</span></li>
+            </ul>
           </div>
-          <div class="flex items-center justify-between">
-            <span class="text-slate-600">Year</span>
-            <span id="selYear" class="font-medium">—</span>
-          </div>
-          <div class="flex items-center justify-between">
-            <span class="text-slate-600">Metric</span>
-            <span id="selMetric" class="font-medium">Employment rate</span>
-          </div>
-          <div class="flex items-center justify-between">
-            <span class="text-slate-600">Value</span>
-            <span id="selValue" class="font-semibold">—</span>
+
+          <div class="mt-4 text-sm">
+            <a id="d-census" class="text-blue-600 underline" href="#" target="_blank" rel="noopener">
+              Open on data.census.gov ↗
+            </a>
           </div>
         </div>
 
-        <div class="mt-4">
-          <label class="text-sm text-slate-600">Quick metric</label>
-          <select id="detailMetric" class="mt-1 w-full px-3 py-2 rounded border border-slate-300 bg-white">
-            <option value="employment_rate">Employment rate</option>
-            <option value="unemployment_rate">Unemployment rate</option>
-            <option value="labor_force_participation_rate">Labor force participation</option>
-            <option value="employment_population_ratio">Employment-population ratio</option>
-          </select>
+        <div>
+          <h3 class="font-semibold mb-2">Employment trend (2010–2023)</h3>
+          <div class="mini bg-gray-50 rounded p-3">
+            <canvas id="lineChart"></canvas>
+          </div>
         </div>
-      </aside>
-    </div>
-    <!-- Charts -->
-    <section class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-      <div class="card p-5">
-        <h3 class="text-lg font-semibold mb-3" id="tsTitle">Time series (2010–2023) — Employment rate</h3>
-        <canvas id="tsChart" height="260"></canvas>
-        <p class="text-xs text-slate-500 mt-2">Note: switches to selected municipio; defaults to Puerto Rico total.</p>
-      </div>
 
-      <div class="card p-5">
-        <h3 class="text-lg font-semibold mb-3" id="barTitle">Latest year comparison — Employment rate</h3>
-        <canvas id="barChart" height="260"></canvas>
-        <p class="text-xs text-slate-500 mt-2">Compares selected municipio vs Puerto Rico total for the chosen metric.</p>
+        <div>
+          <h3 class="font-semibold mb-2">Unemployment trend (2010–2023)</h3>
+          <div class="mini bg-gray-50 rounded p-3">
+            <canvas id="barChart"></canvas>
+          </div>
+        </div>
       </div>
     </section>
 
-    <!-- Sources / Notes -->
-    <section class="card p-5 mt-6">
-      <h3 class="text-lg font-semibold mb-2">File Sources</h3>
-      <ul class="list-disc ml-6 text-sm leading-6">
-        <li>ACS Table S2301 — Employment Status (2010–2023) JSON:
-          <code class="bg-slate-100 px-1 py-0.5 rounded">data/acs/municipios_acs_s2301_2010_2023_wide.json</code>
-        </li>
-        <li>Puerto Rico municipios GeoJSON:
-          <code class="bg-slate-100 px-1 py-0.5 rounded">data/geo/pr_municipios.geojson</code>
-        </li>
-        <li>Intercensal 2010–2020 population (for totals context, optional):
-          Census “Intercensal 2010–2020 Puerto Rico Municipios” (prm-est2020int-pop-72.xlsx).
-        </li>
-      </ul>
+    <!-- Sources -->
+    <section class="card p-6">
+      <h2 class="text-lg font-semibold mb-4">File Sources</h2>
+      <div class="space-y-4">
+        <p>Data for this project was derived from the U.S. Census Bureau’s American Community Survey (ACS S2301):</p>
+        <ul class="list-disc list-inside space-y-1">
+          <li>
+            <a href="https://data.census.gov/table?q=S2301:+EMPLOYMENT+STATUS+Puerto+Rico"
+               target="_blank" rel="noopener" class="text-blue-600 underline">
+              ACS S2301 – Employment Status, Puerto Rico Municipalities
+            </a>
+          </li>
+        </ul>
+
+        <p>Specific files used:</p>
+        <ul class="list-disc list-inside">
+          <li>municipios_acs_s2301_2010_2023_wide.json (site build)</li>
+        </ul>
+      </div>
     </section>
   </main>
-  <!-- Scripts -->
+
   <script>
-  // ---------- Paths (adjust if your repo structure differs) ----------
-  const GEOJSON_PATH = "../data/geo/pr_municipios.geojson";
-  const S2301_JSON   = "../data/acs/municipios_acs_s2301_2010_2023_wide.json";
+    // ---- Config ----
+    const GEOJSON_URL = '../data/tl_2022_72_cousub/pr_municipalities.geojson';
+    // Adjust this path if your JSON lives elsewhere:
+    const EMP_JSON    = '../data/employment/municipios_acs_s2301_2010_2023_wide.json';
 
-  // ---------- Years & metrics ----------
-  const YEARS = Array.from({length: 2023 - 2010 + 1}, (_, i) => 2010 + i);
-  const METRICS = {
-    employment_rate: { label: "Employment rate", fmt: v => (v==null?'—':(v*100).toFixed(1)+'%') },
-    unemployment_rate: { label: "Unemployment rate", fmt: v => (v==null?'—':(v*100).toFixed(1)+'%') },
-    labor_force_participation_rate: { label: "Labor force participation", fmt: v => (v==null?'—':(v*100).toFixed(1)+'%') },
-    employment_population_ratio: { label: "Employment-population ratio", fmt: v => (v==null?'—':(v*100).toFixed(1)+'%') },
-  };
+    const YEARS = [2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023];
+    const fmt = new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 });
 
-  // ---------- State ----------
-  let rawS2301 = null;          // original JSON
-  let dataWide = null;          // normalized to: { muni: { metric: {year: value}, ... }, 'Puerto Rico': {...}}
-  let prTotals = {};            // Puerto Rico totals per metric/year if present; else computed average
-  let currentMetric = "employment_rate";
-  let currentYear   = 2023;
-  let lockedMuni    = null;     // string name when clicked
+    // Choropleth colors
+    const CHORO_COLORS = ['#7f1d1d', '#b91c1c', '#f97316', '#bbf7d0', '#22c55e', '#15803d'];
+    const EMP_BREAKS   = [30, 33, 36, 39, 42]; // employment-pop ratio % bins
+    const UNEMP_BREAKS = [5, 10, 15, 20, 25];  // unemployment rate % bins
 
-  // ---------- Helpers ----------
-  function titleCase(s){ return s ? (s[0].toUpperCase() + s.slice(1)) : s; }
+    const sanitizeName = s => String(s||'').trim();
 
-  function injectYears() {
-    const sel = document.getElementById('yearSelect');
-    YEARS.forEach(y => {
-      const opt = document.createElement('option');
-      opt.value = y; opt.textContent = y;
-      sel.appendChild(opt);
-    });
-    sel.value = currentYear;
-  }
+    // ---- Data helpers ----
+    function statsForMunicipio(name){
+      const key = sanitizeName(name).replace(/\s*Municipio$/,'');
+      const row = _rows.find(r => sanitizeName(r.Municipio) === key);
+      if (!row) return null;
 
-  function normalizeS2301(json) {
-    // Accept either:
-    //  WIDE array of rows: [{municipio, employment_rate_2010, ..., unemployment_rate_2023, ...}, ...]
-    //  or LONG/NESTED like: {municipio: {year: {metric: value}}} or [{municipio, year, metric, value}]
-    const out = {};
-    const rows = Array.isArray(json) ? json : (json.rows || json.data || json);
+      const empVals   = YEARS.map(y => Number(row[`EmpPop_${y}`]));
+      const unempVals = YEARS.map(y => Number(row[`Unemp_${y}`]));
+      const laborVals = YEARS.map(y => Number(row[`LaborForce_${y}`]));
 
-    const addVal = (muni, metric, year, val) => {
-      if (!out[muni]) out[muni] = {};
-      if (!out[muni][metric]) out[muni][metric] = {};
-      out[muni][metric][year] = (val === null || val === undefined || val === '') ? null : +val;
-    };
+      return { empVals, unempVals, laborVals, row };
+    }
 
-    if (Array.isArray(rows)) {
-      // Try to detect wide columns by suffix _YYYY
-      const sample = rows[0] || {};
-      const keys = Object.keys(sample);
-      const hasWide = keys.some(k => /_(201\d|202[0-3])$/.test(k));
-      if (hasWide) {
-        rows.forEach(r => {
-          const muni = r.municipio || r.Municipio || r.name || r.muni || r.geoname || "Unknown";
-          Object.keys(r).forEach(k => {
-            const m = k.match(/^(employment_rate|unemployment_rate|labor_force_participation_rate|employment_population_ratio)_(\d{4})$/);
-            if (m) {
-              const metric = m[1], year = +m[2];
-              addVal(muni, metric, year, r[k]);
+    function colorFor(value, breaks) {
+      if (!Number.isFinite(value)) return '#93c5fd';
+      if (value <= breaks[0]) return CHORO_COLORS[0];
+      if (value <= breaks[1]) return CHORO_COLORS[1];
+      if (value <= breaks[2]) return CHORO_COLORS[2];
+      if (value <= breaks[3]) return CHORO_COLORS[3];
+      if (value <= breaks[4]) return CHORO_COLORS[4];
+      return CHORO_COLORS[5];
+    }
+
+    // ---- Charts + Details ----
+    let lineChart=null, barChart=null;
+    const dName = document.getElementById('d-name');
+    const dCent = document.getElementById('d-centroid');
+    const dEmp  = document.getElementById('d-emppop');
+    const dUn   = document.getElementById('d-unemp');
+    const dLab  = document.getElementById('d-labor');
+    const dCenL = document.getElementById('d-census');
+
+    function drawCharts(name, st){
+      if (!st) return;
+      const ctxL = document.getElementById('lineChart').getContext('2d');
+      const ctxB = document.getElementById('barChart').getContext('2d');
+
+      if (lineChart) lineChart.destroy();
+      if (barChart)  barChart.destroy();
+
+      lineChart = new Chart(ctxL, {
+        type: 'line',
+        data: {
+          labels: YEARS,
+          datasets:[{
+            label:'Employment-population ratio (%)',
+            data: st.empVals,
+            tension:.25,
+            pointRadius:3
+          }]
+        },
+        options: {
+          plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label:(c)=>`${fmt.format(c.parsed.y)}%` } } },
+          scales:{ y:{ ticks:{ callback:v=>`${v}%` } } },
+          maintainAspectRatio:false
+        }
+      });
+
+      barChart = new Chart(ctxB, {
+        type:'bar',
+        data:{
+          labels: YEARS,
+          datasets:[{
+            label:'Unemployment rate (%)',
+            data: st.unempVals
+          }]
+        },
+        options:{
+          plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label:(c)=>`${fmt.format(c.parsed.y)}%` } } },
+          scales:{ y:{ ticks:{ callback:v=>`${v}%` } } },
+          maintainAspectRatio:false
+        }
+      });
+    }
+
+    function updateDetails(name, st, centroid){
+      dName.textContent = name.replace(/\s*Municipio$/,'');
+      dCent.textContent = centroid ? `${centroid.lat.toFixed(4)}, ${centroid.lng.toFixed(4)}` : '—';
+      dEmp.textContent  = st?.row?.EmpPop_2023   != null ? `${fmt.format(st.row.EmpPop_2023)}%`   : '—';
+      dUn.textContent   = st?.row?.Unemp_2023    != null ? `${fmt.format(st.row.Unemp_2023)}%`    : '—';
+      dLab.textContent  = st?.row?.LaborForce_2023!= null ? `${fmt.format(st.row.LaborForce_2023)}%` : '—';
+      dCenL.href = "https://data.census.gov/table?q=S2301:+EMPLOYMENT+STATUS+Puerto+Rico";
+      drawCharts(name, st);
+    }
+
+    // ---- Map + Legend ----
+    let _rows = [], map, layer, fc, legend;
+    let currentMode = 'emp'; // 'emp' = employment-pop; 'unemp' = unemployment
+    let lockedName = null, selectedLayer = null;
+    const selectedOutline = { weight: 4, color: '#111827', dashArray: '3', fillOpacity: 0.85 };
+    let prBoundsGlobal = null;
+
+    function styleForFeature(feature){
+      const p = feature.properties || {};
+      const name = (p.NAME || p.NAMELSAD || p.name || 'Unknown').replace(/\s*Municipio$/,'');
+      const st = statsForMunicipio(name);
+      let value = NaN, breaks = EMP_BREAKS;
+      if (st && st.row) {
+        if (currentMode === 'emp') {
+          value = st.row.EmpPop_2023;
+          breaks = EMP_BREAKS;
+        } else {
+          value = st.row.Unemp_2023;
+          breaks = UNEMP_BREAKS;
+        }
+      }
+      const col = colorFor(value, breaks);
+      return { fillColor: col, weight: 1.2, color:'#111827', fillOpacity:.75 };
+    }
+
+    function renderLegend(){
+      if (!legend || !legend._div) return;
+      const title  = currentMode === 'emp' ? 'Employment-population ratio (%)' : 'Unemployment rate (%)';
+      const breaks = currentMode === 'emp' ? EMP_BREAKS : UNEMP_BREAKS;
+
+      const rows = [];
+      const row = (color, label) =>
+        `<div style="display:flex;align-items:center;gap:.5rem;margin:.2rem 0;">
+           <span style="display:inline-block;width:14px;height:14px;border-radius:3px;background:${color};
+                        border:1px solid rgba(0,0,0,.15)"></span>
+           <span>${label}</span>
+         </div>`;
+
+      const fmtRange = (a,b) => `${a}% – ${b}%`;
+      rows.push(`<div style="font-weight:600;margin-bottom:.25rem">${title}</div>`);
+      rows.push(row(CHORO_COLORS[0], `≤ ${breaks[0]}%`));
+      rows.push(row(CHORO_COLORS[1], fmtRange(breaks[0], breaks[1])));
+      rows.push(row(CHORO_COLORS[2], fmtRange(breaks[1], breaks[2])));
+      rows.push(row(CHORO_COLORS[3], fmtRange(breaks[2], breaks[3])));
+      rows.push(row(CHORO_COLORS[4], fmtRange(breaks[3], breaks[4])));
+      rows.push(row(CHORO_COLORS[5], `> ${breaks[4]}%`));
+
+      legend._div.innerHTML = rows.join('');
+    }
+
+    function wireMetricToggle(){
+      const btnEmp = document.getElementById('metricEmp');
+      const btnUn  = document.getElementById('metricUnemp');
+      function setMode(mode){
+        currentMode = mode;
+        btnEmp.classList.toggle('bg-blue-600', mode==='emp');
+        btnEmp.classList.toggle('text-white', mode==='emp');
+        btnEmp.classList.toggle('hover:bg-gray-50', mode!=='emp');
+        btnUn.classList.toggle('bg-blue-600', mode==='unemp');
+        btnUn.classList.toggle('text-white', mode==='unemp');
+        btnUn.classList.toggle('hover:bg-gray-50', mode!=='unemp');
+        layer.eachLayer(l => l.setStyle(styleForFeature(l.feature)));
+        if (selectedLayer) selectedLayer.setStyle(selectedOutline);
+        renderLegend();
+      }
+      btnEmp.addEventListener('click', ()=>setMode('emp'));
+      btnUn.addEventListener('click', ()=>setMode('unemp'));
+      setMode(currentMode);
+    }
+
+    function wireClearSelection(){
+      function clearSelection(){
+        lockedName = null;
+        if (selectedLayer) { layer.resetStyle(selectedLayer); selectedLayer = null; }
+        if (prBoundsGlobal) map.fitBounds(prBoundsGlobal, { padding:[15,15] });
+      }
+      document.getElementById('clearSel').addEventListener('click', clearSelection);
+      document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape') clearSelection(); });
+    }
+
+    function wireDropdown() {
+      const root = document.getElementById('metrics-dropdown-root');
+      if (!root) return;
+      let hoverTimeout;
+      const menu = document.getElementById('metrics-menu');
+      function addHovering(){ clearTimeout(hoverTimeout); root.classList.add('hovering'); }
+      function removeHovering(){ hoverTimeout = setTimeout(()=>root.classList.remove('hovering'), 300); }
+      root.addEventListener('mouseenter', addHovering);
+      root.addEventListener('mouseleave', removeHovering);
+      if (menu) {
+        menu.addEventListener('mouseenter', addHovering);
+        menu.addEventListener('mouseleave', removeHovering);
+      }
+    }
+
+    // ---- Init ----
+    (async function init(){
+      const res = await fetch(EMP_JSON, { cache:'no-store' });
+      _rows = await res.json();
+
+      const prBounds = L.latLngBounds([[17.85, -67.45],[18.55, -65.25]]);
+      prBoundsGlobal = prBounds;
+      map = L.map('map', { zoomSnap:.25 }).fitBounds(prBounds);
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors',
+        minZoom: 7, maxZoom: 19
+      }).addTo(map);
+
+      const gjRes = await fetch(GEOJSON_URL + (GEOJSON_URL.includes('?')?'&':'?') + 'cb=' + Date.now());
+      fc = await gjRes.json();
+
+      const hiStyle = { weight:3, color:'#111827', fillOpacity:0.9 };
+
+      layer = L.geoJSON(fc, {
+        style: (feature) => styleForFeature(feature),
+        onEachFeature: (f, lyr) => {
+          const p = f.properties || {};
+          const rawName = p.NAME || p.NAMELSAD || p.name || 'Unknown';
+          const name = rawName.replace(/\s*Municipio$/,'');
+          const st = statsForMunicipio(name);
+          const line = st?.row
+            ? `<br><small>Emp-Pop 2023: ${fmt.format(st.row.EmpPop_2023)}% | Unemp 2023: ${fmt.format(st.row.Unemp_2023)}%</small>`
+            : '';
+          lyr.bindTooltip(rawName, { direction:'center', className:'leaflet-tooltip' });
+          lyr.bindPopup(`<strong>${rawName}</strong>${line}`);
+
+          lyr.on({
+            mouseover: e => {
+              if (lockedName) return;
+              e.target.setStyle(hiStyle);
+              const c = e.target.getBounds().getCenter();
+              updateDetails(name, statsForMunicipio(name), c);
+            },
+            mouseout: e => {
+              if (lockedName) return;
+              layer.resetStyle(e.target);
+            },
+            click: e => {
+              if (selectedLayer) layer.resetStyle(selectedLayer);
+              selectedLayer = e.target;
+              lockedName = name;
+              e.target.setStyle(selectedOutline);
+              map.fitBounds(e.target.getBounds(), { padding:[20,20] });
+              const c = e.target.getBounds().getCenter();
+              updateDetails(lockedName, statsForMunicipio(lockedName), c);
             }
           });
-        });
-      } else {
-        // Assume long: {municipio, year, metric, value} or nested objects
-        rows.forEach(r => {
-          const muni = r.municipio || r.Municipio || r.name || r.muni || "Unknown";
-          const year = + (r.year || r.Year);
-          const metric = (r.metric || r.Metric || "").toString().toLowerCase();
-          let mapped = null;
-          if (metric.includes("employment-population")) mapped = "employment_population_ratio";
-          else if (metric.includes("labor force") && metric.includes("participation")) mapped = "labor_force_participation_rate";
-          else if (metric.includes("unemployment")) mapped = "unemployment_rate";
-          else if (metric.includes("employment")) mapped = "employment_rate";
-          if (mapped && year >= 2010 && year <= 2023) addVal(muni, mapped, year, r.value ?? r.Value);
-        });
-      }
-    } else {
-      // Object form: { municipio: { year: { metric: val } } }
-      Object.keys(rows).forEach(muni => {
-        const yearsObj = rows[muni];
-        Object.keys(yearsObj || {}).forEach(y => {
-          const yy = +y;
-          const metricsObj = yearsObj[y];
-          Object.keys(metricsObj || {}).forEach(metricKey => {
-            const mk = metricKey.toLowerCase();
-            let mapped = null;
-            if (mk.includes("employment_population")) mapped = "employment_population_ratio";
-            else if (mk.includes("labor_force_participation")) mapped = "labor_force_participation_rate";
-            else if (mk.includes("unemployment")) mapped = "unemployment_rate";
-            else if (mk.includes("employment")) mapped = "employment_rate";
-            if (mapped && yy >= 2010 && yy <= 2023) addVal(muni, mapped, yy, metricsObj[metricKey]);
-          });
-        });
-      });
-    }
-
-    return out;
-  }
-
-  function computePRTotals() {
-    // Prefer explicit "Puerto Rico" if present; else average municipalities for each metric/year
-    const hasPR = !!dataWide["Puerto Rico"];
-    Object.keys(METRICS).forEach(metric => {
-      prTotals[metric] = {};
-      YEARS.forEach(y => {
-        if (hasPR && dataWide["Puerto Rico"][metric] && dataWide["Puerto Rico"][metric][y] != null) {
-          prTotals[metric][y] = dataWide["Puerto Rico"][metric][y];
-        } else {
-          // average across municipios that have data for that metric/year
-          let sum = 0, n = 0;
-          Object.keys(dataWide).forEach(muni => {
-            if (muni === "Puerto Rico") return;
-            const v = dataWide[muni]?.[metric]?.[y];
-            if (v != null) { sum += v; n++; }
-          });
-          prTotals[metric][y] = n ? sum / n : null;
         }
+      }).addTo(map);
+
+      const b = layer.getBounds();
+      if (b.isValid()) map.fitBounds(b, { padding:[15,15] });
+
+      legend = L.control({ position:'bottomright' });
+      legend.onAdd = function(){
+        const div = L.DomUtil.create('div', 'info legend');
+        div.style.background = 'white';
+        div.style.padding = '8px 10px';
+        div.style.borderRadius = '8px';
+        div.style.boxShadow = '0 2px 8px rgba(0,0,0,.15)';
+        div.style.font = '12px/1.3 system-ui,-apple-system,Segoe UI,Roboto,sans-serif';
+        legend._div = div;
+        renderLegend();
+        return div;
+      };
+      legend.addTo(map);
+
+      // Initial details
+      updateDetails('Puerto Rico', statsForMunicipio('Puerto Rico'), null);
+
+      wireMetricToggle();
+      wireClearSelection();
+      wireDropdown();
+
+      // highlight active link in dropdown based on URL
+      document.addEventListener('DOMContentLoaded', () => {
+        const currentPathname = window.location.pathname.split('/').pop();
+        const subPageLink = document.querySelector(`#metrics-menu a[href="${currentPathname}"]`);
+        if (subPageLink) subPageLink.classList.add('bg-gray-100','font-semibold');
       });
-    });
-  }
-
-  function valueFor(muni, metric, year) {
-    const v = dataWide[muni]?.[metric]?.[year];
-    return (v == null) ? null : +v;
-  }
-
-  // ---------- Leaflet ----------
-  let map, geoLayer, hoverLayer = null, legendControl;
-
-  function colorScale(metric, v) {
-    // Shared % scales (0–100%). We color by “higher-is-better” except unemployment which is reversed.
-    if (v == null) return '#e2e8f0';
-    const pct = Math.max(0, Math.min(100, v * 100));
-    const reversed = (metric === 'unemployment_rate');
-    // bins
-    const stops = [30, 40, 50, 60, 70]; // %
-    const palettes = reversed
-      ? ['#14532d','#166534','#16a34a','#86efac','#dcfce7']  // low unemployment = dark green
-      : ['#fee2e2','#fecaca','#fca5a5','#f87171','#ef4444']; // higher = darker red
-    // map value to bin index
-    let idx = 0;
-    while (idx < stops.length && pct >= stops[idx]) idx++;
-    // reversed palette means low values are dark green; otherwise red scale above
-    return reversed ? palettes[idx] : palettes[idx];
-  }
-
-  function makeLegend(metric) {
-    const reversed = (metric === 'unemployment_rate');
-    const bins = [ '<30%', '30–40%', '40–50%', '50–60%', '60–70%', '≥70%' ];
-    const colors = reversed
-      ? ['#14532d','#166534','#16a34a','#86efac','#dcfce7','#ecfdf5']
-      : ['#fee2e2','#fecaca','#fca5a5','#f87171','#ef4444','#991b1b'];
-    const div = L.DomUtil.create('div', 'legend');
-    div.innerHTML = `<div class="font-medium mb-1">${METRICS[metric].label}</div>` +
-      bins.map((b,i)=>`<div class="text-sm"><i style="background:${colors[i]}"></i>${b}</div>`).join('');
-    return div;
-  }
-
-  function updateLegend() {
-    if (legendControl) legendControl.remove();
-    legendControl = L.control({ position: 'bottomright' });
-    legendControl.onAdd = () => makeLegend(currentMetric);
-    legendControl.addTo(map);
-  }
-
-  function styleFeature(feature) {
-    const muni = feature.properties?.NAME10 || feature.properties?.NAME || feature.properties?.municipio;
-    const v = valueFor(muni, currentMetric, currentYear);
-    return {
-      color: '#334155', weight: 0.8, opacity: 0.7,
-      fillColor: colorScale(currentMetric, v),
-      fillOpacity: 0.85
-    };
-  }
-
-  function initMap(geojson) {
-    map = L.map('map', { zoomControl: true, minZoom: 7, maxZoom: 12 });
-    geoLayer = L.geoJSON(geojson, {
-      style: styleFeature,
-      onEachFeature: (feature, layer) => {
-        const muni = feature.properties?.NAME10 || feature.properties?.NAME || feature.properties?.municipio;
-        layer.on({
-          mouseover: e => {
-            e.target.setStyle({ weight: 2, opacity: 1 });
-            if (!lockedMuni) showHover(muni);
-          },
-          mouseout: e => {
-            geoLayer.resetStyle(e.target);
-            if (!lockedMuni) clearHover();
-          },
-          click: () => {
-            lockedMuni = muni;
-            updateSelectionUI();
-            zoomToMunicipio(layer);
-            refreshCharts();
-          }
-        });
-      }
-    }).addTo(map);
-
-    const bounds = geoLayer.getBounds();
-    map.fitBounds(bounds.pad(0.05));
-    updateLegend();
-  }
-
-  function zoomToMunicipio(layer) {
-    map.fitBounds(layer.getBounds().pad(0.2));
-  }
-
-  function resetZoom() {
-    const b = geoLayer.getBounds();
-    map.fitBounds(b.pad(0.05));
-  }
-
-  function showHover(muni) {
-    const v = valueFor(muni, currentMetric, currentYear);
-    document.getElementById('selName').textContent = muni;
-    document.getElementById('selValue').textContent = METRICS[currentMetric].fmt(v);
-    document.getElementById('selYear').textContent = currentYear;
-    document.getElementById('selMetric').textContent = METRICS[currentMetric].label;
-  }
-  function clearHover() {
-    document.getElementById('selName').textContent = '—';
-    document.getElementById('selValue').textContent = '—';
-  }
-  function updateSelectionUI() {
-    const name = lockedMuni ?? 'Puerto Rico';
-    const v = valueFor(name, currentMetric, currentYear) ?? prTotals[currentMetric][currentYear];
-    document.getElementById('selName').textContent = name;
-    document.getElementById('selValue').textContent = METRICS[currentMetric].fmt(v);
-    document.getElementById('selYear').textContent = currentYear;
-    document.getElementById('selMetric').textContent = METRICS[currentMetric].label;
-  }
-
-  // ---------- Load data & bootstrap ----------
-  async function loadJSON(path) {
-    const r = await fetch(path);
-    if (!r.ok) throw new Error(`Failed to load ${path}`);
-    return r.json();
-  }
-
-  async function boot() {
-    injectYears();
-
-    rawS2301 = await loadJSON(S2301_JSON);
-    dataWide = normalizeS2301(rawS2301);
-    computePRTotals();
-
-    const geojson = await loadJSON(GEOJSON_PATH);
-    initMap(geojson);
-
-    wireControls();
-    updateSelectionUI();
-    refreshCharts();
-  }
-
-  function wireControls() {
-    // metric pills
-    document.querySelectorAll('.metric-pill').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.metric-pill').forEach(b => b.classList.remove('bg-sky-100','text-sky-800'));
-        document.querySelectorAll('.metric-pill').forEach(b => b.classList.add('bg-slate-100','text-slate-700'));
-        btn.classList.add('bg-sky-100','text-sky-800');
-        btn.classList.remove('bg-slate-100','text-slate-700');
-
-        currentMetric = btn.dataset.metric;
-        updateLegend();
-        geoLayer.setStyle(styleFeature);
-        updateSelectionUI();
-        refreshCharts();
-      });
-    });
-
-    document.getElementById('detailMetric').addEventListener('change', (e) => {
-      currentMetric = e.target.value;
-      // sync pill highlight
-      document.querySelectorAll('.metric-pill').forEach(b => {
-        if (b.dataset.metric === currentMetric) {
-          b.classList.add('bg-sky-100','text-sky-800');
-          b.classList.remove('bg-slate-100','text-slate-700');
-        } else {
-          b.classList.remove('bg-sky-100','text-sky-800');
-          b.classList.add('bg-slate-100','text-slate-700');
-        }
-      });
-      updateLegend();
-      geoLayer.setStyle(styleFeature);
-      updateSelectionUI();
-      refreshCharts();
-    });
-
-    document.getElementById('yearSelect').addEventListener('change', e => {
-      currentYear = +e.target.value;
-      geoLayer.setStyle(styleFeature);
-      updateSelectionUI();
-      refreshCharts();
-    });
-
-    document.getElementById('clearSelection').addEventListener('click', () => {
-      lockedMuni = null;
-      resetZoom();
-      updateSelectionUI();
-      refreshCharts();
-    });
-  }
+    })();
   </script>
-  <script>
-  // ---------- Chart.js ----------
-  let tsChart, barChart;
-
-  function ensureCharts() {
-    const tsCtx = document.getElementById('tsChart').getContext('2d');
-    const barCtx = document.getElementById('barChart').getContext('2d');
-    if (!tsChart) {
-      tsChart = new Chart(tsCtx, {
-        type: 'line',
-        data: { labels: YEARS, datasets: [] },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          interaction: { mode: 'index', intersect: false },
-          scales: {
-            y: { ticks: { callback: v => v == null ? '—' : (v*100).toFixed(1) + '%' } }
-          },
-          plugins: { legend: { display: false } }
-        }
-      });
-    }
-    if (!barChart) {
-      barChart = new Chart(barCtx, {
-        type: 'bar',
-        data: { labels: [], datasets: [] },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: { y: { ticks: { callback: v => v == null ? '—' : (v*100).toFixed(1) + '%' } } },
-          plugins: { legend: { position: 'bottom' } }
-        }
-      });
-    }
-  }
-
-  function refreshCharts() {
-    ensureCharts();
-
-    const metricLabel = METRICS[currentMetric].label;
-    document.getElementById('tsTitle').textContent = `Time series (2010–2023) — ${metricLabel}`;
-    document.getElementById('barTitle').textContent = `Latest year comparison — ${metricLabel}`;
-
-    const target = lockedMuni ?? 'Puerto Rico';
-    const muniSeries = YEARS.map(y => valueFor(target, currentMetric, y) ?? null);
-    const prSeries   = YEARS.map(y => prTotals[currentMetric][y] ?? null);
-
-    tsChart.data.labels = YEARS;
-    tsChart.data.datasets = [
-      { label: target, data: muniSeries, borderWidth: 2, tension: .2 },
-      { label: 'Puerto Rico', data: prSeries, borderWidth: 2, borderDash: [4,3], tension: .2 }
-    ];
-    tsChart.update();
-
-    // Bar compare (latest year)
-    const y = currentYear;
-    const muniVal = valueFor(target, currentMetric, y) ?? null;
-    const prVal   = prTotals[currentMetric][y] ?? null;
-
-    barChart.data.labels = [String(y)];
-    barChart.data.datasets = [
-      { label: target, data: [muniVal], borderWidth: 1 },
-      { label: 'Puerto Rico', data: [prVal], borderWidth: 1 }
-    ];
-    barChart.update();
-  }
-
-  // ---------- Start ----------
-  boot().catch(err => {
-    console.error(err);
-    alert("Error loading employment page data. Open the console for details.");
-  });
-  </script>
-
-  <!-- (Optional) Footer kept consistent with your site -->
-  <footer class="mt-10 py-8 text-center text-sm text-slate-500">
-    Built with Tailwind, Leaflet, and Chart.js • ACS S2301 (2010–2023)
-  </footer>
 </body>
 </html>
