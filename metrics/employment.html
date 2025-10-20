@@ -226,7 +226,6 @@
       const isPR = name.toUpperCase().includes('PUERTO RICO');
       const mapNameKey = isPR ? 'PUERTORICO' : sanitizeName(name);
 
-      // FIX: Find the row using the Municipio_Sanitized property
       const row = _rows.find(r => r.Municipio_Sanitized === mapNameKey);
       if (!row) return null;
 
@@ -482,7 +481,6 @@
     function colorFor(value, breaks) {
       if (!Number.isFinite(value)) return '#93c5fd';
       
-      // Since higher employment change is better, we map lowest values to the first color (red)
       if (value <= breaks[0]) return CHORO_COLORS[0];
       if (value <= breaks[1]) return CHORO_COLORS[1];
       if (value <= breaks[2]) return CHORO_COLORS[2];
@@ -525,7 +523,6 @@
       const municipalRows = _rows.filter(r => r.Municipio_Sanitized !== 'PUERTORICO');
       
       municipalRows.forEach(row => {
-        // Find stats based on the row's sanitized name (which is unique)
         const st = statsForMunicipio(row.Municipio);
         if (st && Number.isFinite(st.abs)) {
           values.push({ pct: st.pctTot, abs: st.abs });
