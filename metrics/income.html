@@ -167,6 +167,7 @@
         </div>
       </div>
     </section>
+
     <section class="card p-6">
       <h2 class="text-lg font-semibold mb-4">File Sources</h2>
       <div class="space-y-4">
@@ -197,7 +198,6 @@
   </main>
 
   <script>
-    // START: UPDATED JAVASCRIPT CONSTANTS AND HELPERS
     const GEOJSON_URL = '../data/tl_2022_72_cousub/pr_municipalities.geojson';
     // Use the new income JSON file from the data/household_income folder
     const INCOME_JSON = '../data/household_income/municipios_acs_s1901_median_income_2010_2023_wide.json';
@@ -216,7 +216,7 @@
     // Adjusted breaks for median income % change (Nominal USD)
     const PCT_BREAKS = [20, 30, 40, 50, 60]; 
     // Adjusted breaks for absolute change in USD (Nominal)
-    let ABS_BREAKS = [2000, 4000, 6000, 8000, 10000]; // Re-calculated later in computeAbsBreaks
+    let ABS_BREAKS = [3000, 5000, 7000, 9000, 11000]; // Enforced fixed breaks for consistency
     
     const sanitizeName = s => String(s||'').trim();
     const yearVal = (row,y) => {
@@ -226,36 +226,32 @@
     };
 
     function statsForMunicipio(name){
-      // Match the name against the 'Municipio' field in the new JSON
-      const key = sanitizeName(name).replace(/\s*Municipio$/,'');
-      const row = _rows.find(r => sanitizeName(r.Municipio) === key || sanitizeName(r.Municipio) === name);
-      if (!row) return null;
+      // 1. Normalize the name from the GeoJSON feature: remove "Municipio" suffix
+      const nameKey = sanitizeName(name).replace(/\s*Municipio$/,'');
+      
+      // 2. Find the row, matching against the normalized name or the special PR case
+      const row = _rows.find(r => 
+        sanitizeName(r.Municipio).replace(/\s*Municipio$/,'') === nameKey || // Match the normalized name
+        (nameKey === 'Puerto Rico' && sanitizeName(r.Municipio) === 'Puerto Rico')
+      );
 
-      // Ensure the row is not the metadata row
-      if (row.metadata) return null;
+      if (!row || row.metadata) return null;
 
       const vals = YEARS.map(y => yearVal(row,y));
       if (vals.some(v => !Number.isFinite(v))) return null;
 
-      // Use the first year (2010) and the last year (2023)
-      const val2010 = vals[0];
-      const val2023 = vals[vals.length - 1]; // This is the latest year
-
-      const abs = val2023 - val2010;
-      const pctTot = (abs / val2010) * 100;
+      // Use the pre-calculated cumulative fields in your JSON:
+      const cumAbs = row.Cum_Change_2010_2023;
+      const cumPct = row.Cum_Pct_Change_2010_2023;
+      
+      const val2023 = vals[vals.length - 1]; // Last year in the series (2023)
 
       const pctYear = [];
       for (let i=1;i<YEARS.length;i++){
         pctYear.push(((vals[i]-vals[i-1]) / vals[i-1]) * 100);
       }
-      // Use the last year and the change between the last two years (2022->2023)
-      const change2223 = vals[YEARS.indexOf(2023)] - vals[YEARS.indexOf(2022)];
 
-      // Use the pre-calculated cumulative values from the JSON for comparison consistency
-      const cumAbs = row.Cum_Change_2010_2023;
-      const cumPct = row.Cum_Pct_Change_2010_2023;
-
-      return { vals, abs: cumAbs, pctTot: cumPct, pctYear, val2023, change2223 };
+      return { vals, abs: cumAbs, pctTot: cumPct, pctYear, val2023 };
     }
 
     function censusLink(name){
@@ -313,7 +309,7 @@
       d2023.textContent = Number.isFinite(st?.val2023) ? fmt.format(st.val2023) : '—';
       // Use cumulative change from statsForMunicipio
       dChg.textContent  = st ? `${signed(st.abs)} (${pctFmt(st.pctTot)})` : '—';
-      // Use the last year's percentage change (or absolute change from 2022->2023)
+      // Use the last year's percentage change (2022->2023)
       const lastPct = st && st.pctYear.length ? st.pctYear[st.pctYear.length-1] : NaN;
       d2223.textContent = Number.isFinite(lastPct) ? pctFmt(lastPct) : '—';
       
@@ -351,13 +347,13 @@
         onEachFeature: (f, lyr) => {
           const p = f.properties || {};
           const rawName = p.NAME || p.NAMELSAD || p.name || 'Unknown';
-          const name = rawName.replace(/\s*Municipio$/,'');
-          const geoid = p.GEOID || p.geoid || '';
-          const st = statsForMunicipio(name);
+          // Normalize the name before getting stats for the tooltip
+          const statsName = rawName.replace(/\s*Municipio$/,'');
+          const stTip = statsForMunicipio(statsName);
           
           // Use median income change for tooltip
-          const changeLine = st
-            ? `<br><small>2010→2023: ${signed(st.abs)} (${st.pctTot.toFixed(2)}%)</small>`
+          const changeLine = stTip
+            ? `<br><small>2010→2023: ${signed(stTip.abs)} (${stTip.pctTot.toFixed(2)}%)</small>`
             : '';
           
           lyr.bindTooltip(rawName, { direction:'center', className:'leaflet-tooltip' });
@@ -369,7 +365,8 @@
               e.target.setStyle(hiStyle);
               e.target.bringToFront?.();
               const c = e.target.getBounds().getCenter();
-              updateDetails(name, statsForMunicipio(name), c);
+              // Pass the normalized name for correct lookup
+              updateDetails(statsName, statsForMunicipio(statsName), c);
             },
             mouseout: e => {
               if (lockedName) return;
@@ -377,9 +374,10 @@
             },
             click: e => {
               const l = e.target;
+              const clickedName = rawName.replace(/\s*Municipio$/,'');
               if (selectedLayer) layer.resetStyle(selectedLayer);
               selectedLayer = l;
-              lockedName = name;
+              lockedName = clickedName;
               l.setStyle(selectedOutline);
               map.fitBounds(l.getBounds(), { padding:[20,20] });
               const c = l.getBounds().getCenter();
@@ -460,7 +458,9 @@
 
     function styleForFeature(feature){
       const p = feature.properties || {};
-      const name = (p.NAME || p.NAMELSAD || p.name || 'Unknown').replace(/\s*Municipio$/,'');
+      const rawName = (p.NAME || p.NAMELSAD || p.name || 'Unknown');
+      // Normalize the name before getting stats
+      const name = rawName.replace(/\s*Municipio$/,''); 
       const st = statsForMunicipio(name);
       // Use the pre-calculated cumulative values
       const value = !st ? NaN : (currentMode === 'pct' ? st.pctTot : st.abs);
@@ -531,28 +531,19 @@
         return arr[lo] * (hi - i) + arr[hi] * (i - lo);
       };
 
-      // Calculate breaks based on actual data distribution (quartiles)
-      const q1 = q(values, 0.2) ?? 3000;
-      const q2 = q(values, 0.4) ?? 5000;
-      const q3 = q(values, 0.6) ?? 7000;
-      const q4 = q(values, 0.8) ?? 9000;
+      // Recalculating based on the actual distribution of nominal income change:
+      const n1 = q(values, 0.2) ?? 3000;
+      const n2 = q(values, 0.4) ?? 5000;
+      const n3 = q(values, 0.6) ?? 7000;
+      const n4 = q(values, 0.8) ?? 9000;
       
-      // Define breaks for absolute change
-      ABS_BREAKS = [q1, q2, q3, q4, Infinity].filter((v,i,a) => v < a[i+1]);
-      if(ABS_BREAKS.length < 5) ABS_BREAKS = [3000, 5000, 7000, 9000, 11000];
-      
-      // Since all income values are positive changes (2010 to 2023), 
-      // we only need positive breaks for the current dataset. 
-      // If we used the "RealIncome" values, this would need more work.
-      // For nominal income, the simplified breaks are fine.
-      ABS_BREAKS = [3000, 5000, 7000, 9000, 11000]; 
-      
-      // To match the original color logic (which included negative values for population), 
-      // we should ensure there's a good range. The absolute values in the JSON are all 
-      // positive, so we'll enforce a set of positive breaks for the legend labels.
+      // ABS_BREAKS = [3000, 5000, 7000, 9000, 11000] are good default quantiles for this data
+      ABS_BREAKS = [n1, n2, n3, n4, Infinity].map(v => v === Infinity ? v : Math.round(v));
+      // Ensure the breaks array has exactly 5 numeric values + Infinity if needed, or stick to the fixed list
+      if (ABS_BREAKS.length < 5 || ABS_BREAKS[3] === Infinity) {
+          ABS_BREAKS = [3000, 5000, 7000, 9000, 11000];
+      }
     }
-    
-    // END: UPDATED JAVASCRIPT CONSTANTS AND HELPERS
 
     function wireDropdown() {
       const root = document.getElementById('metrics-dropdown-root');
