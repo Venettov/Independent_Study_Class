@@ -191,30 +191,24 @@
 
   <script>
     const GEOJSON_URL = '../data/tl_2022_72_cousub/pr_municipalities.geojson';
-    // 1. Point to the new employment data file
     const DATA_JSON   = '../data/municipios_acs_s2301_2010_2023_wide.json'; 
 
     const YEARS = [2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023];
     const END_YEAR = 2023;
     const START_YEAR = 2010;
     
-    // 2. Define the metric key for Employment Rate in the new file
     const METRIC_KEY = 'emp_pop_ratio_pct';
     const DISPLAY_UNIT = '%';
 
-    // Formatting functions
     const fmt = new Intl.NumberFormat('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
     const pctFmt = (v) => `${(Number(v)||0).toFixed(2)}%`;
     const signed = (n) => (n > 0 ? '+' : '') + fmt.format(n); 
 
-    // Choropleth colors (Green scale, as higher employment is 'better')
     const CHORO_COLORS = ['#dc2626', '#fca5a5', '#d1d5db', '#6ee7b7', '#10b981', '#047857'];
 
-    // Placeholder breaks (will be dynamically calculated later)
-    const PCT_BREAKS = [-10, -5, 0, 5, 10]; // Relative % change
-    let ABS_BREAKS = [-5, -2, 0, 2, 5]; // Absolute percentage point (pp) change
+    const PCT_BREAKS = [-10, -5, 0, 5, 10]; 
+    let ABS_BREAKS = [-5, -2, 0, 2, 5]; 
 
-    // Utility to handle Spanish characters and strip suffixes for robust matching
     const sanitizeName = s => {
       let str = String(s || '').trim();
       str = str.replace(/\s*Municipio$/i, '');
@@ -222,7 +216,6 @@
       return str.toUpperCase().replace(/\s/g, '');
     };
 
-    // 3. Updated function to read the wide-format data (e.g., row.emp_pop_ratio_pct_2023)
     const yearVal = (row, y, key) => {
       const v = row?.[`${key}_${y}`];
       const n = Number(v);
@@ -230,11 +223,10 @@
     };
 
     function statsForMunicipio(name){
-      // Special case: Use 'PUERTORICO' key only if the input name is exactly 'Puerto Rico'
       const isPR = name.toUpperCase().includes('PUERTO RICO');
       const mapNameKey = isPR ? 'PUERTORICO' : sanitizeName(name);
 
-      // Find the row using the sanitized key
+      // FIX: Find the row using the Municipio_Sanitized property
       const row = _rows.find(r => r.Municipio_Sanitized === mapNameKey);
       if (!row) return null;
 
@@ -245,13 +237,11 @@
       const valStart = vals[YEARS.indexOf(START_YEAR)];
       const valEnd = vals[YEARS.indexOf(END_YEAR)];
 
-      // Calculations for Employment Rate (percentages):
-      const absChange = valEnd - valStart; // Absolute change in percentage points (pp)
-      const pctTot = (absChange / valStart) * 100; // Relative percentage change
+      const absChange = valEnd - valStart;
+      const pctTot = (absChange / valStart) * 100;
 
       const annualChange = [];
       for (let i=1; i < YEARS.length; i++){
-        // Annual change in percentage points (pp)
         annualChange.push(vals[i] - vals[i-1]);
       }
       
@@ -275,7 +265,6 @@
       const ctxL = document.getElementById('lineChart').getContext('2d');
       const ctxB = document.getElementById('barChart').getContext('2d');
 
-      // LINE CHART: Value trend
       if (lineChart) lineChart.destroy();
       lineChart = new Chart(ctxL, {
         type: 'line',
@@ -287,7 +276,6 @@
         }
       });
 
-      // BAR CHART: Annual change (pp)
       const labels = YEARS.slice(1).map((y,i)=> `${YEARS[i]}→${y}`);
       if (barChart) barChart.destroy();
       barChart = new Chart(ctxB, {
@@ -534,11 +522,10 @@
     function computeBreaks(){
       const values = [];
       
-      // Filter the data down to just the municipal records (excluding the overall aggregate)
       const municipalRows = _rows.filter(r => r.Municipio_Sanitized !== 'PUERTORICO');
       
       municipalRows.forEach(row => {
-        // We look up stats using the row's original name to utilize the statsForMunicipio function
+        // Find stats based on the row's sanitized name (which is unique)
         const st = statsForMunicipio(row.Municipio);
         if (st && Number.isFinite(st.abs)) {
           values.push({ pct: st.pctTot, abs: st.abs });
