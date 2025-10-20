@@ -184,6 +184,18 @@
                 </div>
             </div>
         </div>
+        
+        <div class="mt-6">
+            <h3 class="text-base font-semibold mb-2">Understanding the Unemployment Rate Charts</h3>
+            <p class="text-sm text-gray-700 space-y-3">
+                The **Unemployment Rate Trend (2010–2023)** chart displays the yearly unemployment rate for the selected municipality (or Puerto Rico overall) as a share of the labor force. A lower percentage indicates a healthier labor market over the long term. This metric generally reflects a decade-long improvement in employment across Puerto Rico since peak unemployment rates in the early 2010s.
+            </p>
+            <p class="text-sm text-gray-700 mt-2 space-y-3">
+                The **Annual Unemployment Change (2022–2023)** chart ranks all municipalities by the absolute change in their unemployment rate in the most recent year.
+                <span class="font-semibold text-green-600">Green bars</span> represent a **decrease** in the unemployment rate (an improvement in the labor market).
+                <span class="font-semibold text-red-600">Red bars</span> represent an **increase** (a deterioration in the labor market). This chart provides a snapshot of the fastest-changing municipal labor markets in the last year.
+            </p>
+        </div>
     </section>
 
     <section class="card p-6">
@@ -237,7 +249,6 @@
       return { empVals, unempVals, laborVals, row };
     }
     
-    // NEW/MODIFIED: Added mode parameter to handle color direction
     function colorFor(value, breaks, mode) {
       if (!Number.isFinite(value)) return '#93c5fd';
       const isHigherBetter = (mode === 'emp' || mode === 'labor');
@@ -253,12 +264,10 @@
       return colors[5];
     }
     
-    // NEW: Function to get array of all municipality names (excluding PR aggregate)
     function getAllMunicipios() {
         return _rows.filter(r => r.Municipio !== 'Puerto Rico').map(r => r.Municipio).sort();
     }
     
-    // NEW: Function to prepare data for the Annual Change Bar Chart
     function prepareAnnualChangeData() {
         const municipios = getAllMunicipios();
         const data = municipios.map(name => {
@@ -276,7 +285,6 @@
     }
 
     // ---- Charts + Details ----
-    // MODIFIED: Renamed and added new chart variables
     let lineChartEmpPop=null, lineChartLabor=null, barChartUnemp=null, barChartAnnualChange=null;
     const dName = document.getElementById('d-name');
     const dCent = document.getElementById('d-centroid');
@@ -285,7 +293,6 @@
     const dLab  = document.getElementById('d-labor');
     const dCenL = document.getElementById('d-census');
 
-    // MODIFIED: Consolidated all chart drawing logic
     function drawCharts(name, st){
       if (!st) return;
       
@@ -326,7 +333,7 @@
             data: st.laborVals,
             tension:.25,
             pointRadius:3,
-            borderColor: 'rgb(21, 128, 61)' // A distinct green color
+            borderColor: 'rgb(21, 128, 61)' 
           }]
         },
         options: {
@@ -344,7 +351,7 @@
           datasets:[{
             label:'Unemployment rate (%)',
             data: st.unempVals,
-            backgroundColor: 'rgba(239, 68, 68, 0.7)' // Reddish color
+            backgroundColor: 'rgba(239, 68, 68, 0.7)' 
           }]
         },
         options:{
@@ -359,7 +366,7 @@
       const ctxB_AnnualChange = document.getElementById('barChartAnnualChange').getContext('2d');
       if (barChartAnnualChange) barChartAnnualChange.destroy();
       
-      // Assign different colors for positive/negative change
+      // Assign different colors for positive (red) and negative (green) change
       const colors = changeData.values.map(v => v < 0 ? 'rgb(34, 197, 94)' : 'rgb(239, 68, 68)');
 
       barChartAnnualChange = new Chart(ctxB_AnnualChange, {
@@ -405,8 +412,7 @@
 
     // ---- Map + Legend ----
     let _rows = [], map, layer, fc, legend;
-    // MODIFIED: Added 'labor' as a possible mode
-    let currentMode = 'emp'; // 'emp' = employment-pop; 'unemp' = unemployment; 'labor' = labor force participation
+    let currentMode = 'emp'; 
     let lockedName = null, selectedLayer = null;
     const selectedOutline = { weight: 4, color: '#111827', dashArray: '3', fillOpacity: 0.85 };
     let prBoundsGlobal = null;
@@ -434,7 +440,6 @@
       return { fillColor: col, weight: 1.2, color:'#111827', fillOpacity:.75 };
     }
 
-    // MODIFIED: Updated Legend logic for 3 modes
     function renderLegend(){
       if (!legend || !legend._div) return;
       
@@ -455,7 +460,6 @@
       }
       
       let colors = [...CHORO_COLORS];
-      // Flip colors if higher values are "better" (emp-pop ratio, LFP)
       if (isHigherBetter) colors = colors.reverse();
       
       const rows = [];
@@ -468,9 +472,6 @@
 
       const fmtRange = (a,b) => `${a}% – ${b}%`;
       rows.push(`<div style="font-weight:600;margin-bottom:.25rem">${title}</div>`);
-      // Logic for the first and last bin labels:
-      // If higher is better, the lowest color (index 0) is <= min break.
-      // If lower is better (unemp), the lowest color is >= max break.
       rows.push(row(colors[0], isHigherBetter ? `≤ ${breaks[0]}%` : `> ${breaks[4]}%`));
       rows.push(row(colors[1], fmtRange(breaks[0], breaks[1])));
       rows.push(row(colors[2], fmtRange(breaks[1], breaks[2])));
@@ -481,7 +482,6 @@
       legend._div.innerHTML = rows.join('');
     }
 
-    // MODIFIED: Updated metric toggle logic for 3 modes
     function wireMetricToggle(){
       const btnEmp = document.getElementById('metricEmp');
       const btnUn  = document.getElementById('metricUnemp');
@@ -507,7 +507,6 @@
         renderLegend();
       }
       
-      // Set initial mode
       setMode(currentMode); 
       
       btnEmp.addEventListener('click', ()=>setMode('emp'));
@@ -520,7 +519,6 @@
         lockedName = null;
         if (selectedLayer) { layer.resetStyle(selectedLayer); selectedLayer = null; }
         if (prBoundsGlobal) map.fitBounds(prBoundsGlobal, { padding:[15,15] });
-        // Reset details to Puerto Rico aggregate
         updateDetails('Puerto Rico', statsForMunicipio('Puerto Rico'), null); 
       }
       document.getElementById('clearSel').addEventListener('click', clearSelection);
