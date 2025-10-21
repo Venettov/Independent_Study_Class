@@ -1,0 +1,949 @@
+year,municipio,TotalEmployment
+2012,Adjuntas,693
+2013,Adjuntas,706
+2014,Adjuntas,653
+2015,Adjuntas,678
+2016,Adjuntas,694
+2017,Adjuntas,943
+2018,Adjuntas,911
+2019,Adjuntas,924
+2020,Adjuntas,950
+2021,Adjuntas,965
+2022,Adjuntas,1114
+2023,Adjuntas,1119
+2012,Aguada,3199
+2013,Aguada,3259
+2014,Aguada,3167
+2015,Aguada,2881
+2016,Aguada,2798
+2017,Aguada,2721
+2018,Aguada,2700
+2019,Aguada,2918
+2020,Aguada,2945
+2021,Aguada,2943
+2022,Aguada,3403
+2023,Aguada,3530
+2012,Aguadilla,11212
+2013,Aguadilla,11033
+2014,Aguadilla,11652
+2015,Aguadilla,11913
+2016,Aguadilla,12519
+2017,Aguadilla,13765
+2018,Aguadilla,13158
+2019,Aguadilla,13013
+2020,Aguadilla,12975
+2021,Aguadilla,13259
+2022,Aguadilla,14275
+2023,Aguadilla,14428
+2012,Aguas Buenas,1036
+2013,Aguas Buenas,995
+2014,Aguas Buenas,1007
+2015,Aguas Buenas,1058
+2016,Aguas Buenas,1035
+2017,Aguas Buenas,1023
+2018,Aguas Buenas,929
+2019,Aguas Buenas,1040
+2020,Aguas Buenas,1018
+2021,Aguas Buenas,964
+2022,Aguas Buenas,1107
+2023,Aguas Buenas,1109
+2012,Aibonito,2728
+2013,Aibonito,2961
+2014,Aibonito,2802
+2015,Aibonito,2904
+2016,Aibonito,2905
+2017,Aibonito,3464
+2018,Aibonito,3274
+2019,Aibonito,3456
+2020,Aibonito,3461
+2021,Aibonito,3492
+2022,Aibonito,3551
+2023,Aibonito,3621
+2012,Arecibo,12699
+2013,Arecibo,12932
+2014,Arecibo,12789
+2015,Arecibo,12419
+2016,Arecibo,12797
+2017,Arecibo,12351
+2018,Arecibo,12591
+2019,Arecibo,12883
+2020,Arecibo,13025
+2021,Arecibo,13107
+2022,Arecibo,13634
+2023,Arecibo,13975
+2012,Arroyo,1943
+2013,Arroyo,1675
+2014,Arroyo,1448
+2015,Arroyo,1502
+2016,Arroyo,1434
+2017,Arroyo,1423
+2018,Arroyo,1418
+2019,Arroyo,1695
+2020,Arroyo,1662
+2021,Arroyo,1681
+2022,Arroyo,1786
+2023,Arroyo,1950
+2012,Añasco,4420
+2013,Añasco,4509
+2014,Añasco,4593
+2015,Añasco,4853
+2016,Añasco,4450
+2017,Añasco,5362
+2018,Añasco,4203
+2019,Añasco,4472
+2020,Añasco,4293
+2021,Añasco,4242
+2022,Añasco,5310
+2023,Añasco,4885
+2012,Barceloneta,7979
+2013,Barceloneta,7745
+2014,Barceloneta,7195
+2015,Barceloneta,7187
+2016,Barceloneta,7006
+2017,Barceloneta,8924
+2018,Barceloneta,8148
+2019,Barceloneta,7442
+2020,Barceloneta,7277
+2021,Barceloneta,7068
+2022,Barceloneta,7099
+2023,Barceloneta,7437
+2012,Barranquitas,1552
+2013,Barranquitas,1555
+2014,Barranquitas,1497
+2015,Barranquitas,1618
+2016,Barranquitas,1606
+2017,Barranquitas,1628
+2018,Barranquitas,1524
+2019,Barranquitas,1708
+2020,Barranquitas,1756
+2021,Barranquitas,1748
+2022,Barranquitas,2135
+2023,Barranquitas,2123
+2012,Bayamón,45279
+2013,Bayamón,45266
+2014,Bayamón,44837
+2015,Bayamón,43768
+2016,Bayamón,42655
+2017,Bayamón,42902
+2018,Bayamón,40991
+2019,Bayamón,41764
+2020,Bayamón,40689
+2021,Bayamón,38938
+2022,Bayamón,41102
+2023,Bayamón,42507
+2012,Cabo Rojo,4468
+2013,Cabo Rojo,3942
+2014,Cabo Rojo,4109
+2015,Cabo Rojo,4903
+2016,Cabo Rojo,4615
+2017,Cabo Rojo,3925
+2018,Cabo Rojo,3619
+2019,Cabo Rojo,3889
+2020,Cabo Rojo,4270
+2021,Cabo Rojo,4672
+2022,Cabo Rojo,5499
+2023,Cabo Rojo,5481
+2012,Caguas,40117
+2013,Caguas,39814
+2014,Caguas,39889
+2015,Caguas,38836
+2016,Caguas,38631
+2017,Caguas,37081
+2018,Caguas,35187
+2019,Caguas,37201
+2020,Caguas,37413
+2021,Caguas,35943
+2022,Caguas,37481
+2023,Caguas,38498
+2012,Camuy,1835
+2013,Camuy,2047
+2014,Camuy,1867
+2015,Camuy,1807
+2016,Camuy,1797
+2017,Camuy,2102
+2018,Camuy,2092
+2019,Camuy,2435
+2020,Camuy,2807
+2021,Camuy,2743
+2022,Camuy,3311
+2023,Camuy,3319
+2012,Canóvanas,4764
+2013,Canóvanas,4787
+2014,Canóvanas,4967
+2015,Canóvanas,4803
+2016,Canóvanas,4470
+2017,Canóvanas,3998
+2018,Canóvanas,3375
+2019,Canóvanas,3761
+2020,Canóvanas,3680
+2021,Canóvanas,3842
+2022,Canóvanas,4949
+2023,Canóvanas,5294
+2012,Carolina,40896
+2013,Carolina,41592
+2014,Carolina,39892
+2015,Carolina,38441
+2016,Carolina,39000
+2017,Carolina,37663
+2018,Carolina,36533
+2019,Carolina,37181
+2020,Carolina,36350
+2021,Carolina,33096
+2022,Carolina,39270
+2023,Carolina,41822
+2012,Cataño,10099
+2013,Cataño,10447
+2014,Cataño,10164
+2015,Cataño,9522
+2016,Cataño,9487
+2017,Cataño,9186
+2018,Cataño,9387
+2019,Cataño,9760
+2020,Cataño,9316
+2021,Cataño,10433
+2022,Cataño,8233
+2023,Cataño,7579
+2012,Cayey,8632
+2013,Cayey,8810
+2014,Cayey,7778
+2015,Cayey,7820
+2016,Cayey,7679
+2017,Cayey,7300
+2018,Cayey,7470
+2019,Cayey,7804
+2020,Cayey,7522
+2021,Cayey,6890
+2022,Cayey,7373
+2023,Cayey,7608
+2012,Ceiba,631
+2013,Ceiba,662
+2014,Ceiba,643
+2015,Ceiba,622
+2016,Ceiba,657
+2017,Ceiba,532
+2018,Ceiba,541
+2019,Ceiba,649
+2020,Ceiba,648
+2021,Ceiba,759
+2022,Ceiba,1035
+2023,Ceiba,915
+2012,Ciales,1160
+2013,Ciales,1075
+2014,Ciales,844
+2015,Ciales,809
+2016,Ciales,826
+2017,Ciales,748
+2018,Ciales,675
+2019,Ciales,730
+2020,Ciales,745
+2021,Ciales,781
+2022,Ciales,1003
+2023,Ciales,896
+2012,Cidra,3925
+2013,Cidra,3660
+2014,Cidra,3774
+2015,Cidra,3592
+2016,Cidra,3947
+2017,Cidra,3672
+2018,Cidra,3783
+2019,Cidra,3857
+2020,Cidra,3959
+2021,Cidra,3878
+2022,Cidra,4730
+2023,Cidra,4842
+2012,Coamo,2462
+2013,Coamo,2408
+2014,Coamo,2523
+2015,Coamo,2448
+2016,Coamo,2402
+2017,Coamo,2257
+2018,Coamo,1810
+2019,Coamo,1981
+2020,Coamo,1961
+2021,Coamo,2096
+2022,Coamo,2348
+2023,Coamo,2430
+2012,Comerío,987
+2013,Comerío,1124
+2014,Comerío,1009
+2015,Comerío,691
+2016,Comerío,713
+2017,Comerío,720
+2018,Comerío,748
+2019,Comerío,767
+2020,Comerío,806
+2021,Comerío,839
+2022,Comerío,888
+2023,Comerío,972
+2012,Corozal,2306
+2013,Corozal,2477
+2014,Corozal,2544
+2015,Corozal,2451
+2016,Corozal,2502
+2017,Corozal,2522
+2018,Corozal,2497
+2019,Corozal,2802
+2020,Corozal,2769
+2021,Corozal,2624
+2022,Corozal,3141
+2023,Corozal,2917
+2012,Culebra,195
+2013,Culebra,199
+2014,Culebra,0
+2015,Culebra,192
+2016,Culebra,240
+2017,Culebra,251
+2018,Culebra,192
+2019,Culebra,247
+2020,Culebra,247
+2021,Culebra,158
+2022,Culebra,330
+2023,Culebra,305
+2012,Dorado,6123
+2013,Dorado,7062
+2014,Dorado,7208
+2015,Dorado,6927
+2016,Dorado,7153
+2017,Dorado,7296
+2018,Dorado,7139
+2019,Dorado,7831
+2020,Dorado,9013
+2021,Dorado,9048
+2022,Dorado,9326
+2023,Dorado,9801
+2012,Fajardo,8783
+2013,Fajardo,9162
+2014,Fajardo,7919
+2015,Fajardo,7801
+2016,Fajardo,7417
+2017,Fajardo,7291
+2018,Fajardo,6635
+2019,Fajardo,6370
+2020,Fajardo,5944
+2021,Fajardo,6298
+2022,Fajardo,7382
+2023,Fajardo,7738
+2012,Florida,575
+2013,Florida,516
+2014,Florida,498
+2015,Florida,464
+2016,Florida,597
+2017,Florida,672
+2018,Florida,595
+2019,Florida,620
+2020,Florida,683
+2021,Florida,707
+2022,Florida,737
+2023,Florida,693
+2012,Guayama,8001
+2013,Guayama,6996
+2014,Guayama,6488
+2015,Guayama,7373
+2016,Guayama,7016
+2017,Guayama,7140
+2018,Guayama,6673
+2019,Guayama,8405
+2020,Guayama,6632
+2021,Guayama,6533
+2022,Guayama,7607
+2023,Guayama,7459
+2012,Guayanilla,1102
+2013,Guayanilla,1012
+2014,Guayanilla,997
+2015,Guayanilla,947
+2016,Guayanilla,871
+2017,Guayanilla,986
+2018,Guayanilla,877
+2019,Guayanilla,937
+2020,Guayanilla,852
+2021,Guayanilla,936
+2022,Guayanilla,1022
+2023,Guayanilla,1071
+2012,Guaynabo,38986
+2013,Guaynabo,39971
+2014,Guaynabo,40220
+2015,Guaynabo,41016
+2016,Guaynabo,38450
+2017,Guaynabo,39389
+2018,Guaynabo,39235
+2019,Guaynabo,38572
+2020,Guaynabo,38141
+2021,Guaynabo,38348
+2022,Guaynabo,43211
+2023,Guaynabo,44720
+2012,Gurabo,6504
+2013,Gurabo,6484
+2014,Gurabo,6550
+2015,Gurabo,7343
+2016,Gurabo,7517
+2017,Gurabo,7372
+2018,Gurabo,7655
+2019,Gurabo,7304
+2020,Gurabo,6580
+2021,Gurabo,6082
+2022,Gurabo,6747
+2023,Gurabo,7239
+2012,Guánica,1560
+2013,Guánica,1252
+2014,Guánica,1319
+2015,Guánica,1382
+2016,Guánica,1543
+2017,Guánica,1480
+2018,Guánica,1298
+2019,Guánica,2039
+2020,Guánica,1773
+2021,Guánica,1691
+2022,Guánica,1772
+2023,Guánica,1603
+2012,Hatillo,6900
+2013,Hatillo,6921
+2014,Hatillo,7139
+2015,Hatillo,6943
+2016,Hatillo,7091
+2017,Hatillo,6816
+2018,Hatillo,6874
+2019,Hatillo,7898
+2020,Hatillo,7898
+2021,Hatillo,7897
+2022,Hatillo,7620
+2023,Hatillo,7723
+2012,Hormigueros,1907
+2013,Hormigueros,1966
+2014,Hormigueros,1857
+2015,Hormigueros,1776
+2016,Hormigueros,1696
+2017,Hormigueros,1876
+2018,Hormigueros,1858
+2019,Hormigueros,2543
+2020,Hormigueros,2154
+2021,Hormigueros,2201
+2022,Hormigueros,2520
+2023,Hormigueros,2601
+2012,Humacao,11606
+2013,Humacao,11483
+2014,Humacao,11478
+2015,Humacao,11533
+2016,Humacao,11171
+2017,Humacao,11782
+2018,Humacao,10486
+2019,Humacao,10438
+2020,Humacao,10131
+2021,Humacao,9869
+2022,Humacao,10352
+2023,Humacao,11050
+2012,Isabela,4820
+2013,Isabela,4886
+2014,Isabela,4546
+2015,Isabela,4558
+2016,Isabela,4662
+2017,Isabela,4206
+2018,Isabela,4021
+2019,Isabela,4609
+2020,Isabela,4019
+2021,Isabela,4270
+2022,Isabela,4804
+2023,Isabela,5397
+2012,Jayuya,1740
+2013,Jayuya,0
+2014,Jayuya,0
+2015,Jayuya,1734
+2016,Jayuya,1794
+2017,Jayuya,2216
+2018,Jayuya,2064
+2019,Jayuya,1712
+2020,Jayuya,1759
+2021,Jayuya,1744
+2022,Jayuya,1831
+2023,Jayuya,1902
+2012,Juana Díaz,4276
+2013,Juana Díaz,4204
+2014,Juana Díaz,4361
+2015,Juana Díaz,4829
+2016,Juana Díaz,4739
+2017,Juana Díaz,4165
+2018,Juana Díaz,4262
+2019,Juana Díaz,4615
+2020,Juana Díaz,5005
+2021,Juana Díaz,4856
+2022,Juana Díaz,5118
+2023,Juana Díaz,5026
+2012,Juncos,4889
+2013,Juncos,5216
+2014,Juncos,5307
+2015,Juncos,5190
+2016,Juncos,5212
+2017,Juncos,5583
+2018,Juncos,5374
+2019,Juncos,5562
+2020,Juncos,5680
+2021,Juncos,5996
+2022,Juncos,6702
+2023,Juncos,6865
+2012,Lajas,1952
+2013,Lajas,1564
+2014,Lajas,1634
+2015,Lajas,1814
+2016,Lajas,1897
+2017,Lajas,1986
+2018,Lajas,1935
+2019,Lajas,2231
+2020,Lajas,2398
+2021,Lajas,2450
+2022,Lajas,2380
+2023,Lajas,2306
+2012,Lares,3139
+2013,Lares,2242
+2014,Lares,2246
+2015,Lares,2325
+2016,Lares,2036
+2017,Lares,2025
+2018,Lares,2174
+2019,Lares,2150
+2020,Lares,2502
+2021,Lares,2619
+2022,Lares,2661
+2023,Lares,2503
+2012,Las Marías,640
+2013,Las Marías,450
+2014,Las Marías,357
+2015,Las Marías,619
+2016,Las Marías,653
+2017,Las Marías,527
+2018,Las Marías,362
+2019,Las Marías,302
+2020,Las Marías,224
+2021,Las Marías,426
+2022,Las Marías,451
+2023,Las Marías,310
+2012,Las Piedras,6687
+2013,Las Piedras,5328
+2014,Las Piedras,6163
+2015,Las Piedras,5573
+2016,Las Piedras,4236
+2017,Las Piedras,4450
+2018,Las Piedras,4010
+2019,Las Piedras,4384
+2020,Las Piedras,4286
+2021,Las Piedras,4256
+2022,Las Piedras,4410
+2023,Las Piedras,4530
+2012,Loíza,698
+2013,Loíza,799
+2014,Loíza,796
+2015,Loíza,868
+2016,Loíza,871
+2017,Loíza,805
+2018,Loíza,750
+2019,Loíza,784
+2020,Loíza,864
+2021,Loíza,899
+2022,Loíza,1140
+2023,Loíza,1148
+2012,Luquillo,1582
+2013,Luquillo,1651
+2014,Luquillo,1682
+2015,Luquillo,1642
+2016,Luquillo,1657
+2017,Luquillo,1622
+2018,Luquillo,1408
+2019,Luquillo,1657
+2020,Luquillo,1774
+2021,Luquillo,1767
+2022,Luquillo,1717
+2023,Luquillo,1754
+2012,Manatí,10819
+2013,Manatí,10496
+2014,Manatí,10960
+2015,Manatí,10662
+2016,Manatí,11430
+2017,Manatí,11120
+2018,Manatí,11242
+2019,Manatí,11737
+2020,Manatí,11250
+2021,Manatí,11474
+2022,Manatí,11477
+2023,Manatí,11941
+2012,Maricao,0
+2013,Maricao,0
+2014,Maricao,0
+2015,Maricao,601
+2016,Maricao,679
+2017,Maricao,709
+2018,Maricao,666
+2019,Maricao,695
+2020,Maricao,649
+2021,Maricao,714
+2022,Maricao,776
+2023,Maricao,1078
+2012,Maunabo,219
+2013,Maunabo,211
+2014,Maunabo,192
+2015,Maunabo,214
+2016,Maunabo,242
+2017,Maunabo,220
+2018,Maunabo,200
+2019,Maunabo,220
+2020,Maunabo,222
+2021,Maunabo,230
+2022,Maunabo,271
+2023,Maunabo,266
+2012,Mayagüez,24937
+2013,Mayagüez,22934
+2014,Mayagüez,22734
+2015,Mayagüez,23021
+2016,Mayagüez,21728
+2017,Mayagüez,21279
+2018,Mayagüez,20540
+2019,Mayagüez,21116
+2020,Mayagüez,22116
+2021,Mayagüez,20839
+2022,Mayagüez,21583
+2023,Mayagüez,23053
+2012,Moca,2489
+2013,Moca,2735
+2014,Moca,2495
+2015,Moca,2481
+2016,Moca,2827
+2017,Moca,3672
+2018,Moca,3421
+2019,Moca,3569
+2020,Moca,3776
+2021,Moca,4025
+2022,Moca,4367
+2023,Moca,4543
+2012,Morovis,1420
+2013,Morovis,1314
+2014,Morovis,1385
+2015,Morovis,1273
+2016,Morovis,1268
+2017,Morovis,1347
+2018,Morovis,1165
+2019,Morovis,1246
+2020,Morovis,1170
+2021,Morovis,1297
+2022,Morovis,1458
+2023,Morovis,1572
+2012,Naguabo,1059
+2013,Naguabo,1237
+2014,Naguabo,1156
+2015,Naguabo,994
+2016,Naguabo,1173
+2017,Naguabo,1294
+2018,Naguabo,1181
+2019,Naguabo,1211
+2020,Naguabo,1353
+2021,Naguabo,1476
+2022,Naguabo,1532
+2023,Naguabo,1509
+2012,Naranjito,2072
+2013,Naranjito,1865
+2014,Naranjito,1853
+2015,Naranjito,1931
+2016,Naranjito,2003
+2017,Naranjito,2063
+2018,Naranjito,1965
+2019,Naranjito,2212
+2020,Naranjito,2321
+2021,Naranjito,2548
+2022,Naranjito,2792
+2023,Naranjito,3011
+2012,Orocovis,1938
+2013,Orocovis,1082
+2014,Orocovis,1881
+2015,Orocovis,1517
+2016,Orocovis,1635
+2017,Orocovis,1510
+2018,Orocovis,1404
+2019,Orocovis,1664
+2020,Orocovis,1606
+2021,Orocovis,1667
+2022,Orocovis,1574
+2023,Orocovis,1560
+2012,Patillas,854
+2013,Patillas,834
+2014,Patillas,899
+2015,Patillas,866
+2016,Patillas,939
+2017,Patillas,867
+2018,Patillas,791
+2019,Patillas,872
+2020,Patillas,892
+2021,Patillas,954
+2022,Patillas,1003
+2023,Patillas,1145
+2012,Peñuelas,1618
+2013,Peñuelas,1517
+2014,Peñuelas,1439
+2015,Peñuelas,1377
+2016,Peñuelas,1316
+2017,Peñuelas,1299
+2018,Peñuelas,1419
+2019,Peñuelas,1399
+2020,Peñuelas,1271
+2021,Peñuelas,1289
+2022,Peñuelas,1423
+2023,Peñuelas,1416
+2012,Ponce,37743
+2013,Ponce,38502
+2014,Ponce,38087
+2015,Ponce,37366
+2016,Ponce,35605
+2017,Ponce,35562
+2018,Ponce,35517
+2019,Ponce,36108
+2020,Ponce,36592
+2021,Ponce,36558
+2022,Ponce,38684
+2023,Ponce,39835
+2012,Quebradillas,1114
+2013,Quebradillas,1202
+2014,Quebradillas,1159
+2015,Quebradillas,1265
+2016,Quebradillas,1215
+2017,Quebradillas,1117
+2018,Quebradillas,1059
+2019,Quebradillas,1328
+2020,Quebradillas,1361
+2021,Quebradillas,1385
+2022,Quebradillas,1692
+2023,Quebradillas,1695
+2012,Rincón,1004
+2013,Rincón,1065
+2014,Rincón,1127
+2015,Rincón,1166
+2016,Rincón,1243
+2017,Rincón,1286
+2018,Rincón,1263
+2019,Rincón,1383
+2020,Rincón,1492
+2021,Rincón,1494
+2022,Rincón,1790
+2023,Rincón,1907
+2012,Río Grande,4937
+2013,Río Grande,5421
+2014,Río Grande,5199
+2015,Río Grande,4813
+2016,Río Grande,4997
+2017,Río Grande,4926
+2018,Río Grande,4314
+2019,Río Grande,4697
+2020,Río Grande,4715
+2021,Río Grande,4045
+2022,Río Grande,5196
+2023,Río Grande,5814
+2012,Sabana Grande,1651
+2013,Sabana Grande,1481
+2014,Sabana Grande,1454
+2015,Sabana Grande,1650
+2016,Sabana Grande,1654
+2017,Sabana Grande,1644
+2018,Sabana Grande,1740
+2019,Sabana Grande,1955
+2020,Sabana Grande,1964
+2021,Sabana Grande,1934
+2022,Sabana Grande,2177
+2023,Sabana Grande,2099
+2012,Salinas,2044
+2013,Salinas,2157
+2014,Salinas,2142
+2015,Salinas,1842
+2016,Salinas,1704
+2017,Salinas,1730
+2018,Salinas,1483
+2019,Salinas,1425
+2020,Salinas,1415
+2021,Salinas,1585
+2022,Salinas,1802
+2023,Salinas,1827
+2012,San Germán,5534
+2013,San Germán,6046
+2014,San Germán,6257
+2015,San Germán,6237
+2016,San Germán,5894
+2017,San Germán,4174
+2018,San Germán,4140
+2019,San Germán,4168
+2020,San Germán,3966
+2021,San Germán,4066
+2022,San Germán,4631
+2023,San Germán,4639
+2012,San Juan,196108
+2013,San Juan,195647
+2014,San Juan,195972
+2015,San Juan,195513
+2016,San Juan,191958
+2017,San Juan,193673
+2018,San Juan,193924
+2019,San Juan,195925
+2020,San Juan,198448
+2021,San Juan,185963
+2022,San Juan,200296
+2023,San Juan,208446
+2012,San Lorenzo,3467
+2013,San Lorenzo,3267
+2014,San Lorenzo,3116
+2015,San Lorenzo,3003
+2016,San Lorenzo,3370
+2017,San Lorenzo,3514
+2018,San Lorenzo,3616
+2019,San Lorenzo,3321
+2020,San Lorenzo,3369
+2021,San Lorenzo,3493
+2022,San Lorenzo,3560
+2023,San Lorenzo,3822
+2012,San Sebastián,2620
+2013,San Sebastián,2903
+2014,San Sebastián,3188
+2015,San Sebastián,3180
+2016,San Sebastián,3365
+2017,San Sebastián,3217
+2018,San Sebastián,3366
+2019,San Sebastián,3633
+2020,San Sebastián,3509
+2021,San Sebastián,3528
+2022,San Sebastián,4338
+2023,San Sebastián,4587
+2012,Santa Isabel,2950
+2013,Santa Isabel,2705
+2014,Santa Isabel,2794
+2015,Santa Isabel,2860
+2016,Santa Isabel,3002
+2017,Santa Isabel,3282
+2018,Santa Isabel,3193
+2019,Santa Isabel,3619
+2020,Santa Isabel,3666
+2021,Santa Isabel,3728
+2022,Santa Isabel,4572
+2023,Santa Isabel,4695
+2012,Toa Alta,2248
+2013,Toa Alta,2411
+2014,Toa Alta,2574
+2015,Toa Alta,2416
+2016,Toa Alta,2190
+2017,Toa Alta,2257
+2018,Toa Alta,2017
+2019,Toa Alta,2210
+2020,Toa Alta,2373
+2021,Toa Alta,2522
+2022,Toa Alta,3100
+2023,Toa Alta,3073
+2012,Toa Baja,9818
+2013,Toa Baja,10029
+2014,Toa Baja,9849
+2015,Toa Baja,9842
+2016,Toa Baja,9863
+2017,Toa Baja,10229
+2018,Toa Baja,10320
+2019,Toa Baja,10900
+2020,Toa Baja,10550
+2021,Toa Baja,11060
+2022,Toa Baja,11716
+2023,Toa Baja,12191
+2012,Trujillo Alto,9285
+2013,Trujillo Alto,9924
+2014,Trujillo Alto,9695
+2015,Trujillo Alto,9036
+2016,Trujillo Alto,8502
+2017,Trujillo Alto,8361
+2018,Trujillo Alto,7577
+2019,Trujillo Alto,8458
+2020,Trujillo Alto,8261
+2021,Trujillo Alto,7849
+2022,Trujillo Alto,7988
+2023,Trujillo Alto,8206
+2012,Utuado,1358
+2013,Utuado,1390
+2014,Utuado,1453
+2015,Utuado,1384
+2016,Utuado,1378
+2017,Utuado,1331
+2018,Utuado,1272
+2019,Utuado,1348
+2020,Utuado,1264
+2021,Utuado,1339
+2022,Utuado,1590
+2023,Utuado,1764
+2012,Vega Alta,4556
+2013,Vega Alta,4466
+2014,Vega Alta,4210
+2015,Vega Alta,4207
+2016,Vega Alta,4146
+2017,Vega Alta,4368
+2018,Vega Alta,4167
+2019,Vega Alta,4273
+2020,Vega Alta,4225
+2021,Vega Alta,4308
+2022,Vega Alta,4669
+2023,Vega Alta,4812
+2012,Vega Baja,5709
+2013,Vega Baja,5484
+2014,Vega Baja,5533
+2015,Vega Baja,5524
+2016,Vega Baja,5634
+2017,Vega Baja,5518
+2018,Vega Baja,5426
+2019,Vega Baja,5783
+2020,Vega Baja,5982
+2021,Vega Baja,5771
+2022,Vega Baja,5469
+2023,Vega Baja,5774
+2012,Vieques,903
+2013,Vieques,950
+2014,Vieques,1032
+2015,Vieques,1046
+2016,Vieques,1125
+2017,Vieques,966
+2018,Vieques,590
+2019,Vieques,734
+2020,Vieques,724
+2021,Vieques,587
+2022,Vieques,953
+2023,Vieques,927
+2012,Villalba,0
+2013,Villalba,0
+2014,Villalba,0
+2015,Villalba,1933
+2016,Villalba,1943
+2017,Villalba,1605
+2018,Villalba,1776
+2019,Villalba,1903
+2020,Villalba,1911
+2021,Villalba,1933
+2022,Villalba,2248
+2023,Villalba,2286
+2012,Yabucoa,2090
+2013,Yabucoa,2061
+2014,Yabucoa,1679
+2015,Yabucoa,1680
+2016,Yabucoa,1842
+2017,Yabucoa,1773
+2018,Yabucoa,1487
+2019,Yabucoa,1548
+2020,Yabucoa,1619
+2021,Yabucoa,1427
+2022,Yabucoa,1650
+2023,Yabucoa,1687
+2012,Yauco,4092
+2013,Yauco,4080
+2014,Yauco,4072
+2015,Yauco,3888
+2016,Yauco,3914
+2017,Yauco,4120
+2018,Yauco,4040
+2019,Yauco,4081
+2020,Yauco,3629
+2021,Yauco,3953
+2022,Yauco,5023
+2023,Yauco,5429
+2012,Puerto Rico,684343
+2013,Puerto Rico,680261
+2014,Puerto Rico,675994
+2015,Puerto Rico,675163
+2016,Puerto Rico,664928
+2017,Puerto Rico,666181
+2018,Puerto Rico,649722
+2019,Puerto Rico,670083
+2020,Puerto Rico,668517
+2021,Puerto Rico,651095
+2022,Puerto Rico,705017
+2023,Puerto Rico,729610
