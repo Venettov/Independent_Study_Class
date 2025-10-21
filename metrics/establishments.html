@@ -112,7 +112,7 @@
             Population & Economic Dynamics in Puerto Rico
           </h1>
           <p class="mt-3 text-lg text-gray-700">
-            Employer Establishments across Puerto Rico’s municipios (2010–2023), using U.S. Census <em>County Business Patterns (CBP)</em>.
+            Employer Establishments across Puerto Rico’s municipios (2012–2023), using U.S. Census <em>County Business Patterns (CBP)</em>.
           </p>
           <div class="mt-5">
             <span class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-100 text-slate-800">
@@ -139,12 +139,10 @@
       <div id="map" class="mt-3"></div>
     </section>
 
-    <!-- Detail + Charts -->
+    <!-- Charts & Details -->
     <section class="card p-6">
       <h2 class="text-lg font-semibold mb-4">Employer Establishments Details</h2>
-
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Details -->
         <div>
           <div class="text-sm">
             <div>Municipio: <span id="d-name" class="font-semibold">Puerto Rico</span></div>
@@ -152,29 +150,27 @@
           </div>
 
           <div class="mt-4 text-sm">
-            <div class="font-semibold text-gray-700">Establishments (2010–2023):</div>
+            <div class="font-semibold text-gray-700">Establishments (2012–2023):</div>
             <ul class="mt-1 space-y-1">
               <li>2023 Establishments: <span id="d-2023" class="font-semibold kpi">—</span></li>
-              <li>Change since 2010: <span id="d-chg" class="font-semibold kpi">—</span></li>
+              <li>Change since 2012: <span id="d-chg" class="font-semibold kpi">—</span></li>
             </ul>
           </div>
 
           <div class="mt-4 text-sm">
-            <a id="d-census" class="text-blue-600 underline" href="#" target="_blank" rel="noopener">
+            <a id="d-census" class="text-blue-600 underline" href="https://www.census.gov/programs-surveys/cbp.html" target="_blank" rel="noopener">
               Open CBP on census.gov ↗
             </a>
           </div>
         </div>
 
-        <!-- Line Chart -->
         <div>
-          <h3 class="font-semibold mb-2">Establishments Trend (2010–2023)</h3>
+          <h3 class="font-semibold mb-2">Establishments Trend (2012–2023)</h3>
           <div class="mini bg-gray-50 rounded p-3">
             <canvas id="lineChartNominal"></canvas>
           </div>
         </div>
 
-        <!-- Bar Chart -->
         <div>
           <h3 class="font-semibold mb-2">Annual % Change in Establishments</h3>
           <div class="mini bg-gray-50 rounded p-3">
@@ -187,12 +183,17 @@
       <h2 class="text-lg font-semibold mb-4 pt-8 border-t border-gray-200 mt-8">Understanding the Establishment Metrics</h2>
       <div class="space-y-4 text-gray-700">
         <p>
-          The visualizations show the change in <strong>Employer Establishments</strong> across Puerto Rico. These are active business locations with paid employees as reported in the U.S. Census Bureau’s <em>County Business Patterns (CBP)</em).
+          The charts above display the change in <strong>Employer Establishments</strong> across Puerto Rico. These represent active business locations with paid employees as reported in the U.S. Census Bureau’s <em>County Business Patterns (CBP)</em> program.
         </p>
+
         <h3 class="font-semibold text-gray-800 pt-2">Interpreting Trends</h3>
+        <p>
+          Growth or decline in establishments reflects shifts in the island’s economic activity, business formation, and recovery after major events such as natural disasters or recessions.
+        </p>
+
         <ul class="list-disc list-inside space-y-2 ml-4">
-          <li><strong>Nominal Change (%):</strong> Percentage difference in total establishments between 2010 and 2023 (also used in the choropleth map).</li>
-          <li><strong>Nominal Change (#):</strong> Absolute change in number of establishments between 2010 and 2023.</li>
+          <li><strong>Nominal Change (%):</strong> Measures the percent difference in total establishments from 2012 to 2023.</li>
+          <li><strong>Nominal Change (#):</strong> Shows the absolute change in the number of establishments over the same period.</li>
         </ul>
       </div>
     </section>
@@ -206,8 +207,12 @@
             U.S. Census Bureau — County Business Patterns (CBP)
           </a>
         </li>
-        <li>municipios_cbp_total_employment_2010_2023_wide.json (map & charts)</li>
-        <li>municipios_cbp_total_employment_2010_2023.csv (long format for validation)</li>
+        <li>
+          municipios_cbp_total_employment_2010_2023_wide.json (used for map and charts)
+        </li>
+        <li>
+          municipios_cbp_total_employment_2010_2023.csv (used for data verification)
+        </li>
       </ul>
     </section>
   </main>
@@ -219,8 +224,7 @@
     --------------------------*/
     const GEOJSON_URL = '../data/tl_2022_72_cousub/pr_municipalities.geojson';
     const DATA_JSON   = '../data/employment_establishments/municipios_cbp_total_employment_2010_2023_wide.json';
-
-    const YEARS = [2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023];
+    const YEARS       = [2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023];
 
     // Formatting
     const intFmt = new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 });
@@ -230,11 +234,12 @@
     // Map modes (no REAL here)
     const MODE_NOMINAL_PCT = 'nominal_pct';
     const MODE_NOMINAL_ABS = 'nominal_abs';
+    let currentMode = MODE_NOMINAL_PCT;
 
     // Choropleth palette (6 bins, red -> green)
     const CHORO_COLORS = ['#7f1d1d', '#b91c1c', '#f97316', '#bbf7d0', '#22c55e', '#15803d'];
 
-    // Breaks (will be recomputed from data; these serve as safe defaults)
+    // Breaks (defaults; recomputed from data)
     let NOMINAL_PCT_BREAKS = [-20, -10, 0, 10, 20];
     let NOMINAL_ABS_BREAKS = [-300, -150, 0, 150, 300];
 
@@ -243,20 +248,18 @@
     const dCent   = document.getElementById('d-centroid');
     const d2023   = document.getElementById('d-2023');
     const dChg    = document.getElementById('d-chg');
-    const dCensus = document.getElementById('d-census');
 
     // Chart handles
     let lineChart = null, barChart = null;
 
     // Map globals
     let _rows = [];
-    let map, layer, fc, legend;
-    let currentMode = MODE_NOMINAL_PCT;
+    let map, layer, legend;
     let lockedName = null, selectedLayer = null;
     const selectedOutline = { weight: 4, color: '#111827', dashArray: '3', fillOpacity: 0.85 };
     let prBoundsGlobal = null;
 
-    // Small helpers
+    // Helpers
     const sanitizeName = (s) => String(s || '').trim();
     const normMunicipio = (s) => sanitizeName(s).replace(/\s*Municipio$/,'');
     const yearVal = (row, y) => {
@@ -288,9 +291,10 @@
         pctYear.push(pct);
       }
 
-      // Use precomputed cumulative fields from the JSON (created by your script)
-      const cumAbs = Number(row.Cum_Change_2010_2023);
-      const cumPct = Number(row.Cum_Pct_Change_2010_2023);
+      // Use precomputed cumulative fields from the JSON
+      // NOTE: employment JSON uses 2012 as the first year
+      const cumAbs = Number(row.Cum_Change_2012_2023);
+      const cumPct = Number(row.Cum_Pct_Change_2012_2023);
       const val2023 = vals[vals.length - 1];
 
       return { vals, pctYear, cumAbs, cumPct, val2023 };
@@ -369,25 +373,21 @@
         dChg.textContent  = `${signed(st.cumAbs)} (${pctFmt(st.cumPct)})`;
       }
 
-      dCensus.href = censusLink(name);
       drawCharts(name, st);
-    }
-
-    function censusLink(name) {
-      // General CBP landing (municipio-specific deep links vary by year/table)
-      return 'https://www.census.gov/programs-surveys/cbp.html';
     }
 
     /* -------------------------
        Choropleth rendering
     --------------------------*/
-    function colorFor(value, breaks) {
-      if (!Number.isFinite(value)) return '#93c5fd'; // fallback light blue
-      if (value <= breaks[0]) return CHORO_COLORS[0];
-      if (value <= breaks[1]) return CHORO_COLORS[1];
-      if (value <= breaks[2]) return CHORO_COLORS[2];
-      if (value <= breaks[3]) return CHORO_COLORS[3];
-      if (value <= breaks[4]) return CHORO_COLORS[4];
+    function colorFor(value, breaks, isPct) {
+      if (!Number.isFinite(value)) return '#e5e7eb'; // neutral gray
+      // 6 bins => 5 breaks
+      const [b0,b1,b2,b3,b4] = breaks;
+      if (value <= b0) return CHORO_COLORS[0];
+      if (value <= b1) return CHORO_COLORS[1];
+      if (value <= b2) return CHORO_COLORS[2];
+      if (value <= b3) return CHORO_COLORS[3];
+      if (value <= b4) return CHORO_COLORS[4];
       return CHORO_COLORS[5];
     }
 
@@ -397,26 +397,26 @@
       const name = normMunicipio(rawName);
       const st = statsForMunicipio(name);
 
-      // Use currently-selected mode to pick value + breaks
-      let value, breaks;
+      let value, breaks, isPct = false;
       if (currentMode === MODE_NOMINAL_PCT) {
         value = st ? st.cumPct : NaN;
         breaks = NOMINAL_PCT_BREAKS;
+        isPct = true;
       } else {
         value = st ? st.cumAbs : NaN;
         breaks = NOMINAL_ABS_BREAKS;
       }
-      const col = colorFor(value, breaks);
-      return { fillColor: col, weight: 1.2, color:'#111827', fillOpacity:.75 };
+      const fill = colorFor(value, breaks, isPct);
+      return { fillColor: fill, weight: 1.2, color:'#ffffff', fillOpacity:.78 };
     }
 
-    // Recompute breaks from data for better local contrast
+    // Recompute data-driven breaks (quantiles) for better contrast
     function computeBreaks() {
       const pctVals = [], absVals = [];
       for (const r of _rows) {
         if (r && !r.metadata) {
-          const p = Number(r.Cum_Pct_Change_2010_2023);
-          const a = Number(r.Cum_Change_2010_2023);
+          const p = Number(r.Cum_Pct_Change_2012_2023);
+          const a = Number(r.Cum_Change_2012_2023);
           if (Number.isFinite(p)) pctVals.push(p);
           if (Number.isFinite(a)) absVals.push(a);
         }
@@ -436,13 +436,11 @@
         }
       };
 
-      // 5 thresholds -> 6 bins
-      const pctBreaks = [q(pctVals, .10), q(pctVals, .30), q(pctVals, .50), q(pctVals, .70), q(pctVals, .90)]
+      const pctBreaks = [q(pctVals,.10), q(pctVals,.30), q(pctVals,.50), q(pctVals,.70), q(pctVals,.90)]
         .map(v => Number.isFinite(v) ? Math.round(v*100)/100 : v);
-      const absBreaks = [q(absVals, .10), q(absVals, .30), q(absVals, .50), q(absVals, .70), q(absVals, .90)]
+      const absBreaks = [q(absVals,.10), q(absVals,.30), q(absVals,.50), q(absVals,.70), q(absVals,.90)]
         .map(v => Number.isFinite(v) ? Math.round(v) : v);
 
-      // Fallback to defaults if distribution is degenerate
       if (pctBreaks.every(Number.isFinite)) NOMINAL_PCT_BREAKS = pctBreaks;
       if (absBreaks.every(Number.isFinite)) NOMINAL_ABS_BREAKS = absBreaks;
     }
@@ -453,11 +451,11 @@
       let breaks, title, isPct;
       if (mode === MODE_NOMINAL_PCT) {
         breaks = NOMINAL_PCT_BREAKS;
-        title  = 'Establishment Change 2010–2023 — % (Nominal)';
+        title  = 'Establishment Change 2012–2023 — % (Nominal)';
         isPct  = true;
       } else {
         breaks = NOMINAL_ABS_BREAKS;
-        title  = 'Establishment Change 2010–2023 — # (Nominal)';
+        title  = 'Establishment Change 2012–2023 — # (Nominal)';
         isPct  = false;
       }
 
@@ -468,20 +466,20 @@
            <span>${label}</span>
          </div>`;
 
-      const fmtBreak = (v, pct) => {
+      const fmtBreak = (v) => {
         if (!Number.isFinite(v)) return '—';
-        return pct ? `${v.toFixed(2)}%` : (v>0?'+':'') + intFmt.format(v);
+        return isPct ? `${v.toFixed(2)}%` : (v>0?'+':'') + intFmt.format(v);
       };
-      const fmtRange = (a,b,pct) => `${fmtBreak(a,pct)} to ${fmtBreak(b,pct)}`;
+      const fmtRange = (a,b) => `${fmtBreak(a)} to ${fmtBreak(b)}`;
 
       const html = [];
       html.push(`<div style="font-weight:600;margin-bottom:.25rem">${title}</div>`);
-      html.push(row(CHORO_COLORS[0], `≤ ${fmtBreak(breaks[0], isPct)}`));
-      html.push(row(CHORO_COLORS[1], fmtRange(breaks[0], breaks[1], isPct)));
-      html.push(row(CHORO_COLORS[2], fmtRange(breaks[1], breaks[2], isPct)));
-      html.push(row(CHORO_COLORS[3], fmtRange(breaks[2], breaks[3], isPct)));
-      html.push(row(CHORO_COLORS[4], fmtRange(breaks[3], breaks[4], isPct)));
-      html.push(row(CHORO_COLORS[5], `> ${fmtBreak(breaks[4], isPct)}`));
+      html.push(row(CHORO_COLORS[0], `≤ ${fmtBreak(breaks[0])}`));
+      html.push(row(CHORO_COLORS[1], fmtRange(breaks[0], breaks[1])));
+      html.push(row(CHORO_COLORS[2], fmtRange(breaks[1], breaks[2])));
+      html.push(row(CHORO_COLORS[3], fmtRange(breaks[2], breaks[3])));
+      html.push(row(CHORO_COLORS[4], fmtRange(breaks[3], breaks[4])));
+      html.push(row(CHORO_COLORS[5], `> ${fmtBreak(breaks[4])}`));
 
       legend._div.innerHTML = html.join('');
     }
@@ -489,6 +487,13 @@
     /* -------------------------
        UI wiring
     --------------------------*/
+    function restyleLayer() {
+      if (!layer) return;
+      layer.eachLayer(l => l.setStyle(styleForFeature(l.feature)));
+      if (selectedLayer) selectedLayer.setStyle(selectedOutline);
+      renderLegend(currentMode);
+    }
+
     function wireMetricToggle() {
       const btnNomPct = document.getElementById('metricNominalPct');
       const btnNomAbs = document.getElementById('metricNominalAbs');
@@ -504,10 +509,7 @@
         setBtn(btnNomPct, mode === MODE_NOMINAL_PCT);
         setBtn(btnNomAbs, mode === MODE_NOMINAL_ABS);
 
-        // Repaint polygons under new legend/breaks
-        layer.eachLayer(l => l.setStyle(styleForFeature(l.feature)));
-        if (selectedLayer) selectedLayer.setStyle(selectedOutline);
-        renderLegend(currentMode);
+        restyleLayer();
       }
 
       btnNomPct.addEventListener('click', () => setActive(MODE_NOMINAL_PCT));
@@ -548,6 +550,11 @@
     (async function init(){
       // Load data
       const res = await fetch(DATA_JSON, { cache: 'no-store' });
+      if (!res.ok) {
+        console.error('Failed to load data JSON:', res.status, await res.text());
+        alert('Could not load data JSON. Check the path in establishments.html.');
+        return;
+      }
       _rows = await res.json();
 
       // Compute breaks from data (robust to skew)
@@ -564,9 +571,14 @@
       }).addTo(map);
 
       const gjRes = await fetch(GEOJSON_URL + (GEOJSON_URL.includes('?')?'&':'?') + 'cb=' + Date.now());
-      fc = await gjRes.json();
+      if (!gjRes.ok) {
+        console.error('Failed to load GeoJSON:', gjRes.status, await gjRes.text());
+        alert('Could not load GeoJSON. Check the GEOJSON_URL path.');
+        return;
+      }
+      const fc = await gjRes.json();
 
-      const hiStyle = { weight:3, color:'#111827', fillOpacity:0.9 };
+      const hoverStyle = { weight:3, color:'#111827', fillOpacity:0.9 };
 
       layer = L.geoJSON(fc, {
         style: (feature) => styleForFeature(feature),
@@ -579,7 +591,7 @@
 
           const stTip = statsForMunicipio(statsName);
           const changeLine = stTip
-            ? `<br><small>2010→2023: ${signed(stTip.cumAbs)} (${(Number(stTip.cumPct)||0).toFixed(2)}%)</small>`
+            ? `<br><small>2012→2023: ${signed(stTip.cumAbs)} (${(Number(stTip.cumPct)||0).toFixed(2)}%)</small>`
             : '';
 
           lyr.bindTooltip(displayName, { direction:'center', className:'leaflet-tooltip' });
@@ -588,7 +600,7 @@
           lyr.on({
             mouseover: e => {
               if (lockedName) return;
-              e.target.setStyle(hiStyle);
+              e.target.setStyle(hoverStyle);
               e.target.bringToFront?.();
               const c = e.target.getBounds().getCenter();
               updateDetails(statsName, statsForMunicipio(statsName), c);
@@ -647,13 +659,6 @@
       wireMetricToggle();
       wireClearSelection();
       wireDropdown();
-
-      // Highlight current menu item in dropdown if opened
-      document.addEventListener('DOMContentLoaded', () => {
-        const currentPathname = window.location.pathname.split('/').pop();
-        const subPageLink = document.querySelector(`#metrics-menu a[href="${currentPathname}"]`);
-        if (subPageLink) subPageLink.classList.add('bg-gray-100','font-semibold');
-      });
     })();
   </script>
 </body>
