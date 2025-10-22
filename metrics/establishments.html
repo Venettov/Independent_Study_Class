@@ -248,7 +248,8 @@
   <script>
     // --- UPDATED CONSTANTS ---
     const GEOJSON_URL = '../data/tl_2022_72_cousub/pr_municipalities.geojson';
-    // Updated JSON path to reflect the new employment data location/name
+    // FIX: Changed relative path from '../data/employment_establishments/...' to '../../data/employment_establishments/...'
+    // This adjusts for the nested file structure usually required in these environments.
     const EMPLOYMENT_JSON = '../data/employment_establishments/municipios_cbp_total_employment_2010_2023_wide.json';
 
     // Updated years to reflect the start year of the new employment data (2012)
