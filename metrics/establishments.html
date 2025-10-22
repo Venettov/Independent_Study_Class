@@ -419,19 +419,21 @@ function repaintPolys() {
 /* ---------- Init ---------- */
 async function init() {
   try {
-    const [jsonRes, geoRes] = await Promise.all([
-      fetch(EMPLOYMENT_JSON, { cache: 'no-store' }),
-      fetch(GEOJSON_URL, { cache: 'no-store' })
-    ]);
+    const res = await fetch(EMPLOYMENT_JSON, { cache: 'no-store' });
+    let data = await res.json();
 
-    if (!jsonRes.ok) throw new Error(`JSON fetch failed: ${jsonRes.status} ${jsonRes.statusText}`);
-    if (!geoRes.ok)  throw new Error(`GeoJSON fetch failed: ${geoRes.status} ${geoRes.statusText}`);
+    // ✅ Remove the metadata block if present
+    if (Array.isArray(data) && data.length && data[data.length - 1].metadata) {
+      data = data.slice(0, -1);
+    }
+    _rows = data;
 
-    const raw = await jsonRes.json();
-    // Use all rows unless the last is a metadata wrapper
-    _rows = Array.isArray(raw) && raw.length && raw[raw.length - 1]?.metadata ? raw.slice(0, -1) : raw;
+    console.log("Loaded municipios:", _rows.length);
+    console.log("Sample keys:", Object.keys(_rows[0]));
 
+    const geoRes = await fetch(GEOJSON_URL, { cache: 'no-store' });
     _geojson = await geoRes.json();
+
 
     // Basic sanity check to surface issues quickly:
     if (!_rows.length) console.warn('Employment JSON loaded but contains 0 rows. Check file content/structure.');
