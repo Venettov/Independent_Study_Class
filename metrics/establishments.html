@@ -330,9 +330,11 @@
 
     (async function init(){
       try {
+        console.log("Attempting to fetch:", EMPLOYMENT_JSON);
         const res = await fetch(EMPLOYMENT_JSON, { cache:'no-store' });
+        console.log("Fetch response:", res);
         if (!res.ok) {
-          throw new Error(`Failed to fetch data file: ${EMPLOYMENT_JSON}`);
+          throw new Error(`Failed to fetch data file: ${EMPLOYMENT_JSON} (status: ${res.status})`);
         }
         _rows = await res.json();
         console.log("Loaded employment data:", _rows);
