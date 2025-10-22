@@ -284,8 +284,8 @@
       return Number.isFinite(n) ? n : 0; 
     };
     
-    // Real values are not used for CBP data, but these functions are kept for structural compatibility (though they are now unused in HTML)
-    const realYearVal = (row,y) => 0; // Returning 0/NaN for unused real metric
+    // Real values are not used for CBP data, but these functions are kept for structural compatibility 
+    const realYearVal = (row,y) => 0; 
     
     
     let lineChartNominal = null, barChartNominal = null, barChartAbsolute = null; // barChartReal is now barChartAbsolute
@@ -294,7 +294,6 @@
     const dName = document.getElementById('d-name');
     const dCent = document.getElementById('d-centroid');
     const d2023 = document.getElementById('d-2023');
-    // Removed Real metrics element IDs: d2023Real, dChgReal
     const dChg  = document.getElementById('d-chg');
     const dCenL = document.getElementById('d-census');
 
@@ -318,22 +317,27 @@
       for (let i=1;i<YEARS.length;i++){
         const currentVal = nominalVals[i];
         const prevVal = nominalVals[i-1];
-        // Handle division by zero for initial years with 0 or NaN/null (Maricao/Villalba/Culebra)
-        const pctChange = (prevVal > 0 && currentVal > 0) 
+        // FIX: Handle division by zero for initial years with 0 or NaN/null
+        const pctChange = (prevVal > 0 && Number.isFinite(currentVal) && Number.isFinite(prevVal)) 
                             ? ((currentVal - prevVal) / prevVal) * 100
-                            : 0; 
+                            : 0; // Return 0 if the start value is 0 or non-finite
         nominalPctYear.push(pctChange);
       }
       
-      // Annual Absolute Change (Reused Real metric logic for this)
+      // Annual Absolute Change
       const nominalAbsYear = [];
       for (let i=1;i<YEARS.length;i++){
         nominalAbsYear.push(nominalVals[i] - nominalVals[i-1]);
       }
 
       // Use the pre-calculated cumulative fields in your JSON:
-      const nominalCumAbs = row.Cum_Change_2012_2023;
-      const nominalCumPct = row.Cum_Pct_Change_2012_2023;
+      let nominalCumAbs = row.Cum_Change_2012_2023;
+      let nominalCumPct = row.Cum_Pct_Change_2012_2023;
+      
+      // FIX: Handle Infinity from cumulative percentage change (occurs when base year 2012 is 0)
+      if (!Number.isFinite(nominalCumPct) || nominalVals[0] === 0) {
+        nominalCumPct = 0;
+      }
       
       const val2023 = nominalVals[nominalVals.length - 1];
 
@@ -342,7 +346,7 @@
         nominalCumAbs: nominalCumAbs, 
         nominalCumPct: nominalCumPct, 
         nominalPctYear,
-        nominalAbsYear, // New metric
+        nominalAbsYear, 
         val2023
       };
     }
@@ -401,7 +405,8 @@
         options:{
           ...chartOptions,
           plugins:{ ...chartOptions.plugins, tooltip:{ callbacks:{ label:(c)=>signed(c.parsed.y) } } },
-          scales:{ y:{ ticks:{ callback:v=>fmt.format(v) } } }
+          // FIX: Use fmt.format for y-axis ticks (was using fmt.format(v).replace('$', '') from old income code)
+          scales:{ y:{ ticks:{ callback:v=>fmt.format(v) } } } 
         }
       });
     }
@@ -415,8 +420,6 @@
       // Updated label text to reflect change from BASE_YEAR
       dChg.textContent  = st ? `${signed(st.nominalCumAbs)} (${pctFmt(st.nominalCumPct)})` : '—';
       
-      // Real fields (d2023Real and dChgReal removed from HTML)
-
       dCenL.href = censusLink(name);
       drawCharts(name, st);
     }
@@ -442,6 +445,7 @@
         minZoom: 7, maxZoom: 19
       }).addTo(map);
 
+      // FIX: Added cache buster to GeoJSON fetch to ensure fresh data load if environment changes
       const gjRes = await fetch(GEOJSON_URL + (GEOJSON_URL.includes('?')?'&':'?') + 'cb=' + Date.now());
       fc = await gjRes.json();
 
@@ -451,7 +455,7 @@
         style: (feature) => styleForFeature(feature),
         onEachFeature: (f, lyr) => {
           const p = f.properties || {};
-          const rawName = p.NAME || p.NAMELSAD || p.name || 'Unknown';
+          const rawName = (p.NAME || p.NAMELSAD || p.name || 'Unknown');
           const geoid = p.GEOID || p.geoid || '';
           
           const statsName = rawName.replace(/\s*Municipio$/,'');
@@ -495,8 +499,6 @@
       const b = layer.getBounds();
       if (b.isValid()) map.fitBounds(b, { padding:[15,15] });
 
-      // computeAbsBreaks(); // Breaks are now hardcoded as constants
-
       legend = L.control({ position:'bottomright' });
       legend.onAdd = function(){
         const div = L.DomUtil.create('div', 'info legend');
@@ -531,12 +533,11 @@
     function wireMetricToggle(){
       const btnNomPct = document.getElementById('metricNominalPct');
       const btnNomAbs = document.getElementById('metricNominalAbs');
-      // const btnRealPct = document.getElementById('metricRealPct'); // Removed
 
       function setActive(mode){
         currentMode = mode;
         
-        [btnNomPct, btnNomAbs].forEach(btn => { // Only iterating over two buttons
+        [btnNomPct, btnNomAbs].forEach(btn => { 
           const isActive = (btn.id === 'metricNominalPct' && mode === MODE_NOMINAL_PCT) ||
                            (btn.id === 'metricNominalAbs' && mode === MODE_NOMINAL_ABS);
           btn.classList.toggle('bg-blue-600', isActive);
@@ -590,7 +591,6 @@
           value = st.nominalCumAbs;
           breaks = NOMINAL_ABS_BREAKS;
       } 
-      // Removed MODE_REAL_PCT logic
       
       const col = colorFor(value, breaks);
       
@@ -625,7 +625,8 @@
           breaks = NOMINAL_ABS_BREAKS;
           title = `Employee Change ${BASE_YEAR}–2023 — Count`;
           isPct = false;
-          formatFn = (val) => `${val > 0 ? '+' : ''}${fmt.format(val)}`;
+          // Updated formatting to use signed helper for consistency
+          formatFn = (val) => signed(val);
       }
 
       const labels = [];
@@ -636,6 +637,7 @@
            <span>${label}</span>
          </div>`;
       
+      // Use fmt.format for formatting ranges of absolute counts
       const fmtRange = (a,b) => `${formatFn(a)} to ${formatFn(b)}`;
       
       labels.push(`<div style="font-weight:600;margin-bottom:.25rem">${title}</div>`);
@@ -648,9 +650,6 @@
 
       legend._div.innerHTML = labels.join('');
     }
-
-    // Function removed as breaks are now hardcoded constants.
-    // function computeAbsBreaks(){} 
 
     function wireDropdown() {
       const root = document.getElementById('metrics-dropdown-root');
