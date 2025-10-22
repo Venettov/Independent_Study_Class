@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Population & Economic Dynamics in Puerto Rico</title>
+  <title>Employer Establishments & Employment in Puerto Rico</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
 
@@ -97,11 +97,10 @@
         <div>
           <p class="text-sm font-semibold text-gray-500 uppercase">Graduate Independent Study</p>
           <h1 class="mt-2 text-4xl sm:text-5xl font-extrabold leading-tight">
-            Population & Economic Dynamics in Puerto Rico
+            Employer Establishments & Employment in Puerto Rico
           </h1>
           <p class="mt-3 text-lg text-gray-700">
-            A graduate research project examining demographic shifts, out-migration, and sustainable development
-            strategies through linked data analysis and policy synthesis.
+            Visualizing employment and establishment trends by municipio using Census Bureau County Business Patterns (CBP) data.
           </p>
           <div class="mt-5">
             <span class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-100 text-slate-800">
@@ -118,9 +117,9 @@
         <div class="text-sm text-gray-700 font-medium">Map shading by</div>
         <div class="flex items-center gap-2">
           <div class="inline-flex rounded-lg border bg-white shadow-sm overflow-hidden">
-            <button id="metricNominalPct" type="button" class="px-3 py-1.5 text-sm font-medium hover:bg-gray-50">Nominal Change (%)</button>
-            <button id="metricNominalAbs" type="button" class="px-3 py-1.5 text-sm font-medium hover:bg-gray-50">Nominal Change ($)</button>
-            <button id="metricRealPct" type="button" class="px-3 py-1.5 text-sm font-medium bg-blue-600 text-white">Real Change (%)</button>
+            <button id="metricNominalPct" type="button" class="px-3 py-1.5 text-sm font-medium hover:bg-gray-50">Employment Change (%)</button>
+            <button id="metricNominalAbs" type="button" class="px-3 py-1.5 text-sm font-medium hover:bg-gray-50">Employment Change (#)</button>
+            <button id="metricRealPct" type="button" class="px-3 py-1.5 text-sm font-medium bg-blue-600 text-white">Total Employment (2023)</button>
           </div>
           <button id="clearSel" class="px-3 py-1.5 text-sm rounded-lg border bg-white hover:bg-gray-50">Clear selection</button>
         </div>
@@ -129,7 +128,7 @@
     </section>
 
     <section class="card p-6">
-      <h2 class="text-lg font-semibold mb-4">Household Income details</h2>
+      <h2 class="text-lg font-semibold mb-4">Employment Establishment Details</h2>
       <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
         
         <div>
@@ -139,108 +138,71 @@
           </div>
 
           <div class="mt-4 text-sm">
-            <div class="font-semibold text-gray-700">Median Household Income (Vintage 2023):</div>
+            <div class="font-semibold text-gray-700">Total Employment (2023):</div>
             <ul class="mt-1 space-y-1">
-              <li>2023 (Nominal): <span id="d-2023" class="font-semibold">—</span></li>
-              <li>2023 (Real, 2023 $): <span id="d-2023-real" class="font-semibold">—</span></li>
-              <li>Change since 2010 (Nominal): <span id="d-chg" class="font-semibold">—</span></li>
-              <li>Change since 2010 (Real): <span id="d-chg-real" class="font-semibold">—</span></li>
+              <li>2023: <span id="d-2023" class="font-semibold">—</span></li>
+              <li>Change since 2010 (#): <span id="d-chg" class="font-semibold">—</span></li>
+              <li>Change since 2010 (%): <span id="d-chg-pct" class="font-semibold">—</span></li>
             </ul>
           </div>
+        </div>
 
-          <div class="mt-4 text-sm">
-            <a id="d-census" class="text-blue-600 underline" href="#" target="_blank" rel="noopener">
-              Open on data.census.gov ↗
-            </a>
+        <div>
+          <h3 class="font-semibold mb-2">Total Employment trend (2010–2023)</h3>
+          <div class="mini bg-gray-50 rounded p-3">
+            <canvas id="lineChartEmployment"></canvas>
           </div>
         </div>
 
         <div>
-          <h3 class="font-semibold mb-2">Nominal Income trend (2010–2023)</h3>
+          <h3 class="font-semibold mb-2">Annual % Change</h3>
           <div class="mini bg-gray-50 rounded p-3">
-            <canvas id="lineChartNominal"></canvas>
-          </div>
-        </div>
-
-        <div>
-          <h3 class="font-semibold mb-2">Nominal Annual % Change</h3>
-          <div class="mini bg-gray-50 rounded p-3">
-            <canvas id="barChartNominal"></canvas>
+            <canvas id="barChartPct"></canvas>
           </div>
         </div>
         
         <div>
-          <h3 class="font-semibold mb-2">Real Annual % Change (2023 $)</h3>
+          <h3 class="font-semibold mb-2">Annual Change (#)</h3>
           <div class="mini bg-gray-50 rounded p-3">
-            <canvas id="barChartReal"></canvas>
+            <canvas id="barChartAbs"></canvas>
           </div>
         </div>
       </div>
       
-      <h2 class="text-lg font-semibold mb-4 pt-8 border-t border-gray-200 mt-8">Understanding the Income Metrics</h2>
+      <h2 class="text-lg font-semibold mb-4 pt-8 border-t border-gray-200 mt-8">Understanding the Employment Metrics</h2>
       <div class="space-y-4 text-gray-700">
         <p>
-          The charts above illustrate the trajectory of **Median Household Income** in Puerto Rico, differentiating between Nominal (raw) values and Real (inflation-adjusted) values. Analyzing both is crucial for understanding genuine economic progress.
+          The charts above show the evolution of total employment reported by employer establishments in Puerto Rico's municipios, based on County Business Patterns (CBP) data.
         </p>
-        
-        <h3 class="font-semibold text-gray-800 pt-2">Nominal vs. Real Income Trends</h3>
-        <p>
-          The distinction between Nominal and Real income is primarily driven by the **Consumer Price Index (CPI)**, which measures inflation. 
-        </p>
-        
         <ul class="list-disc list-inside space-y-2 ml-4">
           <li>
-            <strong class="text-blue-600">Nominal Income</strong> is the income earned in a specific year, unadjusted for inflation. The **Nominal Income Trend** line chart shows a strong, consistent upward path for median income over the 2010–2023 period.
+            <strong class="text-blue-600">Total Employment:</strong> The total number of employees reported by establishments for each municipio.
           </li>
           <li>
-            <strong class="text-green-600">Real Income</strong> is Nominal Income adjusted to a constant purchasing power (in this case, 2023 U.S. Dollars). This metric reveals the actual change in buying power.
-          </li>
-        </ul>
-
-        <h3 class="font-semibold text-gray-800 pt-2">Comparing Annual Percentage Changes</h3>
-        <p>
-          The two bar charts offer the clearest comparison of economic growth versus inflation.
-        </p>
-
-        <ul class="list-disc list-inside space-y-2 ml-4">
-          <li>
-            <strong class="text-blue-600">Nominal Annual % Change:</strong> This chart shows the raw, year-over-year percentage increase in reported income. A positive bar here means households received a higher dollar amount than the previous year.
+            <strong class="text-green-600">Annual % Change:</strong> Year-over-year percentage change in total employment.
           </li>
           <li>
-            <strong class="text-green-600">Real Annual % Change (2023 $):</strong> This chart is calculated by subtracting the rate of inflation from the Nominal rate of change.
-            <ul class="list-circle list-inside ml-6 mt-1 space-y-1 text-sm">
-                <li>A **positive bar** indicates that household purchasing power *actually increased* that year (the Nominal rate outpaced inflation).</li>
-                <li>A **negative bar** indicates that despite receiving more nominal dollars, household purchasing power *declined* (inflation was higher than the Nominal rate of income growth). Many years show negative real growth, highlighting the persistent challenge of inflation eroding wage gains.</li>
-            </ul>
+            <strong class="text-purple-600">Annual Change (#):</strong> Year-over-year absolute change in total employment.
           </li>
         </ul>
       </div>
-      </section>
+    </section>
 
     <section class="card p-6">
       <h2 class="text-lg font-semibold mb-4">File Sources</h2>
       <div class="space-y-4">
-        <p>Data for this project was derived from the U.S. Census Bureau:</p>
+        <p>Data for this project was derived from the U.S. Census Bureau County Business Patterns (CBP):</p>
         <ul class="list-disc list-inside space-y-1">
           <li>
-            <a href="https://data.census.gov/cedsci/table?g=0400000US72&tid=ACSST5Y2023.S1901"
+            <a href="https://www.census.gov/data/datasets/2010/econ/cbp/2010-cbp.html"
                target="_blank" rel="noopener" class="text-blue-600 underline">
-              2023 ACS 5-Year Estimates - Median Household Income (Table S1901)
-            </a>
-          </li>
-          <li>
-            <a href="https://wwwcensus.gov/data/tables/time-series/demo/popest/intercensal-2010-2020-puerto-rico-municipios.html"
-               target="_blank" rel="noopener" class="text-gray-600">
-              (Original file source for municipal boundaries/GeoJSON remains valid)
+              2010–2023 CBP Data
             </a>
           </li>
         </ul>
-
-        <p>Specific files used:</p>
+        <p>Specific file used:</p>
         <ul class="list-disc list-inside">
-          <li>municipios_acs_s1901_median_income_2010_2023_wide.json (site build)</li>
-          <li>municipios_acs_s1901_median_income_2010_2023_wide.csv (analysis)</li>
-          <li>prm-est2020int-pop-72.xlsx (2010–2020 intercensal)</li>
+          <li>municipios_cbp_total_employment_2010_2023_wide.json (site build)</li>
         </ul>
       </div>
     </section>
@@ -248,114 +210,76 @@
 
   <script>
     const GEOJSON_URL = '../data/tl_2022_72_cousub/pr_municipalities.geojson';
-    const INCOME_JSON = '../data/household_income/municipios_acs_s1901_median_income_2010_2023_wide.json';
-
+    const EMPLOYMENT_JSON = '../data/employment_establishments/municipios_cbp_total_employment_2010_2023_wide.json';
     const YEARS = [2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023];
 
-    // Format for currency and percentage
-    const fmt = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+    // Format for numbers and percentage
+    const numFmt = new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 });
     const pctFmt = (v) => `${(Number(v)||0).toFixed(2)}%`;
-    const signed = (n) => (n > 0 ? '+' : '') + fmt.format(n);
+    const signed = (n) => (n > 0 ? '+' : '') + numFmt.format(n);
 
     // Map Mode Identifiers
-    const MODE_NOMINAL_PCT = 'nominal_pct';
-    const MODE_NOMINAL_ABS = 'nominal_abs';
-    const MODE_REAL_PCT    = 'real_pct';
+    const MODE_PCT = 'pct';
+    const MODE_ABS = 'abs';
+    const MODE_TOTAL = 'total';
 
     // Color breaks for choropleth map
     const CHORO_COLORS = ['#7f1d1d', '#b91c1c', '#f97316', '#bbf7d0', '#22c55e', '#15803d'];
-    
-    // Nominal Income PCT Change (2010-2023)
-    const NOMINAL_PCT_BREAKS = [20, 30, 40, 50, 60]; 
-    // Nominal Income Absolute Change (2010-2023)
-    let NOMINAL_ABS_BREAKS = [3000, 5000, 7000, 9000, 11000]; 
-    // Real Income PCT Change (2010-2023)
-    const REAL_PCT_BREAKS = [-15, -10, -5, 0, 5]; 
-    
+    const PCT_BREAKS = [-20, -10, 0, 10, 20];
+    let ABS_BREAKS = [ -5000, 0, 5000, 10000, 20000 ];
+    const TOTAL_BREAKS = [ 1000, 5000, 10000, 20000, 40000 ];
+
     const sanitizeName = s => String(s||'').trim();
-    const yearVal = (row,y) => {
-      const v = row?.[String(y)];
-      const n = Number(v);
-      return Number.isFinite(n) ? n : NaN;
-    };
-    const realYearVal = (row,y) => {
-      const v = row?.[`RealIncome_${y}`];
-      const n = Number(v);
-      return Number.isFinite(n) ? n : NaN;
-    };
 
+    let lineChartEmployment = null, barChartPct = null, barChartAbs = null;
 
-    let lineChartNominal = null, barChartNominal = null, barChartReal = null;
-    
     // Element IDs for the new detail structure
     const dName = document.getElementById('d-name');
     const dCent = document.getElementById('d-centroid');
     const d2023 = document.getElementById('d-2023');
-    const d2023Real = document.getElementById('d-2023-real');
     const dChg  = document.getElementById('d-chg');
-    const dChgReal = document.getElementById('d-chg-real');
-    const dCenL = document.getElementById('d-census');
+    const dChgPct = document.getElementById('d-chg-pct');
 
     function statsForMunicipio(name){
-      // 1. Normalize the name from the GeoJSON feature: remove "Municipio" suffix
       const nameKey = sanitizeName(name).replace(/\s*Municipio$/,'');
-      
-      // 2. Find the row, matching against the normalized name or the special PR case
-      const row = _rows.find(r => 
-        sanitizeName(r.Municipio).replace(/\s*Municipio$/,'') === nameKey || 
+      const row = _rows.find(r =>
+        sanitizeName(r.Municipio).replace(/\s*Municipio$/,'') === nameKey ||
         (nameKey === 'Puerto Rico' && sanitizeName(r.Municipio) === 'Puerto Rico')
       );
-
       if (!row || row.metadata) return null;
 
-      // Nominal Income Metrics
-      const nominalVals = YEARS.map(y => yearVal(row,y));
-      const nominalPctYear = [];
+      // Employment Metrics
+      const empVals = YEARS.map(y => Number(row[String(y)]));
+      const pctYear = [];
+      const absYear = [];
       for (let i=1;i<YEARS.length;i++){
-        nominalPctYear.push(((nominalVals[i]-nominalVals[i-1]) / nominalVals[i-1]) * 100);
+        pctYear.push(((empVals[i]-empVals[i-1]) / empVals[i-1]) * 100);
+        absYear.push(empVals[i]-empVals[i-1]);
       }
-      
-      // Real Income Metrics
-      const realVals = YEARS.map(y => realYearVal(row,y));
-      const realPctYear = [];
-      for (let i=1;i<YEARS.length;i++){
-        realPctYear.push(((realVals[i]-realVals[i-1]) / realVals[i-1]) * 100);
-      }
-      
-      // Use the pre-calculated cumulative fields in your JSON:
-      const nominalCumAbs = row.Cum_Change_2010_2023;
-      const nominalCumPct = row.Cum_Pct_Change_2010_2023;
-      const realCumAbs = row.Real_Cum_Change_2010_2023;
-      const realCumPct = row.Real_Cum_Pct_Change_2010_2023;
-      
-      const val2023 = nominalVals[nominalVals.length - 1];
-      const realVal2023 = realVals[realVals.length - 1];
+      const cumAbs = empVals[empVals.length-1] - empVals[0];
+      const cumPct = ((empVals[empVals.length-1] - empVals[0]) / empVals[0]) * 100;
+      const val2023 = empVals[empVals.length-1];
 
-      return { 
-        nominalVals, nominalCumAbs, nominalCumPct, nominalPctYear, val2023, 
-        realVals, realCumAbs, realCumPct, realPctYear, realVal2023 
+      return {
+        empVals, pctYear, absYear, cumAbs, cumPct, val2023
       };
-    }
-
-    function censusLink(name){
-      return `https://data.census.gov/cedsci/table?g=0400000US72&tid=ACSST5Y2023.S1901`;
     }
 
     function drawCharts(name, st){
       if (!st) return;
-      const ctxLN = document.getElementById('lineChartNominal').getContext('2d');
-      const ctxBN = document.getElementById('barChartNominal').getContext('2d');
-      const ctxBR = document.getElementById('barChartReal').getContext('2d');
+      const ctxLN = document.getElementById('lineChartEmployment').getContext('2d');
+      const ctxBP = document.getElementById('barChartPct').getContext('2d');
+      const ctxBA = document.getElementById('barChartAbs').getContext('2d');
 
-      // Nominal Line Chart
-      if (lineChartNominal) lineChartNominal.destroy();
-      lineChartNominal = new Chart(ctxLN, {
+      // Employment Line Chart
+      if (lineChartEmployment) lineChartEmployment.destroy();
+      lineChartEmployment = new Chart(ctxLN, {
         type: 'line',
-        data: { labels: YEARS, datasets:[{ label:'Nominal Income', data: st.nominalVals, tension:.2, pointRadius:3 }] },
+        data: { labels: YEARS, datasets:[{ label:'Total Employment', data: st.empVals, tension:.2, pointRadius:3 }] },
         options: {
-          plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label:(c)=>fmt.format(c.parsed.y) } } },
+          plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label:(c)=>numFmt.format(c.parsed.y) } } },
           scales:{ 
-            y:{ ticks:{ callback:v=>`${fmt.format(v).replace('$','')}` } }, 
+            y:{ ticks:{ callback:v=>`${numFmt.format(v)}` } }, 
             x:{ ticks:{ maxRotation: 90, minRotation: 90 } }
           },
           maintainAspectRatio:false
@@ -363,12 +287,12 @@
       });
 
       const labels = YEARS.slice(1).map((y,i)=> `${YEARS[i]}→${y}`);
-      
-      // Nominal Bar Chart
-      if (barChartNominal) barChartNominal.destroy();
-      barChartNominal = new Chart(ctxBN, {
+
+      // Percent Bar Chart
+      if (barChartPct) barChartPct.destroy();
+      barChartPct = new Chart(ctxBP, {
         type:'bar',
-        data:{ labels, datasets:[{ label:'% change', data: st.nominalPctYear.map(v=>+v.toFixed(2)) }] },
+        data:{ labels, datasets:[{ label:'% change', data: st.pctYear.map(v=>+v.toFixed(2)) }] },
         options:{
           plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label:(c)=>pctFmt(c.parsed.y) } } },
           scales:{ y:{ ticks:{ callback:v=>pctFmt(v) } } },
@@ -376,14 +300,14 @@
         }
       });
 
-      // Real Bar Chart
-      if (barChartReal) barChartReal.destroy();
-      barChartReal = new Chart(ctxBR, {
+      // Absolute Bar Chart
+      if (barChartAbs) barChartAbs.destroy();
+      barChartAbs = new Chart(ctxBA, {
         type:'bar',
-        data:{ labels, datasets:[{ label:'% change (Real)', data: st.realPctYear.map(v=>+v.toFixed(2)) }] },
+        data:{ labels, datasets:[{ label:'Change (#)', data: st.absYear.map(v=>+v.toFixed(0)) }] },
         options:{
-          plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label:(c)=>pctFmt(c.parsed.y) } } },
-          scales:{ y:{ ticks:{ callback:v=>pctFmt(v) } } },
+          plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label:(c)=>numFmt.format(c.parsed.y) } } },
+          scales:{ y:{ ticks:{ callback:v=>numFmt.format(v) } } },
           maintainAspectRatio:false
         }
       });
@@ -392,27 +316,20 @@
     function updateDetails(name, st, centroid){
       dName.textContent = name.replace(/\s*Municipio$/,'');
       dCent.textContent = centroid ? `${centroid.lat.toFixed(4)}, ${centroid.lng.toFixed(4)}` : '—';
-      
-      // Nominal fields
-      d2023.textContent = Number.isFinite(st?.val2023) ? fmt.format(st.val2023) : '—';
-      dChg.textContent  = st ? `${signed(st.nominalCumAbs)} (${pctFmt(st.nominalCumPct)})` : '—';
-      
-      // Real fields
-      d2023Real.textContent = Number.isFinite(st?.realVal2023) ? fmt.format(st.realVal2023) : '—';
-      dChgReal.textContent  = st ? `${signed(st.realCumAbs)} (${pctFmt(st.realCumPct)})` : '—';
-
-      dCenL.href = censusLink(name);
+      d2023.textContent = Number.isFinite(st?.val2023) ? numFmt.format(st.val2023) : '—';
+      dChg.textContent  = st ? signed(st.cumAbs) : '—';
+      dChgPct.textContent = st ? pctFmt(st.cumPct) : '—';
       drawCharts(name, st);
     }
 
     let _rows = [], map, layer, fc, legend;
-    let currentMode = MODE_REAL_PCT; // Start on Real % Change
+    let currentMode = MODE_TOTAL; // Start on Total Employment
     let lockedName = null, selectedLayer = null;
     const selectedOutline = { weight: 4, color: '#111827', dashArray: '3', fillOpacity: 0.85 };
     let prBoundsGlobal = null;
 
     (async function init(){
-      const res = await fetch(INCOME_JSON, { cache:'no-store' });
+      const res = await fetch(EMPLOYMENT_JSON, { cache:'no-store' });
       _rows = await res.json();
 
       const prBounds = L.latLngBounds([[17.85, -67.45],[18.55, -65.25]]);
@@ -440,7 +357,7 @@
           const stTip = statsForMunicipio(statsName);
           
           const changeLine = stTip
-            ? `<br><small>2010→2023: ${signed(stTip.nominalCumAbs)} (${stTip.nominalCumPct.toFixed(2)}%)</small>`
+            ? `<br><small>2010→2023: ${signed(stTip.cumAbs)} (${stTip.cumPct.toFixed(2)}%)</small>`
             : '';
           
           lyr.bindTooltip(rawName, { direction:'center', className:'leaflet-tooltip' });
@@ -476,8 +393,6 @@
       const b = layer.getBounds();
       if (b.isValid()) map.fitBounds(b, { padding:[15,15] });
 
-      computeAbsBreaks();
-
       legend = L.control({ position:'bottomright' });
       legend.onAdd = function(){
         const div = L.DomUtil.create('div', 'info legend');
@@ -510,17 +425,17 @@
     })();
 
     function wireMetricToggle(){
-      const btnNomPct = document.getElementById('metricNominalPct');
-      const btnNomAbs = document.getElementById('metricNominalAbs');
-      const btnRealPct = document.getElementById('metricRealPct');
+      const btnPct = document.getElementById('metricNominalPct');
+      const btnAbs = document.getElementById('metricNominalAbs');
+      const btnTotal = document.getElementById('metricRealPct');
 
       function setActive(mode){
         currentMode = mode;
         
-        [btnNomPct, btnNomAbs, btnRealPct].forEach(btn => {
-          const isActive = (btn.id === 'metricNominalPct' && mode === MODE_NOMINAL_PCT) ||
-                           (btn.id === 'metricNominalAbs' && mode === MODE_NOMINAL_ABS) ||
-                           (btn.id === 'metricRealPct' && mode === MODE_REAL_PCT);
+        [btnPct, btnAbs, btnTotal].forEach(btn => {
+          const isActive = (btn.id === 'metricNominalPct' && mode === MODE_PCT) ||
+                           (btn.id === 'metricNominalAbs' && mode === MODE_ABS) ||
+                           (btn.id === 'metricRealPct' && mode === MODE_TOTAL);
           btn.classList.toggle('bg-blue-600', isActive);
           btn.classList.toggle('text-white', isActive);
           btn.classList.toggle('hover:bg-gray-50', !isActive);
@@ -531,9 +446,9 @@
         renderLegend(currentMode);
       }
 
-      btnNomPct.addEventListener('click', () => setActive(MODE_NOMINAL_PCT));
-      btnNomAbs.addEventListener('click', () => setActive(MODE_NOMINAL_ABS));
-      btnRealPct.addEventListener('click', () => setActive(MODE_REAL_PCT));
+      btnPct.addEventListener('click', () => setActive(MODE_PCT));
+      btnAbs.addEventListener('click', () => setActive(MODE_ABS));
+      btnTotal.addEventListener('click', () => setActive(MODE_TOTAL));
       
       setActive(currentMode); // Initialize the state
     }
@@ -561,15 +476,15 @@
       let value;
       let breaks;
 
-      if (currentMode === MODE_NOMINAL_PCT) {
-          value = st.nominalCumPct;
-          breaks = NOMINAL_PCT_BREAKS;
-      } else if (currentMode === MODE_NOMINAL_ABS) {
-          value = st.nominalCumAbs;
-          breaks = NOMINAL_ABS_BREAKS;
-      } else if (currentMode === MODE_REAL_PCT) {
-          value = st.realCumPct;
-          breaks = REAL_PCT_BREAKS;
+      if (currentMode === MODE_PCT) {
+        value = st.cumPct;
+        breaks = PCT_BREAKS;
+      } else if (currentMode === MODE_ABS) {
+        value = st.cumAbs;
+        breaks = ABS_BREAKS;
+      } else if (currentMode === MODE_TOTAL) {
+        value = st.val2023;
+        breaks = TOTAL_BREAKS;
       }
       
       const col = colorFor(value, breaks);
@@ -592,20 +507,18 @@
       
       let breaks;
       let title;
-      let isPct;
+      let isPct = false;
 
-      if (mode === MODE_NOMINAL_PCT) {
-          breaks = NOMINAL_PCT_BREAKS;
-          title = 'Income Change 2010–2023 — % (Nominal)';
-          isPct = true;
-      } else if (mode === MODE_REAL_PCT) {
-          breaks = REAL_PCT_BREAKS;
-          title = 'Income Change 2010–2023 — % (Real, 2023 $)';
-          isPct = true;
+      if (mode === MODE_PCT) {
+        breaks = PCT_BREAKS;
+        title = 'Employment Change 2010–2023 — %';
+        isPct = true;
+      } else if (mode === MODE_ABS) {
+        breaks = ABS_BREAKS;
+        title = 'Employment Change 2010–2023 — #';
       } else {
-          breaks = NOMINAL_ABS_BREAKS;
-          title = 'Income Change 2010–2023 — $ (Nominal)';
-          isPct = false;
+        breaks = TOTAL_BREAKS;
+        title = 'Total Employment (2023)';
       }
 
       const labels = [];
@@ -615,13 +528,8 @@
                         border:1px solid rgba(0,0,0,.15)"></span>
            <span>${label}</span>
          </div>`;
-      
-      const formatBreak = (val, isPct) => {
-        if (isPct) {
-            return `${(Math.round(val * 100) / 100)}%`;
-        }
-        return `${val > 0 ? '+' : ''}$${Math.round(val/1000)}k`;
-      };
+
+      const formatBreak = (val, isPct) => isPct ? `${(Math.round(val * 100) / 100)}%` : numFmt.format(val);
       const fmtRange = (a,b,isPct) => `${formatBreak(a, isPct)} to ${formatBreak(b, isPct)}`;
       
       labels.push(`<div style="font-weight:600;margin-bottom:.25rem">${title}</div>`);
@@ -633,11 +541,6 @@
       labels.push(row(CHORO_COLORS[5], isPct ? `> ${formatBreak(breaks[4], true)}` : `> ${formatBreak(breaks[4], false)}`));
 
       legend._div.innerHTML = labels.join('');
-    }
-
-    function computeAbsBreaks(){
-      // Fixed breaks for Nominal Absolute mode
-      NOMINAL_ABS_BREAKS = [3000, 5000, 7000, 9000, 11000];
     }
 
     function wireDropdown() {
