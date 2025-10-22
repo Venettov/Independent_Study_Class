@@ -248,23 +248,22 @@ const EMPLOYMENT_JSON = '../data/employment_establishments/municipios_cbp_total_
 
 const YEARS = [2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023];
 const fmt = new Intl.NumberFormat('en-US');
-const pctFmt = (v) => `${(Number(v)||0).toFixed(2)}%`;
-const signed = (n) => (n>0?'+':'') + fmt.format(n);
+const pctFmt = v => `${(Number(v)||0).toFixed(2)}%`;
+const signed = n => (n>0?'+':'') + fmt.format(n);
 
-const MODE_NOMINAL_PCT='nominal_pct';
-const MODE_NOMINAL_ABS='nominal_abs';
-const CHORO_COLORS=['#7f1d1d','#b91c1c','#f97316','#bbf7d0','#22c55e','#15803d'];
-const NOMINAL_PCT_BREAKS=[-30,-10,0,10,25];
-const NOMINAL_ABS_BREAKS=[-300,-100,0,100,300];
+const MODE_NOMINAL_PCT = 'nominal_pct';
+const MODE_NOMINAL_ABS = 'nominal_abs';
+const CHORO_COLORS = ['#7f1d1d','#b91c1c','#f97316','#bbf7d0','#22c55e','#15803d'];
+const NOMINAL_PCT_BREAKS = [-30,-10,0,10,25];
+const NOMINAL_ABS_BREAKS = [-300,-100,0,100,300];
 
+let map, geoLayer, _rows=[], _geojson, _mode=MODE_NOMINAL_PCT, selectedName=null;
 let lineChartNominal=null, barChartNominal=null;
+
 const dName=document.getElementById('d-name');
 const dCent=document.getElementById('d-centroid');
 const d2023=document.getElementById('d-2023');
 const dChg=document.getElementById('d-chg');
-const dCenL=document.getElementById('d-census');
-
-let map, geoLayer, _rows=[], _geojson, _mode=MODE_NOMINAL_PCT, selectedName=null;
 
 function sanitizeName(s){return String(s||'').trim();}
 
@@ -274,10 +273,13 @@ function yearVal(row,y){
   return Number.isFinite(n)?n:NaN;
 }
 
+// ✅ Fix: normalize names between JSON and GeoJSON
 function statsForMunicipio(name){
-  const key=sanitizeName(name).replace(/\s*Municipio$/,'');
-  const row=_rows.find(r=>sanitizeName(r.Municipio).replace(/\s*Municipio$/,'')===key);
-  return row||null;
+  const key = sanitizeName(name)
+    .replace(" Municipio","")
+    .replace("Municipio, Puerto Rico","")
+    .trim();
+  return _rows.find(r => sanitizeName(r.Municipio) === key) || null;
 }
 
 function colorForValue(val,mode){
@@ -306,9 +308,9 @@ function makeLegend(map){
 }
 
 async function init(){
-  const res = await fetch(EMPLOYMENT_JSON, {cache:'no-store'});
+  const res = await fetch(EMPLOYMENT_JSON,{cache:'no-store'});
   const data = await res.json();
-  _rows = data.slice(0, -1); // last item = metadata
+  _rows = data.slice(0,-1); // exclude metadata
 
   const geoRes = await fetch(GEOJSON_URL);
   _geojson = await geoRes.json();
@@ -320,14 +322,14 @@ async function init(){
 
   geoLayer = L.geoJSON(_geojson,{
     style:feature=>{
-      const name=feature.properties.NAMELSAD;
+      const name=feature.properties.NAMELSAD.replace(" Municipio","");
       const row=statsForMunicipio(name);
-      if(!row)return{color:'#999',weight:1,fillColor:'#ccc',fillOpacity:.7};
+      if(!row)return{color:'#999',weight:1,fillColor:'#ccc',fillOpacity:.6};
       const val=_mode===MODE_NOMINAL_ABS?row['Cum_Change_2012_2023']:row['Cum_Pct_Change_2012_2023'];
-      return{color:'#999',weight:1,fillColor:colorForValue(val,_mode),fillOpacity:.8};
+      return{color:'#999',weight:1,fillColor:colorForValue(val,_mode),fillOpacity:.85};
     },
     onEachFeature:(feature,layer)=>{
-      const name=feature.properties.NAMELSAD;
+      const name=feature.properties.NAMELSAD.replace(" Municipio","");
       layer.bindTooltip(name,{direction:'center',permanent:false});
       layer.on({
         mouseover:e=>{
@@ -348,16 +350,14 @@ async function init(){
     }
   }).addTo(map);
 
-  const legend=makeLegend(map);
-  legend.addTo(map);
+  makeLegend(map).addTo(map);
 }
 
 function updateDetails(name,row){
   dName.textContent=name;
-  dCent.textContent='Lat '+(Math.random()*0.5+18).toFixed(2)+', Lng '+(Math.random()*0.5-66).toFixed(2); // placeholder
+  dCent.textContent='Lat '+(Math.random()*0.5+18).toFixed(2)+', Lng '+(Math.random()*0.5-66).toFixed(2);
   d2023.textContent=fmt.format(row['2023']);
-  const chg=row['Cum_Change_2012_2023'];
-  dChg.textContent=signed(chg);
+  dChg.textContent=signed(row['Cum_Change_2012_2023']);
 }
 
 function updateCharts(row){
@@ -388,9 +388,7 @@ function updateCharts(row){
     },
     options:{
       responsive:true,
-      scales:{
-        y:{beginAtZero:false,ticks:{callback:v=>fmt.format(v)}}
-      },
+      scales:{y:{ticks:{callback:v=>fmt.format(v)}}},
       plugins:{legend:{display:false}}
     }
   });
@@ -407,18 +405,17 @@ function updateCharts(row){
     },
     options:{
       responsive:true,
-      scales:{
-        y:{ticks:{callback:v=>pctFmt(v)}}
-      },
+      scales:{y:{ticks:{callback:v=>pctFmt(v)}}},
       plugins:{legend:{display:false}}
     }
   });
 }
 
+// Mode buttons
 document.getElementById('metricNominalPct').addEventListener('click',()=>{
   _mode=MODE_NOMINAL_PCT;
   geoLayer.eachLayer(l=>{
-    const name=l.feature.properties.NAMELSAD;
+    const name=l.feature.properties.NAMELSAD.replace(" Municipio","");
     const row=statsForMunicipio(name);
     if(!row)return;
     const val=row['Cum_Pct_Change_2012_2023'];
@@ -429,7 +426,7 @@ document.getElementById('metricNominalPct').addEventListener('click',()=>{
 document.getElementById('metricNominalAbs').addEventListener('click',()=>{
   _mode=MODE_NOMINAL_ABS;
   geoLayer.eachLayer(l=>{
-    const name=l.feature.properties.NAMELSAD;
+    const name=l.feature.properties.NAMELSAD.replace(" Municipio","");
     const row=statsForMunicipio(name);
     if(!row)return;
     const val=row['Cum_Change_2012_2023'];
