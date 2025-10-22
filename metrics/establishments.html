@@ -637,11 +637,18 @@
            <span>${label}</span>
          </div>`;
       
-      // Use fmt.format for formatting ranges of absolute counts
-      const fmtRange = (a,b) => `${formatFn(a)} to ${formatFn(b)}`;
+      // *** FIX: Simplified fmtRange to use formatFn directly for cleaner display ***
+      const fmtRange = (a,b) => {
+        const start = formatFn(a);
+        const end = formatFn(b);
+        // Remove '+' sign from the start of ranges if they are positive, 
+        // to display ranges like "1,000 to +3,000" rather than "+1,000 to +3,000"
+        return `${start.startsWith('+') ? start.slice(1) : start} to ${end}`;
+      };
       
       labels.push(`<div style="font-weight:600;margin-bottom:.25rem">${title}</div>`);
-      labels.push(row(CHORO_COLORS[0], `≤ ${formatFn(breaks[0])}`));
+      // For the lowest bucket, ensure the formatFn returns the correct signed value
+      labels.push(row(CHORO_COLORS[0], `≤ ${formatFn(breaks[0])}`)); 
       labels.push(row(CHORO_COLORS[1], fmtRange(breaks[0], breaks[1])));
       labels.push(row(CHORO_COLORS[2], fmtRange(breaks[1], breaks[2])));
       labels.push(row(CHORO_COLORS[3], fmtRange(breaks[2], breaks[3])));
