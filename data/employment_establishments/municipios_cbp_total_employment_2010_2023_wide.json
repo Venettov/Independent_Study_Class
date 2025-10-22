@@ -2768,23 +2768,23 @@
     "metadata": {
       "source": "U.S. Census Bureau, County Business Patterns (CBP), NAICS 00 (All Industries)",
       "units": "Number of Paid Employees (as of March 12)",
-      "islandwide_aggregation": "Sum of all Municipio employment (Total)",
+      "islandwide_aggregation": true,
       "data_years": [
-        2012,
-        2013,
-        2014,
-        2015,
-        2016,
-        2017,
-        2018,
-        2019,
-        2020,
-        2021,
-        2022,
-        2023
+        "2012",
+        "2013",
+        "2014",
+        "2015",
+        "2016",
+        "2017",
+        "2018",
+        "2019",
+        "2020",
+        "2021",
+        "2022",
+        "2023"
       ],
       "updated": "2025-10-21",
-      "notes": "This dataset mirrors the structure of municipios_acs_s1901_median_income_2010_2023_wide.json. All 'RealIncome' and 'Real_*' fields are included as null values for structural compatibility. Employment data represent nominal counts of paid employees (not inflation-adjusted)."
+      "notes": "Nominal employment values represent total paid employees. RealIncome_* and Real_* fields are null placeholders for compatibility with municipios_acs_s1901_median_income_2010_2023_wide.json."
     }
   }
 ]
