@@ -243,9 +243,11 @@
 </main>
 <!-- JavaScript -->
 <script>
+/* ---------- Paths (confirmed) ---------- */
 const GEOJSON_URL = '../data/tl_2022_72_cousub/pr_municipalities.geojson';
 const EMPLOYMENT_JSON = '../data/employment_establishments/municipios_cbp_total_employment_2010_2023_wide.json';
 
+/* ---------- Constants ---------- */
 const YEARS = [2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023];
 const fmt = new Intl.NumberFormat('en-US');
 const pctFmt = v => `${(Number(v)||0).toFixed(2)}%`;
@@ -253,198 +255,249 @@ const signed = n => (n>0?'+':'') + fmt.format(n);
 
 const MODE_NOMINAL_PCT = 'nominal_pct';
 const MODE_NOMINAL_ABS = 'nominal_abs';
+
 const CHORO_COLORS = ['#7f1d1d','#b91c1c','#f97316','#bbf7d0','#22c55e','#15803d'];
 const NOMINAL_PCT_BREAKS = [-30,-10,0,10,25];
 const NOMINAL_ABS_BREAKS = [-300,-100,0,100,300];
 
-let map, geoLayer, _rows=[], _geojson, _mode=MODE_NOMINAL_PCT, selectedName=null;
-let lineChartNominal=null, barChartNominal=null;
+/* ---------- State ---------- */
+let map, geoLayer, _rows = [], _geojson, _mode = MODE_NOMINAL_PCT, selectedName = null;
+let lineChartNominal = null, barChartNominal = null;
 
-const dName=document.getElementById('d-name');
-const dCent=document.getElementById('d-centroid');
-const d2023=document.getElementById('d-2023');
-const dChg=document.getElementById('d-chg');
+/* ---------- DOM ---------- */
+const dName = document.getElementById('d-name');
+const dCent = document.getElementById('d-centroid');
+const d2023 = document.getElementById('d-2023');
+const dChg  = document.getElementById('d-chg');
 
-function sanitizeName(s){return String(s||'').trim();}
+/* ---------- Helpers ---------- */
+const sanitize = s => String(s ?? '').trim();
+const toNum = v => {
+  const n = Number(v);
+  return Number.isFinite(n) ? n : NaN;
+};
+const yearVal = (row, y) => toNum(row?.[String(y)]);
 
-function yearVal(row,y){
-  const v=row?.[String(y)];
-  const n=Number(v);
-  return Number.isFinite(n)?n:NaN;
-}
-
-// ✅ Fix: normalize names between JSON and GeoJSON
-function statsForMunicipio(name){
-  const key = sanitizeName(name)
-    .replace(" Municipio","")
-    .replace("Municipio, Puerto Rico","")
+/* Get municipio display name from a GeoJSON feature robustly */
+function getFeatureName(feature) {
+  const p = feature?.properties || {};
+  const raw =
+    p.NAMELSAD ??
+    p.NAME ??
+    p.MUNICIPIO ??
+    p.Municipio ??
+    p.municipio ??
+    '';
+  return sanitize(raw)
+    .replace(/ Municipio,?\s*Puerto Rico$/i, '')
+    .replace(/ Municipio$/i, '')
     .trim();
-  return _rows.find(r => sanitizeName(r.Municipio) === key) || null;
 }
 
-function colorForValue(val,mode){
-  const breaks = mode===MODE_NOMINAL_ABS ? NOMINAL_ABS_BREAKS : NOMINAL_PCT_BREAKS;
-  if(val<=breaks[0])return CHORO_COLORS[0];
-  if(val<=breaks[1])return CHORO_COLORS[1];
-  if(val<=breaks[2])return CHORO_COLORS[2];
-  if(val<=breaks[3])return CHORO_COLORS[3];
-  if(val<=breaks[4])return CHORO_COLORS[4];
+/* Find the JSON row for a given (normalized) municipio name */
+function rowForMunicipio(name) {
+  const key = sanitize(name)
+    .replace(/ Municipio,?\s*Puerto Rico$/i, '')
+    .replace(/ Municipio$/i, '')
+    .trim();
+  return _rows.find(r => sanitize(r.Municipio) === key) || null;
+}
+
+/* Choropleth color */
+function colorForValue(val, mode) {
+  const breaks = mode === MODE_NOMINAL_ABS ? NOMINAL_ABS_BREAKS : NOMINAL_PCT_BREAKS;
+  if (val <= breaks[0]) return CHORO_COLORS[0];
+  if (val <= breaks[1]) return CHORO_COLORS[1];
+  if (val <= breaks[2]) return CHORO_COLORS[2];
+  if (val <= breaks[3]) return CHORO_COLORS[3];
+  if (val <= breaks[4]) return CHORO_COLORS[4];
   return CHORO_COLORS[5];
 }
 
-function makeLegend(map){
-  const div=L.DomUtil.create('div','info legend card p-2 text-xs bg-white rounded-lg shadow');
-  const breaks=_mode===MODE_NOMINAL_ABS?NOMINAL_ABS_BREAKS:NOMINAL_PCT_BREAKS;
-  const unit=_mode===MODE_NOMINAL_ABS?'establishments':'%';
-  div.innerHTML=`<strong>${_mode===MODE_NOMINAL_ABS?'Nominal Change (absolute)':'Nominal Change (%)'}</strong><br>`;
-  for(let i=0;i<breaks.length;i++){
-    const from=breaks[i],to=breaks[i+1];
-    div.innerHTML+=
-      `<i style="background:${colorForValue(from+0.1,_mode)};width:12px;height:12px;display:inline-block;margin-right:4px;border-radius:2px"></i> `+
-      `${from}${to?'–'+to:''} ${unit}<br>`;
-  }
-  L.DomEvent.disableClickPropagation(div);
-  return div;
+/* Proper Leaflet legend control */
+function legendControl() {
+  const ctrl = L.control({ position: 'bottomright' });
+  ctrl.onAdd = function() {
+    const div = L.DomUtil.create('div', 'card p-2 text-xs bg-white rounded-lg shadow');
+    const breaks = _mode === MODE_NOMINAL_ABS ? NOMINAL_ABS_BREAKS : NOMINAL_PCT_BREAKS;
+    const unit = _mode === MODE_NOMINAL_ABS ? 'establishments' : '%';
+    div.innerHTML = `<strong>${_mode === MODE_NOMINAL_ABS ? 'Nominal Change (absolute)' : 'Nominal Change (%)'}</strong><br>`;
+    for (let i = 0; i < breaks.length; i++) {
+      const from = breaks[i], to = breaks[i + 1];
+      const swatch = `<i style="background:${colorForValue(from + 0.1, _mode)};width:12px;height:12px;display:inline-block;margin-right:4px;border-radius:2px"></i>`;
+      div.innerHTML += `${swatch}${from}${to ? '–' + to : ''} ${unit}<br>`;
+    }
+    return div;
+  };
+  return ctrl;
 }
 
-async function init(){
-  const res = await fetch(EMPLOYMENT_JSON,{cache:'no-store'});
-  const data = await res.json();
-  _rows = data.slice(0,-1); // exclude metadata
+let legend; // keep reference to update when mode changes
 
-  const geoRes = await fetch(GEOJSON_URL);
-  _geojson = await geoRes.json();
+/* ---------- UI Updates ---------- */
+function updateDetails(name, row) {
+  dName.textContent = name;
+  // You can replace this placeholder with a real centroid lookup if you have it:
+  dCent.textContent = '—';
+  d2023.textContent = Number.isFinite(row?.['2023']) ? fmt.format(row['2023']) : '—';
+  const chg = toNum(row?.['Cum_Change_2012_2023']);
+  dChg.textContent = Number.isFinite(chg) ? signed(chg) : '—';
+}
 
-  map = L.map('map',{scrollWheelZoom:true}).setView([18.22,-66.45],8);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
-    attribution:'&copy; OpenStreetMap contributors'
-  }).addTo(map);
+function updateCharts(row) {
+  const years = YEARS;
+  const vals = years.map(y => yearVal(row, y));
+  const pct = [];
+  for (let i = 1; i < vals.length; i++) {
+    const prev = vals[i - 1];
+    const curr = vals[i];
+    const pctVal = Number.isFinite(prev) && prev !== 0 ? ((curr - prev) / prev) * 100 : NaN;
+    pct.push(pctVal);
+  }
 
-  geoLayer = L.geoJSON(_geojson,{
-    style:feature=>{
-      const name=feature.properties.NAMELSAD.replace(" Municipio","");
-      const row=statsForMunicipio(name);
-      if(!row)return{color:'#999',weight:1,fillColor:'#ccc',fillOpacity:.6};
-      const val=_mode===MODE_NOMINAL_ABS?row['Cum_Change_2012_2023']:row['Cum_Pct_Change_2012_2023'];
-      return{color:'#999',weight:1,fillColor:colorForValue(val,_mode),fillOpacity:.85};
+  const ctx1 = document.getElementById('lineChartNominal');
+  const ctx2 = document.getElementById('barChartNominal');
+
+  if (lineChartNominal) lineChartNominal.destroy();
+  if (barChartNominal)  barChartNominal.destroy();
+
+  lineChartNominal = new Chart(ctx1, {
+    type: 'line',
+    data: {
+      labels: years,
+      datasets: [{
+        label: 'Total Establishments',
+        data: vals,
+        borderColor: '#2563eb',
+        tension: .2,
+        fill: false
+      }]
     },
-    onEachFeature:(feature,layer)=>{
-      const name=feature.properties.NAMELSAD.replace(" Municipio","");
-      layer.bindTooltip(name,{direction:'center',permanent:false});
-      layer.on({
-        mouseover:e=>{
-          e.target.setStyle({weight:2,color:'#000'});
-          const row=statsForMunicipio(name);
-          if(row){
-            updateDetails(name,row);
-            updateCharts(row);
+    options: {
+      responsive: true,
+      scales: { y: { ticks: { callback: v => fmt.format(v) } } },
+      plugins: { legend: { display: false } }
+    }
+  });
+
+  barChartNominal = new Chart(ctx2, {
+    type: 'bar',
+    data: {
+      labels: years.slice(1),
+      datasets: [{
+        label: '% Change (Nominal)',
+        data: pct,
+        backgroundColor: '#60a5fa'
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: { y: { ticks: { callback: v => pctFmt(v) } } },
+      plugins: { legend: { display: false } }
+    }
+  });
+}
+
+/* ---------- Map Paint ---------- */
+function styleForFeature(feature) {
+  const name = getFeatureName(feature);
+  const row = rowForMunicipio(name);
+  if (!row) return { color: '#999', weight: 1, fillColor: '#e5e7eb', fillOpacity: .7 };
+  const val = _mode === MODE_NOMINAL_ABS ? toNum(row['Cum_Change_2012_2023'])
+                                         : toNum(row['Cum_Pct_Change_2012_2023']);
+  const fill = Number.isFinite(val) ? colorForValue(val, _mode) : '#e5e7eb';
+  return { color: '#999', weight: 1, fillColor: fill, fillOpacity: .85 };
+}
+
+function repaintPolys() {
+  geoLayer.setStyle(styleForFeature);
+  // refresh legend to show correct units
+  if (legend) legend.remove();
+  legend = legendControl(); legend.addTo(map);
+}
+
+/* ---------- Init ---------- */
+async function init() {
+  try {
+    const [jsonRes, geoRes] = await Promise.all([
+      fetch(EMPLOYMENT_JSON, { cache: 'no-store' }),
+      fetch(GEOJSON_URL, { cache: 'no-store' })
+    ]);
+
+    if (!jsonRes.ok) throw new Error(`JSON fetch failed: ${jsonRes.status} ${jsonRes.statusText}`);
+    if (!geoRes.ok)  throw new Error(`GeoJSON fetch failed: ${geoRes.status} ${geoRes.statusText}`);
+
+    const raw = await jsonRes.json();
+    // Use all rows unless the last is a metadata wrapper
+    _rows = Array.isArray(raw) && raw.length && raw[raw.length - 1]?.metadata ? raw.slice(0, -1) : raw;
+
+    _geojson = await geoRes.json();
+
+    // Basic sanity check to surface issues quickly:
+    if (!_rows.length) console.warn('Employment JSON loaded but contains 0 rows. Check file content/structure.');
+    if (!_geojson?.features?.length) console.warn('GeoJSON loaded but contains 0 features. Check file path/format.');
+
+    map = L.map('map', { scrollWheelZoom: true }).setView([18.22, -66.45], 8);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    geoLayer = L.geoJSON(_geojson, {
+      style: styleForFeature,
+      onEachFeature: (feature, layer) => {
+        const name = getFeatureName(feature);
+        layer.bindTooltip(name, { direction: 'center', permanent: false });
+        layer.on({
+          mouseover: e => {
+            e.target.setStyle({ weight: 2, color: '#000' });
+            const row = rowForMunicipio(name);
+            if (row) { updateDetails(name, row); updateCharts(row); }
+          },
+          mouseout: e => geoLayer.resetStyle(e.target),
+          click:   () => {
+            selectedName = name;
+            const row = rowForMunicipio(name);
+            if (row) { updateDetails(name, row); updateCharts(row); }
           }
-        },
-        mouseout:e=>geoLayer.resetStyle(e.target),
-        click:e=>{
-          selectedName=name;
-          updateDetails(name,statsForMunicipio(name));
-          updateCharts(statsForMunicipio(name));
-        }
-      });
-    }
-  }).addTo(map);
+        });
+      }
+    }).addTo(map);
 
-  makeLegend(map).addTo(map);
-}
+    legend = legendControl(); legend.addTo(map);
 
-function updateDetails(name,row){
-  dName.textContent=name;
-  dCent.textContent='Lat '+(Math.random()*0.5+18).toFixed(2)+', Lng '+(Math.random()*0.5-66).toFixed(2);
-  d2023.textContent=fmt.format(row['2023']);
-  dChg.textContent=signed(row['Cum_Change_2012_2023']);
-}
+    // Optional: show Puerto Rico totals on load if present
+    const pr = _rows.find(r => sanitize(r.Municipio) === 'Puerto Rico');
+    if (pr) { updateDetails('Puerto Rico', pr); updateCharts(pr); }
 
-function updateCharts(row){
-  const years=YEARS;
-  const vals=years.map(y=>yearVal(row,y));
-  const pct=[];
-  for(let i=1;i<vals.length;i++){
-    const prev=vals[i-1];
-    pct.push(((vals[i]-prev)/prev)*100);
+    setTimeout(() => map.invalidateSize(), 50);
+  } catch (err) {
+    console.error('Initialization error:', err);
   }
-
-  const ctx1=document.getElementById('lineChartNominal');
-  const ctx2=document.getElementById('barChartNominal');
-  if(lineChartNominal)lineChartNominal.destroy();
-  if(barChartNominal)barChartNominal.destroy();
-
-  lineChartNominal=new Chart(ctx1,{
-    type:'line',
-    data:{
-      labels:years,
-      datasets:[{
-        label:'Total Establishments',
-        data:vals,
-        borderColor:'#2563eb',
-        tension:.2,
-        fill:false
-      }]
-    },
-    options:{
-      responsive:true,
-      scales:{y:{ticks:{callback:v=>fmt.format(v)}}},
-      plugins:{legend:{display:false}}
-    }
-  });
-
-  barChartNominal=new Chart(ctx2,{
-    type:'bar',
-    data:{
-      labels:years.slice(1),
-      datasets:[{
-        label:'% Change (Nominal)',
-        data:pct,
-        backgroundColor:'#60a5fa'
-      }]
-    },
-    options:{
-      responsive:true,
-      scales:{y:{ticks:{callback:v=>pctFmt(v)}}},
-      plugins:{legend:{display:false}}
-    }
-  });
 }
 
-// Mode buttons
-document.getElementById('metricNominalPct').addEventListener('click',()=>{
-  _mode=MODE_NOMINAL_PCT;
-  geoLayer.eachLayer(l=>{
-    const name=l.feature.properties.NAMELSAD.replace(" Municipio","");
-    const row=statsForMunicipio(name);
-    if(!row)return;
-    const val=row['Cum_Pct_Change_2012_2023'];
-    l.setStyle({fillColor:colorForValue(val,_mode)});
-  });
+/* ---------- Buttons ---------- */
+document.getElementById('metricNominalPct').addEventListener('click', () => {
+  _mode = MODE_NOMINAL_PCT;
+  repaintPolys();
 });
 
-document.getElementById('metricNominalAbs').addEventListener('click',()=>{
-  _mode=MODE_NOMINAL_ABS;
-  geoLayer.eachLayer(l=>{
-    const name=l.feature.properties.NAMELSAD.replace(" Municipio","");
-    const row=statsForMunicipio(name);
-    if(!row)return;
-    const val=row['Cum_Change_2012_2023'];
-    l.setStyle({fillColor:colorForValue(val,_mode)});
-  });
+document.getElementById('metricNominalAbs').addEventListener('click', () => {
+  _mode = MODE_NOMINAL_ABS;
+  repaintPolys();
 });
 
-document.getElementById('clearSel').addEventListener('click',()=>{
-  selectedName=null;
-  dName.textContent='Puerto Rico';
-  dCent.textContent='—';
-  d2023.textContent='—';
-  dChg.textContent='—';
-  if(lineChartNominal)lineChartNominal.destroy();
-  if(barChartNominal)barChartNominal.destroy();
+document.getElementById('clearSel').addEventListener('click', () => {
+  selectedName = null;
+  dName.textContent = 'Puerto Rico';
+  dCent.textContent = '—';
+  d2023.textContent = '—';
+  dChg.textContent  = '—';
+  if (lineChartNominal) lineChartNominal.destroy();
+  if (barChartNominal)  barChartNominal.destroy();
 });
 
-window.addEventListener('DOMContentLoaded',init);
+/* ---------- Kick off ---------- */
+window.addEventListener('DOMContentLoaded', init);
 </script>
 </body>
 </html>
