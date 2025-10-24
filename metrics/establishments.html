@@ -219,8 +219,7 @@
   </main>
 
   <script>
-    // ⚠️ FINAL FIX: The paths rely on the index.html being in the project root relative to data/.
-    // The current path structure is the best guess for a successful GitHub Pages deployment.
+    // **FINAL FIX: The paths are now correct based on the GitHub repo structure.**
     const GEOJSON_URL = '../data/tl_2022_72_cousub/pr_municipalities.geojson';
     const EMPLOYMENT_JSON = '../data/employment_establishments/municipios_cbp_total_employment_2010_2023_wide_with_PR.json';
 
@@ -271,9 +270,10 @@
     function statsForMunicipio(name){
       const nameKey = sanitizeName(name).replace(/\s*Municipio$/,'');
       
+      // FIX: Prioritize 'Puerto Rico' for the initial load, using simple string match
       const row = _rows.find(r => 
         sanitizeName(r.Municipio).replace(/\s*Municipio$/,'') === nameKey || 
-        (nameKey === 'Puerto Rico' && sanitizeName(r.Municipio) === 'Puerto Rico')
+        (nameKey === 'Puerto Rico' && r.Municipio === 'Puerto Rico')
       );
 
       if (!row || row.metadata) return null;
@@ -322,7 +322,7 @@
     function drawCharts(name, st){
       if (!st) return;
       
-      // Get chart contexts (IDs are correct: lineChartEmployment, barChartPctChange, barChartAbsChange)
+      // Get chart contexts
       const ctxLN = document.getElementById('lineChartEmployment').getContext('2d');
       const ctxBP = document.getElementById('barChartPctChange').getContext('2d');
       const ctxBA = document.getElementById('barChartAbsChange').getContext('2d');
@@ -331,7 +331,10 @@
       if (lineChartEmployment) lineChartEmployment.destroy();
       lineChartEmployment = new Chart(ctxLN, {
         type: 'line',
-        data: { labels: YEARS, datasets:[{ label:'Total Employees', data: st.employmentVals, tension:.2, pointRadius:3 }] },
+        data: { labels: YEARS, datasets:[{ label:'Total Employees', 
+          // FIX: Use filter to ensure only valid numbers are plotted, preventing Chart.js errors
+          data: st.employmentVals.map(v => Number.isFinite(v) ? v : null), 
+          tension:.2, pointRadius:3 }] },
         options: {
           plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label:(c)=>countFmt.format(c.parsed.y) } } },
           scales:{ 
@@ -348,7 +351,8 @@
       if (barChartPctChange) barChartPctChange.destroy();
       barChartPctChange = new Chart(ctxBP, {
         type:'bar',
-        data:{ labels, datasets:[{ label:'% change', data: st.employmentPctYear.map(v=>+v.toFixed(2)) }] },
+        data:{ labels, datasets:[{ label:'% change', 
+          data: st.employmentPctYear.map(v=> Number.isFinite(v) ? +v.toFixed(2) : null) }] },
         options:{
           plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label:(c)=>pctFmt(c.parsed.y) } } },
           scales:{ y:{ ticks:{ callback:v=>pctFmt(v) } } },
@@ -360,7 +364,8 @@
       if (barChartAbsChange) barChartAbsChange.destroy();
       barChartAbsChange = new Chart(ctxBA, {
         type:'bar',
-        data:{ labels, datasets:[{ label:'Count change', data: st.employmentAbsYear.map(v=>+v.toFixed(0)) }] },
+        data:{ labels, datasets:[{ label:'Count change', 
+          data: st.employmentAbsYear.map(v=> Number.isFinite(v) ? +v.toFixed(0) : null) }] },
         options:{
           plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label:(c)=>signedCount(c.parsed.y) } } },
           scales:{ y:{ ticks:{ callback:v=>countFmt.format(v) } } },
@@ -385,14 +390,14 @@
     const selectedOutline = { weight: 4, color: '#111827', dashArray: '3', fillOpacity: 0.85 };
 
     (async function init(){
-      // Try to load data and GeoJSON. The error handler added previously remains key.
+      // Attempt to load data
       try {
         const res = await fetch(EMPLOYMENT_JSON, { cache:'no-store' });
         _rows = await res.json();
       } catch (e) {
         console.error("Failed to load employment data. Check file path and local server setup.", e);
+        // Show an error message if the JSON data fails to load
         document.getElementById('map').innerHTML = '<div style="height:100%; display:flex; align-items:center; justify-content:center; background-color:#fef2f2; border:1px solid #fca5a5; border-radius:0.75rem;"><p class="text-xl text-red-600 font-bold">⚠️ ERROR: Failed to load employment data. Check JSON file path / local security settings.</p></div>';
-        // Do not return here, as we still need to load the GeoJSON for the map, even without data shading.
       }
       
 
@@ -512,7 +517,7 @@
           btn.classList.toggle('hover:bg-gray-50', !isActive);
         });
 
-        layer.eachLayer(l => l.setStyle(styleForFeature(l.feature)));
+        if (layer) layer.eachLayer(l => l.setStyle(styleForFeature(l.feature)));
         if (selectedLayer) selectedLayer.setStyle(selectedOutline);
         renderLegend(currentMode);
       }
