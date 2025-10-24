@@ -1,4 +1,4 @@
-<!DOCTYPE >
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -72,8 +72,6 @@
         </a>
         <div id="metrics-menu" class="absolute right-0 mt-2 w-64 rounded-xl border border-gray-200 bg-white shadow-lg ring-1 ring-black/5 z-50">
           <div class="py-2">
-            <a href="../metrics.html"     class="block px-4 py-2 hover:bg-gray-50 font-semibold">All Metrics Overview</a>
-            <div class="my-1 border-t border-gray-100"></div>
             <a href="population.html"     class="block px-4 py-2 hover:bg-gray-50">Population</a>
             <a href="employment.html"     class="block px-4 py-2 bg-gray-100 font-semibold">Employment Rate</a>
             <a href="establishments.html" class="block px-4 py-2 hover:bg-gray-50">Employer Establishments</a>
@@ -219,13 +217,13 @@
   </main>
 
   <script>
-    // **Path must be updated if you ran the Python fix:**
-    // const EMPLOYMENT_JSON = '../data/employment_establishments/municipios_cbp_fixed_for_web.json'; 
+    // **NOTE: Ensure this JSON file is the version cleaned by your Python script if you followed the previous step.**
     const GEOJSON_URL = '../data/tl_2022_72_cousub/pr_municipalities.geojson';
     const EMPLOYMENT_JSON = '../data/employment_establishments/municipios_cbp_total_employment_2010_2023_wide_with_PR.json';
 
     const BASE_YEAR = 2012;
-    const ALL_YEARS = [2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023]; // Use all years for parsing
+    // Set YEARS to explicitly start from 2012, matching BASE_YEAR
+    const YEARS = [2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023]; 
 
     // Formatters remain the same
     const countFmt = new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 });
@@ -278,18 +276,10 @@
 
       if (!row || row.metadata) return null;
       
-      // Dynamic year slicing for charts
-      let employmentVals = ALL_YEARS.map(y => yearVal(row,y));
-      let employmentYears = ALL_YEARS;
-      
-      // Find the index of the BASE_YEAR (2012)
-      let startIndex = ALL_YEARS.indexOf(BASE_YEAR); 
-      
-      if (startIndex !== -1) {
-          employmentVals = employmentVals.slice(startIndex);
-          employmentYears = ALL_YEARS.slice(startIndex);
-      } 
-      // End Dynamic year slicing
+      // FIX: Ensure data values and years strictly start from 2012
+      const employmentVals = YEARS.map(y => yearVal(row,y)); // Uses YEARS (2012-2023)
+      const employmentYears = YEARS;
+      // END FIX
 
       // Calculate cumulative change using 2012 as the explicit base year 
       const baseVal = yearVal(row, BASE_YEAR);
@@ -305,7 +295,7 @@
           }
       }
       
-      // Calculate Annual Percentage Change - must use the sliced/filtered data for annual change.
+      // Calculate Annual Percentage Change
       const employmentAbsYear = [];
       const employmentPctYear = [];
       
