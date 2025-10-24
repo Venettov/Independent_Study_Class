@@ -219,14 +219,13 @@
   </main>
 
   <script>
-    // **FINAL FIX: The paths are now correct based on the GitHub repo structure.**
     const GEOJSON_URL = '../data/tl_2022_72_cousub/pr_municipalities.geojson';
     const EMPLOYMENT_JSON = '../data/employment_establishments/municipios_cbp_total_employment_2010_2023_wide_with_PR.json';
 
     const BASE_YEAR = 2012;
-    const YEARS = [2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023];
+    const ALL_YEARS = [2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023]; // Use all years for parsing
 
-    // Format for count and percentage
+    // Formatters remain the same
     const countFmt = new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 });
     const pctFmt = (v) => `${(Number(v)||0).toFixed(2)}%`;
     const signedCount = (n) => (n > 0 ? '+' : '') + countFmt.format(n);
@@ -270,19 +269,35 @@
     function statsForMunicipio(name){
       const nameKey = sanitizeName(name).replace(/\s*Municipio$/,'');
       
-      // FIX: Prioritize 'Puerto Rico' for the initial load, using simple string match
       const row = _rows.find(r => 
         sanitizeName(r.Municipio).replace(/\s*Municipio$/,'') === nameKey || 
         (nameKey === 'Puerto Rico' && r.Municipio === 'Puerto Rico')
       );
 
       if (!row || row.metadata) return null;
-
-      const employmentVals = YEARS.map(y => yearVal(row,y));
       
+      // FIX: Dynamically determine the start index for the chart data (charts cannot handle 0/null data points at the start easily)
+      let dataStartYear = BASE_YEAR;
+      let employmentVals = ALL_YEARS.map(y => yearVal(row,y));
+      let employmentYears = ALL_YEARS;
+      
+      // Find the first non-null/non-zero data point starting from 2012
+      let startIndex = employmentVals.findIndex((v, i) => v > 0 && ALL_YEARS[i] >= BASE_YEAR);
+
+      if (startIndex !== -1) {
+          employmentVals = employmentVals.slice(startIndex);
+          employmentYears = ALL_YEARS.slice(startIndex);
+          dataStartYear = employmentYears[0];
+      } else {
+          // If no data > 0 exists from 2012 onward, default to the 2012 slice
+          employmentVals = ALL_YEARS.map(y => yearVal(row, y)).slice(2); // Slice to start at 2012 (index 2)
+          employmentYears = ALL_YEARS.slice(2);
+      }
+      // END FIX
+
       // Calculate cumulative change using 2012 as the explicit base year 
       const baseVal = yearVal(row, BASE_YEAR);
-      const val2023 = employmentVals[employmentVals.length - 1];
+      const val2023 = yearVal(row, 2023); // Always use the fixed 2023 column value
 
       let cumAbs = NaN;
       let cumPct = NaN;
@@ -294,11 +309,11 @@
           }
       }
       
-      // Calculate Annual Percentage Change
+      // Calculate Annual Percentage Change - must use the potentially sliced/filtered data for annual change.
       const employmentAbsYear = [];
       const employmentPctYear = [];
       
-      for (let i=1;i<YEARS.length;i++){
+      for (let i=1; i < employmentYears.length; i++){
         const current = employmentVals[i];
         const previous = employmentVals[i-1];
         if (Number.isFinite(current) && Number.isFinite(previous) && previous !== 0) {
@@ -311,7 +326,13 @@
       }
 
       return { 
-        employmentVals, cumAbs, cumPct, employmentPctYear, employmentAbsYear, val2023 
+        employmentVals: employmentVals, 
+        employmentYears: employmentYears, // Return the sliced years
+        cumAbs: cumAbs, 
+        cumPct: cumPct, 
+        employmentPctYear: employmentPctYear, 
+        employmentAbsYear: employmentAbsYear, 
+        val2023: val2023 
       };
     }
 
@@ -320,7 +341,7 @@
     }
 
     function drawCharts(name, st){
-      if (!st) return;
+      if (!st || !st.employmentYears || st.employmentYears.length === 0) return;
       
       // Get chart contexts
       const ctxLN = document.getElementById('lineChartEmployment').getContext('2d');
@@ -331,10 +352,12 @@
       if (lineChartEmployment) lineChartEmployment.destroy();
       lineChartEmployment = new Chart(ctxLN, {
         type: 'line',
-        data: { labels: YEARS, datasets:[{ label:'Total Employees', 
-          // FIX: Use filter to ensure only valid numbers are plotted, preventing Chart.js errors
+        data: { 
+          labels: st.employmentYears, // Use the dynamically determined years
+          datasets:[{ label:'Total Employees', 
           data: st.employmentVals.map(v => Number.isFinite(v) ? v : null), 
-          tension:.2, pointRadius:3 }] },
+          tension:.2, pointRadius:3 }] 
+        },
         options: {
           plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label:(c)=>countFmt.format(c.parsed.y) } } },
           scales:{ 
@@ -345,7 +368,8 @@
         }
       });
 
-      const labels = YEARS.slice(1).map((y,i)=> `${YEARS[i]}→${y}`);
+      // Labels for annual change charts must match the number of data points (Years - 1)
+      const labels = st.employmentYears.slice(1).map((y,i)=> `${st.employmentYears[i]}→${y}`);
       
       // Annual % Change Bar Chart
       if (barChartPctChange) barChartPctChange.destroy();
@@ -396,7 +420,6 @@
         _rows = await res.json();
       } catch (e) {
         console.error("Failed to load employment data. Check file path and local server setup.", e);
-        // Show an error message if the JSON data fails to load
         document.getElementById('map').innerHTML = '<div style="height:100%; display:flex; align-items:center; justify-content:center; background-color:#fef2f2; border:1px solid #fca5a5; border-radius:0.75rem;"><p class="text-xl text-red-600 font-bold">⚠️ ERROR: Failed to load employment data. Check JSON file path / local security settings.</p></div>';
       }
       
@@ -416,7 +439,6 @@
         fc = await gjRes.json();
       } catch (e) {
          console.error("Failed to load GeoJSON file. Check file path and local server setup.", e);
-         // If GeoJSON fails, the map will not draw boundaries or function interactively.
          return; 
       }
 
