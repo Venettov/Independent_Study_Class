@@ -251,10 +251,10 @@
       const n = Number(v);
       return Number.isFinite(n) ? n : NaN;
     };
-    // Removed realYearVal function
 
-    // Renamed charts to match new template
-    let lineChartEmployment = null, barChartPctChange = null, barChartAbsChange = null;
+    // --- FIX: Correct global chart variable initialization ---
+    let lineChartEmployment = null, barChartPctChange = null, barChartAbsChange = null; 
+    // --- END FIX ---
     
     // Element IDs for the new detail structure
     const dName = document.getElementById('d-name');
@@ -263,7 +263,7 @@
     const dChgAbs = document.getElementById('d-chg-abs');
     const dChgPct  = document.getElementById('d-chg-pct');
     const dCenL = document.getElementById('d-census');
-    // Removed d2023Real and dChgReal
+    
 
     function statsForMunicipio(name){
       const nameKey = sanitizeName(name).replace(/\s*Municipio$/,'');
@@ -321,9 +321,12 @@
     function drawCharts(name, st){
       if (!st) return;
       
+      // --- FIX: Correctly reference canvas elements by their new IDs ---
       const ctxLN = document.getElementById('lineChartEmployment').getContext('2d');
       const ctxBP = document.getElementById('barChartPctChange').getContext('2d');
       const ctxBA = document.getElementById('barChartAbsChange').getContext('2d');
+      // --- END FIX ---
+
 
       // Employment Line Chart
       if (lineChartEmployment) lineChartEmployment.destroy();
@@ -373,10 +376,8 @@
       
       // Employment fields
       d2023.textContent = Number.isFinite(st?.val2023) ? countFmt.format(st.val2023) : '—';
-      // *** FIX: Use the new dChgAbs/dChgPct elements and calculated data ***
       dChgAbs.textContent = st ? signedCount(st.cumAbs) : '—';
       dChgPct.textContent = st ? signedPct(st.cumPct) : '—';
-      // *** END FIX ***
 
       dCenL.href = censusLink(name);
       drawCharts(name, st);
@@ -416,11 +417,10 @@
           const statsName = rawName.replace(/\s*Municipio$/,'');
           const stTip = statsForMunicipio(statsName);
           
-          // *** FIX: Correct tooltip year range and format ***
+          // Correct tooltip year range and format
           const changeLine = stTip
             ? `<br><small>${BASE_YEAR}→2023: ${signedCount(stTip.cumAbs)} (${pctFmt(stTip.cumPct)})</small>`
             : '';
-          // *** END FIX ***
           
           lyr.bindTooltip(rawName, { direction:'center', className:'leaflet-tooltip' });
           lyr.bindPopup(`<strong>${rawName}</strong>${geoid?`<br><small>GEOID: ${geoid}</small>`:''}${changeLine}`);
@@ -491,12 +491,10 @@
     function wireMetricToggle(){
       const btnNomPct = document.getElementById('metricNominalPct');
       const btnNomAbs = document.getElementById('metricNominalAbs');
-      // Removed btnRealPct reference
 
       function setActive(mode){
         currentMode = mode;
         
-        // Target only the two active buttons
         [btnNomPct, btnNomAbs].forEach(btn => {
           const isActive = (btn.id === 'metricNominalPct' && mode === MODE_NOMINAL_PCT) ||
                            (btn.id === 'metricNominalAbs' && mode === MODE_NOMINAL_ABS);
@@ -550,13 +548,13 @@
           breaks = EMPLOYMENT_ABS_BREAKS;
       }
       
-      // *** FIX: Handle Infinity/NaN resulting from division by zero, set color to highlight ***
-      const col = colorFor(value, breaks);
+      // Handle Infinity/NaN resulting from division by zero, set color to highlight
       if (value === Infinity || value === -Infinity || !Number.isFinite(value)) {
         return { fillColor: '#fca5a5', weight: 1.2, color:'#111827', fillOpacity:.75 }; // Light Red for Missing/NaN/Infinity
       }
-      // *** END FIX ***
 
+      const col = colorFor(value, breaks);
+      
       return { fillColor: col, weight: 1.2, color:'#111827', fillOpacity:.75 };
     }
 
