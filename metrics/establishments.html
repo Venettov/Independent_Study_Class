@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE >
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -219,8 +219,10 @@
   </main>
 
   <script>
+    // **Path must be updated if you ran the Python fix:**
+    // const EMPLOYMENT_JSON = '../data/employment_establishments/municipios_cbp_fixed_for_web.json'; 
     const GEOJSON_URL = '../data/tl_2022_72_cousub/pr_municipalities.geojson';
-    const EMPLOYMENT_JSON = '../data/employment_establishments/municipios_cbp_fixed_for_web.json';
+    const EMPLOYMENT_JSON = '../data/employment_establishments/municipios_cbp_total_employment_2010_2023_wide_with_PR.json';
 
     const BASE_YEAR = 2012;
     const ALL_YEARS = [2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023]; // Use all years for parsing
@@ -276,28 +278,22 @@
 
       if (!row || row.metadata) return null;
       
-      // FIX: Dynamically determine the start index for the chart data (charts cannot handle 0/null data points at the start easily)
-      let dataStartYear = BASE_YEAR;
+      // Dynamic year slicing for charts
       let employmentVals = ALL_YEARS.map(y => yearVal(row,y));
       let employmentYears = ALL_YEARS;
       
-      // Find the first non-null/non-zero data point starting from 2012
-      let startIndex = employmentVals.findIndex((v, i) => v > 0 && ALL_YEARS[i] >= BASE_YEAR);
-
+      // Find the index of the BASE_YEAR (2012)
+      let startIndex = ALL_YEARS.indexOf(BASE_YEAR); 
+      
       if (startIndex !== -1) {
           employmentVals = employmentVals.slice(startIndex);
           employmentYears = ALL_YEARS.slice(startIndex);
-          dataStartYear = employmentYears[0];
-      } else {
-          // If no data > 0 exists from 2012 onward, default to the 2012 slice
-          employmentVals = ALL_YEARS.map(y => yearVal(row, y)).slice(2); // Slice to start at 2012 (index 2)
-          employmentYears = ALL_YEARS.slice(2);
-      }
-      // END FIX
+      } 
+      // End Dynamic year slicing
 
       // Calculate cumulative change using 2012 as the explicit base year 
       const baseVal = yearVal(row, BASE_YEAR);
-      const val2023 = yearVal(row, 2023); // Always use the fixed 2023 column value
+      const val2023 = yearVal(row, 2023); 
 
       let cumAbs = NaN;
       let cumPct = NaN;
@@ -309,7 +305,7 @@
           }
       }
       
-      // Calculate Annual Percentage Change - must use the potentially sliced/filtered data for annual change.
+      // Calculate Annual Percentage Change - must use the sliced/filtered data for annual change.
       const employmentAbsYear = [];
       const employmentPctYear = [];
       
@@ -327,7 +323,7 @@
 
       return { 
         employmentVals: employmentVals, 
-        employmentYears: employmentYears, // Return the sliced years
+        employmentYears: employmentYears,
         cumAbs: cumAbs, 
         cumPct: cumPct, 
         employmentPctYear: employmentPctYear, 
@@ -343,17 +339,27 @@
     function drawCharts(name, st){
       if (!st || !st.employmentYears || st.employmentYears.length === 0) return;
       
-      // Get chart contexts
-      const ctxLN = document.getElementById('lineChartEmployment').getContext('2d');
-      const ctxBP = document.getElementById('barChartPctChange').getContext('2d');
-      const ctxBA = document.getElementById('barChartAbsChange').getContext('2d');
+      // Get chart contexts, check if elements exist
+      const ctxLN_el = document.getElementById('lineChartEmployment');
+      const ctxBP_el = document.getElementById('barChartPctChange');
+      const ctxBA_el = document.getElementById('barChartAbsChange');
 
+      // Check for chart elements explicitly
+      if (!ctxLN_el || !ctxBP_el || !ctxBA_el) {
+          console.error("Chart canvas elements not found. Check HTML IDs.");
+          return;
+      }
+      
+      const ctxLN = ctxLN_el.getContext('2d');
+      const ctxBP = ctxBP_el.getContext('2d');
+      const ctxBA = ctxBA_el.getContext('2d');
+      
       // Employment Line Chart
       if (lineChartEmployment) lineChartEmployment.destroy();
       lineChartEmployment = new Chart(ctxLN, {
         type: 'line',
         data: { 
-          labels: st.employmentYears, // Use the dynamically determined years
+          labels: st.employmentYears,
           datasets:[{ label:'Total Employees', 
           data: st.employmentVals.map(v => Number.isFinite(v) ? v : null), 
           tension:.2, pointRadius:3 }] 
