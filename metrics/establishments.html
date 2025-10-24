@@ -220,10 +220,8 @@
 
   <script>
     const GEOJSON_URL = '../data/tl_2022_72_cousub/pr_municipalities.geojson';
-    // --- UPDATED DATA PATH ---
     const EMPLOYMENT_JSON = '../data/employment_establishments/municipios_cbp_total_employment_2010_2023_wide_with_PR.json';
 
-    // Adjusted Years to exclude 2010/2011 since the first reliable year is 2012 for most municipios
     const BASE_YEAR = 2012;
     const YEARS = [2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023];
 
@@ -233,9 +231,9 @@
     const signedCount = (n) => (n > 0 ? '+' : '') + countFmt.format(n);
     const signedPct = (n) => (n > 0 ? '+' : '') + pctFmt(n);
 
-    // Map Mode Identifiers (only two modes now)
-    const MODE_NOMINAL_PCT = 'nominal_pct'; // Percent Change
-    const MODE_NOMINAL_ABS = 'nominal_abs'; // Absolute Change
+    // Map Mode Identifiers
+    const MODE_NOMINAL_PCT = 'nominal_pct'; 
+    const MODE_NOMINAL_ABS = 'nominal_abs'; 
     
     // Color breaks for choropleth map
     const CHORO_COLORS = ['#7f1d1d', '#b91c1c', '#f97316', '#bbf7d0', '#22c55e', '#15803d'];
@@ -251,11 +249,15 @@
       const n = Number(v);
       return Number.isFinite(n) ? n : NaN;
     };
-
-    // --- FIX: Correct global chart variable initialization ---
-    let lineChartEmployment = null, barChartPctChange = null, barChartAbsChange = null; 
-    // --- END FIX ---
     
+    // *** FIX: Global chart variables must be initialized here ***
+    let lineChartEmployment = null, barChartPctChange = null, barChartAbsChange = null; 
+    let _rows = [], map, layer, fc, legend;
+    let currentMode = MODE_NOMINAL_PCT;
+    let lockedName = null, selectedLayer = null;
+    let prBoundsGlobal = null;
+    // *** END FIX ***
+
     // Element IDs for the new detail structure
     const dName = document.getElementById('d-name');
     const dCent = document.getElementById('d-centroid');
@@ -277,7 +279,7 @@
 
       const employmentVals = YEARS.map(y => yearVal(row,y));
       
-      // *** FIX: Calculate cumulative change using 2012 as the explicit base year ***
+      // Calculate cumulative change using 2012 as the explicit base year 
       const baseVal = yearVal(row, BASE_YEAR);
       const val2023 = employmentVals[employmentVals.length - 1];
 
@@ -286,12 +288,10 @@
 
       if (Number.isFinite(baseVal) && Number.isFinite(val2023)) {
           cumAbs = val2023 - baseVal;
-          // Prevent Division by Zero (Infinity/NaN)
           if (baseVal !== 0) {
               cumPct = (cumAbs / baseVal) * 100;
           }
       }
-      // *** END FIX ***
       
       // Calculate Annual Percentage Change
       const employmentAbsYear = [];
@@ -321,12 +321,10 @@
     function drawCharts(name, st){
       if (!st) return;
       
-      // --- FIX: Correctly reference canvas elements by their new IDs ---
+      // Get chart contexts
       const ctxLN = document.getElementById('lineChartEmployment').getContext('2d');
       const ctxBP = document.getElementById('barChartPctChange').getContext('2d');
       const ctxBA = document.getElementById('barChartAbsChange').getContext('2d');
-      // --- END FIX ---
-
 
       // Employment Line Chart
       if (lineChartEmployment) lineChartEmployment.destroy();
@@ -383,16 +381,13 @@
       drawCharts(name, st);
     }
 
-    let _rows = [], map, layer, fc, legend;
-    let currentMode = MODE_NOMINAL_PCT; // Start on Percent Change
-    let lockedName = null, selectedLayer = null;
     const selectedOutline = { weight: 4, color: '#111827', dashArray: '3', fillOpacity: 0.85 };
-    let prBoundsGlobal = null;
 
     (async function init(){
+      // *** FIX: Moved global variables outside of init, simplified data fetch ***
       const res = await fetch(EMPLOYMENT_JSON, { cache:'no-store' });
       _rows = await res.json();
-
+      
       const prBounds = L.latLngBounds([[17.85, -67.45],[18.55, -65.25]]);
       prBoundsGlobal = prBounds;
       map = L.map('map', { zoomSnap:.25 }).fitBounds(prBounds);
@@ -417,7 +412,6 @@
           const statsName = rawName.replace(/\s*Municipio$/,'');
           const stTip = statsForMunicipio(statsName);
           
-          // Correct tooltip year range and format
           const changeLine = stTip
             ? `<br><small>${BASE_YEAR}→2023: ${signedCount(stTip.cumAbs)} (${pctFmt(stTip.cumPct)})</small>`
             : '';
