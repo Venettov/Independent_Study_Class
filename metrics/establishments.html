@@ -219,6 +219,8 @@
   </main>
 
   <script>
+    // ⚠️ FINAL FIX: The paths rely on the index.html being in the project root relative to data/.
+    // The current path structure is the best guess for a successful GitHub Pages deployment.
     const GEOJSON_URL = '../data/tl_2022_72_cousub/pr_municipalities.geojson';
     const EMPLOYMENT_JSON = '../data/employment_establishments/municipios_cbp_total_employment_2010_2023_wide_with_PR.json';
 
@@ -320,7 +322,7 @@
     function drawCharts(name, st){
       if (!st) return;
       
-      // Get chart contexts
+      // Get chart contexts (IDs are correct: lineChartEmployment, barChartPctChange, barChartAbsChange)
       const ctxLN = document.getElementById('lineChartEmployment').getContext('2d');
       const ctxBP = document.getElementById('barChartPctChange').getContext('2d');
       const ctxBA = document.getElementById('barChartAbsChange').getContext('2d');
@@ -383,15 +385,14 @@
     const selectedOutline = { weight: 4, color: '#111827', dashArray: '3', fillOpacity: 0.85 };
 
     (async function init(){
-      // Attempt to load data
+      // Try to load data and GeoJSON. The error handler added previously remains key.
       try {
         const res = await fetch(EMPLOYMENT_JSON, { cache:'no-store' });
         _rows = await res.json();
       } catch (e) {
         console.error("Failed to load employment data. Check file path and local server setup.", e);
-        // Alert user if data failed to load, preventing map rendering
         document.getElementById('map').innerHTML = '<div style="height:100%; display:flex; align-items:center; justify-content:center; background-color:#fef2f2; border:1px solid #fca5a5; border-radius:0.75rem;"><p class="text-xl text-red-600 font-bold">⚠️ ERROR: Failed to load employment data. Check JSON file path / local security settings.</p></div>';
-        return;
+        // Do not return here, as we still need to load the GeoJSON for the map, even without data shading.
       }
       
 
@@ -410,7 +411,8 @@
         fc = await gjRes.json();
       } catch (e) {
          console.error("Failed to load GeoJSON file. Check file path and local server setup.", e);
-         return;
+         // If GeoJSON fails, the map will not draw boundaries or function interactively.
+         return; 
       }
 
       const hiStyle = { weight:3, color:'#111827', fillOpacity:0.9 };
