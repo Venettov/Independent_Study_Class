@@ -101,7 +101,7 @@
           </h1>
           <p class="mt-3 text-lg text-gray-700">
             Examining the total number of paid employees in each municipio to understand shifts in the labor market 
-            and local economic activity from 2012 to 2023.
+            and local economic activity from **2012 to 2023** (County Business Patterns).
           </p>
           <div class="mt-5">
             <span class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-100 text-slate-800">
@@ -115,7 +115,7 @@
 
     <section class="card p-4">
       <div class="flex items-center justify-between gap-3">
-        <div class="text-sm text-gray-700 font-medium">Map shading by</div>
+        <div class="text-sm text-gray-700 font-medium">Map shading by cumulative change from 2012–2023</div>
         <div class="flex items-center gap-2">
           <div class="inline-flex rounded-lg border bg-white shadow-sm overflow-hidden">
             <button id="metricNominalPct" type="button" class="px-3 py-1.5 text-sm font-medium bg-blue-600 text-white">Percent Change (%)</button>
@@ -138,7 +138,7 @@
           </div>
 
           <div class="mt-4 text-sm">
-            <div class="font-semibold text-gray-700">Total Paid Employees (As of March 12, CBP):</div>
+            <div class="font-semibold text-gray-700">Total Paid Employees (As of March 12, 2023):</div>
             <ul class="mt-1 space-y-1">
               <li>2023 Total: <span id="d-2023" class="font-semibold">—</span></li>
               <li>Change since 2012 (Absolute): <span id="d-chg-abs" class="font-semibold">—</span></li>
@@ -147,7 +147,7 @@
           </div>
 
           <div class="mt-4 text-sm">
-            <a id="d-census" class="text-blue-600 underline" href="#" target="_blank" rel="noopener">
+            <a id="d-census" class="text-blue-600 underline" href="https://data.census.gov/cedsci/table?q=paid%20employees%20Puerto%20Rico&tid=CBP20.CB1900A11&g=0400000US72&vintage=2020" target="_blank" rel="noopener">
               Open on Census CBP Source ↗
             </a>
           </div>
@@ -183,12 +183,12 @@
         
         <h3 class="font-semibold text-gray-800 pt-2">Employment Trend and Annual Change</h3>
         <p>
-          The data for 2010 and 2011 is not available for all municipios in this dataset (null values) so the analysis focuses on the 2012-2023 period.
+          The analysis uses **2012 as the base year** because data for 2010 and 2011 are unavailable or incomplete for most municipios in this specific dataset. The trend shows overall changes in the size of the paid labor force across the island.
         </p>
         
         <ul class="list-disc list-inside space-y-2 ml-4">
           <li>
-            <strong class="text-blue-600">Total Employment Trend:</strong> This line chart shows the total number of paid employees over the selected period.
+            <strong class="text-blue-600">Total Employment Trend:</strong> This line chart shows the total number of paid employees over the selected period (2012–2023).
           </li>
           <li>
             <strong class="text-green-600">Annual Change (% and Count):</strong> The bar charts show the year-over-year change. Positive bars indicate job growth, while negative bars indicate job losses. Note the significant drops in certain years (e.g., 2017/2018 post-Hurricane Maria) followed by recovery in later years.
@@ -224,6 +224,7 @@
     const EMPLOYMENT_JSON = '../data/employment_establishments/municipios_cbp_total_employment_2010_2023_wide_with_PR.json';
 
     // Adjusted Years to exclude 2010/2011 since the first reliable year is 2012 for most municipios
+    const BASE_YEAR = 2012;
     const YEARS = [2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023];
 
     // Format for count and percentage
@@ -233,8 +234,8 @@
     const signedPct = (n) => (n > 0 ? '+' : '') + pctFmt(n);
 
     // Map Mode Identifiers (only two modes now)
-    const MODE_NOMINAL_PCT = 'nominal_pct'; // Renamed to PERCENT_CHANGE
-    const MODE_NOMINAL_ABS = 'nominal_abs'; // Renamed to ABSOLUTE_CHANGE
+    const MODE_NOMINAL_PCT = 'nominal_pct'; // Percent Change
+    const MODE_NOMINAL_ABS = 'nominal_abs'; // Absolute Change
     
     // Color breaks for choropleth map
     const CHORO_COLORS = ['#7f1d1d', '#b91c1c', '#f97316', '#bbf7d0', '#22c55e', '#15803d'];
@@ -244,7 +245,6 @@
     // Employment Absolute Change (2012-2023) - Adjusted breaks for employment count
     let EMPLOYMENT_ABS_BREAKS = [-1500, -500, 0, 500, 1500]; 
     
-    // --- Simplified functions since 'real' income is not used ---
     const sanitizeName = s => String(s||'').trim();
     const yearVal = (row,y) => {
       const v = row?.[String(y)];
@@ -256,7 +256,7 @@
     // Renamed charts to match new template
     let lineChartEmployment = null, barChartPctChange = null, barChartAbsChange = null;
     
-    // Element IDs for the new detail structure - Adjusted IDs for clarity
+    // Element IDs for the new detail structure
     const dName = document.getElementById('d-name');
     const dCent = document.getElementById('d-centroid');
     const d2023 = document.getElementById('d-2023');
@@ -275,8 +275,25 @@
 
       if (!row || row.metadata) return null;
 
-      // Nominal Employment Metrics
       const employmentVals = YEARS.map(y => yearVal(row,y));
+      
+      // *** FIX: Calculate cumulative change using 2012 as the explicit base year ***
+      const baseVal = yearVal(row, BASE_YEAR);
+      const val2023 = employmentVals[employmentVals.length - 1];
+
+      let cumAbs = NaN;
+      let cumPct = NaN;
+
+      if (Number.isFinite(baseVal) && Number.isFinite(val2023)) {
+          cumAbs = val2023 - baseVal;
+          // Prevent Division by Zero (Infinity/NaN)
+          if (baseVal !== 0) {
+              cumPct = (cumAbs / baseVal) * 100;
+          }
+      }
+      // *** END FIX ***
+      
+      // Calculate Annual Percentage Change
       const employmentAbsYear = [];
       const employmentPctYear = [];
       
@@ -291,12 +308,6 @@
             employmentPctYear.push(NaN);
         }
       }
-      
-      // Use the pre-calculated cumulative fields in your JSON:
-      const cumAbs = row.Cum_Change_2010_2023; // NOTE: The JSON actually uses the 2012 as base
-      const cumPct = row.Cum_Pct_Change_2010_2023;
-      
-      const val2023 = employmentVals[employmentVals.length - 1];
 
       return { 
         employmentVals, cumAbs, cumPct, employmentPctYear, employmentAbsYear, val2023 
@@ -362,8 +373,10 @@
       
       // Employment fields
       d2023.textContent = Number.isFinite(st?.val2023) ? countFmt.format(st.val2023) : '—';
+      // *** FIX: Use the new dChgAbs/dChgPct elements and calculated data ***
       dChgAbs.textContent = st ? signedCount(st.cumAbs) : '—';
       dChgPct.textContent = st ? signedPct(st.cumPct) : '—';
+      // *** END FIX ***
 
       dCenL.href = censusLink(name);
       drawCharts(name, st);
@@ -403,9 +416,11 @@
           const statsName = rawName.replace(/\s*Municipio$/,'');
           const stTip = statsForMunicipio(statsName);
           
+          // *** FIX: Correct tooltip year range and format ***
           const changeLine = stTip
-            ? `<br><small>2012→2023: ${signedCount(stTip.cumAbs)} (${pctFmt(stTip.cumPct)})</small>`
+            ? `<br><small>${BASE_YEAR}→2023: ${signedCount(stTip.cumAbs)} (${pctFmt(stTip.cumPct)})</small>`
             : '';
+          // *** END FIX ***
           
           lyr.bindTooltip(rawName, { direction:'center', className:'leaflet-tooltip' });
           lyr.bindPopup(`<strong>${rawName}</strong>${geoid?`<br><small>GEOID: ${geoid}</small>`:''}${changeLine}`);
@@ -476,11 +491,12 @@
     function wireMetricToggle(){
       const btnNomPct = document.getElementById('metricNominalPct');
       const btnNomAbs = document.getElementById('metricNominalAbs');
+      // Removed btnRealPct reference
 
       function setActive(mode){
         currentMode = mode;
         
-        // Removed btnRealPct reference
+        // Target only the two active buttons
         [btnNomPct, btnNomAbs].forEach(btn => {
           const isActive = (btn.id === 'metricNominalPct' && mode === MODE_NOMINAL_PCT) ||
                            (btn.id === 'metricNominalAbs' && mode === MODE_NOMINAL_ABS);
@@ -534,13 +550,18 @@
           breaks = EMPLOYMENT_ABS_BREAKS;
       }
       
+      // *** FIX: Handle Infinity/NaN resulting from division by zero, set color to highlight ***
       const col = colorFor(value, breaks);
-      
+      if (value === Infinity || value === -Infinity || !Number.isFinite(value)) {
+        return { fillColor: '#fca5a5', weight: 1.2, color:'#111827', fillOpacity:.75 }; // Light Red for Missing/NaN/Infinity
+      }
+      // *** END FIX ***
+
       return { fillColor: col, weight: 1.2, color:'#111827', fillOpacity:.75 };
     }
 
     function colorFor(value, breaks) {
-      if (!Number.isFinite(value)) return '#93c5fd';
+      if (!Number.isFinite(value)) return '#93c5fd'; // Default color for missing data
       if (value <= breaks[0]) return CHORO_COLORS[0];
       if (value <= breaks[1]) return CHORO_COLORS[1];
       if (value <= breaks[2]) return CHORO_COLORS[2];
@@ -558,11 +579,11 @@
 
       if (mode === MODE_NOMINAL_PCT) {
           breaks = EMPLOYMENT_PCT_BREAKS;
-          title = 'Employment Change 2012–2023 — % Change';
+          title = `Employment Change ${BASE_YEAR}–2023 — % Change`;
           isPct = true;
       } else {
           breaks = EMPLOYMENT_ABS_BREAKS;
-          title = 'Employment Change 2012–2023 — Absolute Count';
+          title = `Employment Change ${BASE_YEAR}–2023 — Absolute Count`;
           isPct = false;
       }
 
@@ -591,6 +612,10 @@
       labels.push(row(CHORO_COLORS[3], fmtRange(breaks[2], breaks[3], isPct)));
       labels.push(row(CHORO_COLORS[4], fmtRange(breaks[3], breaks[4], isPct)));
       labels.push(row(CHORO_COLORS[5], isPct ? `> ${formatBreak(breaks[4], true)}` : `> ${formatBreak(breaks[4], false)}`));
+      
+      // Add entry for error/missing data
+      labels.push(row('#fca5a5', 'Missing/Unreliable Base Data'));
+
 
       legend._div.innerHTML = labels.join('');
     }
