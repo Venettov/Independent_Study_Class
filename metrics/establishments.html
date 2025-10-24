@@ -248,7 +248,7 @@
 
   <script>
     const GEOJSON_URL = '../data/tl_2022_72_cousub/pr_municipalities.geojson';
-    const INCOME_JSON = '../data/employment_establishments/municipios_cbp_total_employment_2010_2023_wide_standardized.json';
+    const ESTABLISH_JSON = '../data/employment_establishments/municipios_cbp_total_employment_2010_2023_wide_with_PR.json';
 
 
     const YEARS = [2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023];
@@ -413,7 +413,7 @@
     let prBoundsGlobal = null;
 
     (async function init(){
-      const res = await fetch(INCOME_JSON, { cache:'no-store' });
+      const res = await fetch(ESTABLISH_JSON, { cache:'no-store' });
       _rows = await res.json();
 
       const prBounds = L.latLngBounds([[17.85, -67.45],[18.55, -65.25]]);
