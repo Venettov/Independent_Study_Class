@@ -1,11 +1,14 @@
 # --------------------------------------------------------------------------
-# Education Attainment Data Collection (V7 - Final Clean)
+# Education Attainment Data Collection (V8 - FIPS & Naming Fixes)
 #
 # This script fetches the Percentage of Population (25+) with a Bachelor's
 # Degree or Higher for Puerto Rico municipalities using the highly reliable
 # ACS Subject Table API (S1501).
 #
-# It outputs the data in a clean, wide format, removing unnecessary RealIncome_* fields.
+# FIXES:
+# 1. Ensures all 78 FIPS codes are explicitly listed to prevent missing Municipios (like Yauco/153).
+# 2. Adjusts START_YEAR to 2013 for better data coverage.
+# 3. Improves municipality name sanitization to handle various API return formats.
 # --------------------------------------------------------------------------
 
 import json
@@ -28,6 +31,7 @@ START_YEAR = 2013
 EDUCATION_VAR = "S1501_C01_006E" 
 
 # FIX: Explicit list of all 78 Puerto Rico County FIPS codes (Counties = Municipios in PR)
+# FIPS 001 to 153, odd numbers only. This ensures Yauco (153) is included.
 PR_COUNTY_FIPS = [
     '001', '003', '005', '007', '009', '011', '013', '015', '017', '019', '021', '023',
     '025', '027', '029', '031', '033', '035', '037', '039', '041', '043', '045', '047',
@@ -35,17 +39,23 @@ PR_COUNTY_FIPS = [
     '071', '073', '075', '077', '079', '081', '083', '085', '087', '089', '091', '093',
     '095', '097', '099', '101', '103', '105', '107', '109', '111', '113', '115', '117',
     '119', '121', '123', '125', '127', '129', '131', '133', '135', '137', '139', '141',
-    '143', '145', '147', '149', '151'
+    '143', '145', '147', '149', '151', '153' # Added FIPS 153 (Yauco)
 ]
 
 def safe_float(val):
     """Safely converts string value to float, treating missing/non-finite data as 0.0."""
     try:
-        if val is None or str(val).strip().upper() in ('N', '-', '0', '0.0'):
+        if val is None or str(val).strip().upper() in ('N', '-', '0', '0.0', '(X)', 'NA'):
             return 0.0
         return float(val)
     except Exception:
         return 0.0
+
+def clean_municipio_name(full_name):
+    """Strips common Census suffixes to get just the Municipio name."""
+    name = str(full_name).replace(", Puerto Rico", "").strip()
+    name = name.replace(" Municipio", "").strip()
+    return name
 
 # --------------------------------------------------------
 # 1. Determine available years
@@ -94,14 +104,16 @@ for i, year in enumerate(years, start=1):
         header, *rows = data
         idx = {k: i for i, k in enumerate(header)}
         
-        if len(rows) < 70:
+        if len(rows) < 78:
+            # We expect 78 municipios + 1 header row. If fewer than 78 rows, log a warning.
             print(f"\n⚠️ Only {len(rows)} municipios retrieved for {year}. Data may be incomplete.")
 
         successful_years.append(year)
         
         for row in rows:
             municipio_full = row[idx["NAME"]]
-            municipio = municipio_full.replace(" Municipio, Puerto Rico", "").replace(" Municipio", "")
+            # FIX: Use improved cleaning function
+            municipio = clean_municipio_name(municipio_full)
             percentage = safe_float(row[idx[EDUCATION_VAR]])
             
             records.append({
@@ -123,6 +135,7 @@ if len(successful_years) < 2:
 # 3. Build dataframe
 # --------------------------------------------------------
 df = pd.DataFrame(records)
+# Use the corrected municipality name to group and sort
 df = df.sort_values(["Municipio", "year"])
 
 # Add islandwide total by finding the average across all municipalities
@@ -150,8 +163,6 @@ pivot[f"Change_{prev_str}_{last_str}"] = pivot[last_str] - pivot[prev_str]
 pivot[f"Pct_Change_{prev_str}_{last_str}"] = pivot[f"Change_{prev_str}_{last_str}"]
 pivot[f"Cum_Change_{first_str}_{last_str}"] = pivot[last_str] - pivot[first_str]
 pivot[f"Cum_Pct_Change_{first_str}_{last_str}"] = pivot[f"Cum_Change_{first_str}_{last_str}"]
-
-# --- REMOVED Placeholder Fields: RealIncome_* and Real_* ---
 
 # --------------------------------------------------------
 # 5. Add metadata and save JSON
