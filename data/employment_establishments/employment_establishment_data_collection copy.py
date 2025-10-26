@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-establishment_data_collection.py — Modified to collect Establishments
-(Output structure matches municipios_acs_s1901_median_income_2010_2023_wide.json)
+employment_establishment_data_collection.py — Final API Version
+(Directly fetches data from Census CBP and outputs JSON identical in
+structure to municipios_acs_s1901_median_income_2010_2023_wide.json)
 """
 
 import json
@@ -11,16 +12,12 @@ import pandas as pd
 from pathlib import Path
 from datetime import date, datetime
 import sys
-import os # Added for environment variable access
 
-# API Key is sensitive. It's best practice to load it from an environment variable.
-# For simplicity and direct use in this script, I'll keep the placeholder but recommend E-VAR.
-API_KEY = os.environ.get("CENSUS_API_KEY", "29dc42832697b740f9eff8ae8d61b9e544478c2b")
+API_KEY = "29dc42832697b740f9eff8ae8d61b9e544478c2b"
 OUT = Path(__file__).resolve().parent
 START_YEAR = 2010
 
 def safe_int(val):
-    """Safely converts string value to int, handling 'N' and '0' as 0."""
     try:
         if val in ('N', '0'):
             return 0
@@ -29,7 +26,6 @@ def safe_int(val):
         return None
 
 def get_naics_variable_name(year):
-    """Returns the correct NAICS variable name for the CBP API by year."""
     if year >= 2017: return "NAICS2017"
     elif year >= 2012: return "NAICS2012"
     elif year >= 2007: return "NAICS2007"
@@ -38,21 +34,16 @@ def get_naics_variable_name(year):
 # --------------------------------------------------------
 # 1. Determine available CBP years
 # --------------------------------------------------------
-# Set the current year to the maximum available CBP data, or the current year
-# We'll assume the latest year for which data is available is current_year - 2
 current_year = date.today().year
-latest_data_year = current_year - 2 
-years = [y for y in range(START_YEAR, latest_data_year + 1)]
-
-if len(years) < 2:
-    raise RuntimeError("❌ Not enough valid CBP years found.")
+years = [y for y in range(START_YEAR, current_year)]
+if not years:
+    raise RuntimeError("❌ No valid CBP years found.")
 
 # --------------------------------------------------------
-# 2. Download data (Establishment Count)
+# 2. Download data
 # --------------------------------------------------------
-print("📊 Downloading Total Employer Establishments from CBP...")
-# VARS now requests the Number of Establishments (ESTAB)
-VARS = ["NAME", "ESTAB"] 
+print("📊 Downloading Total Employment from CBP...")
+VARS = ["NAME", "EMP"]
 records, successful_years = [], []
 
 for i, year in enumerate(years, start=1):
@@ -80,7 +71,7 @@ for i, year in enumerate(years, start=1):
             records.append({
                 "year": year,
                 "Municipio": municipio,
-                "Establishments": safe_int(row[idx["ESTAB"]]) # Changed to ESTAB
+                "employment": safe_int(row[idx["EMP"]])
             })
     except Exception as e:
         print(f"\n❌ {year} failed: {e}")
@@ -94,46 +85,39 @@ if len(successful_years) < 2:
 # 3. Build dataframe
 # --------------------------------------------------------
 df = pd.DataFrame(records)
-df = df.sort_values(["Municipio", "year"]).dropna(subset=["Establishments"])
+df = df.sort_values(["Municipio", "year"]).dropna(subset=["employment"])
 
 # Add islandwide total
 island = (
-    df.groupby("year", as_index=False)["Establishments"]
+    df.groupby("year", as_index=False)["employment"]
     .sum()
     .assign(Municipio="Puerto Rico")
 )
 df = pd.concat([df, island], ignore_index=True)
 
 # --------------------------------------------------------
-# 4. Pivot to wide format (CRITICAL for structural parity)
+# 4. Pivot to wide format
 # --------------------------------------------------------
-# Pivot using 'Establishments' column
-pivot = df.pivot(index="Municipio", columns="year", values="Establishments").reset_index()
+pivot = df.pivot(index="Municipio", columns="year", values="employment").reset_index()
 pivot.columns.name = None
-
-# Rename the Establishment Count columns to the year string to match the income JSON structure
-# This is the key change for compatibility: Nominal income uses '2023', so establishment count uses '2023'
 pivot = pivot.rename(columns={y: str(y) for y in successful_years})
 
 first, prev, last = successful_years[0], successful_years[-2], successful_years[-1]
-first_str, prev_str, last_str = str(first), str(prev), str(last)
 
-# Calculate change metrics, referencing the columns by their string year name
-pivot[f"Change_{prev_str}_{last_str}"] = pivot[last_str] - pivot[prev_str]
-pivot[f"Pct_Change_{prev_str}_{last_str}"] = (pivot[f"Change_{prev_str}_{last_str}"] / pivot[prev_str]) * 100
-pivot[f"Cum_Change_{first_str}_{last_str}"] = pivot[last_str] - pivot[first_str]
-pivot[f"Cum_Pct_Change_{first_str}_{last_str}"] = (pivot[f"Cum_Change_{first_str}_{last_str}"] / pivot[first_str]) * 100
+pivot[f"Change_{prev}_{last}"] = pivot[str(last)] - pivot[str(prev)]
+pivot[f"Pct_Change_{prev}_{last}"] = (pivot[f"Change_{prev}_{last}"] / pivot[str(prev)]) * 100
+pivot[f"Cum_Change_{first}_{last}"] = pivot[str(last)] - pivot[str(first)]
+pivot[f"Cum_Pct_Change_{first}_{last}"] = (pivot[f"Cum_Change_{first}_{last}"] / pivot[str(first)]) * 100
 
-# Add RealIncome_* and Real_* fields as None to ensure structural parity
-# These fields are meaningless for establishment count but required for HTML compatibility
+# Add RealIncome_* placeholders
 for y in successful_years:
     pivot[f"RealIncome_{y}"] = None
 
 for key in [
-    f"Real_Change_{prev_str}_{last_str}",
-    f"Real_Pct_Change_{prev_str}_{last_str}",
-    f"Real_Cum_Change_{first_str}_{last_str}",
-    f"Real_Cum_Pct_Change_{first_str}_{last_str}",
+    f"Real_Change_{prev}_{last}",
+    f"Real_Pct_Change_{prev}_{last}",
+    f"Real_Cum_Change_{first}_{last}",
+    f"Real_Cum_Pct_Change_{first}_{last}",
 ]:
     pivot[key] = None
 
@@ -145,21 +129,21 @@ records = pivot.to_dict(orient="records")
 metadata = {
     "metadata": {
         "source": "U.S. Census Bureau, County Business Patterns (CBP), NAICS 00 (All Industries)",
-        "units": "Number of Employer Establishments (as of March 12)",
+        "units": "Number of Paid Employees (as of March 12)",
         "islandwide_aggregation": True,
         "data_years": [str(y) for y in successful_years],
         "updated": datetime.now().strftime("%Y-%m-%d"),
         "notes": (
-            "Establishment counts use year keys (e.g., '2023') to maintain structural parity "
-            "with the income JSON. RealIncome_* and Real_* fields are null placeholders."
+            "Nominal employment values represent total paid employees. "
+            "RealIncome_* and Real_* fields are null placeholders for "
+            "compatibility with municipios_acs_s1901_median_income_2010_2023_wide.json."
         )
     }
 }
 
 records.append(metadata)
 
-# Use a new filename that indicates the data content
-json_path = OUT / f"municipios_cbp_establishments_{START_YEAR}_{last_str}_wide.json"
+json_path = OUT / f"municipios_cbp_total_employment_{START_YEAR}_{last}_wide.json"
 with open(json_path, "w", encoding="utf-8") as f:
     json.dump(records, f, indent=2, ensure_ascii=False)
 
