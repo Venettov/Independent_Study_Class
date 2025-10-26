@@ -198,8 +198,10 @@
 
     const YEARS = [2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023];
 
+    // Census Subject Table S1501 returns percentage * 1000 for precision. We must divide by 1000.
+    const PPT_DIVISOR = 1000; 
+    
     // Format for percentage display (0 decimal places)
-    const PPT_DIVISOR = 1000; // Value is stored as float * 1000 in JSON (e.g., 12.232 -> 12232.0)
     const fmt = new Intl.NumberFormat('en-US', { maximumFractionDigits: 1, minimumFractionDigits: 1 });
     const pctFmt = (v) => `${(Number(v)||0).toFixed(1)}%`;
     const signed = (n) => (n > 0 ? '+' : '') + fmt.format(n);
@@ -212,13 +214,13 @@
     const CHORO_COLORS = ['#7f1d1d', '#b91c1c', '#f97316', '#bbf7d0', '#22c55e', '#15803d'];
     
     // Cumulative Change in Percentage Points (2010-2023)
-    const CUM_PPT_BREAKS = [0, 1, 2, 3, 4]; 
+    const CUM_PPT_BREAKS = [0.0, 1.0, 2.0, 3.0, 4.0]; 
     // Absolute Change in Percentage Points (2022-2023)
-    const ABS_PPT_BREAKS = [-0.5, 0, 0.5, 1.0, 1.5];
+    const ABS_PPT_BREAKS = [-0.5, 0.0, 0.5, 1.0, 1.5];
 
     const sanitizeName = s => String(s||'').trim();
     
-    // NEW: Function to safely extract a numerical value and divide it by the divisor
+    // Function to safely extract a raw numerical value and divide it by the divisor
     const yearVal = (row, y) => {
       const v = row?.[String(y)];
       const n = Number(v);
@@ -226,12 +228,11 @@
       return Number.isFinite(n) ? n / PPT_DIVISOR : NaN;
     };
     
-    // NEW: Function to safely extract a pre-calculated change value and divide it
+    // Function to safely extract a raw change value and divide it by the divisor
     const changeVal = (val) => {
         const n = Number(val);
-        // The change values are raw floats/ints, which already represent the Ppt change.
-        // We only need to check for NaN/Invalid values.
-        return Number.isFinite(n) ? n / PPT_DIVISOR : 0;
+        // The change fields (Cum_Change_..., Change_...) are also raw percentage * 1000
+        return Number.isFinite(n) ? n / PPT_DIVISOR : NaN;
     }
 
 
@@ -247,10 +248,10 @@
 
       const val2023 = vals[vals.length - 1];
 
-      // Cumulative Change in Percentage Points (Ppt) - stored in Cum_Change_... (JSON value must be divided)
+      // Cumulative Change in Percentage Points (Ppt)
       const cumPpt = changeVal(row[`Cum_Change_${YEARS[0]}_${YEARS[YEARS.length-1}`]);
       
-      // Year-over-Year Change in Percentage Points (Ppt) - stored in Change_... (JSON value must be divided)
+      // Year-over-Year Change in Percentage Points (Ppt)
       const lastPptChange = changeVal(row[`Change_${YEARS[YEARS.length-2]}_${YEARS[YEARS.length-1}`]);
 
       // Annual Percentage Point Change array for bar chart
@@ -259,6 +260,9 @@
           // Calculate Ppt change: (Year N - Year N-1)
           pptYear.push(vals[i] - vals[i-1]);
       }
+      
+      // We must ensure the cumulative and annual change metrics are valid
+      if (!Number.isFinite(cumPpt) || !Number.isFinite(lastPptChange)) return null;
 
       return { 
         vals, val2023, cumPpt, lastPptChange, pptYear 
@@ -317,7 +321,7 @@
           labels, 
           datasets:[{ 
             label:'Ppt Change', 
-            data: st.pptYear.map(v=>+v.toFixed(3)), // Use 3 decimal points for precision before chart scaling
+            data: st.pptYear.map(v=>+v.toFixed(3)), 
             backgroundColor: st.pptYear.map(v => v < 0 ? '#dc2626' : '#16a34a') // Red/Green coloring
           }] 
         },
@@ -357,10 +361,10 @@
       d2023Pct.textContent = Number.isFinite(st?.val2023) ? `${fmt.format(st.val2023)}%` : '—';
       
       // Cumulative Ppt Change
-      dChg.textContent  = st ? `${(st.cumPpt > 0 ? '+' : '')}${fmt.format(st.cumPpt)} Ppt` : '—';
+      dChg.textContent  = st && Number.isFinite(st.cumPpt) ? `${(st.cumPpt > 0 ? '+' : '')}${fmt.format(st.cumPpt)} Ppt` : '—';
       
       // YoY Ppt Change (2022 -> 2023)
-      d2223.textContent = st ? `${(st.lastPptChange > 0 ? '+' : '')}${fmt.format(st.lastPptChange)} Ppt` : '—';
+      d2223.textContent = st && Number.isFinite(st.lastPptChange) ? `${(st.lastPptChange > 0 ? '+' : '')}${fmt.format(st.lastPptChange)} Ppt` : '—';
 
       dCenL.href = censusLink(name);
       drawCharts(name, st);
@@ -439,7 +443,7 @@
       const b = layer.getBounds();
       if (b.isValid()) map.fitBounds(b, { padding:[15,15] });
 
-      computeAbsBreaks();
+      // computeAbsBreaks is not needed since we use fixed breaks. Removed the call.
 
       legend = L.control({ position:'bottomright' });
       legend.onAdd = function(){
@@ -579,8 +583,9 @@
     }
 
     function computeAbsBreaks(){
-      // Set fixed breaks for Year-over-Year Ppt Change (2022-2023)
-      ABS_PPT_BREAKS = [-0.5, 0, 0.5, 1.0, 1.5];
+      // Fixed breaks for Year-over-Year Ppt Change (2022-2023)
+      // Note: This function is implicitly called by Leaflet's initialization, but we
+      // use fixed values defined globally, so no complex logic is needed here.
     }
 
     function wireDropdown() {
