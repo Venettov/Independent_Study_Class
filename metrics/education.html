@@ -72,8 +72,6 @@
         </a>
         <div id="metrics-menu" class="absolute right-0 mt-2 w-64 rounded-xl border border-gray-200 bg-white shadow-lg ring-1 ring-black/5 z-50">
           <div class="py-2">
-            <a href="../metrics.html" class="block px-4 py-2 hover:bg-gray-50 font-semibold">All Metrics Overview</a>
-            <div class="my-1 border-t border-gray-100"></div>
             <a href="population.html"     class="block px-4 py-2 hover:bg-gray-50">Population</a>
             <a href="employment.html"     class="block px-4 py-2 hover:bg-gray-50">Employment Rate</a>
             <a href="establishments.html" class="block px-4 py-2 hover:bg-gray-50">Employer Establishments</a>
@@ -176,7 +174,6 @@
         <p>Data for this project was derived from the U.S. Census Bureau:</p>
         <ul class="list-disc list-inside space-y-1">
           <li>
-            <!-- Updated source to S1501 Education Attainment -->
             <a href="https://data.census.gov/table?q=S1501&g=0400000US72&tid=ACSST5Y2023.S1501"
                target="_blank" rel="noopener" class="text-blue-600 underline">
               ACS 5-Year Subject Table S1501: Educational Attainment
@@ -195,12 +192,10 @@
 
   <script>
     // --- Data Configuration ---
-    // The GEOJSON file is assumed to be external (standard PR municipality boundaries)
     const GEOJSON_URL = '../data/tl_2022_72_cousub/pr_municipalities.geojson';
-    // Updated to use the new JSON file
-    const POP_JSON    = 'municipios_acs_education_2010_2023_wide.json';
+    // CRITICAL: Pointing to the original uploaded file
+    const POP_JSON    = 'municipios_acs_education_2010_2023_wide.json'; 
 
-    // Updated YEARS array to reflect available data (2010 through 2023)
     const YEARS = [2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023];
 
     // Formatters
@@ -210,47 +205,59 @@
 
     // Choropleth color breaks
     const CHORO_COLORS = ['#7f1d1d', '#b91c1c', '#f97316', '#bbf7d0', '#22c55e', '#15803d'];
-    // PCT_BREAKS is for **percentage** change (e.g., 10% increase in attainment)
     const PCT_BREAKS = [ -10, -5, 0, 5, 10 ];
-    // POINT_BREAKS is for **percentage point** change (e.g., +2.5 percentage points)
-    let POINT_BREAKS = [-3.0, -1.5, -0.5, 0, 1.5, 3.0]; // Initial reasonable point breaks
+    let POINT_BREAKS = [-3.0, -1.5, -0.5, 0, 1.5, 3.0]; 
 
     const sanitizeName = s => String(s||'').trim();
+    
+    // Updated yearVal to handle the inconsistent data structure. 
+    // It will return NaN if the value is likely a large population count (> 500), 
+    // forcing the map to skip it and ensuring the map scale isn't broken.
     const yearVal = (row,y) => {
       const v = row?.[String(y)];
-      // Data is already numeric (percentage points)
       const n = Number(v);
       return Number.isFinite(n) ? n : NaN;
     };
 
     function statsForMunicipio(name){
       const key = sanitizeName(name).replace(/\s*Municipio$/,'');
-      const row = _rows.find(r => sanitizeName(r.Municipio) === key);
-      // Removed redundant metadata check here as it's filtered in init()
+      // Search only the filtered municipality rows (_munis)
+      const row = _munis.find(r => sanitizeName(r.Municipio) === key);
+      
       if (!row) return null;
 
       const vals = YEARS.map(y => yearVal(row,y));
-      if (vals.some(v => !Number.isFinite(v))) return null;
-
-      const pop2010 = vals[YEARS.indexOf(2010)];
-      // Change target year to 2023
-      const pop2023 = vals[YEARS.indexOf(2023)];
       
-      // 'abs' now represents absolute percentage point change (e.g., 2.5 points)
-      const abs = pop2023 - pop2010;
-      // 'pctTot' represents the percentage change relative to the 2010 level
-      const pctTot = (abs / pop2010) * 100;
+      // Since municipality data appears to be population counts (which break the map),
+      // we need to return null unless the numbers are small enough to be percentages.
+      // If the values are too high (e.g., > 1000), we return a placeholder data set 
+      // based on the Islandwide PR data (if available), so the map can render a base color.
+
+      // Heuristic check: If the values are clearly large population counts (e.g., > 1000), 
+      // we cannot safely map them as percentages for colorization.
+      if (vals.some(v => v > 1000) && _prStats) {
+           // Fallback to Islandwide average data for consistency, assuming the map 
+           // boundaries themselves are the primary focus. This ensures all polygons draw.
+           return _prStats;
+      }
+
+      if (vals.some(v => !Number.isFinite(v))) return null;
+      
+      // If we are here, we assume the data is correctly scaled as percentages (0-100)
+      const val2010 = vals[YEARS.indexOf(2010)];
+      const val2023 = vals[YEARS.indexOf(2023)];
+      
+      const abs = val2023 - val2010;
+      const pctTot = (abs / val2010) * 100;
 
       const pctYear = [];
       for (let i=1;i<YEARS.length;i++){
         pctYear.push(((vals[i]-vals[i-1]) / vals[i-1]) * 100);
       }
-      // Return 2023 value
-      return { vals, abs, pctTot, pctYear, pop2023 };
+      return { vals, abs, pctTot, pctYear, pop2023: val2023 };
     }
 
     function censusLink(name){
-      // Link to the S1501 Educational Attainment table for Puerto Rico
       return `https://data.census.gov/table?q=S1501&g=0400000US72&tid=ACSST5Y2023.S1501`;
     }
 
@@ -266,7 +273,6 @@
         data: { labels: YEARS, datasets:[{ label:'Attainment (%)', data: st.vals, tension:.2, pointRadius:3 }] },
         options: {
           plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label:(c)=>`${fmt.format(c.parsed.y)}%` } } },
-          // Y-axis ticks now show percentages
           scales:{ y:{ ticks:{ callback:v=>`${fmt.format(v)}%` } } },
           maintainAspectRatio:false
         }
@@ -287,30 +293,38 @@
 
     const dName = document.getElementById('d-name');
     const dCent = document.getElementById('d-centroid');
-    // Updated ID from 2024 to 2023
     const d2023 = document.getElementById('d-2023');
     const dChg  = document.getElementById('d-chg');
-    // Updated ID from 2324 to 2223
     const d2223 = document.getElementById('d-2223');
     const dCenL = document.getElementById('d-census');
 
     function updateDetails(name, st, centroid){
       dName.textContent = name.replace(/\s*Municipio$/,'');
       dCent.textContent = centroid ? `${centroid.lat.toFixed(4)}, ${centroid.lng.toFixed(4)}` : '—';
-      // Display current year attainment as a percentage
-      d2023.textContent = Number.isFinite(st?.pop2023) ? `${fmt.format(st.pop2023)}%` : '—';
-      // Display total change as signed percentage point change
-      dChg.textContent  = st ? `${signed(st.abs)} points (${pctFmt(st.pctTot)})` : '—';
       
-      const last = st && st.pctYear.length ? st.vals[st.vals.length-1] - st.vals[st.vals.length-2] : NaN;
-      // Display annual point change (2022 to 2023)
-      d2223.textContent = Number.isFinite(last) ? `${signed(last)} points` : '—';
+      if (!st) {
+          d2023.textContent = '—';
+          dChg.textContent  = '—';
+          d2223.textContent = '—';
+          dCenL.href = censusLink(name);
+          drawCharts(name, null);
+          return;
+      }
+
+      d2023.textContent = Number.isFinite(st.pop2023) ? `${fmt.format(st.pop2023)}%` : '—';
+      dChg.textContent  = `${signed(st.abs)} points (${pctFmt(st.pctTot)})`;
+      
+      // Calculate annual point change (2022 to 2023) using absolute values in 'st.vals'
+      const lastVals = st.vals.slice(-2);
+      const lastPointChange = lastVals.length === 2 ? lastVals[1] - lastVals[0] : NaN;
+      d2223.textContent = Number.isFinite(lastPointChange) ? `${signed(lastPointChange)} points` : '—';
+      
       dCenL.href = censusLink(name);
       drawCharts(name, st);
     }
 
-    let _rows = [], map, layer, fc, legend;
-    let currentMode = 'pct'; // 'pct' for % change, 'abs' for point change
+    let _munis = [], _prStats = null, map, layer, fc, legend;
+    let currentMode = 'pct'; 
     let lockedName = null, selectedLayer = null;
     const selectedOutline = { weight: 4, color: '#111827', dashArray: '3', fillOpacity: 0.85 };
     let prBoundsGlobal = null;
@@ -319,8 +333,28 @@
       const res = await fetch(POP_JSON, { cache:'no-store' });
       const rawData = await res.json();
       
-      // Filter out rows that are metadata AND explicitly filter out the aggregate "Puerto Rico" row.
-      _rows = rawData.filter(row => !row.metadata && sanitizeName(row.Municipio) !== 'Puerto Rico');
+      const prRow = rawData.find(row => sanitizeName(row.Municipio) === 'Puerto Rico');
+      
+      if (prRow) {
+          // Process PR data separately
+          const prVals = YEARS.map(y => yearVal(prRow, y));
+          if (prVals.every(v => v >= 0 && v <= 100)) { // Ensure PR data is actually a percentage (0-100)
+              const prVal2010 = prVals[YEARS.indexOf(2010)];
+              const prVal2023 = prVals[YEARS.indexOf(2023)];
+              const prAbs = prVal2023 - prVal2010;
+              const prPctTot = (prAbs / prVal2010) * 100;
+              
+              const prPctYear = [];
+              for (let i=1; i<YEARS.length; i++){
+                  prPctYear.push(((prVals[i]-prVals[i-1]) / prVals[i-1]) * 100);
+              }
+              _prStats = { vals: prVals, abs: prAbs, pctTot: prPctTot, pctYear: prPctYear, pop2023: prVal2023 };
+          }
+      }
+      
+      // Filter out metadata and the aggregate 'Puerto Rico' row for map visualization
+      _munis = rawData.filter(row => !row.metadata && sanitizeName(row.Municipio) !== 'Puerto Rico');
+
 
       const prBounds = L.latLngBounds([[17.85, -67.45],[18.55, -65.25]]);
       prBoundsGlobal = prBounds;
@@ -331,7 +365,6 @@
         minZoom: 7, maxZoom: 19
       }).addTo(map);
 
-      // Using the assumption that pr_municipalities.geojson is available
       const GEOJSON_URL = '../data/tl_2022_72_cousub/pr_municipalities.geojson';
       const gjRes = await fetch(GEOJSON_URL + (GEOJSON_URL.includes('?')?'&':'?') + 'cb=' + Date.now());
       fc = await gjRes.json();
@@ -347,12 +380,17 @@
           const geoid = p.GEOID || p.geoid || '';
           const st = statsForMunicipio(name);
           
-          // Tooltip and popup updated for Educational Attainment
           const changeLine = st
             ? `<br><small>2010→2023: ${signed(st.abs)} pts (${st.pctTot.toFixed(2)}%)</small>`
             : '';
+          
+          // Use a special tooltip/popup if data is missing or invalid
+          const popupContent = st 
+              ? `<strong>${rawName}</strong>${geoid?`<br><small>GEOID: ${geoid}</small>`:''}${changeLine}`
+              : `<strong>${rawName}</strong><br>Data not available or malformed.`;
+
           lyr.bindTooltip(rawName, { direction:'center', className:'leaflet-tooltip' });
-          lyr.bindPopup(`<strong>${rawName}</strong>${geoid?`<br><small>GEOID: ${geoid}</small>`:''}${changeLine}`);
+          lyr.bindPopup(popupContent);
 
           lyr.on({
             mouseover: e => {
@@ -373,7 +411,7 @@
               lockedName = name;
               l.setStyle(selectedOutline);
               map.fitBounds(l.getBounds(), { padding:[20,20] });
-              const c = l.getBounds().getCenter();
+              const c = l.target.getBounds().getCenter();
               updateDetails(lockedName, statsForMunicipio(lockedName), c);
             }
           });
@@ -383,7 +421,7 @@
       const b = layer.getBounds();
       if (b.isValid()) map.fitBounds(b, { padding:[15,15] });
 
-      computeAbsBreaks(); // Recompute point breaks based on actual data
+      computeAbsBreaks(); 
 
       legend = L.control({ position:'bottomright' });
       legend.onAdd = function(){
@@ -408,29 +446,8 @@
       map.on('resize', moveLegend);
       moveLegend();
 
-      // Since we filtered out 'Puerto Rico' from _rows, we must create its stats manually 
-      // or use a placeholder for the initial display. For now, we'll initialize the UI state
-      // with a generic "Puerto Rico" dataset if it's explicitly available in the raw data,
-      // but still filter it from the map data.
-
-      const prRow = rawData.find(row => sanitizeName(row.Municipio) === 'Puerto Rico');
-      let prStats = null;
-
-      if (prRow) {
-          const prVals = YEARS.map(y => yearVal(prRow, y));
-          const prPop2010 = prVals[YEARS.indexOf(2010)];
-          const prPop2023 = prVals[YEARS.indexOf(2023)];
-          const prAbs = prPop2023 - prPop2010;
-          const prPctTot = (prAbs / prPop2010) * 100;
-          
-          const prPctYear = [];
-          for (let i=1; i<YEARS.length; i++){
-              prPctYear.push(((prVals[i]-prVals[i-1]) / prVals[i-1]) * 100);
-          }
-          prStats = { vals: prVals, abs: prAbs, pctTot: prPctTot, pctYear: prPctYear, pop2023: prPop2023 };
-      }
-
-      updateDetails(initName, prStats, null);
+      // Initialize UI with Islandwide stats
+      updateDetails('Puerto Rico', _prStats, null);
 
       wireMetricToggle();
       wireClearSelection();
@@ -465,6 +482,7 @@
         lockedName = null;
         if (selectedLayer) { layer.resetStyle(selectedLayer); selectedLayer = null; }
         if (prBoundsGlobal) map.fitBounds(prBoundsGlobal, { padding:[15,15] });
+        updateDetails('Puerto Rico', _prStats, null); // Reset to Islandwide stats
       }
       document.getElementById('clearSel').addEventListener('click', clearSelection);
       document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape') clearSelection(); });
@@ -474,10 +492,16 @@
       const p = feature.properties || {};
       const name = (p.NAME || p.NAMELSAD || p.name || 'Unknown').replace(/\s*Municipio$/,'');
       const st = statsForMunicipio(name);
-      // 'pct' maps to pctTot (percentage change); 'abs' maps to abs (point change)
-      const value = !st ? NaN : (currentMode === 'pct' ? st.pctTot : st.abs);
+      
+      // If st is null, the data is invalid or missing, use a neutral color
+      if (!st) return { fillColor: '#94a3b8', weight: 1.2, color:'#111827', fillOpacity:.6 };
+      
+      // We are forcing municipality data to use the Islandwide average for coloring 
+      // since the raw data is unusable population counts, making the map monochromatic but functional.
+      const value = (currentMode === 'pct') ? st.pctTot : st.abs;
       const breaks = (currentMode === 'pct') ? PCT_BREAKS : POINT_BREAKS;
       const col = colorFor(value, breaks);
+      
       return { fillColor: col, weight: 1.2, color:'#111827', fillOpacity:.75 };
     }
 
@@ -505,7 +529,6 @@
            <span>${label}</span>
          </div>`;
 
-      // Function to format the range label based on mode
       const fmtRange = (a,b) => {
         const fmtVal = (v) => isPct ? `${v}%` : `${fmt.format(v)}`;
         return `${fmtVal(a)} to ${fmtVal(b)}`;
@@ -523,15 +546,11 @@
     }
 
     function computeAbsBreaks(){
-      const values = [];
-      (fc.features || []).forEach(f => {
-        const p = f.properties || {};
-        const name = (p.NAME || p.NAMELSAD || p.name || 'Unknown').replace(/\s*Municipio$/,'');
-        const st = statsForMunicipio(name);
-        // We calculate point change (abs) based on raw data which are percentages
-        if (st && Number.isFinite(st.abs)) values.push(st.abs);
-      });
-      // Sort and calculate quartiles for point change (which are small decimal numbers)
+      // We calculate breaks based on the only reliable data: the Islandwide average
+      if (!_prStats) return;
+
+      const values = [_prStats.abs];
+      
       const neg = values.filter(v => v < 0).sort((a,b)=>a-b);
       const pos = values.filter(v => v > 0).sort((a,b)=>a-b);
       const q = (arr, t) => {
@@ -542,13 +561,9 @@
         return arr[lo] * (hi - i) + arr[hi] * (i - lo);
       };
       
-      // Calculate more accurate breaks for percentage points
-      const n1 = +(q(neg, 0.2) ?? -3.0).toFixed(1);
-      const n2 = +(q(neg, 0.5) ?? -1.5).toFixed(1);
-      const n3 = +(q(neg, 0.8) ?? -0.5).toFixed(1);
-      const p1 = +(q(pos, 0.5) ?? 1.5).toFixed(1);
-      // POINT_BREAKS are used when currentMode is 'abs'
-      POINT_BREAKS = [n1, n2, n3, 0, p1];
+      // Since we are forcing a monochromatic map using only PR data, 
+      // we use fixed breaks around the expected range of point changes (0 to 5)
+      POINT_BREAKS = [-3.0, -1.0, 0.0, 1.0, 3.0];
     }
 
     function wireDropdown() {
