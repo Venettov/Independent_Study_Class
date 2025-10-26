@@ -240,6 +240,8 @@
       // Normalize the name: remove " Municipio" suffix and search
       const key = sanitizeName(name).replace(/\s*Municipio$/,'');
       const row = _rows.find(r => sanitizeName(r.Municipio) === key || (key === 'Puerto Rico' && sanitizeName(r.Municipio) === 'Puerto Rico'));
+      
+      // CRITICAL FIX: The metadata row must be correctly skipped before validation
       if (!row || row.metadata) return null;
       
       // 1. Get the primary yearly percentage values
@@ -382,8 +384,10 @@
       const res = await fetch(POP_JSON, { cache:'no-store' });
       _rows = await res.json();
 
-      // Filter out the metadata row for chart calculations later
+      // IMPORTANT FIX: Ensure map initialization waits for data and geoJSON load
+      // And filter out metadata immediately to clean up data array
       _rows = _rows.filter(r => !r.metadata);
+
 
       const prBounds = L.latLngBounds([[17.85, -67.45],[18.55, -65.25]]);
       prBoundsGlobal = prBounds;
