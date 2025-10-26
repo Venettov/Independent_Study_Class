@@ -226,8 +226,8 @@
     function statsForMunicipio(name){
       const key = sanitizeName(name).replace(/\s*Municipio$/,'');
       const row = _rows.find(r => sanitizeName(r.Municipio) === key);
-      // Exclude metadata row
-      if (!row || row.metadata) return null;
+      // Removed redundant metadata check here as it's filtered in init()
+      if (!row) return null;
 
       const vals = YEARS.map(y => yearVal(row,y));
       if (vals.some(v => !Number.isFinite(v))) return null;
@@ -317,7 +317,10 @@
 
     (async function init(){
       const res = await fetch(POP_JSON, { cache:'no-store' });
-      _rows = await res.json();
+      const rawData = await res.json();
+      
+      // Filter out the metadata object found in the last position of the array
+      _rows = rawData.filter(row => !row.metadata);
 
       const prBounds = L.latLngBounds([[17.85, -67.45],[18.55, -65.25]]);
       prBoundsGlobal = prBounds;
