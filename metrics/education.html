@@ -414,7 +414,8 @@
         onEachFeature: (f, lyr) => {
           const p = f.properties || {};
           const rawName = p.NAME || p.NAMELSAD || p.name || 'Unknown';
-          const name = rawName.replace(/\s*Municipio$/,'');
+          // Fix 1: Robustly sanitize GeoJSON name
+          const name = rawName.replace(/\s*Municipio$/,''); 
           const geoid = p.GEOID || p.geoid || '';
           const st = statsForMunicipio(name);
           
