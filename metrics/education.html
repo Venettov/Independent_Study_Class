@@ -231,7 +231,7 @@
     // Function to safely extract a raw change value and divide it by the divisor
     const changeVal = (val) => {
         const n = Number(val);
-        // The change fields (Cum_Change_..., Change_...) are also raw percentage * 1000
+        // The change fields (Cum_Change_..., Change_...) are raw percentage * 1000, so they need division
         return Number.isFinite(n) ? n / PPT_DIVISOR : NaN;
     }
 
@@ -241,28 +241,30 @@
       const key = sanitizeName(name).replace(/\s*Municipio$/,'');
       const row = _rows.find(r => sanitizeName(r.Municipio) === key || (key === 'Puerto Rico' && sanitizeName(r.Municipio) === 'Puerto Rico'));
       if (!row || row.metadata) return null;
-
+      
+      // 1. Get the primary yearly percentage values
       const vals = YEARS.map(y => yearVal(row,y));
-      // Stop if any core values are missing
       if (vals.some(v => !Number.isFinite(v))) return null;
 
       const val2023 = vals[vals.length - 1];
 
-      // Cumulative Change in Percentage Points (Ppt)
+      // 2. Get the pre-calculated change fields (must be divided by PPT_DIVISOR)
       const cumPpt = changeVal(row[`Cum_Change_${YEARS[0]}_${YEARS[YEARS.length-1}`]);
-      
-      // Year-over-Year Change in Percentage Points (Ppt)
       const lastPptChange = changeVal(row[`Change_${YEARS[YEARS.length-2]}_${YEARS[YEARS.length-1}`]);
+      
+      // 3. Validate key metrics (prevent map crash if any main change metrics are bad)
+      if (!Number.isFinite(cumPpt) || !Number.isFinite(lastPptChange)) return null;
 
-      // Annual Percentage Point Change array for bar chart
+
+      // 4. Annual Percentage Point Change array for bar chart (calculated from converted vals)
       const pptYear = [];
       for (let i = 1; i < YEARS.length; i++) {
           // Calculate Ppt change: (Year N - Year N-1)
           pptYear.push(vals[i] - vals[i-1]);
       }
       
-      // We must ensure the cumulative and annual change metrics are valid
-      if (!Number.isFinite(cumPpt) || !Number.isFinite(lastPptChange)) return null;
+      // Final check: if the last calculated PPT change is NaN, we return null to skip mapping
+      if (!Number.isFinite(pptYear[pptYear.length - 1])) return null;
 
       return { 
         vals, val2023, cumPpt, lastPptChange, pptYear 
@@ -443,8 +445,6 @@
       const b = layer.getBounds();
       if (b.isValid()) map.fitBounds(b, { padding:[15,15] });
 
-      // computeAbsBreaks is not needed since we use fixed breaks. Removed the call.
-
       legend = L.control({ position:'bottomright' });
       legend.onAdd = function(){
         const div = L.DomUtil.create('div', 'info legend');
@@ -583,9 +583,7 @@
     }
 
     function computeAbsBreaks(){
-      // Fixed breaks for Year-over-Year Ppt Change (2022-2023)
-      // Note: This function is implicitly called by Leaflet's initialization, but we
-      // use fixed values defined globally, so no complex logic is needed here.
+      // Fixed breaks are defined globally (CUM_PPT_BREAKS and ABS_PPT_BREAKS)
     }
 
     function wireDropdown() {
