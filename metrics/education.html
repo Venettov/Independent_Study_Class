@@ -243,7 +243,8 @@
       if (!row || row.metadata) return null;
       
       // 1. Get the primary yearly percentage values
-      const vals = YEARS.map(y => yearVal(row,y));
+      // CRITICAL FIX: Truncate to a standard number of decimals (like 4) for floating point consistency
+      const vals = YEARS.map(y => Number(yearVal(row,y).toFixed(4)));
       if (vals.some(v => !Number.isFinite(v))) return null;
 
       const val2023 = vals[vals.length - 1];
