@@ -319,8 +319,8 @@
       const res = await fetch(POP_JSON, { cache:'no-store' });
       const rawData = await res.json();
       
-      // Filter out the metadata object found in the last position of the array
-      _rows = rawData.filter(row => !row.metadata);
+      // Filter out rows that are metadata AND explicitly filter out the aggregate "Puerto Rico" row.
+      _rows = rawData.filter(row => !row.metadata && sanitizeName(row.Municipio) !== 'Puerto Rico');
 
       const prBounds = L.latLngBounds([[17.85, -67.45],[18.55, -65.25]]);
       prBoundsGlobal = prBounds;
@@ -408,8 +408,29 @@
       map.on('resize', moveLegend);
       moveLegend();
 
-      const initName = 'Puerto Rico';
-      updateDetails(initName, statsForMunicipio(initName), null);
+      // Since we filtered out 'Puerto Rico' from _rows, we must create its stats manually 
+      // or use a placeholder for the initial display. For now, we'll initialize the UI state
+      // with a generic "Puerto Rico" dataset if it's explicitly available in the raw data,
+      // but still filter it from the map data.
+
+      const prRow = rawData.find(row => sanitizeName(row.Municipio) === 'Puerto Rico');
+      let prStats = null;
+
+      if (prRow) {
+          const prVals = YEARS.map(y => yearVal(prRow, y));
+          const prPop2010 = prVals[YEARS.indexOf(2010)];
+          const prPop2023 = prVals[YEARS.indexOf(2023)];
+          const prAbs = prPop2023 - prPop2010;
+          const prPctTot = (prAbs / prPop2010) * 100;
+          
+          const prPctYear = [];
+          for (let i=1; i<YEARS.length; i++){
+              prPctYear.push(((prVals[i]-prVals[i-1]) / prVals[i-1]) * 100);
+          }
+          prStats = { vals: prVals, abs: prAbs, pctTot: prPctTot, pctYear: prPctYear, pop2023: prPop2023 };
+      }
+
+      updateDetails(initName, prStats, null);
 
       wireMetricToggle();
       wireClearSelection();
