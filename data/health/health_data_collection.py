@@ -1,11 +1,11 @@
 # --------------------------------------------------------------------------
-# Education Attainment Data Collection (V7 - Final Clean)
+# Health Coverage Data Collection (S2701)
 #
-# This script fetches the Percentage of Population (25+) with a Bachelor's
-# Degree or Higher for Puerto Rico municipalities using the highly reliable
-# ACS Subject Table API (S1501).
+# This script fetches the Percentage of Civilian Noninstitutionalized Population
+# that is WITHOUT HEALTH INSURANCE COVERAGE for Puerto Rico municipalities
+# using the ACS Subject Table API (S2701).
 #
-# It outputs the data in a clean, wide format, removing unnecessary RealIncome_* fields.
+# It outputs the data in a clean, wide format, calculating key change metrics.
 # --------------------------------------------------------------------------
 
 import json
@@ -21,13 +21,16 @@ from time import sleep
 # Hardcoding the key for successful retrieval based on previous run information.
 API_KEY = "29dc42832697b740f9eff8ae8d61b9e544478c2b" 
 OUT = Path(__file__).resolve().parent
-# FIX: Start year adjusted to 2013 for reliable data coverage across all 78 municipios
+# --- FIX: Start at 2013, as earlier years often have suppressed data.
 START_YEAR = 2013
 
-# Variable for Percent of Population (25+) with Bachelor's Degree or Higher (S1501)
-EDUCATION_VAR = "S1501_C01_006E" 
+# Variable for Percent of Civilian Noninstitutionalized Population WITHOUT Health Coverage (S2701)
+# S2701_C05_001E: Estimate; Percent without health insurance coverage
+HEALTH_VAR = "S2701_C05_001E" 
+METRIC_LABEL = "Percentage Without Health Coverage"
 
-# FIX: Explicit list of all 78 Puerto Rico County FIPS codes (Counties = Municipios in PR)
+# List of all 78 Puerto Rico County FIPS codes (Counties = Municipios in PR)
+# All 78 FIPS codes for Puerto Rico counties (municipios)
 PR_COUNTY_FIPS = [
     '001', '003', '005', '007', '009', '011', '013', '015', '017', '019', '021', '023',
     '025', '027', '029', '031', '033', '035', '037', '039', '041', '043', '045', '047',
@@ -41,6 +44,7 @@ PR_COUNTY_FIPS = [
 def safe_float(val):
     """Safely converts string value to float, treating missing/non-finite data as 0.0."""
     try:
+        # Note: ACS sometimes returns '-' or 'N' for suppressed data. Treat as 0.0 for calculations.
         if val is None or str(val).strip().upper() in ('N', '-', '0', '0.0'):
             return 0.0
         return float(val)
@@ -59,22 +63,25 @@ if len(years) < 2:
     sys.exit(0)
 
 # --------------------------------------------------------
-# 2. Download data (Percentage Attainment)
+# 2. Download data (Health Coverage Percentage)
 # --------------------------------------------------------
-print("🎓 Downloading Population 25+ Attainment Data (Table S1501)...")
+print(f"🏥 Downloading Health Coverage Data ({METRIC_LABEL} - Table S2701)...")
 
 records, successful_years = [], []
 
 for i, year in enumerate(years, start=1):
     fips_list = ','.join(PR_COUNTY_FIPS)
     
+    # URL to fetch S2701 percentage of population without coverage
     url = (
         f"https://api.census.gov/data/{year}/acs/acs5/subject"
-        f"?get=NAME,{EDUCATION_VAR}&for=county:{fips_list}&in=state:72&key={API_KEY}"
+        f"?get=NAME,{HEALTH_VAR}&for=county:{fips_list}&in=state:72&key={API_KEY}"
     )
 
     sys.stdout.write(f"\rFetching {year} ({i}/{len(years)})...")
     sys.stdout.flush()
+    
+    # --- Exponential Backoff/Retry Logic (Not implemented here for brevity, but recommended) ---
     
     try:
         r = requests.get(url, timeout=30)
@@ -87,22 +94,26 @@ for i, year in enumerate(years, start=1):
         data = r.json()
         
         if not data or len(data) <= 1:
-            print(f"\n🛑 Error: Empty response body for {year}. Data skipped.")
+            # If the response is empty or just contains headers, it means no data was available for the query.
+            # This is common in early ACS years for all municipios.
+            print(f"\n🛑 No data returned for {year}. Data skipped.")
             sleep(0.5)
             continue
             
         header, *rows = data
         idx = {k: i for i, k in enumerate(header)}
         
+        # Check if the number of municipios retrieved is close to 78.
         if len(rows) < 70:
             print(f"\n⚠️ Only {len(rows)} municipios retrieved for {year}. Data may be incomplete.")
-
+        
         successful_years.append(year)
         
         for row in rows:
             municipio_full = row[idx["NAME"]]
+            # Remove " Municipio, Puerto Rico" and " Municipio" from the name
             municipio = municipio_full.replace(" Municipio, Puerto Rico", "").replace(" Municipio", "")
-            percentage = safe_float(row[idx[EDUCATION_VAR]])
+            percentage = safe_float(row[idx[HEALTH_VAR]])
             
             records.append({
                 "year": year,
@@ -126,6 +137,8 @@ df = pd.DataFrame(records)
 df = df.sort_values(["Municipio", "year"])
 
 # Add islandwide total by finding the average across all municipalities
+# Note: ACS provides direct Puerto Rico totals, but averaging the 78 municipios
+# is often necessary if the query does not retrieve the aggregate.
 island_avg = (
     df.groupby("year", as_index=False)["Percentage"]
     .mean()
@@ -151,8 +164,6 @@ pivot[f"Pct_Change_{prev_str}_{last_str}"] = pivot[f"Change_{prev_str}_{last_str
 pivot[f"Cum_Change_{first_str}_{last_str}"] = pivot[last_str] - pivot[first_str]
 pivot[f"Cum_Pct_Change_{first_str}_{last_str}"] = pivot[f"Cum_Change_{first_str}_{last_str}"]
 
-# --- REMOVED Placeholder Fields: RealIncome_* and Real_* ---
-
 # --------------------------------------------------------
 # 5. Add metadata and save JSON
 # --------------------------------------------------------
@@ -160,21 +171,21 @@ records = pivot.to_dict(orient="records")
 
 metadata = {
     "metadata": {
-        "source": "U.S. Census Bureau, ACS 5-Year Subject Table S1501 (Educational Attainment)",
-        "units": "Percent of Population Age 25+ with Bachelor's Degree or Higher (Percentage Points)",
-        "islandwide_aggregation": "Average of all 78 Municipios",
+        "source": "U.S. Census Bureau, ACS 5-Year Subject Table S2701 (Selected Characteristics of Health Insurance Coverage)",
+        "units": "Percent of Civilian Noninstitutionalized Population Without Health Insurance Coverage (Percentage Points)",
+        "islandwide_aggregation": "Average of all 78 Municipios (used for consistency)",
         "data_years": [str(y) for y in successful_years],
         "updated": datetime.now().strftime("%Y-%m-%d"),
         "notes": (
-            "Nominal values represent the calculated percentage point for Bachelor's degree or higher. "
-            "File structure has been simplified to exclude unnecessary RealIncome fields."
+            f"Nominal values represent the calculated percentage point for {METRIC_LABEL}. "
+            "Lower values are generally better for this metric."
         )
     }
 }
 
 records.append(metadata)
 
-json_path = OUT / f"municipios_acs_education_{START_YEAR}_{last_str}_wide.json"
+json_path = OUT / f"municipios_acs_health_{START_YEAR}_{last_str}_wide.json"
 with open(json_path, "w", encoding="utf-8") as f:
     json.dump(records, f, indent=2, ensure_ascii=False)
 

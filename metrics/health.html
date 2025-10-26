@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Population & Economic Dynamics in Puerto Rico</title>
+  <title>Health Coverage Dynamics in Puerto Rico</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
 
@@ -91,7 +91,7 @@
             <a href="income.html"         class="block px-4 py-2 hover:bg-gray-50">Household Income</a>
             <a href="housing.html"        class="block px-4 py-2 hover:bg-gray-50">Housing Units</a>
             <a href="education.html"      class="block px-4 py-2 hover:bg-gray-50">Education</a>
-            <a href="health.html"         class="block px-4 py-2 hover:bg-gray-50">Health</a>
+            <a href="health.html"         class="block px-4 py-2 bg-gray-100 font-semibold">Health</a>
           </div>
         </div>
       </div>
@@ -104,6 +104,7 @@
 
   <main class="max-w-7xl mx-auto px-4 py-8 space-y-8">
 
+    <!-- STANDARDIZED HEADER -->
     <header class="card hero p-6 sm:p-8 lg:p-10 relative">
       <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between">
           <div>
@@ -123,28 +124,7 @@
               </div>
           </div>
       </div>
-
-      <div class="absolute bottom-4 right-4 group">
-        <div class="text-right">
-          <span class="text-sm font-semibold text-gray-700 cursor-pointer group-hover:text-blue-700 transition">
-            Project Customer: Puerto Rico Planning Board
-          </span>
-        </div>
-
-        <div class="absolute right-0 bottom-full mb-2 w-96 bg-white text-gray-800 p-4 rounded-lg shadow-xl border border-gray-200 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50">
-          <p class="text-gray-700 text-sm">
-            The Planning Board oversees long-term economic development, demographic analysis, and land-use
-            planning for Puerto Rico. This project’s interactive maps, municipal-level dashboards, and
-            population change analyses provide actionable insights that could directly support their policy
-            models and strategic decision-making.
-          </p>
-          <p class="text-sm mt-3">
-            🔗 <a href="https://jp.pr.gov" target="_blank" rel="noopener" class="text-blue-600 underline">
-              Visit Puerto Rico Planning Board Website
-            </a>
-          </p>
-        </div>
-      </div>
+      <!-- Removed extra Planning Board hover box for simplicity -->
     </header>
 
     <section class="card p-4">
@@ -153,9 +133,9 @@
         <div class="flex items-center gap-2">
           <div class="inline-flex rounded-lg border bg-white shadow-sm overflow-hidden">
             <button id="metricPct" type="button"
-              class="px-3 py-1.5 text-sm font-medium bg-blue-600 text-white">% change</button>
+              class="px-3 py-1.5 text-sm font-medium bg-blue-600 text-white">% Change in Coverage Gap</button>
             <button id="metricAbs" type="button"
-              class="px-3 py-1.5 text-sm font-medium hover:bg-gray-50">abs change</button>
+              class="px-3 py-1.5 text-sm font-medium hover:bg-gray-50">Absolute Coverage Gap</button>
           </div>
           <button id="clearSel"
             class="px-3 py-1.5 text-sm rounded-lg border bg-white hover:bg-gray-50">Clear selection</button>
@@ -165,7 +145,7 @@
     </section>
 
     <section class="card p-6">
-      <h2 class="text-lg font-semibold mb-4">Population details</h2>
+      <h2 class="text-lg font-semibold mb-4">Health Coverage Details</h2>
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div>
           <div class="text-sm">
@@ -174,31 +154,31 @@
           </div>
 
           <div class="mt-4 text-sm">
-            <div class="font-semibold text-gray-700">Population (Vintage 2024):</div>
+            <div class="font-semibold text-gray-700">Health Coverage Gap (Percentage Without Coverage):</div>
             <ul class="mt-1 space-y-1">
-              <li>2024: <span id="d-2024" class="font-semibold">—</span></li>
-              <li>Change since 2020: <span id="d-chg" class="font-semibold">—</span></li>
-              <li>2023→2024: <span id="d-2324" class="font-semibold">—</span></li>
+              <!-- UPDATED LABELS -->
+              <li>Latest Year (2023): <span id="d-latest" class="font-semibold">—</span></li>
+              <li>Change since 2013: <span id="d-chg" class="font-semibold">—</span></li>
+              <li>Latest Annual Change: <span id="d-annual-chg" class="font-semibold">—</span></li>
             </ul>
           </div>
 
           <div class="mt-4 text-sm">
-            <a id="d-census" class="text-blue-600 underline" href="#" target="_blank" rel="noopener">
-              Open on data.census.gov ↗
+            <a id="d-census" class="text-blue-600 underline" href="https://data.census.gov/table?q=S2701:+HEALTH+INSURANCE+COVERAGE+STATUS+Puerto+Rico" target="_blank" rel="noopener">
+              Open on data.census.gov (S2701) ↗
             </a>
           </div>
-          <Image of a person looking through a magnifying glass at a map of Puerto Rico>
         </div>
 
         <div>
-          <h3 class="font-semibold mb-2">Population trend (2020–2024)</h3>
+          <h3 class="font-semibold mb-2">Percentage Without Coverage Trend (2013–2023)</h3>
           <div class="mini bg-gray-50 rounded p-3">
             <canvas id="lineChart"></canvas>
           </div>
         </div>
 
         <div>
-          <h3 class="font-semibold mb-2">Annual % Change</h3>
+          <h3 class="font-semibold mb-2">Annual Change in Coverage Gap (pp)</h3>
           <div class="mini bg-gray-50 rounded p-3">
             <canvas id="barChart"></canvas>
           </div>
@@ -210,26 +190,37 @@
   <script>
     // ---------------------- Data paths ----------------------
     const GEOJSON_URL = '../data/tl_2022_72_cousub/pr_municipalities.geojson';
-    const POP_JSON    = '../data/population/prm-est2024-chg.json';
+    // --- UPDATED PATH ---
+    const HEALTH_JSON    = '../data/health/municipios_acs_health_2013_2023_wide.json';
+    
+    // --- UPDATED YEARS ---
+    const YEARS = [2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023];
 
     // ---------------------- Formatters ----------------------
-    const fmt = new Intl.NumberFormat('en-US');
-    const pctFmt = (v) => `${(Number(v)||0).toFixed(2)}%`;
-    const signed = (n) => (n > 0 ? '+' : '') + fmt.format(n);
+    // Percent format with one decimal place
+    const fmtPct = (v) => `${(Number(v)||0).toFixed(1)}%`;
+    // Percentage Point Change format
+    const ppFmt = (v) => `${(Number(v)||0).toFixed(2)} pp`;
+    // Signed percentage point change (for cumulative change)
+    const signedPP = (n) => (n > 0 ? '+' : '') + ppFmt(n);
 
     // ---------------------- Choropleth colors ----------------------
-    // 6-bin palette (deep red → orange → light green → green)
-    const CHORO_COLORS = ['#7f1d1d', '#b91c1c', '#f97316', '#bbf7d0', '#22c55e', '#15803d'];
-
-    // Default % breaks (≤-10, -10–-6, -6–-3, -3–0, 0–2, >2)
-    const PCT_BREAKS = [-10, -6, -3, 0, 2];
-
-    // Computed later from data for abs change
-    let ABS_BREAKS = [-10000, -6000, -3000, 0, 1000];
+    // Colors must be INVERSE since a lower percentage is better (Good=Green, Bad=Red)
+    const CHORO_COLORS = ['#15803d', '#22c55e', '#bbf7d0', '#f97316', '#b91c1c', '#7f1d1d']; // Green to Red
+    
+    // Breaks for Percentage Without Coverage (Lower is better)
+    // Example breaks: ≤4%, 4-6%, 6-8%, 8-10%, 10-12%, >12%
+    // Using values from the uploaded data range (e.g., 2% to 15%)
+    const PCT_BREAKS = [2, 4, 6, 8, 10]; 
+    
+    // Computed later from data for absolute change in percentage points
+    // Example breaks: ≤-2, -2 to -1, -1 to 0, 0 to 1, 1 to 2, >2
+    let ABS_BREAKS = [-2.0, -1.0, 0.0, 1.0, 2.0]; // Change in PP (Negative is better)
 
     // Utility: color for a value given breaks
     function colorFor(value, breaks) {
       if (!Number.isFinite(value)) return '#93c5fd';
+      // The color scale is already defined Green->Red (good->bad)
       if (value <= breaks[0]) return CHORO_COLORS[0];
       if (value <= breaks[1]) return CHORO_COLORS[1];
       if (value <= breaks[2]) return CHORO_COLORS[2];
@@ -239,59 +230,55 @@
     }
 
     // ---------------------- Helpers ----------------------
-    function sanitizeName(s){ return String(s||'').replace(/^\s*[.\-•]\s*/, '').trim(); }
-
-    function detectGeoHeader(rows){
-      const keys = Object.keys(rows[0]||{});
-      const priority = ["col_1","Geographic Area","Geographic Area Name","Geographic Area:"];
-      for (const p of priority) if (keys.includes(p)) return p;
-      for (const k of keys) {
-        const col = rows.slice(0,40).map(r => r[k]);
-        const hasPR = col.some(v => typeof v === 'string' && /puerto rico/i.test(v));
-        if (hasPR) return k;
-      }
-      return keys[0];
+    function sanitizeName(s){ 
+      return String(s||'').replace(/^\s*[.\-•]\s*/, '').replace(/\s*Municipio$/,'').trim(); 
     }
 
     function valFromRow(row, y){
-      if (row.hasOwnProperty(String(y))) {
-        const n = Number(String(row[String(y)]).replace(/[, ]/g,''));
-        if (Number.isFinite(n)) return n;
-      }
-      const alt = `Population Estimate (as of July 1) | ${y}`;
-      if (row.hasOwnProperty(alt)) {
-        const n = Number(String(row[alt]).replace(/[, ]/g,''));
-        if (Number.isFinite(n)) return n;
-      }
-      if (y === 2020 && row.hasOwnProperty("April 1, 2020 Estimates Base")) {
-        const n = Number(String(row["April 1, 2020 Estimates Base"]).replace(/[, ]/g,''));
-        if (Number.isFinite(n)) return n;
-      }
-      return NaN;
+      const v = row?.[String(y)];
+      const n = Number(v);
+      return Number.isFinite(n) ? n : NaN;
     }
-
-    const YEARS = [2020,2021,2022,2023,2024];
-
+    
     function statsForMunicipio(name){
       name = sanitizeName(name);
-      const row = _rows.find(r => sanitizeName(r[_geoHeader]) === name);
+      // Data structure changed to simplified format, finding row by Municipio key
+      const row = _rows.find(r => sanitizeName(r.Municipio) === name);
       if (!row) return null;
+
+      // Extract raw percentage values
       const vals = YEARS.map(y => valFromRow(row, y));
+      
+      // Look up change metrics from the row directly
+      const firstYear = YEARS[0];
+      const lastYear = YEARS[YEARS.length - 1];
+      const changeAbs = row[`Cum_Change_${firstYear}_${lastYear}`];
+      const changePct = row[`Cum_Pct_Change_${firstYear}_${lastYear}`];
+      const annualChange = row[`Change_${YEARS[YEARS.length-2]}_${lastYear}`];
+      
       if (vals.some(v => !Number.isFinite(v))) return null;
-      const pop2020 = vals[0];
-      const pop2024 = vals[4];
-      const abs = pop2024 - pop2020;
-      const pctTot = (abs / pop2020) * 100;
-      const pctYear = [];
-      for (let i=1;i<YEARS.length;i++){
-        pctYear.push(((vals[i]-vals[i-1]) / vals[i-1]) * 100);
+      
+      // Calculate annual percentage point change
+      const ppChangeYear = [];
+      for (let i = 1; i < YEARS.length; i++) {
+        ppChangeYear.push(vals[i] - vals[i - 1]);
       }
-      return { vals, abs, pctTot, pctYear, pop2024 };
+      
+      const latestVal = vals[vals.length - 1];
+      
+      return { 
+        vals, 
+        abs: Number(changeAbs), // Cumulative PP change
+        pctTot: Number(changePct), // Cumulative PP change (same as abs)
+        ppChangeYear, 
+        latestVal, 
+        annualChange: Number(annualChange)
+      };
     }
 
     function censusLink(name){
       const g = '040XX00US72'; // Puerto Rico profile
-      return `https://data.census.gov/profile/Puerto_Rico?g=${g}`;
+      return `https://data.census.gov/table?q=S2701:+HEALTH+INSURANCE+COVERAGE+STATUS+Puerto+Rico`;
     }
 
     // ---------------------- Charts ----------------------
@@ -304,22 +291,56 @@
       if (lineChart) lineChart.destroy();
       lineChart = new Chart(ctxL, {
         type: 'line',
-        data: { labels: YEARS, datasets:[{ label:'Population', data: st.vals, tension:.2, pointRadius:4 }] },
+        data: { 
+          labels: YEARS, 
+          datasets:[{ 
+            label:'% Without Coverage', 
+            data: st.vals, 
+            tension:.2, 
+            pointRadius:4,
+            borderColor: '#dc2626' // Red for 'without coverage'
+          }] 
+        },
         options: {
-          plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label:(c)=>fmt.format(c.parsed.y) } } },
-          scales:{ y:{ ticks:{ callback:v=>fmt.format(v) } } },
+          plugins:{ 
+            legend:{ display:false }, 
+            tooltip:{ callbacks:{ label:(c)=>fmtPct(c.parsed.y) } } 
+          },
+          scales:{ 
+            y:{ 
+              ticks:{ callback:v=>fmtPct(v) },
+              title: { display: true, text: '% Without Coverage' }
+            } 
+          },
           maintainAspectRatio: false
         }
       });
 
-      const labels = ['2020→2021','2021→2022','2022→2023','2023→2024'];
+      const labels = YEARS.slice(1).map((y,i)=> `${YEARS[i]}→${y}`);
       if (barChart) barChart.destroy();
       barChart = new Chart(ctxB, {
         type: 'bar',
-        data: { labels, datasets:[{ label:'% change', data: st.pctYear.map(v=>+v.toFixed(2)) }] },
+        data: { 
+          labels, 
+          datasets:[{ 
+            label:'Annual Change in Percentage Points (pp)', 
+            data: st.ppChangeYear.map(v=>+v.toFixed(2)),
+            // Negative change (red) is GOOD (fewer people without coverage).
+            // Positive change (green) is BAD (more people without coverage).
+            backgroundColor: st.ppChangeYear.map(v => v < 0 ? '#15803d' : '#b91c1c') 
+          }] 
+        },
         options: {
-          plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label:(c)=>pctFmt(c.parsed.y) } } },
-          scales:{ y:{ ticks:{ callback:v=>pctFmt(v) } } },
+          plugins:{ 
+            legend:{ display:false }, 
+            tooltip:{ callbacks:{ label:(c)=>signedPP(c.parsed.y) } } 
+          },
+          scales:{ 
+            y:{ 
+              ticks:{ callback:v=>ppFmt(v) },
+              title: { display: true, text: 'Change in PP' }
+            } 
+          },
           maintainAspectRatio: false
         }
       });
@@ -328,26 +349,32 @@
     // ---------------------- DOM targets ----------------------
     const dName = document.getElementById('d-name');
     const dCent = document.getElementById('d-centroid');
-    const d2024 = document.getElementById('d-2024');
+    const dLatest = document.getElementById('d-latest');
     const dChg  = document.getElementById('d-chg');
-    const d2324 = document.getElementById('d-2324');
+    const dAnnualChg = document.getElementById('d-annual-chg');
     const dCenL = document.getElementById('d-census');
 
     function updateDetails(name, st, centroid){
       dName.textContent = name;
       dCent.textContent = centroid ? `${centroid.lat.toFixed(4)}, ${centroid.lng.toFixed(4)}` : '—';
-      d2024.textContent = Number.isFinite(st?.pop2024) ? fmt.format(st.pop2024) : '—';
-      dChg.textContent  = st ? `${signed(st.abs)} (${pctFmt(st.pctTot)})` : '—';
-      const last = st && st.pctYear.length ? st.pctYear[st.pctYear.length-1] : NaN;
-      d2324.textContent = Number.isFinite(last) ? pctFmt(last) : '—';
+      
+      // Latest Year (2023) percentage without coverage
+      dLatest.textContent = Number.isFinite(st?.latestVal) ? fmtPct(st.latestVal) : '—';
+      
+      // Cumulative change since 2013 (in PP)
+      dChg.textContent  = st ? signedPP(st.abs) : '—';
+      
+      // Latest annual change (2022 -> 2023) in PP
+      dAnnualChg.textContent = st ? signedPP(st.annualChange) : '—';
+      
       dCenL.href = censusLink(name);
       drawCharts(name, st);
     }
 
     // ---------------------- Load data + map ----------------------
-    let _rows = [], _geoHeader = null;
+    let _rows = [];
     let map, layer, fc, legend;
-    let currentMode = 'pct'; // 'pct' | 'abs'
+    let currentMode = 'pct'; // 'pct' (Cumulative Change) | 'abs' (Latest Value)
 
     // Selection state (click-to-lock)
     let lockedName = null;
@@ -358,10 +385,12 @@
     let prBoundsGlobal = null;
 
     (async function init(){
-      // Load population rows
-      const res = await fetch(POP_JSON, { cache:'no-store' });
-      _rows = await res.json();
-      _geoHeader = detectGeoHeader(_rows);
+      // Load health coverage rows
+      const res = await fetch(HEALTH_JSON, { cache:'no-store' });
+      const rawData = await res.json();
+      
+      // Filter out the metadata row
+      _rows = rawData.filter(row => !row.metadata);
 
       // Map
       const prBounds = L.latLngBounds([[17.85, -67.45],[18.55, -65.25]]);
@@ -384,41 +413,45 @@
           const p = f.properties || {};
           const name = p.NAME || p.NAMELSAD || p.name || 'Unknown';
           const geoid = p.GEOID || p.geoid || '';
-          const st = statsForMunicipio(name);
-          const changeLine = st
-            ? `<br><small>2020→2024: ${signed(st.abs)} (${st.pctTot.toFixed(2)}%)</small>`
-            : '';
+          const statsName = sanitizeName(name);
+          const st = statsForMunicipio(statsName);
+          
+          let changeLine = '';
+          if (st) {
+            // Using latest value for tooltip
+            const latest = fmtPct(st.latestVal);
+            const change = signedPP(st.abs);
+            changeLine = `<br><small>Without Coverage (2023): ${latest}<br>Change since ${YEARS[0]}: ${change}</small>`;
+          }
+          
           lyr.bindTooltip(name, { direction:'center', className:'leaflet-tooltip' });
           lyr.bindPopup(`<strong>${name}</strong>${geoid?`<br><small>GEOID: ${geoid}</small>`:''}${changeLine}`);
 
           lyr.on({
             mouseover: e => {
-              if (lockedName) return; // ignore hovers while locked
+              if (lockedName) return; 
               e.target.setStyle(hiStyle);
               e.target.bringToFront?.();
               const c = e.target.getBounds().getCenter();
-              updateDetails(name, statsForMunicipio(name), c);
+              updateDetails(statsName, statsForMunicipio(statsName), c);
             },
             mouseout: e => {
-              if (lockedName) return; // keep selected outline when locked
+              if (lockedName) return; 
               layer.resetStyle(e.target);
             },
             click: e => {
               const l = e.target;
+              const clickedName = sanitizeName(name);
 
-              // Remove previous selection outline
               if (selectedLayer) layer.resetStyle(selectedLayer);
-
-              // Record and outline the new selection
               selectedLayer = l;
-              lockedName = name;
+              lockedName = clickedName;
               l.setStyle(selectedOutline);
 
-              // Keep zoom-on-click
               map.fitBounds(l.getBounds(), { padding:[20,20] });
 
               const c = l.getBounds().getCenter();
-              updateDetails(name, statsForMunicipio(name), c);
+              updateDetails(lockedName, statsForMunicipio(lockedName), c);
             }
           });
         }
@@ -430,7 +463,7 @@
       // Compute ABS breaks from data (quantile-ish)
       computeAbsBreaks();
 
-      // Legend control (up over the VI)
+      // Legend control
       legend = L.control({ position:'bottomright' });
       legend.onAdd = function(){
         const div = L.DomUtil.create('div', 'info legend');
@@ -454,14 +487,9 @@
       map.on('resize', moveLegend);
       moveLegend();
 
-      // Initial details
+      // Initial details for Puerto Rico (Islandwide average)
       const initName = 'Puerto Rico';
-      const st0 = statsForMunicipio(initName) || (function(){
-        const f0 = (fc.features && fc.features[0]) || null;
-        const nm = f0 ? (f0.properties.NAME || f0.properties.NAMELSAD || '—') : '—';
-        return statsForMunicipio(nm);
-      })();
-      updateDetails(initName, st0, null);
+      updateDetails(initName, statsForMunicipio(initName), null);
 
       // Toggle UI + Clear selection
       wireMetricToggle();
@@ -476,6 +504,8 @@
 
       function setActive(mode){
         currentMode = mode;
+        
+        // Active state styles
         btnPct.classList.toggle('bg-blue-600', mode==='pct');
         btnPct.classList.toggle('text-white', mode==='pct');
         btnPct.classList.toggle('hover:bg-gray-50', mode!=='pct');
@@ -485,7 +515,6 @@
 
         // Restyle polygons
         layer.eachLayer(l => l.setStyle(styleForFeature(l.feature)));
-        // Preserve selection outline
         if (selectedLayer) selectedLayer.setStyle(selectedOutline);
 
         // Update legend
@@ -503,6 +532,7 @@
         lockedName = null;
         if (selectedLayer) { layer.resetStyle(selectedLayer); selectedLayer = null; }
         if (prBoundsGlobal) map.fitBounds(prBoundsGlobal, { padding:[15,15] });
+        updateDetails('Puerto Rico', statsForMunicipio('Puerto Rico'), null);
       }
       document.getElementById('clearSel').addEventListener('click', clearSelection);
       document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape') clearSelection(); });
@@ -513,8 +543,12 @@
       const p = feature.properties || {};
       const name = p.NAME || p.NAMELSAD || p.name || 'Unknown';
       const st = statsForMunicipio(name);
-      const value = !st ? NaN : (currentMode === 'pct' ? st.pctTot : st.abs);
-      const breaks = (currentMode === 'pct') ? PCT_BREAKS : ABS_BREAKS;
+      
+      // Mode 'pct' uses Cumulative Change in PP (Lower is better, -ve is better)
+      // Mode 'abs' uses Latest Value (2023) (Lower is better)
+      const value = !st ? NaN : (currentMode === 'pct' ? st.abs : st.latestVal);
+      const breaks = (currentMode === 'pct') ? ABS_BREAKS : PCT_BREAKS;
+      
       const col = colorFor(value, breaks);
       return { fillColor: col, weight: 1.2, color:'#111827', fillOpacity:.75 };
     }
@@ -522,8 +556,14 @@
     // Legend render (updates title + ranges)
     function renderLegend(){
       if (!legend || !legend._div) return;
-      const breaks = (currentMode === 'pct') ? PCT_BREAKS : ABS_BREAKS;
-      const title  = (currentMode === 'pct') ? 'Change since 2020 — %' : 'Change since 2020 — people';
+      
+      const isLatestValue = currentMode === 'abs';
+      const breaks = isLatestValue ? PCT_BREAKS : ABS_BREAKS;
+      
+      // In both modes, lower value (green color) is better
+      const title  = isLatestValue 
+        ? `Coverage Gap (2023) — %` 
+        : `Coverage Gap Change (${YEARS[0]}–${YEARS[YEARS.length-1]}) — pp`;
 
       const labels = [];
       function row(color, label) {
@@ -534,17 +574,19 @@
                 </div>`;
       }
       // Build range labels
-      const fmtRange = (a,b) => (currentMode==='pct')
-          ? `${a}% to ${b}%`
-          : `${signed(a)} to ${signed(b)}`;
+      const fmtRange = (a,b) => isLatestValue 
+          ? `${fmtPct(a)} to ${fmtPct(b)}` 
+          : `${signedPP(a)} to ${signedPP(b)}`;
 
       labels.push(`<div style="font-weight:600;margin-bottom:.25rem">${title}</div>`);
-      labels.push(row(CHORO_COLORS[0], (currentMode==='pct') ? `≤ ${breaks[0]}%` : `≤ ${signed(breaks[0])}`));
+      
+      // Color scale is Green (low) to Red (high)
+      labels.push(row(CHORO_COLORS[0], isLatestValue ? `≤ ${fmtPct(breaks[0])}` : `≤ ${signedPP(breaks[0])}`));
       labels.push(row(CHORO_COLORS[1], fmtRange(breaks[0], breaks[1])));
       labels.push(row(CHORO_COLORS[2], fmtRange(breaks[1], breaks[2])));
       labels.push(row(CHORO_COLORS[3], fmtRange(breaks[2], breaks[3])));
       labels.push(row(CHORO_COLORS[4], fmtRange(breaks[3], breaks[4])));
-      labels.push(row(CHORO_COLORS[5], (currentMode==='pct') ? `> ${breaks[4]}%` : `> ${signed(breaks[4])}`));
+      labels.push(row(CHORO_COLORS[5], isLatestValue ? `> ${fmtPct(breaks[4])}` : `> ${signedPP(breaks[4])}`));
 
       legend._div.innerHTML = labels.join('');
     }
@@ -552,14 +594,17 @@
     // Compute ABS breaks from current data (quantile-ish, robust)
     function computeAbsBreaks(){
       const values = [];
-      (fc.features || []).forEach(f => {
-        const p = f.properties || {};
-        const name = p.NAME || p.NAMELSAD || p.name || 'Unknown';
-        const st = statsForMunicipio(name);
-        if (st && Number.isFinite(st.abs)) values.push(st.abs);
+      _rows.filter(r => r.Municipio !== 'Puerto Rico').forEach(row => {
+        const firstYear = YEARS[0];
+        const lastYear = YEARS[YEARS.length - 1];
+        const abs = row[`Cum_Change_${firstYear}_${lastYear}`];
+        if (Number.isFinite(abs)) values.push(abs);
       });
+      
+      // ABS breaks are based on change in PP (Negative is better/green)
       const neg = values.filter(v => v < 0).sort((a,b)=>a-b);
       const pos = values.filter(v => v > 0).sort((a,b)=>a-b);
+      
       const q = (arr, t) => {
         if (!arr.length) return null;
         const i = (arr.length - 1) * t;
@@ -567,11 +612,36 @@
         if (lo === hi) return arr[lo];
         return arr[lo] * (hi - i) + arr[hi] * (i - lo);
       };
-      const n1 = q(neg, 0.2) ?? -1000;
-      const n2 = q(neg, 0.5) ?? -500;
-      const n3 = q(neg, 0.8) ?? -100;
-      const p1 = q(pos, 0.5) ?? 100;
-      ABS_BREAKS = [n1, n2, n3, 0, p1];
+      
+      // Calculate quantiles and round to 1 decimal place
+      const r1 = (n) => Math.round(n * 10) / 10;
+      
+      // Negative changes (improvement)
+      const n1 = q(neg, 0.2) ?? -2.0;
+      const n2 = q(neg, 0.5) ?? -1.0;
+      
+      // Positive changes (deterioration)
+      const p1 = q(pos, 0.5) ?? 1.0;
+      const p2 = q(pos, 0.8) ?? 2.0;
+      
+      // Breaks must be sorted ascending: [Red, Red, Orange, Green, Green, Green]
+      // We focus on separating large negative changes (best) from small/positive changes (worst)
+      
+      ABS_BREAKS = [r1(n1), r1(n2), r1(0), r1(p1), r1(p2)]; // [Worst negative, Mid negative, 0, Mid positive, Worst positive]
+      
+      // Final break array should clearly separate improvement from worsening.
+      ABS_BREAKS = [
+          r1(Math.min(...values) - 0.01), // Min value (deepest red)
+          r1(q(neg, 0.25) || -1.0),      // Low-end improvement
+          r1(q(neg, 0.75) || -0.5),      // Mid-range improvement
+          r1(q(pos, 0.5) || 0.5),        // Mid-range deterioration
+          r1(Math.max(...values) + 0.01) // Max value (deepest green)
+      ];
+      
+      // Final sanity check, ensuring 0 is captured and breaks are sorted (ascending)
+      ABS_BREAKS = Array.from(new Set([
+          -2.0, -1.0, 0.0, 1.0, 2.0
+      ])).sort((a,b) => a - b);
     }
     
     // Dropdown functionality & active link
