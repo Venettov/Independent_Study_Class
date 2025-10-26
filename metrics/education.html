@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Educational Attainment Dynamics in Puerto Rico</title>
+  <title>Education Attainment Dynamics in Puerto Rico</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
 
@@ -72,6 +72,8 @@
         </a>
         <div id="metrics-menu" class="absolute right-0 mt-2 w-64 rounded-xl border border-gray-200 bg-white shadow-lg ring-1 ring-black/5 z-50">
           <div class="py-2">
+            <a href="../metrics.html" class="block px-4 py-2 hover:bg-gray-50 font-semibold">All Metrics Overview</a>
+            <div class="my-1 border-t border-gray-100"></div>
             <a href="population.html"     class="block px-4 py-2 hover:bg-gray-50">Population</a>
             <a href="employment.html"     class="block px-4 py-2 hover:bg-gray-50">Employment Rate</a>
             <a href="establishments.html" class="block px-4 py-2 hover:bg-gray-50">Employer Establishments</a>
@@ -95,11 +97,10 @@
         <div>
           <p class="text-sm font-semibold text-gray-500 uppercase">Graduate Independent Study</p>
           <h1 class="mt-2 text-4xl sm:text-5xl font-extrabold leading-tight">
-            Population & Economic Dynamics in Puerto Rico
+            Educational Attainment Dynamics in Puerto Rico
           </h1>
           <p class="mt-3 text-lg text-gray-700">
-            A graduate research project examining demographic shifts, out-migration, and sustainable development
-            strategies through linked data analysis and policy synthesis.
+            Analysis of the percentage of the population aged 25 and older with a Bachelor's Degree or Higher across municipalities, based on ACS 5-Year Estimates.
           </p>
           <div class="mt-5">
             <span class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-100 text-slate-800">
@@ -116,8 +117,8 @@
         <div class="text-sm text-gray-700 font-medium">Map shading by</div>
         <div class="flex items-center gap-2">
           <div class="inline-flex rounded-lg border bg-white shadow-sm overflow-hidden">
-            <button id="metricPct" type="button" class="px-3 py-1.5 text-sm font-medium bg-blue-600 text-white">Change (Percentage Points)</button>
-            <button id="metricAbs" type="button" class="px-3 py-1.5 text-sm font-medium hover:bg-gray-50">Change (YoY Ppt)</button>
+            <button id="metricPct" type="button" class="px-3 py-1.5 text-sm font-medium bg-blue-600 text-white">Pct Change</button>
+            <button id="metricAbs" type="button" class="px-3 py-1.5 text-sm font-medium hover:bg-gray-50">Point Change</button>
           </div>
           <button id="clearSel" class="px-3 py-1.5 text-sm rounded-lg border bg-white hover:bg-gray-50">Clear selection</button>
         </div>
@@ -126,7 +127,7 @@
     </section>
 
     <section class="card p-6">
-      <h2 class="text-lg font-semibold mb-4">Educational Attainment details</h2>
+      <h2 class="text-lg font-semibold mb-4">Education Attainment Details</h2>
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div>
           <div class="text-sm">
@@ -135,30 +136,33 @@
           </div>
 
           <div class="mt-4 text-sm">
-            <div class="font-semibold text-gray-700">Bachelor's Degree or Higher (Ages 25+):</div>
+            <div class="font-semibold text-gray-700">Attainment (2023 ACS Estimate):</div>
             <ul class="mt-1 space-y-1">
-              <li>2023 Percentage: <span id="d-2023-pct" class="font-semibold">—</span></li>
-              <li>Change since 2010 (Ppt): <span id="d-chg" class="font-semibold">—</span></li>
-              <li>2022→2023 (Ppt Change): <span id="d-2223" class="font-semibold">—</span></li>
+              <!-- Value is now a percentage -->
+              <li>2023 (%): <span id="d-2023" class="font-semibold">—</span></li>
+              <!-- Change is now percentage points -->
+              <li>Change since 2010 (Points): <span id="d-chg" class="font-semibold">—</span></li>
+              <!-- Annual change is now percentage points -->
+              <li>2022→2023 (Points): <span id="d-2223" class="font-semibold">—</span></li>
             </ul>
           </div>
 
           <div class="mt-4 text-sm">
             <a id="d-census" class="text-blue-600 underline" href="#" target="_blank" rel="noopener">
-              Open on data.census.gov ↗
+              Open on data.census.gov (ACS S1501) ↗
             </a>
           </div>
         </div>
 
         <div>
-          <h3 class="font-semibold mb-2">Attainment Trend (2010–2023)</h3>
+          <h3 class="font-semibold mb-2">Attainment Trend (2010–2023, %)</h3>
           <div class="mini bg-gray-50 rounded p-3">
             <canvas id="lineChart"></canvas>
           </div>
         </div>
 
         <div>
-          <h3 class="font-semibold mb-2">Annual Change (Percentage Points)</h3>
+          <h3 class="font-semibold mb-2">Annual % Change</h3>
           <div class="mini bg-gray-50 rounded p-3">
             <canvas id="barChart"></canvas>
           </div>
@@ -172,17 +176,16 @@
         <p>Data for this project was derived from the U.S. Census Bureau:</p>
         <ul class="list-disc list-inside space-y-1">
           <li>
-            <a href="https://data.census.gov/cedsci/table?q=S1501&g=0400000US72&tid=ACSST5Y2023.S1501"
+            <!-- Updated source to S1501 Education Attainment -->
+            <a href="https://data.census.gov/table?q=S1501&g=0400000US72&tid=ACSST5Y2023.S1501"
                target="_blank" rel="noopener" class="text-blue-600 underline">
-              2023 ACS 5-Year Estimates - Educational Attainment (Table S1501)
+              ACS 5-Year Subject Table S1501: Educational Attainment
             </a>
-          </li>
-          <li>
-            <span class="text-gray-600">Geographic boundaries are based on 2022 TIGER/Line Shapefiles.</span>
+            <span class="text-gray-600"> (Bachelor's Degree or Higher, Pop 25+)</span>
           </li>
         </ul>
 
-        <p>Specific files used:</p>
+        <p>Specific file used:</p>
         <ul class="list-disc list-inside">
           <li>municipios_acs_education_2010_2023_wide.json (site build)</li>
         </ul>
@@ -191,89 +194,64 @@
   </main>
 
   <script>
+    // --- Data Configuration ---
+    // The GEOJSON file is assumed to be external (standard PR municipality boundaries)
     const GEOJSON_URL = '../data/tl_2022_72_cousub/pr_municipalities.geojson';
-    const POP_JSON    = '../data/education/municipios_acs_education_2010_2023_wide.json';
+    // Updated to use the new JSON file
+    const POP_JSON    = 'municipios_acs_education_2010_2023_wide.json';
 
+    // Updated YEARS array to reflect available data (2010 through 2023)
     const YEARS = [2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023];
 
-    // Census Subject Table S1501 returns percentage * 1000 for precision. We must divide by 1000.
-    const PPT_DIVISOR = 1000; 
-    
-    // Format for percentage display (0 decimal places)
-    const fmt = new Intl.NumberFormat('en-US', { maximumFractionDigits: 1, minimumFractionDigits: 1 });
-    const pctFmt = (v) => `${(Number(v)||0).toFixed(1)}%`;
+    // Formatters
+    const fmt = new Intl.NumberFormat('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+    const pctFmt = (v) => `${(Number(v)||0).toFixed(2)}%`;
     const signed = (n) => (n > 0 ? '+' : '') + fmt.format(n);
 
-    // Map Mode Identifiers
-    const MODE_PCT_CHANGE_PPT = 'cum_ppt'; // Cumulative Change in Percentage Points
-    const MODE_ABS_CHANGE_PPT = 'yoy_ppt'; // Year-over-Year Change in Percentage Points
-
-    // Color breaks for choropleth map
+    // Choropleth color breaks
     const CHORO_COLORS = ['#7f1d1d', '#b91c1c', '#f97316', '#bbf7d0', '#22c55e', '#15803d'];
-    
-    // Cumulative Change in Percentage Points (2010-2023)
-    const CUM_PPT_BREAKS = [0.0, 1.0, 2.0, 3.0, 4.0]; 
-    // Absolute Change in Percentage Points (2022-2023)
-    const ABS_PPT_BREAKS = [-0.5, 0.0, 0.5, 1.0, 1.5];
+    // PCT_BREAKS is for **percentage** change (e.g., 10% increase in attainment)
+    const PCT_BREAKS = [ -10, -5, 0, 5, 10 ];
+    // POINT_BREAKS is for **percentage point** change (e.g., +2.5 percentage points)
+    let POINT_BREAKS = [-3.0, -1.5, -0.5, 0, 1.5, 3.0]; // Initial reasonable point breaks
 
     const sanitizeName = s => String(s||'').trim();
-    
-    // Function to safely extract a raw numerical value and divide it by the divisor
-    const yearVal = (row, y) => {
+    const yearVal = (row,y) => {
       const v = row?.[String(y)];
+      // Data is already numeric (percentage points)
       const n = Number(v);
-      // Convert raw value (e.g., 12232.0) to actual percentage (e.g., 12.232)
-      return Number.isFinite(n) ? n / PPT_DIVISOR : NaN;
+      return Number.isFinite(n) ? n : NaN;
     };
-    
-    // Function to safely extract a raw change value and divide it by the divisor
-    const changeVal = (val) => {
-        const n = Number(val);
-        // The change fields (Cum_Change_..., Change_...) are raw percentage * 1000, so they need division
-        return Number.isFinite(n) ? n / PPT_DIVISOR : NaN;
-    }
-
 
     function statsForMunicipio(name){
-      // Normalize the name: remove " Municipio" suffix and search
       const key = sanitizeName(name).replace(/\s*Municipio$/,'');
-      const row = _rows.find(r => sanitizeName(r.Municipio) === key || (key === 'Puerto Rico' && sanitizeName(r.Municipio) === 'Puerto Rico'));
-      
-      // CRITICAL FIX: The metadata row must be correctly skipped before validation
+      const row = _rows.find(r => sanitizeName(r.Municipio) === key);
+      // Exclude metadata row
       if (!row || row.metadata) return null;
-      
-      // 1. Get the primary yearly percentage values
-      // CRITICAL FIX: Truncate to a standard number of decimals (like 4) for floating point consistency
-      const vals = YEARS.map(y => Number(yearVal(row,y).toFixed(4)));
+
+      const vals = YEARS.map(y => yearVal(row,y));
       if (vals.some(v => !Number.isFinite(v))) return null;
 
-      const val2023 = vals[vals.length - 1];
-
-      // 2. Get the pre-calculated change fields (must be divided by PPT_DIVISOR)
-      const cumPpt = changeVal(row[`Cum_Change_${YEARS[0]}_${YEARS[YEARS.length-1}`]);
-      const lastPptChange = changeVal(row[`Change_${YEARS[YEARS.length-2]}_${YEARS[YEARS.length-1}`]);
+      const pop2010 = vals[YEARS.indexOf(2010)];
+      // Change target year to 2023
+      const pop2023 = vals[YEARS.indexOf(2023)];
       
-      // 3. Validate key metrics (prevent map crash if any main change metrics are bad)
-      if (!Number.isFinite(cumPpt) || !Number.isFinite(lastPptChange)) return null;
+      // 'abs' now represents absolute percentage point change (e.g., 2.5 points)
+      const abs = pop2023 - pop2010;
+      // 'pctTot' represents the percentage change relative to the 2010 level
+      const pctTot = (abs / pop2010) * 100;
 
-
-      // 4. Annual Percentage Point Change array for bar chart (calculated from converted vals)
-      const pptYear = [];
-      for (let i = 1; i < YEARS.length; i++) {
-          // Calculate Ppt change: (Year N - Year N-1)
-          pptYear.push(vals[i] - vals[i-1]);
+      const pctYear = [];
+      for (let i=1;i<YEARS.length;i++){
+        pctYear.push(((vals[i]-vals[i-1]) / vals[i-1]) * 100);
       }
-      
-      // Final check: if the last calculated PPT change is NaN, we return null to skip mapping
-      if (!Number.isFinite(pptYear[pptYear.length - 1])) return null;
-
-      return { 
-        vals, val2023, cumPpt, lastPptChange, pptYear 
-      };
+      // Return 2023 value
+      return { vals, abs, pctTot, pctYear, pop2023 };
     }
 
     function censusLink(name){
-      return `https://data.census.gov/cedsci/table?q=S1501&g=0400000US72&tid=ACSST5Y2023.S1501`;
+      // Link to the S1501 Educational Attainment table for Puerto Rico
+      return `https://data.census.gov/table?q=S1501&g=0400000US72&tid=ACSST5Y2023.S1501`;
     }
 
     let lineChart=null, barChart=null;
@@ -282,68 +260,26 @@
       const ctxL = document.getElementById('lineChart').getContext('2d');
       const ctxB = document.getElementById('barChart').getContext('2d');
 
-      // Line Chart (Attainment Trend)
       if (lineChart) lineChart.destroy();
       lineChart = new Chart(ctxL, {
         type: 'line',
-        data: { labels: YEARS, datasets:[{ 
-          label:'% with Bachelor\'s+', 
-          data: st.vals, 
-          tension:.2, 
-          pointRadius:3, 
-          borderColor: '#2563eb', 
-          backgroundColor: 'rgba(37, 99, 235, 0.2)' 
-        }] },
+        data: { labels: YEARS, datasets:[{ label:'Attainment (%)', data: st.vals, tension:.2, pointRadius:3 }] },
         options: {
-          plugins:{ 
-            legend:{ display:false }, 
-            tooltip:{ 
-              callbacks:{ 
-                label:(c)=>`${c.parsed.y.toFixed(2)}%` 
-              } 
-            } 
-          },
-          scales:{ 
-            y:{ 
-              ticks:{ 
-                callback:v=>`${v.toFixed(1)}%` 
-              } 
-            }, 
-            x:{ ticks:{ maxRotation: 90, minRotation: 90 } }
-          },
+          plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label:(c)=>`${fmt.format(c.parsed.y)}%` } } },
+          // Y-axis ticks now show percentages
+          scales:{ y:{ ticks:{ callback:v=>`${fmt.format(v)}%` } } },
           maintainAspectRatio:false
         }
       });
 
-      // Bar Chart (Annual Ppt Change)
       const labels = YEARS.slice(1).map((y,i)=> `${YEARS[i]}→${y}`);
       if (barChart) barChart.destroy();
       barChart = new Chart(ctxB, {
         type:'bar',
-        data:{ 
-          labels, 
-          datasets:[{ 
-            label:'Ppt Change', 
-            data: st.pptYear.map(v=>+v.toFixed(3)), 
-            backgroundColor: st.pptYear.map(v => v < 0 ? '#dc2626' : '#16a34a') // Red/Green coloring
-          }] 
-        },
+        data:{ labels, datasets:[{ label:'% change', data: st.pctYear.map(v=>+v.toFixed(2)) }] },
         options:{
-          plugins:{ 
-            legend:{ display:false }, 
-            tooltip:{ 
-              callbacks:{ 
-                label:(c)=>`${(c.parsed.y > 0 ? '+' : '')}${c.parsed.y.toFixed(2)} Ppt` 
-              } 
-            } 
-          },
-          scales:{ 
-            y:{ 
-              ticks:{ 
-                callback:v=>`${(v > 0 ? '+' : '')}${v.toFixed(1)}`
-              } 
-            } 
-          },
+          plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label:(c)=>pctFmt(c.parsed.y) } } },
+          scales:{ y:{ ticks:{ callback:v=>pctFmt(v) } } },
           maintainAspectRatio:false
         }
       });
@@ -351,30 +287,30 @@
 
     const dName = document.getElementById('d-name');
     const dCent = document.getElementById('d-centroid');
-    const d2023Pct = document.getElementById('d-2023-pct');
+    // Updated ID from 2024 to 2023
+    const d2023 = document.getElementById('d-2023');
     const dChg  = document.getElementById('d-chg');
+    // Updated ID from 2324 to 2223
     const d2223 = document.getElementById('d-2223');
     const dCenL = document.getElementById('d-census');
 
     function updateDetails(name, st, centroid){
       dName.textContent = name.replace(/\s*Municipio$/,'');
       dCent.textContent = centroid ? `${centroid.lat.toFixed(4)}, ${centroid.lng.toFixed(4)}` : '—';
+      // Display current year attainment as a percentage
+      d2023.textContent = Number.isFinite(st?.pop2023) ? `${fmt.format(st.pop2023)}%` : '—';
+      // Display total change as signed percentage point change
+      dChg.textContent  = st ? `${signed(st.abs)} points (${pctFmt(st.pctTot)})` : '—';
       
-      // 2023 Percentage
-      d2023Pct.textContent = Number.isFinite(st?.val2023) ? `${fmt.format(st.val2023)}%` : '—';
-      
-      // Cumulative Ppt Change
-      dChg.textContent  = st && Number.isFinite(st.cumPpt) ? `${(st.cumPpt > 0 ? '+' : '')}${fmt.format(st.cumPpt)} Ppt` : '—';
-      
-      // YoY Ppt Change (2022 -> 2023)
-      d2223.textContent = st && Number.isFinite(st.lastPptChange) ? `${(st.lastPptChange > 0 ? '+' : '')}${fmt.format(st.lastPptChange)} Ppt` : '—';
-
+      const last = st && st.pctYear.length ? st.vals[st.vals.length-1] - st.vals[st.vals.length-2] : NaN;
+      // Display annual point change (2022 to 2023)
+      d2223.textContent = Number.isFinite(last) ? `${signed(last)} points` : '—';
       dCenL.href = censusLink(name);
       drawCharts(name, st);
     }
 
     let _rows = [], map, layer, fc, legend;
-    let currentMode = MODE_PCT_CHANGE_PPT;
+    let currentMode = 'pct'; // 'pct' for % change, 'abs' for point change
     let lockedName = null, selectedLayer = null;
     const selectedOutline = { weight: 4, color: '#111827', dashArray: '3', fillOpacity: 0.85 };
     let prBoundsGlobal = null;
@@ -383,27 +319,17 @@
       const res = await fetch(POP_JSON, { cache:'no-store' });
       _rows = await res.json();
 
-      // IMPORTANT: Filter out metadata BEFORE processing
-      _rows = _rows.filter(r => !r.metadata);
-
-
       const prBounds = L.latLngBounds([[17.85, -67.45],[18.55, -65.25]]);
       prBoundsGlobal = prBounds;
-      
-      // CRITICAL FIX: Ensure map initialization is wrapped in a try/catch or post-load check
-      try {
-        map = L.map('map', { zoomSnap:.25 }).fitBounds(prBounds);
-      } catch (e) {
-        console.error("Leaflet Map Initialization Failed:", e);
-        // Exit initialization if map fails to create
-        return; 
-      }
+      map = L.map('map', { zoomSnap:.25 }).fitBounds(prBounds);
 
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap contributors',
         minZoom: 7, maxZoom: 19
       }).addTo(map);
 
+      // Using the assumption that pr_municipalities.geojson is available
+      const GEOJSON_URL = '../data/tl_2022_72_cousub/pr_municipalities.geojson';
       const gjRes = await fetch(GEOJSON_URL + (GEOJSON_URL.includes('?')?'&':'?') + 'cb=' + Date.now());
       fc = await gjRes.json();
 
@@ -414,16 +340,14 @@
         onEachFeature: (f, lyr) => {
           const p = f.properties || {};
           const rawName = p.NAME || p.NAMELSAD || p.name || 'Unknown';
-          // Fix 1: Robustly sanitize GeoJSON name
-          const name = rawName.replace(/\s*Municipio$/,''); 
+          const name = rawName.replace(/\s*Municipio$/,'');
           const geoid = p.GEOID || p.geoid || '';
           const st = statsForMunicipio(name);
           
-          const cumulativeChange = Number.isFinite(st?.cumPpt) ? `${(st.cumPpt > 0 ? '+' : '')}${st.cumPpt.toFixed(1)} Ppt` : '—';
+          // Tooltip and popup updated for Educational Attainment
           const changeLine = st
-            ? `<br><small>2010→2023: ${cumulativeChange}</small>`
+            ? `<br><small>2010→2023: ${signed(st.abs)} pts (${st.pctTot.toFixed(2)}%)</small>`
             : '';
-            
           lyr.bindTooltip(rawName, { direction:'center', className:'leaflet-tooltip' });
           lyr.bindPopup(`<strong>${rawName}</strong>${geoid?`<br><small>GEOID: ${geoid}</small>`:''}${changeLine}`);
 
@@ -454,8 +378,9 @@
       }).addTo(map);
 
       const b = layer.getBounds();
-      // FIX: Added explicit check on bounds validity before attempting to fit map.
       if (b.isValid()) map.fitBounds(b, { padding:[15,15] });
+
+      computeAbsBreaks(); // Recompute point breaks based on actual data
 
       legend = L.control({ position:'bottomright' });
       legend.onAdd = function(){
@@ -489,26 +414,25 @@
     })();
 
     function wireMetricToggle(){
-      const btnCum = document.getElementById('metricPct'); // Reusing existing ID for Cumulative
-      const btnYoY = document.getElementById('metricAbs'); // Reusing existing ID for YoY
+      const btnPct = document.getElementById('metricPct');
+      const btnAbs = document.getElementById('metricAbs');
 
       function setActive(mode){
         currentMode = mode;
-        btnCum.classList.toggle('bg-blue-600', mode===MODE_PCT_CHANGE_PPT);
-        btnCum.classList.toggle('text-white', mode===MODE_PCT_CHANGE_PPT);
-        btnCum.classList.toggle('hover:bg-gray-50', mode!==MODE_PCT_CHANGE_PPT);
-        
-        btnYoY.classList.toggle('bg-blue-600', mode===MODE_ABS_CHANGE_PPT);
-        btnYoY.classList.toggle('text-white', mode===MODE_ABS_CHANGE_PPT);
-        btnYoY.classList.toggle('hover:bg-gray-50', mode!==MODE_ABS_CHANGE_PPT);
+        btnPct.classList.toggle('bg-blue-600', mode==='pct');
+        btnPct.classList.toggle('text-white', mode==='pct');
+        btnPct.classList.toggle('hover:bg-gray-50', mode!=='pct');
+        btnAbs.classList.toggle('bg-blue-600', mode==='abs');
+        btnAbs.classList.toggle('text-white', mode==='abs');
+        btnAbs.classList.toggle('hover:bg-gray-50', mode!=='abs');
 
         layer.eachLayer(l => l.setStyle(styleForFeature(l.feature)));
         if (selectedLayer) selectedLayer.setStyle(selectedOutline);
         renderLegend();
       }
 
-      btnCum.addEventListener('click', () => setActive(MODE_PCT_CHANGE_PPT));
-      btnYoY.addEventListener('click', () => setActive(MODE_ABS_CHANGE_PPT));
+      btnPct.addEventListener('click', () => setActive('pct'));
+      btnAbs.addEventListener('click', () => setActive('abs'));
       setActive(currentMode);
     }
 
@@ -526,24 +450,9 @@
       const p = feature.properties || {};
       const name = (p.NAME || p.NAMELSAD || p.name || 'Unknown').replace(/\s*Municipio$/,'');
       const st = statsForMunicipio(name);
-      
-      let value;
-      let breaks;
-
-      if (!st) {
-          return { fillColor: '#93c5fd', weight: 1.2, color:'#111827', fillOpacity:.15 }; 
-      }
-
-      // MODE_PCT_CHANGE_PPT uses Cum_Change_... (Cumulative Ppt Change 2010-2023)
-      if (currentMode === MODE_PCT_CHANGE_PPT) {
-          value = st.cumPpt;
-          breaks = CUM_PPT_BREAKS;
-      // MODE_ABS_CHANGE_PPT uses Change_... (YoY Ppt Change 2022-2023)
-      } else {
-          value = st.lastPptChange;
-          breaks = ABS_PPT_BREAKS;
-      }
-
+      // 'pct' maps to pctTot (percentage change); 'abs' maps to abs (point change)
+      const value = !st ? NaN : (currentMode === 'pct' ? st.pctTot : st.abs);
+      const breaks = (currentMode === 'pct') ? PCT_BREAKS : POINT_BREAKS;
       const col = colorFor(value, breaks);
       return { fillColor: col, weight: 1.2, color:'#111827', fillOpacity:.75 };
     }
@@ -560,17 +469,9 @@
 
     function renderLegend(){
       if (!legend || !legend._div) return;
-      
-      let breaks;
-      let title;
-
-      if (currentMode === MODE_PCT_CHANGE_PPT) {
-          breaks = CUM_PPT_BREAKS;
-          title = 'Ppt Change 2010–2023 (Cumulative)';
-      } else {
-          breaks = ABS_PPT_BREAKS;
-          title = 'Ppt Change 2022–2023 (Annual)';
-      }
+      const breaks = (currentMode === 'pct') ? PCT_BREAKS : POINT_BREAKS;
+      const title  = (currentMode === 'pct') ? '2010→2023 Change (%)' : '2010→2023 Change (Points)';
+      const isPct = currentMode === 'pct';
 
       const labels = [];
       const row = (color, label) =>
@@ -579,23 +480,51 @@
                         border:1px solid rgba(0,0,0,.15)"></span>
            <span>${label}</span>
          </div>`;
-      
-      const formatBreak = (val) => `${(val > 0 ? '+' : '')}${val.toFixed(1)} Ppt`;
-      const fmtRange = (a,b) => `${formatBreak(a)} to ${formatBreak(b)}`;
-      
+
+      // Function to format the range label based on mode
+      const fmtRange = (a,b) => {
+        const fmtVal = (v) => isPct ? `${v}%` : `${fmt.format(v)}`;
+        return `${fmtVal(a)} to ${fmtVal(b)}`;
+      }
+
       labels.push(`<div style="font-weight:600;margin-bottom:.25rem">${title}</div>`);
-      labels.push(row(CHORO_COLORS[0], `≤ ${formatBreak(breaks[0])}`));
+      labels.push(row(CHORO_COLORS[0], isPct ? `≤ ${breaks[0]}%` : `≤ ${signed(breaks[0])}`));
       labels.push(row(CHORO_COLORS[1], fmtRange(breaks[0], breaks[1])));
       labels.push(row(CHORO_COLORS[2], fmtRange(breaks[1], breaks[2])));
       labels.push(row(CHORO_COLORS[3], fmtRange(breaks[2], breaks[3])));
       labels.push(row(CHORO_COLORS[4], fmtRange(breaks[3], breaks[4])));
-      labels.push(row(CHORO_COLORS[5], `> ${formatBreak(breaks[4])}`));
+      labels.push(row(CHORO_COLORS[5], isPct ? `> ${breaks[4]}%` : `> ${signed(breaks[4])}`));
 
       legend._div.innerHTML = labels.join('');
     }
 
     function computeAbsBreaks(){
-      // Fixed breaks are defined globally (CUM_PPT_BREAKS and ABS_PPT_BREAKS)
+      const values = [];
+      (fc.features || []).forEach(f => {
+        const p = f.properties || {};
+        const name = (p.NAME || p.NAMELSAD || p.name || 'Unknown').replace(/\s*Municipio$/,'');
+        const st = statsForMunicipio(name);
+        // We calculate point change (abs) based on raw data which are percentages
+        if (st && Number.isFinite(st.abs)) values.push(st.abs);
+      });
+      // Sort and calculate quartiles for point change (which are small decimal numbers)
+      const neg = values.filter(v => v < 0).sort((a,b)=>a-b);
+      const pos = values.filter(v => v > 0).sort((a,b)=>a-b);
+      const q = (arr, t) => {
+        if (!arr.length) return null;
+        const i = (arr.length - 1) * t;
+        const lo = Math.floor(i), hi = Math.ceil(i);
+        if (lo === hi) return arr[lo];
+        return arr[lo] * (hi - i) + arr[hi] * (i - lo);
+      };
+      
+      // Calculate more accurate breaks for percentage points
+      const n1 = +(q(neg, 0.2) ?? -3.0).toFixed(1);
+      const n2 = +(q(neg, 0.5) ?? -1.5).toFixed(1);
+      const n3 = +(q(neg, 0.8) ?? -0.5).toFixed(1);
+      const p1 = +(q(pos, 0.5) ?? 1.5).toFixed(1);
+      // POINT_BREAKS are used when currentMode is 'abs'
+      POINT_BREAKS = [n1, n2, n3, 0, p1];
     }
 
     function wireDropdown() {
