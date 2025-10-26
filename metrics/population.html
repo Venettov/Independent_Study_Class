@@ -169,7 +169,54 @@
         </div>
       </div>
     </section>
+    
+    <hr class="border-gray-300">
 
+    <section class="card p-6 space-y-6">
+      <h2 class="text-lg font-semibold">Analysis of Population Dynamics (2010–2024)</h2>
+
+      <div class="space-y-4">
+        <h3 class="text-base font-semibold text-gray-700">The Overall Trend: Population Decline</h3>
+        <p>
+          The **Population Trend (2010–2024) line chart** clearly shows a significant, sustained decline in the resident population of Puerto Rico since 2010. This decline is not a recent phenomenon but an acceleration of a trend spanning over a decade, driven primarily by **negative net migration**.
+        </p>
+        <p>
+          The **Annual % Change bar chart** illustrates the severity of this loss, with nearly every year showing a negative percentage change, often exceeding $-1.00\%$ per year, especially following the major hurricanes (Maria and Irma in 2017) and the ongoing fiscal crisis. Periods of negative economic growth and lack of opportunity fuel this out-migration, particularly among the working-age population.
+        </p>
+      </div>
+
+      <div class="space-y-4">
+        <h3 class="text-base font-semibold text-gray-700">Geographic Disparities and Density</h3>
+        <p>
+          The **Map Shading** (when set to `% change` or `abs change`) reveals that population loss is widespread, impacting both urban and rural municipalities, though highly populated areas like the San Juan metropolitan area have lost the largest **absolute number of people**.
+        </p>
+        <p>
+          When switching the map to **Density** mode, one can visualize the distribution of the remaining population. High-density areas (urban centers, visible in reds/oranges) are vital economic hubs, but the simultaneous population loss in these areas represents a high concentration of demographic stress. Conversely, lower-density, often more mountainous or peripheral municipalities (visible in greens) face distinct challenges related to providing basic services and infrastructure to a highly dispersed and aging population.
+        </p>
+      </div>
+
+      <div class="space-y-4">
+        <h3 class="text-base font-semibold text-gray-700">Supporting Resources and Data</h3>
+        <p>
+          The primary source for these detailed annual population estimates is the **U.S. Census Bureau’s Population Estimates Program**, which provides vintages for Puerto Rico's municipalities.
+        </p>
+        <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
+          <li>
+            <a href="https://www.census.gov/data/datasets/time-series/demo/popest/2020s-total-puerto-rico-municipios.html"
+               target="_blank" rel="noopener" class="text-blue-600 underline">
+              U.S. Census Bureau: 2020s Census Estimates – Puerto Rico Municipalities
+            </a> (for post-2020 data).
+          </li>
+          <li>
+            <a href="https://www.census.gov/data/tables/time-series/demo/popest/intercensal-2010-2020-puerto-rico-municipios.html"
+               target="_blank" rel="noopener" class="text-blue-600 underline">
+              U.S. Census Bureau: Intercensal Estimates 2010–2020 – Puerto Rico Municipalities
+            </a> (for historical data).
+          </li>
+          <li>**Economic Research Institutions:** Further analysis of the drivers of migration (economic stagnation, debt crisis, and natural disasters) is routinely published by the Federal Reserve Bank of New York and various Puerto Rican and U.S. think tanks.</li>
+        </ul>
+      </div>
+    </section>
     <section class="card p-6">
       <h2 class="text-lg font-semibold mb-4">File Sources</h2>
       <div class="space-y-4">
@@ -216,7 +263,7 @@
     const CHORO_COLORS = ['#7f1d1d', '#b91c1c', '#f97316', '#bbf7d0', '#22c55e', '#15803d'];
     const PCT_BREAKS = [-10, -6, -3, 0, 2];
     let ABS_BREAKS = [-10000, -6000, -3000, 0, 1000];
-    // NEW DENSITY BREAKS (Simulated - Higher density is visually more intense/red)
+    // NEW DENSITY BREAKS 
     const DENSITY_BREAKS = [200, 400, 600, 800, 1000]; 
 
     const sanitizeName = s => String(s||'').trim();
@@ -230,7 +277,6 @@
     let _areaData = {};
     
     // Placeholder function to simulate extracting area from GeoJSON features.
-    // In a production environment, this would read properties like 'ALAND_SQMI'.
     function buildAreaMap(features) {
         // --- SIMULATION START ---
         // Real PR area: 3515.1 sq mi. Average density: ~911/sq mi
@@ -245,13 +291,79 @@
             'Aguas Buenas': 29.8, 
             'Comerío': 28.3,
             'Loíza': 19.4,
-            'Adjuntas': 66.6
+            'Adjuntas': 66.6,
+            'Aguada': 30.6,
+            'Aguadilla': 36.1,
+            'Aibonito': 39.8,
+            'Añasco': 38.6,
+            'Arecibo': 125.7,
+            'Arroyo': 4.7,
+            'Barceloneta': 17.5,
+            'Barranquitas': 33.9,
+            'Cabo Rojo': 59.8,
+            'Camuy': 46.3,
+            'Canóvanas': 46.9,
+            'Cataño': 4.8,
+            'Cayey': 50.7,
+            'Ceiba': 28.5,
+            'Ciales': 67.5,
+            'Cidra': 36.5,
+            'Coamo': 76.5,
+            'Corozal': 42.1,
+            'Culebra': 11.7,
+            'Dorado': 23.4,
+            'Fajardo': 30.1,
+            'Florida': 15.6,
+            'Guánica': 37.8,
+            'Guayama': 64.9,
+            'Guayanilla': 42.9,
+            'Gurabo': 28.1,
+            'Hatillo': 66.8,
+            'Hormigueros': 11.6,
+            'Humacao': 44.7,
+            'Isabela': 47.6,
+            'Jayuya': 67.8,
+            'Juana Díaz': 59.8,
+            'Juncos': 26.6,
+            'Lajas': 60.1,
+            'Lares': 61.6,
+            'Las Marías': 46.6,
+            'Las Piedras': 33.8,
+            'Luquillo': 26.7,
+            'Manatí': 46.5,
+            'Maricao': 36.8,
+            'Maunabo': 20.2,
+            'Mayagüez': 77.5,
+            'Moca': 50.3,
+            'Morovis': 40.5,
+            'Naguabo': 52.4,
+            'Naranjito': 26.1,
+            'Orocovis': 62.3,
+            'Patillas': 47.7,
+            'Peñuelas': 43.1,
+            'Quebradillas': 22.8,
+            'Rincón': 14.7,
+            'Río Grande': 60.1,
+            'Sabana Grande': 36.0,
+            'Salinas': 69.9,
+            'San Germán': 55.4,
+            'San Lorenzo': 53.0,
+            'San Sebastián': 69.4,
+            'Santa Isabel': 36.3,
+            'Toa Alta': 26.3,
+            'Toa Baja': 18.0,
+            'Trujillo Alto': 20.6,
+            'Utuado': 113.8,
+            'Vega Alta': 27.8,
+            'Vega Baja': 46.4,
+            'Vieques': 50.9,
+            'Villalba': 35.8,
+            'Yabucoa': 53.6,
+            'Yauco': 65.5
         };
-        // Use the simulation dictionary for area data
         features.forEach(f => {
             const p = f.properties || {};
             const name = (p.NAME || p.NAMELSAD || p.name || 'Unknown').replace(/\s*Municipio$/,'');
-            // Check if the simulated area exists, otherwise use a default for remaining rural municipios (~50 sq mi)
             const area = simAreas[name] || 50; 
             _areaData[name] = area;
         });
