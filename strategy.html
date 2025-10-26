@@ -81,16 +81,23 @@
   </nav>
 
   <main class="max-w-7xl mx-auto px-4 py-6 space-y-6">
-    <!-- HERO (standardized to match index/metrics/maps/charts height) -->
+    <!-- HERO (Standardized Header) -->
     <header class="card hero p-6 sm:p-8 lg:p-10">
       <p class="text-sm font-semibold text-gray-500 uppercase">Graduate Independent Study</p>
-      <h1 class="mt-2 text-4xl sm:text-5xl font-extrabold leading-tight">Synthesis & Strategic Solutions</h1>
+      <h1 class="mt-2 text-4xl sm:text-5xl font-extrabold leading-tight">
+        Population & Economic Dynamics in Puerto Rico
+      </h1>
       <p class="mt-3 text-lg text-gray-700">
-        Puerto Rico’s demographic and economic challenges reinforce one another. The goal here is to connect the data to
+        A graduate research project examining demographic shifts, out-migration, and sustainable development strategies through linked data analysis and policy synthesis.
+      </p>
+
+      <!-- Strategy-specific introduction -->
+      <p class="mt-4 text-sm text-gray-700">
+        **Synthesis & Strategic Solutions:** Puerto Rico’s demographic and economic challenges reinforce one another. The goal here is to connect the data to
         concrete, locally focused actions that can stabilize population trends, expand opportunity, and rebuild resilience.
       </p>
 
-      <!-- Spacer to match index.html height -->
+      <!-- Original Spacer -->
       <div class="mt-3">&nbsp;</div>
     </header>
 
@@ -240,13 +247,7 @@
 
   <script>
     // Highlight active nav
-    document.querySelectorAll('.nav-link').forEach(a=>{
-      if (location.pathname.endsWith(a.getAttribute('href')) ||
-          (location.pathname === '/' && a.getAttribute('href') === 'strategy.html')) {
-        a.classList.add('text-blue-600','font-semibold','border-blue-600');
-        a.setAttribute('aria-current','page');
-      }
-    });
+    document.querySelectorAll('.nav-link').forEach(a=>{\n      if (location.pathname.endsWith(a.getAttribute('href')) ||\n          (location.pathname === '/' && a.getAttribute('href') === 'strategy.html')) {\n        a.classList.add('text-blue-600','font-semibold','border-blue-600');\n        a.setAttribute('aria-current','page');\n      }\n    });
 
     // Safer hover persistence for Metrics dropdown
     (function() {
