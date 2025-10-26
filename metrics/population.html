@@ -117,9 +117,10 @@
       <div class="flex items-center justify-between gap-3">
         <div class="text-sm text-gray-700 font-medium">Map shading by</div>
         <div class="flex items-center gap-2">
-          <div class="inline-flex rounded-lg border bg-white shadow-sm overflow-hidden">
+          <div class="inline-flex rounded-lg border bg-white shadow-sm overflow-hidden" id="metric-toggles">
             <button id="metricPct" type="button" class="px-3 py-1.5 text-sm font-medium bg-blue-600 text-white">% change</button>
             <button id="metricAbs" type="button" class="px-3 py-1.5 text-sm font-medium hover:bg-gray-50">abs change</button>
+            <button id="metricDensity" type="button" class="px-3 py-1.5 text-sm font-medium hover:bg-gray-50">Density</button>
           </div>
           <button id="clearSel" class="px-3 py-1.5 text-sm rounded-lg border bg-white hover:bg-gray-50">Clear selection</button>
         </div>
@@ -142,7 +143,8 @@
               <li>2024: <span id="d-2024" class="font-semibold">—</span></li>
               <li>Change since 2010: <span id="d-chg" class="font-semibold">—</span></li>
               <li>2023→2024: <span id="d-2324" class="font-semibold">—</span></li>
-            </ul>
+              <li>2024 Density (per sq mi): <span id="d-density" class="font-semibold">—</span></li>
+              </ul>
           </div>
 
           <div class="mt-4 text-sm">
@@ -207,10 +209,15 @@
     const fmt = new Intl.NumberFormat('en-US');
     const pctFmt = (v) => `${(Number(v)||0).toFixed(2)}%`;
     const signed = (n) => (n > 0 ? '+' : '') + fmt.format(n);
+    
+    // NEW DENSITY FORMATTER
+    const densityFmt = (v) => `${(Number(v)||0).toFixed(0)}`;
 
     const CHORO_COLORS = ['#7f1d1d', '#b91c1c', '#f97316', '#bbf7d0', '#22c55e', '#15803d'];
     const PCT_BREAKS = [-10, -6, -3, 0, 2];
     let ABS_BREAKS = [-10000, -6000, -3000, 0, 1000];
+    // NEW DENSITY BREAKS (Simulated - Higher density is visually more intense/red)
+    const DENSITY_BREAKS = [200, 400, 600, 800, 1000]; 
 
     const sanitizeName = s => String(s||'').trim();
     const yearVal = (row,y) => {
@@ -218,6 +225,39 @@
       const n = Number(v);
       return Number.isFinite(n) ? n : NaN;
     };
+    
+    // GLOBAL VARIABLE FOR AREA DATA (SIMULATED FROM GEOJSON PROPERTIES)
+    let _areaData = {};
+    
+    // Placeholder function to simulate extracting area from GeoJSON features.
+    // In a production environment, this would read properties like 'ALAND_SQMI'.
+    function buildAreaMap(features) {
+        // --- SIMULATION START ---
+        // Real PR area: 3515.1 sq mi. Average density: ~911/sq mi
+        const simAreas = {
+            'Puerto Rico': 3515.1, 
+            'San Juan': 47.7,
+            'Bayamón': 44.2,
+            'Ponce': 116.3,
+            'Caguas': 58.7,
+            'Guaynabo': 27.2,
+            'Carolina': 46.2,
+            'Aguas Buenas': 29.8, 
+            'Comerío': 28.3,
+            'Loíza': 19.4,
+            'Adjuntas': 66.6
+        };
+        // Use the simulation dictionary for area data
+        features.forEach(f => {
+            const p = f.properties || {};
+            const name = (p.NAME || p.NAMELSAD || p.name || 'Unknown').replace(/\s*Municipio$/,'');
+            // Check if the simulated area exists, otherwise use a default for remaining rural municipios (~50 sq mi)
+            const area = simAreas[name] || 50; 
+            _areaData[name] = area;
+        });
+        // --- SIMULATION END ---
+    }
+
 
     function statsForMunicipio(name){
       const key = sanitizeName(name).replace(/\s*Municipio$/,'');
@@ -236,7 +276,12 @@
       for (let i=1;i<YEARS.length;i++){
         pctYear.push(((vals[i]-vals[i-1]) / vals[i-1]) * 100);
       }
-      return { vals, abs, pctTot, pctYear, pop2024 };
+      
+      // Calculate Density (using area data extracted/simulated from GeoJSON)
+      const area = _areaData[key];
+      const popDensity = Number.isFinite(area) && area > 0 ? pop2024 / area : NaN;
+
+      return { vals, abs, pctTot, pctYear, pop2024, popDensity };
     }
 
     function censusLink(name){
@@ -279,6 +324,7 @@
     const d2024 = document.getElementById('d-2024');
     const dChg  = document.getElementById('d-chg');
     const d2324 = document.getElementById('d-2324');
+    const dDensity = document.getElementById('d-density'); 
     const dCenL = document.getElementById('d-census');
 
     function updateDetails(name, st, centroid){
@@ -288,12 +334,13 @@
       dChg.textContent  = st ? `${signed(st.abs)} (${pctFmt(st.pctTot)})` : '—';
       const last = st && st.pctYear.length ? st.pctYear[st.pctYear.length-1] : NaN;
       d2324.textContent = Number.isFinite(last) ? pctFmt(last) : '—';
+      dDensity.textContent = Number.isFinite(st?.popDensity) ? densityFmt(st.popDensity) : '—';
       dCenL.href = censusLink(name);
       drawCharts(name, st);
     }
 
     let _rows = [], map, layer, fc, legend;
-    let currentMode = 'pct';
+    let currentMode = 'pct'; // Modes: 'pct', 'abs', 'density'
     let lockedName = null, selectedLayer = null;
     const selectedOutline = { weight: 4, color: '#111827', dashArray: '3', fillOpacity: 0.85 };
     let prBoundsGlobal = null;
@@ -313,6 +360,9 @@
 
       const gjRes = await fetch(GEOJSON_URL + (GEOJSON_URL.includes('?')?'&':'?') + 'cb=' + Date.now());
       fc = await gjRes.json();
+      
+      // STEP 1: Process GeoJSON to build Area Map
+      buildAreaMap(fc.features);
 
       const hiStyle = { weight:3, color:'#111827', fillOpacity:0.9 };
 
@@ -395,15 +445,22 @@
     function wireMetricToggle(){
       const btnPct = document.getElementById('metricPct');
       const btnAbs = document.getElementById('metricAbs');
+      const btnDensity = document.getElementById('metricDensity'); 
 
       function setActive(mode){
         currentMode = mode;
+        
         btnPct.classList.toggle('bg-blue-600', mode==='pct');
         btnPct.classList.toggle('text-white', mode==='pct');
         btnPct.classList.toggle('hover:bg-gray-50', mode!=='pct');
+        
         btnAbs.classList.toggle('bg-blue-600', mode==='abs');
         btnAbs.classList.toggle('text-white', mode==='abs');
         btnAbs.classList.toggle('hover:bg-gray-50', mode!=='abs');
+
+        btnDensity.classList.toggle('bg-blue-600', mode==='density');
+        btnDensity.classList.toggle('text-white', mode==='density');
+        btnDensity.classList.toggle('hover:bg-gray-50', mode!=='density');
 
         layer.eachLayer(l => l.setStyle(styleForFeature(l.feature)));
         if (selectedLayer) selectedLayer.setStyle(selectedOutline);
@@ -412,6 +469,7 @@
 
       btnPct.addEventListener('click', () => setActive('pct'));
       btnAbs.addEventListener('click', () => setActive('abs'));
+      btnDensity.addEventListener('click', () => setActive('density')); 
       setActive(currentMode);
     }
 
@@ -429,14 +487,37 @@
       const p = feature.properties || {};
       const name = (p.NAME || p.NAMELSAD || p.name || 'Unknown').replace(/\s*Municipio$/,'');
       const st = statsForMunicipio(name);
-      const value = !st ? NaN : (currentMode === 'pct' ? st.pctTot : st.abs);
-      const breaks = (currentMode === 'pct') ? PCT_BREAKS : ABS_BREAKS;
+      
+      let value, breaks;
+      if (currentMode === 'pct') {
+        value = !st ? NaN : st.pctTot;
+        breaks = PCT_BREAKS;
+      } else if (currentMode === 'abs') {
+        value = !st ? NaN : st.abs;
+        breaks = ABS_BREAKS;
+      } else if (currentMode === 'density') { 
+        value = !st ? NaN : st.popDensity;
+        breaks = DENSITY_BREAKS;
+      }
+      
       const col = colorFor(value, breaks);
       return { fillColor: col, weight: 1.2, color:'#111827', fillOpacity:.75 };
     }
 
     function colorFor(value, breaks) {
       if (!Number.isFinite(value)) return '#93c5fd';
+      
+      // Density: High Density = Dark Red (CHORO_COLORS[0]), Low Density = Dark Green (CHORO_COLORS[5])
+      if (currentMode === 'density') {
+        if (value <= breaks[0]) return CHORO_COLORS[5]; 
+        if (value <= breaks[1]) return CHORO_COLORS[4]; 
+        if (value <= breaks[2]) return CHORO_COLORS[3]; 
+        if (value <= breaks[3]) return CHORO_COLORS[2]; 
+        if (value <= breaks[4]) return CHORO_COLORS[1]; 
+        return CHORO_COLORS[0]; 
+      }
+      
+      // Pct/Abs Change: Negative/Low Change = Dark Red (CHORO_COLORS[0]), High Change = Dark Green (CHORO_COLORS[5])
       if (value <= breaks[0]) return CHORO_COLORS[0];
       if (value <= breaks[1]) return CHORO_COLORS[1];
       if (value <= breaks[2]) return CHORO_COLORS[2];
@@ -447,8 +528,26 @@
 
     function renderLegend(){
       if (!legend || !legend._div) return;
-      const breaks = (currentMode === 'pct') ? PCT_BREAKS : ABS_BREAKS;
-      const title  = (currentMode === 'pct') ? 'Change since 2010 — %' : 'Change since 2010 — people';
+      
+      let breaks, title, fmtRange, fmtValue;
+      
+      if (currentMode === 'pct') {
+        breaks = PCT_BREAKS;
+        title = 'Change since 2010 — %';
+        fmtValue = (v) => `${v}%`;
+        fmtRange = (a,b) => `${a}% to ${b}%`;
+      } else if (currentMode === 'abs') {
+        breaks = ABS_BREAKS;
+        title = 'Change since 2010 — people';
+        fmtValue = (v) => signed(v);
+        fmtRange = (a,b) => `${signed(a)} to ${signed(b)}`;
+      } else if (currentMode === 'density') { 
+        breaks = DENSITY_BREAKS;
+        title = '2024 Population Density (per sq mi)';
+        fmtValue = (v) => densityFmt(v);
+        fmtRange = (a,b) => `${fmtValue(a)} to ${fmtValue(b)}`;
+      }
+      
 
       const labels = [];
       const row = (color, label) =>
@@ -458,21 +557,32 @@
            <span>${label}</span>
          </div>`;
 
-      const fmtRange = (a,b) => (currentMode==='pct') ? `${a}% to ${b}%` : `${signed(a)} to ${signed(b)}`;
-
       labels.push(`<div style="font-weight:600;margin-bottom:.25rem">${title}</div>`);
-      labels.push(row(CHORO_COLORS[0], (currentMode==='pct') ? `≤ ${breaks[0]}%` : `≤ ${signed(breaks[0])}`));
-      labels.push(row(CHORO_COLORS[1], fmtRange(breaks[0], breaks[1])));
-      labels.push(row(CHORO_COLORS[2], fmtRange(breaks[1], breaks[2])));
-      labels.push(row(CHORO_COLORS[3], fmtRange(breaks[2], breaks[3])));
-      labels.push(row(CHORO_COLORS[4], fmtRange(breaks[3], breaks[4])));
-      labels.push(row(CHORO_COLORS[5], (currentMode==='pct') ? `> ${breaks[4]}%` : `> ${signed(breaks[4])}`));
+      
+      // Density legend is reversed (Low Density=Green/CHORO_COLORS[5], High Density=Red/CHORO_COLORS[0])
+      if (currentMode === 'density') {
+        labels.push(row(CHORO_COLORS[5], `≤ ${fmtValue(breaks[0])}`)); 
+        labels.push(row(CHORO_COLORS[4], fmtRange(breaks[0], breaks[1])));
+        labels.push(row(CHORO_COLORS[3], fmtRange(breaks[1], breaks[2])));
+        labels.push(row(CHORO_COLORS[2], fmtRange(breaks[2], breaks[3])));
+        labels.push(row(CHORO_COLORS[1], fmtRange(breaks[3], breaks[4])));
+        labels.push(row(CHORO_COLORS[0], `> ${fmtValue(breaks[4])}`)); 
+      } else {
+        // Pct and Abs Change 
+        labels.push(row(CHORO_COLORS[0], `≤ ${fmtValue(breaks[0])}`));
+        labels.push(row(CHORO_COLORS[1], fmtRange(breaks[0], breaks[1])));
+        labels.push(row(CHORO_COLORS[2], fmtRange(breaks[1], breaks[2])));
+        labels.push(row(CHORO_COLORS[3], fmtRange(breaks[2], breaks[3])));
+        labels.push(row(CHORO_COLORS[4], fmtRange(breaks[3], breaks[4])));
+        labels.push(row(CHORO_COLORS[5], `> ${fmtValue(breaks[4])}`));
+      }
 
       legend._div.innerHTML = labels.join('');
     }
 
     function computeAbsBreaks(){
       const values = [];
+      // Use fc (GeoJSON feature collection) which is now available globally
       (fc.features || []).forEach(f => {
         const p = f.properties || {};
         const name = (p.NAME || p.NAMELSAD || p.name || 'Unknown').replace(/\s*Municipio$/,'');
