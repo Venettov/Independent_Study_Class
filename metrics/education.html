@@ -129,8 +129,7 @@
 
     <section class="card p-6">
       <h2 class="text-lg font-semibold mb-4">Educational Attainment Details</h2>
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div>
+      <div class="grid grid-cols-1 lg:grid-cols-4 gap-6"> <div class="lg:col-span-1">
           <div class="text-sm">
             <div>Municipio: <span id="d-name" class="font-semibold">Puerto Rico</span></div>
             <div>Centroid: <span id="d-centroid" class="text-gray-600">—</span></div>
@@ -165,9 +164,56 @@
             <canvas id="barChart"></canvas>
           </div>
         </div>
+
+        <div>
+          <h3 class="font-semibold mb-2">Cumulative Percentage Change (2013–2023)</h3>
+          <div class="mini bg-gray-50 rounded p-3">
+            <canvas id="pctChangeBarChart"></canvas>
+          </div>
+        </div>
+        </div>
+    </section>
+
+    <hr class="border-gray-300">
+
+    <section class="card p-6 space-y-6">
+      <h2 class="text-lg font-semibold">Analysis and Supporting Resources</h2>
+
+      <div class="space-y-4">
+        <h3 class="text-base font-semibold text-gray-700">Educational Attainment Trend (2013–2023)</h3>
+        <p>
+          The **Attainment Trend** line chart displays the overall percentage of the population aged 25 and over with a Bachelor's degree or higher. For Puerto Rico as a whole, this trend shows an initial decline followed by a rebound, often reflecting the turbulent economic and demographic period after the 2008 financial crisis, the debt crisis, and natural disasters. The general trend for the entire island suggests a **net decrease in the percentage of highly educated residents** since 2013, despite a recent uptick.
+        </p>
+        <p>
+          This net decrease, or slow growth, is often attributed to two major factors:
+          <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
+            <li>**Out-migration (Brain Drain):** Economic conditions and natural disasters (like Hurricane Maria in 2017) have driven significant out-migration, which is often **negatively selective on educational attainment**—meaning the loss is primarily of workers with college degrees or higher, or at least a significant portion of them. This selective migration decreases the overall human capital on the island.</li>
+            <li>**Economic Demand:** A weak local economy may not generate sufficient **high-skill jobs** to retain the new graduates from local universities, leading them to seek opportunities on the mainland.</li>
+          </ul>
+        </p>
+      </div>
+
+      <div class="space-y-4">
+        <h3 class="text-base font-semibold text-gray-700">Municipal Differences (Map and Local Data)</h3>
+        <p>
+          The **Annual Change** and **Cumulative Change** charts and the **Choropleth Map** (when set to Cumulative % Change) highlight the geographic disparities. Areas that show a significant **red-to-orange** (negative or low-gain) coloring on the map typically align with municipalities experiencing the most pronounced out-migration and/or economic decline. Conversely, areas in **green** (positive change) might indicate regions that have retained or attracted a higher proportion of college-educated residents, potentially due to local economic hubs or residential preferences.
+        </p>
+      </div>
+
+      <div class="space-y-4">
+        <h3 class="text-base font-semibold text-gray-700">Supporting Resources and Data</h3>
+        <p>
+          For more in-depth data and analysis, you can refer to the following:
+          <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
+            <li>**US Census Bureau, American Community Survey (ACS) Table S1501:** The source of this educational attainment data. The link is provided in the details panel.</li>
+            <li>**Federal Reserve Bank of New York:** Analysis on human capital, education quality, and migration from Puerto Rico.</li>
+            <li>**Bureau of Labor Statistics (BLS):** Reports and articles on Puerto Rico's population loss and economic decline.</li>
+            <li>**NAEP (The Nation's Report Card):** Provides data on the academic performance of K-12 students in Puerto Rico, which provides context for the future workforce's educational foundation.</li>
+          </ul>
+        </p>
       </div>
     </section>
-  </main>
+    </main>
 
   <script>
     // ---------------------- Data paths ----------------------
@@ -185,6 +231,8 @@
     const ppFmt = (v) => `${(Number(v)||0).toFixed(2)} pp`;
     // Signed percentage point change (for cumulative change)
     const signedPP = (n) => (n > 0 ? '+' : '') + ppFmt(n);
+    // Signed percentage format
+    const signedPct = (n) => (n > 0 ? '+' : '') + fmtPct(n);
 
     // ---------------------- Choropleth colors ----------------------
     // Standard scale: Red (Low) to Green (High)
@@ -236,8 +284,8 @@
       const lastYear = YEARS[YEARS.length - 1];
       
       // Calculate change metrics
-      const changeAbs = row[`Cum_Change_${firstYear}_${lastYear}`];
-      const changePct = row[`Cum_Pct_Change_${firstYear}_${lastYear}`];
+      const changeAbs = row[`Cum_Change_${firstYear}_${lastYear}`]; // Cumulative Change in PP
+      const changePct = row[`Cum_Pct_Change_${firstYear}_${lastYear}`]; // Cumulative Percentage Change
       const annualChange = row[`Change_${YEARS[YEARS.length-2]}_${lastYear}`];
       
       if (vals.some(v => !Number.isFinite(v))) return null;
@@ -265,7 +313,45 @@
     }
 
     // ---------------------- Charts ----------------------
-    let lineChart = null, barChart = null;
+    let lineChart = null, barChart = null, pctChangeBarChart = null; // Added pctChangeBarChart
+
+    // NEW CHART FUNCTION
+    function drawPctChangeBarChart(name, st){
+      if (!st || !Number.isFinite(st.pctTot)) return;
+      
+      const ctx = document.getElementById('pctChangeBarChart').getContext('2d');
+      const data = [st.pctTot.toFixed(1)];
+      const color = st.pctTot > 0 ? '#15803d' : '#b91c1c'; // Green for positive, Red for negative
+      const label = `${YEARS[0]}–${YEARS[YEARS.length-1]} Cumulative Change`;
+
+      if (pctChangeBarChart) pctChangeBarChart.destroy();
+      pctChangeBarChart = new Chart(ctx, {
+        type: 'bar',
+        data: { 
+          labels: [label], 
+          datasets:[{ 
+            label: label, 
+            data: data,
+            backgroundColor: color
+          }] 
+        },
+        options: {
+          indexAxis: 'y', // Make it a horizontal bar for single value
+          plugins:{ 
+            legend:{ display:false }, 
+            tooltip:{ callbacks:{ label:(c)=>signedPct(c.parsed.x) } } 
+          },
+          scales:{ 
+            y: { display: false },
+            x: { 
+              ticks:{ callback:v=>signedPct(v) },
+              title: { display: true, text: 'Percentage Change (%)' }
+            } 
+          },
+          maintainAspectRatio: false
+        }
+      });
+    }
     
     function drawCharts(name, st){
       if (!st) return;
@@ -329,6 +415,9 @@
           maintainAspectRatio: false
         }
       });
+
+      // --- 3. Cumulative Percentage Change Bar Chart ---
+      drawPctChangeBarChart(name, st);
     }
 
     // ---------------------- DOM targets ----------------------
@@ -580,11 +669,6 @@
       const n2 = q(neg, 0.75) ?? -50;
       const p1 = q(pos, 0.25) ?? 100;
       const p2 = q(pos, 0.75) ?? 500;
-      
-      // Since the raw values in the JSON are large (population counts) but the METADATA
-      // says they should be *Percentage Points*, we must use the simpler, PP-style breaks
-      // established in the health.html to visualize the change, assuming the underlying
-      // issue is with the Python script's output values.
       
       // FIXED PP BREAKS for Educational Attainment Change (Positive is generally good)
       // Small/no gain (Red) to High gain (Green)
