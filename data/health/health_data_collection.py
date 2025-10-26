@@ -5,7 +5,9 @@
 # that is WITHOUT HEALTH INSURANCE COVERAGE for Puerto Rico municipalities
 # using the ACS Subject Table API (S2701).
 #
-# It outputs the data in a clean, wide format, calculating key change metrics.
+# FIXES:
+# 1. Ensures all 78 FIPS codes are explicitly listed to prevent missing Municipios (like Yauco/153).
+# 2. Improves municipality name sanitization.
 # --------------------------------------------------------------------------
 
 import json
@@ -21,7 +23,7 @@ from time import sleep
 # Hardcoding the key for successful retrieval based on previous run information.
 API_KEY = "29dc42832697b740f9eff8ae8d61b9e544478c2b" 
 OUT = Path(__file__).resolve().parent
-# --- FIX: Start at 2013, as earlier years often have suppressed data.
+# FIX: Start at 2013, as earlier years often have suppressed data.
 START_YEAR = 2013
 
 # Variable for Percent of Civilian Noninstitutionalized Population WITHOUT Health Coverage (S2701)
@@ -29,8 +31,8 @@ START_YEAR = 2013
 HEALTH_VAR = "S2701_C05_001E" 
 METRIC_LABEL = "Percentage Without Health Coverage"
 
-# List of all 78 Puerto Rico County FIPS codes (Counties = Municipios in PR)
-# All 78 FIPS codes for Puerto Rico counties (municipios)
+# FIX: Explicit list of all 78 Puerto Rico County FIPS codes (Counties = Municipios in PR)
+# Includes FIPS 153 (Yauco)
 PR_COUNTY_FIPS = [
     '001', '003', '005', '007', '009', '011', '013', '015', '017', '019', '021', '023',
     '025', '027', '029', '031', '033', '035', '037', '039', '041', '043', '045', '047',
@@ -38,18 +40,24 @@ PR_COUNTY_FIPS = [
     '071', '073', '075', '077', '079', '081', '083', '085', '087', '089', '091', '093',
     '095', '097', '099', '101', '103', '105', '107', '109', '111', '113', '115', '117',
     '119', '121', '123', '125', '127', '129', '131', '133', '135', '137', '139', '141',
-    '143', '145', '147', '149', '151'
+    '143', '145', '147', '149', '151', '153' # Added FIPS 153 (Yauco)
 ]
 
 def safe_float(val):
     """Safely converts string value to float, treating missing/non-finite data as 0.0."""
     try:
         # Note: ACS sometimes returns '-' or 'N' for suppressed data. Treat as 0.0 for calculations.
-        if val is None or str(val).strip().upper() in ('N', '-', '0', '0.0'):
+        if val is None or str(val).strip().upper() in ('N', '-', '0', '0.0', '(X)', 'NA'):
             return 0.0
         return float(val)
     except Exception:
         return 0.0
+
+def clean_municipio_name(full_name):
+    """Strips common Census suffixes to get just the Municipio name."""
+    name = str(full_name).replace(", Puerto Rico", "").strip()
+    name = name.replace(" Municipio", "").strip()
+    return name
 
 # --------------------------------------------------------
 # 1. Determine available years
@@ -81,8 +89,6 @@ for i, year in enumerate(years, start=1):
     sys.stdout.write(f"\rFetching {year} ({i}/{len(years)})...")
     sys.stdout.flush()
     
-    # --- Exponential Backoff/Retry Logic (Not implemented here for brevity, but recommended) ---
-    
     try:
         r = requests.get(url, timeout=30)
         
@@ -94,8 +100,6 @@ for i, year in enumerate(years, start=1):
         data = r.json()
         
         if not data or len(data) <= 1:
-            # If the response is empty or just contains headers, it means no data was available for the query.
-            # This is common in early ACS years for all municipios.
             print(f"\n🛑 No data returned for {year}. Data skipped.")
             sleep(0.5)
             continue
@@ -104,15 +108,15 @@ for i, year in enumerate(years, start=1):
         idx = {k: i for i, k in enumerate(header)}
         
         # Check if the number of municipios retrieved is close to 78.
-        if len(rows) < 70:
+        if len(rows) < 78:
             print(f"\n⚠️ Only {len(rows)} municipios retrieved for {year}. Data may be incomplete.")
         
         successful_years.append(year)
         
         for row in rows:
             municipio_full = row[idx["NAME"]]
-            # Remove " Municipio, Puerto Rico" and " Municipio" from the name
-            municipio = municipio_full.replace(" Municipio, Puerto Rico", "").replace(" Municipio", "")
+            # FIX: Use improved cleaning function
+            municipio = clean_municipio_name(municipio_full)
             percentage = safe_float(row[idx[HEALTH_VAR]])
             
             records.append({
@@ -137,8 +141,6 @@ df = pd.DataFrame(records)
 df = df.sort_values(["Municipio", "year"])
 
 # Add islandwide total by finding the average across all municipalities
-# Note: ACS provides direct Puerto Rico totals, but averaging the 78 municipios
-# is often necessary if the query does not retrieve the aggregate.
 island_avg = (
     df.groupby("year", as_index=False)["Percentage"]
     .mean()
