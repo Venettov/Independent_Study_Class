@@ -97,11 +97,11 @@
         <div>
           <p class="text-sm font-semibold text-gray-500 uppercase">Graduate Independent Study</p>
           <h1 class="mt-2 text-4xl sm:text-5xl font-extrabold leading-tight">
-            Educational Attainment Dynamics in Puerto Rico
+            Population & Economic Dynamics in Puerto Rico
           </h1>
           <p class="mt-3 text-lg text-gray-700">
-            A project examining the change in the percentage of the population (25 years and older) with a
-            Bachelor's Degree or Higher across Puerto Rico's municipalities.
+            A graduate research project examining demographic shifts, out-migration, and sustainable development
+            strategies through linked data analysis and policy synthesis.
           </p>
           <div class="mt-5">
             <span class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-100 text-slate-800">
@@ -119,7 +119,7 @@
         <div class="flex items-center gap-2">
           <div class="inline-flex rounded-lg border bg-white shadow-sm overflow-hidden">
             <button id="metricPct" type="button" class="px-3 py-1.5 text-sm font-medium bg-blue-600 text-white">Change (Percentage Points)</button>
-            <button id="metricAbs" type="button" class="px-3 py-1.5 text-sm font-medium hover:bg-gray-50">Change (YoY %)</button>
+            <button id="metricAbs" type="button" class="px-3 py-1.5 text-sm font-medium hover:bg-gray-50">Change (YoY Ppt)</button>
           </div>
           <button id="clearSel" class="px-3 py-1.5 text-sm rounded-lg border bg-white hover:bg-gray-50">Clear selection</button>
         </div>
@@ -139,9 +139,9 @@
           <div class="mt-4 text-sm">
             <div class="font-semibold text-gray-700">Bachelor's Degree or Higher (Ages 25+):</div>
             <ul class="mt-1 space-y-1">
-              <li>2023 Percentage: <span id="d-2024" class="font-semibold">—</span></li>
+              <li>2023 Percentage: <span id="d-2023-pct" class="font-semibold">—</span></li>
               <li>Change since 2010 (Ppt): <span id="d-chg" class="font-semibold">—</span></li>
-              <li>2022→2023 (Ppt Change): <span id="d-2324" class="font-semibold">—</span></li>
+              <li>2022→2023 (Ppt Change): <span id="d-2223" class="font-semibold">—</span></li>
             </ul>
           </div>
 
@@ -199,13 +199,14 @@
     const YEARS = [2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023];
 
     // Format for percentage display (0 decimal places)
+    const PPT_DIVISOR = 1000; // Value is stored as float * 1000 in JSON (e.g., 12.232 -> 12232.0)
     const fmt = new Intl.NumberFormat('en-US', { maximumFractionDigits: 1, minimumFractionDigits: 1 });
     const pctFmt = (v) => `${(Number(v)||0).toFixed(1)}%`;
     const signed = (n) => (n > 0 ? '+' : '') + fmt.format(n);
 
     // Map Mode Identifiers
-    const MODE_PCT_CHANGE_PPT = 'pct_ppt'; // Cumulative Change in Percentage Points
-    const MODE_ABS_CHANGE_PPT = 'abs_ppt'; // Year-over-Year Change in Percentage Points
+    const MODE_PCT_CHANGE_PPT = 'cum_ppt'; // Cumulative Change in Percentage Points
+    const MODE_ABS_CHANGE_PPT = 'yoy_ppt'; // Year-over-Year Change in Percentage Points
 
     // Color breaks for choropleth map
     const CHORO_COLORS = ['#7f1d1d', '#b91c1c', '#f97316', '#bbf7d0', '#22c55e', '#15803d'];
@@ -213,15 +214,26 @@
     // Cumulative Change in Percentage Points (2010-2023)
     const CUM_PPT_BREAKS = [0, 1, 2, 3, 4]; 
     // Absolute Change in Percentage Points (2022-2023)
-    const ABS_PPT_BREAKS = [-1, 0, 0.5, 1, 2];
+    const ABS_PPT_BREAKS = [-0.5, 0, 0.5, 1.0, 1.5];
 
     const sanitizeName = s => String(s||'').trim();
-    const yearVal = (row,y) => {
-      // Data values are stored as floats (e.g., 12.2)
+    
+    // NEW: Function to safely extract a numerical value and divide it by the divisor
+    const yearVal = (row, y) => {
       const v = row?.[String(y)];
       const n = Number(v);
-      return Number.isFinite(n) ? n : NaN;
+      // Convert raw value (e.g., 12232.0) to actual percentage (e.g., 12.232)
+      return Number.isFinite(n) ? n / PPT_DIVISOR : NaN;
     };
+    
+    // NEW: Function to safely extract a pre-calculated change value and divide it
+    const changeVal = (val) => {
+        const n = Number(val);
+        // The change values are raw floats/ints, which already represent the Ppt change.
+        // We only need to check for NaN/Invalid values.
+        return Number.isFinite(n) ? n / PPT_DIVISOR : 0;
+    }
+
 
     function statsForMunicipio(name){
       // Normalize the name: remove " Municipio" suffix and search
@@ -230,16 +242,16 @@
       if (!row || row.metadata) return null;
 
       const vals = YEARS.map(y => yearVal(row,y));
+      // Stop if any core values are missing
       if (vals.some(v => !Number.isFinite(v))) return null;
 
-      const val2010 = vals[0];
       const val2023 = vals[vals.length - 1];
 
-      // Cumulative Change in Percentage Points (Ppt) - stored in Cum_Change_...
-      const cumPpt = row[`Cum_Change_${YEARS[0]}_${YEARS[YEARS.length-1}`] || 0;
+      // Cumulative Change in Percentage Points (Ppt) - stored in Cum_Change_... (JSON value must be divided)
+      const cumPpt = changeVal(row[`Cum_Change_${YEARS[0]}_${YEARS[YEARS.length-1}`]);
       
-      // Year-over-Year Change in Percentage Points (Ppt) - stored in Change_...
-      const lastPptChange = row[`Change_${YEARS[YEARS.length-2]}_${YEARS[YEARS.length-1}`] || 0;
+      // Year-over-Year Change in Percentage Points (Ppt) - stored in Change_... (JSON value must be divided)
+      const lastPptChange = changeVal(row[`Change_${YEARS[YEARS.length-2]}_${YEARS[YEARS.length-1}`]);
 
       // Annual Percentage Point Change array for bar chart
       const pptYear = [];
@@ -249,7 +261,7 @@
       }
 
       return { 
-        vals, val2023: val2023, cumPpt, lastPptChange, pptYear 
+        vals, val2023, cumPpt, lastPptChange, pptYear 
       };
     }
 
@@ -280,7 +292,7 @@
             legend:{ display:false }, 
             tooltip:{ 
               callbacks:{ 
-                label:(c)=>`${c.parsed.y.toFixed(1)}%` 
+                label:(c)=>`${c.parsed.y.toFixed(2)}%` 
               } 
             } 
           },
@@ -305,7 +317,7 @@
           labels, 
           datasets:[{ 
             label:'Ppt Change', 
-            data: st.pptYear.map(v=>+v.toFixed(2)),
+            data: st.pptYear.map(v=>+v.toFixed(3)), // Use 3 decimal points for precision before chart scaling
             backgroundColor: st.pptYear.map(v => v < 0 ? '#dc2626' : '#16a34a') // Red/Green coloring
           }] 
         },
@@ -332,23 +344,23 @@
 
     const dName = document.getElementById('d-name');
     const dCent = document.getElementById('d-centroid');
-    const d2024 = document.getElementById('d-2024');
+    const d2023Pct = document.getElementById('d-2023-pct');
     const dChg  = document.getElementById('d-chg');
-    const d2324 = document.getElementById('d-2324');
+    const d2223 = document.getElementById('d-2223');
     const dCenL = document.getElementById('d-census');
 
     function updateDetails(name, st, centroid){
       dName.textContent = name.replace(/\s*Municipio$/,'');
       dCent.textContent = centroid ? `${centroid.lat.toFixed(4)}, ${centroid.lng.toFixed(4)}` : '—';
       
-      // 2023 Percentage (2023 is the last year in the JSON)
-      d2024.textContent = Number.isFinite(st?.val2023) ? `${fmt.format(st.val2023)}%` : '—';
+      // 2023 Percentage
+      d2023Pct.textContent = Number.isFinite(st?.val2023) ? `${fmt.format(st.val2023)}%` : '—';
       
       // Cumulative Ppt Change
       dChg.textContent  = st ? `${(st.cumPpt > 0 ? '+' : '')}${fmt.format(st.cumPpt)} Ppt` : '—';
       
       // YoY Ppt Change (2022 -> 2023)
-      d2324.textContent = st ? `${(st.lastPptChange > 0 ? '+' : '')}${fmt.format(st.lastPptChange)} Ppt` : '—';
+      d2223.textContent = st ? `${(st.lastPptChange > 0 ? '+' : '')}${fmt.format(st.lastPptChange)} Ppt` : '—';
 
       dCenL.href = censusLink(name);
       drawCharts(name, st);
