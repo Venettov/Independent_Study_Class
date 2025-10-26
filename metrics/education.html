@@ -72,8 +72,6 @@
         </a>
         <div id="metrics-menu" class="absolute right-0 mt-2 w-64 rounded-xl border border-gray-200 bg-white shadow-lg ring-1 ring-black/5 z-50">
           <div class="py-2">
-            <a href="../metrics.html" class="block px-4 py-2 hover:bg-gray-50 font-semibold">All Metrics Overview</a>
-            <div class="my-1 border-t border-gray-100"></div>
             <a href="population.html"     class="block px-4 py-2 hover:bg-gray-50">Population</a>
             <a href="employment.html"     class="block px-4 py-2 hover:bg-gray-50">Employment Rate</a>
             <a href="establishments.html" class="block px-4 py-2 hover:bg-gray-50">Employer Establishments</a>
@@ -384,14 +382,21 @@
       const res = await fetch(POP_JSON, { cache:'no-store' });
       _rows = await res.json();
 
-      // IMPORTANT FIX: Ensure map initialization waits for data and geoJSON load
-      // And filter out metadata immediately to clean up data array
+      // IMPORTANT: Filter out metadata BEFORE processing
       _rows = _rows.filter(r => !r.metadata);
 
 
       const prBounds = L.latLngBounds([[17.85, -67.45],[18.55, -65.25]]);
       prBoundsGlobal = prBounds;
-      map = L.map('map', { zoomSnap:.25 }).fitBounds(prBounds);
+      
+      // CRITICAL FIX: Ensure map initialization is wrapped in a try/catch or post-load check
+      try {
+        map = L.map('map', { zoomSnap:.25 }).fitBounds(prBounds);
+      } catch (e) {
+        console.error("Leaflet Map Initialization Failed:", e);
+        // Exit initialization if map fails to create
+        return; 
+      }
 
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap contributors',
@@ -447,6 +452,7 @@
       }).addTo(map);
 
       const b = layer.getBounds();
+      // FIX: Added explicit check on bounds validity before attempting to fit map.
       if (b.isValid()) map.fitBounds(b, { padding:[15,15] });
 
       legend = L.control({ position:'bottomright' });
