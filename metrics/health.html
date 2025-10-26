@@ -144,7 +144,9 @@
 
     <section class="card p-6">
       <h2 class="text-lg font-semibold mb-4">Health Coverage Details</h2>
-      <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      
+      <!-- GRID 1: Details and Two Charts -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div>
           <div class="text-sm">
             <div>Municipio: <span id="d-name" class="font-semibold">Puerto Rico</span></div>
@@ -180,17 +182,17 @@
             <canvas id="barChart"></canvas>
           </div>
         </div>
-        
-        <!-- NEW CHART COLUMN -->
-        <div>
-          <h3 class="font-semibold mb-2">Comparison of Coverage Gap Change (pp)</h3>
-          <div class="mini bg-gray-50 rounded p-3">
-            <canvas id="compareChart"></canvas>
-          </div>
-        </div>
-        <!-- END NEW CHART COLUMN -->
-
       </div>
+      
+      <!-- NEW FULL-WIDTH CHART SECTION -->
+      <div class="mt-6 pt-6 border-t border-gray-200">
+        <h3 class="font-semibold mb-2">Comparison of Coverage Gap Change by Period (pp)</h3>
+        <div class="w-full h-80 bg-gray-50 rounded p-3">
+            <!-- Canvas container takes up more vertical space -->
+            <canvas id="compareChart"></canvas>
+        </div>
+      </div>
+      <!-- END NEW FULL-WIDTH CHART SECTION -->
       
       <!-- EXPLANATION SECTION -->
       <div class="mt-10 pt-6 border-t border-gray-200">
@@ -230,36 +232,23 @@
   <script>
     // ---------------------- Data paths ----------------------
     const GEOJSON_URL = '../data/tl_2022_72_cousub/pr_municipalities.geojson';
-    // --- UPDATED PATH ---
     const HEALTH_JSON    = '../data/health/municipios_acs_health_2013_2023_wide.json';
     
-    // --- UPDATED YEARS ---
     const YEARS = [2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023];
 
     // ---------------------- Formatters ----------------------
-    // Percent format with one decimal place
     const fmtPct = (v) => `${(Number(v)||0).toFixed(1)}%`;
-    // Percentage Point Change format
     const ppFmt = (v) => `${(Number(v)||0).toFixed(2)} pp`;
-    // Signed percentage point change (for cumulative change)
     const signedPP = (n) => (n > 0 ? '+' : '') + ppFmt(n);
 
     // ---------------------- Choropleth colors ----------------------
-    // Colors must be INVERSE since a lower percentage is better (Good=Green, Bad=Red)
-    const CHORO_COLORS = ['#15803d', '#22c55e', '#bbf7d0', '#f97316', '#b91c1c', '#7f1d1d']; // Green to Red
-    
-    // Breaks for Percentage Without Coverage (Lower is better)
-    // Example breaks: ≤4%, 4-6%, 6-8%, 8-10%, 10-12%, >12%
-    // Using values from the uploaded data range (e.g., 2% to 15%)
+    const CHORO_COLORS = ['#15803d', '#22c55e', '#bbf7d0', '#f97316', '#b91c1c', '#7f1d1d']; 
     const PCT_BREAKS = [2.5, 4.0, 6.0, 8.0, 10.0]; 
-    
-    // Computed later from data for absolute change in percentage points
-    let ABS_BREAKS = [-2.0, -1.0, 0.0, 1.0, 2.0]; // Change in PP (Negative is better)
+    let ABS_BREAKS = [-2.0, -1.0, 0.0, 1.0, 2.0]; 
 
     // Utility: color for a value given breaks
     function colorFor(value, breaks) {
       if (!Number.isFinite(value)) return '#93c5fd';
-      // The color scale is already defined Green->Red (good->bad)
       if (value <= breaks[0]) return CHORO_COLORS[0];
       if (value <= breaks[1]) return CHORO_COLORS[1];
       if (value <= breaks[2]) return CHORO_COLORS[2];
@@ -284,7 +273,6 @@
       const row = _rows.find(r => sanitizeName(r.Municipio) === name);
       if (!row) return null;
 
-      // Extract raw percentage values
       const vals = YEARS.map(y => valFromRow(row, y));
       
       const firstYear = YEARS[0];
@@ -295,7 +283,6 @@
       
       if (vals.some(v => !Number.isFinite(v))) return null;
       
-      // Calculate annual percentage point change
       const ppChangeYear = [];
       for (let i = 1; i < YEARS.length; i++) {
         ppChangeYear.push(vals[i] - vals[i - 1]);
@@ -303,7 +290,6 @@
       
       const latestVal = vals[vals.length - 1];
       
-      // Calculate specific change periods for comparison chart
       const val2015 = valFromRow(row, 2015) || NaN;
       const val2017 = valFromRow(row, 2017) || NaN;
       const val2021 = valFromRow(row, 2021) || NaN;
@@ -336,14 +322,16 @@
             .filter(r => r.Municipio !== 'Puerto Rico' && !r.metadata)
             .map(row => {
                 const st = statsForMunicipio(row.Municipio);
+                // Fallback for missing/NaN data in the comparison periods
+                if (!st || !Number.isFinite(st.chg_1517) || !Number.isFinite(st.chg_2123)) return null; 
                 return {
                     municipio: row.Municipio.replace(' Municipio', ''),
                     chg_1517: st.chg_1517,
                     chg_2123: st.chg_2123
                 };
             })
-            .filter(d => Number.isFinite(d.chg_1517) && Number.isFinite(d.chg_2123))
-            .sort((a, b) => (a.chg_2123 + a.chg_1517) - (b.chg_2123 + b.chg_1517)); // Sort by average change
+            .filter(d => d !== null)
+            .sort((a, b) => (a.chg_2123 + a.chg_1517) - (b.chg_2123 + b.chg_1517)); 
 
         const labels = data.map(d => d.municipio);
         const data1517 = data.map(d => d.chg_1517);
@@ -356,7 +344,7 @@
       if (!st) return;
       const ctxL = document.getElementById('lineChart').getContext('2d');
       const ctxB = document.getElementById('barChart').getContext('2d');
-      const ctxC = document.getElementById('compareChart').getContext('2d'); // New chart context
+      const ctxC = document.getElementById('compareChart').getContext('2d'); 
 
       // --- 1. Line Chart (Coverage Trend) ---
       if (lineChart) lineChart.destroy();
@@ -415,15 +403,26 @@
         }
       });
       
-      // --- 3. Comparison Chart (Municipios only) ---
+      // --- 3. Comparison Chart (Full-Width View) ---
       if (compareChart) compareChart.destroy();
       
-      if (name !== 'Puerto Rico') {
+      // The chart will be a horizontal bar chart when displaying all municipios
+      const compData = getMunicipioComparisonData();
+      const numToShow = 20; // Show top 10 best and 10 worst
+      
+      // Filter/Slice the data to show top/bottom for Islandwide view, or show the current municipality if selected
+      let displayLabels, display1517, display2123;
+      
+      if (name !== 'Puerto Rico' && Number.isFinite(st.chg_1517) && Number.isFinite(st.chg_2123)) {
           // Individual municipality view
+          displayLabels = ['2015–2017 (Policy/Reform)', '2021–2023 (Post-Pandemic)'];
+          display1517 = [st.chg_1517];
+          display2123 = [st.chg_2123];
+          
           compareChart = new Chart(ctxC, {
               type: 'bar',
               data: {
-                  labels: ['2015–2017 (Policy/Reform)', '2021–2023 (Post-Pandemic)'],
+                  labels: displayLabels,
                   datasets: [
                       {
                           label: 'Change in Coverage Gap (pp)',
@@ -433,47 +432,52 @@
                   ]
               },
               options: {
-                  plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c) => signedPP(c.parsed.y) } } },
+                  indexAxis: 'y', // Set to horizontal for single muni view for better label readability
+                  plugins: { 
+                    legend: { display: false }, 
+                    tooltip: { callbacks: { label: (c) => signedPP(c.parsed.x) } } 
+                  },
                   scales: {
-                      y: { ticks: { callback: v => ppFmt(v) }, title: { display: true, text: 'Change in PP' } },
-                      x: { ticks: { maxRotation: 0, minRotation: 0 } }
+                      x: { position: 'top', ticks: { callback: v => ppFmt(v) }, title: { display: true, text: 'Change in Percentage Points (pp)' } },
+                      y: { ticks: { maxRotation: 0, minRotation: 0 } }
                   },
                   maintainAspectRatio: false
               }
           });
       } else {
-          // Islandwide view (show top/bottom performing municipalities)
-          const compData = getMunicipioComparisonData();
-          const numTop = 15;
-          const topData = compData.labels.slice(0, numTop).concat(compData.labels.slice(-numTop));
-          const top1517 = compData.data1517.slice(0, numTop).concat(compData.data1517.slice(-numTop));
-          const top2123 = compData.data2123.slice(0, numTop).concat(compData.data2123.slice(-numTop));
+          // Islandwide view: Show top/bottom 20 municipios
+          const topN = compData.labels.slice(0, numToShow);
+          const top1517N = compData.data1517.slice(0, numToShow);
+          const top2123N = compData.data2123.slice(0, numToShow);
 
           compareChart = new Chart(ctxC, {
               type: 'bar',
               data: {
-                  labels: topData,
+                  labels: topN,
                   datasets: [
                       {
                           label: '2015–2017 Change (pp)',
-                          data: top1517,
-                          backgroundColor: top1517.map(v => v < 0 ? '#22c55e' : '#f97316'), // Lighter green/orange
+                          data: top1517N,
+                          backgroundColor: top1517N.map(v => v < 0 ? '#22c55e' : '#f97316'), 
                           stack: 'stack1'
                       },
                       {
                           label: '2021–2023 Change (pp)',
-                          data: top2123,
-                          backgroundColor: top2123.map(v => v < 0 ? '#15803d' : '#b91c1c'), // Darker green/red
+                          data: top2123N,
+                          backgroundColor: top2123N.map(v => v < 0 ? '#15803d' : '#b91c1c'), 
                           stack: 'stack2'
                       }
                   ]
               },
               options: {
                   indexAxis: 'y',
-                  plugins: { legend: { display: true, position: 'bottom' }, tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${signedPP(c.parsed.x)}` } } },
+                  plugins: { 
+                    legend: { position: 'bottom', labels: { boxWidth: 10 } }, 
+                    tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${signedPP(c.parsed.x)}` } } 
+                  },
                   scales: {
                       x: { position: 'top', ticks: { callback: v => ppFmt(v) }, title: { display: true, text: 'Change in Percentage Points (pp)' } },
-                      y: { ticks: { autoSkip: true, maxRotation: 0, minRotation: 0 } }
+                      y: { ticks: { autoSkip: false, maxRotation: 0, minRotation: 0 } }
                   },
                   maintainAspectRatio: false
               }
@@ -504,7 +508,7 @@
     // ---------------------- Load data + map ----------------------
     let _rows = [];
     let map, layer, fc, legend;
-    let currentMode = 'pct'; // 'pct' (Cumulative Change) | 'abs' (Latest Value)
+    let currentMode = 'pct'; 
 
     let lockedName = null;
     let selectedLayer = null;
