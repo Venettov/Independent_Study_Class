@@ -253,6 +253,10 @@
     // Breaks for Cumulative Change in Percentage Points (Higher is better)
     let ABS_BREAKS = [0.0, 2.0, 4.0, 6.0, 8.0]; // Change in PP (Positive is better)
 
+    // Stores the global min and max values for the current map mode
+    let _extremeValues = { min: Infinity, max: -Infinity };
+
+
     // Utility: color for a value given breaks
     function colorFor(value, breaks, isLatest) {
       if (!Number.isFinite(value)) return '#93c5fd';
@@ -315,6 +319,36 @@
         annualChange: Number(annualChange)
       };
     }
+    
+    // NEW: Function to pre-calculate global min/max for the current metric
+    function calculateExtremeValues() {
+        _extremeValues = { min: Infinity, max: -Infinity };
+        let valueKey;
+        const firstYear = YEARS[0];
+        const lastYear = YEARS[YEARS.length - 1];
+
+        if (currentMode === 'pct') valueKey = `Cum_Change_${firstYear}_${lastYear}`;
+        else if (currentMode === 'latest') valueKey = `${lastYear}`;
+        else return;
+
+        // Iterate through all municipalities to find the global min and max value
+        const municipioRows = _rows.filter(r => r.Municipio !== 'Puerto Rico' && !r.metadata);
+        
+        municipioRows.forEach(row => {
+            // Note: For latest value, we read the column directly using the year as the key
+            const value = (currentMode === 'latest') ? Number(row[valueKey]) : Number(row[valueKey]);
+
+            if (Number.isFinite(value)) {
+                _extremeValues.min = Math.min(_extremeValues.min, value);
+                _extremeValues.max = Math.max(_extremeValues.max, value);
+            }
+        });
+        
+        // Handle floating point precision for comparison
+        _extremeValues.min = parseFloat(_extremeValues.min.toFixed(2));
+        _extremeValues.max = parseFloat(_extremeValues.max.toFixed(2));
+    }
+
 
     function censusLink(name){
       return `https://data.census.gov/table?q=S1501:+EDUCATIONAL+ATTAINMENT+Puerto+Rico`;
@@ -457,6 +491,10 @@
       const rawData = await res.json();
       // Filter out metadata and ensure we get only data rows
       _rows = rawData.filter(row => !row.metadata);
+      
+      // Calculate initial extremes
+      calculateExtremeValues();
+
 
       const prBounds = L.latLngBounds([[17.85, -67.45],[18.55, -65.25]]);
       prBoundsGlobal = prBounds;
@@ -571,6 +609,9 @@
         btnLatest.classList.toggle('bg-blue-600', mode==='latest');
         btnLatest.classList.toggle('text-white', mode==='latest');
         btnLatest.classList.toggle('hover:bg-gray-50', mode!=='latest');
+        
+        // Re-calculate extremes before restyling
+        calculateExtremeValues();
 
         layer.eachLayer(l => l.setStyle(styleForFeature(l.feature)));
         if (selectedLayer) selectedLayer.setStyle(selectedOutline);
@@ -599,13 +640,34 @@
     function styleForFeature(feature){
       const p = feature.properties || {};
       const name = p.NAME || p.NAMELSAD || p.name || 'Unknown';
-      const st = statsForMunicipio(name);
+      const statsName = sanitizeName(name);
+      const st = statsForMunicipio(statsName);
       
       const value = !st ? NaN : (currentMode === 'pct' ? st.abs : st.latestVal);
       const breaks = (currentMode === 'pct') ? ABS_BREAKS : PCT_BREAKS;
       
       const col = colorFor(value, breaks, currentMode === 'latest');
-      return { fillColor: col, weight: 1.2, color:'#111827', fillOpacity:.75 };
+      
+      // Default style
+      let style = { fillColor: col, weight: 1.2, color:'#111827', fillOpacity:.75 };
+      
+      // >>> START: Custom logic to highlight only the single min and max values (Thicker Yellow Line) <<<
+      if (Number.isFinite(value) && _extremeValues.min !== Infinity) {
+          // Compare value to the globally calculated min and max, accounting for floating point
+          const valRounded = parseFloat(value.toFixed(2));
+          const isExtreme = valRounded === _extremeValues.min || valRounded === _extremeValues.max;
+          
+          // Only highlight if min is not equal to max (i.e., not all values are the same)
+          if (isExtreme && _extremeValues.min !== _extremeValues.max) { 
+              style.weight = 5;            // Thicker border
+              style.color = '#facc15';     // Yellow border (tailwind yellow-400)
+              style.dashArray = '';        // Solid line
+              style.fillOpacity = 0.95;    // Max fill opacity to make the interior color stand out
+          }
+      }
+      // >>> END: Custom logic to highlight only the single min and max values (Thicker Yellow Line) <<<
+
+      return style;
     }
 
     // Legend render (updates title + ranges)
@@ -631,49 +693,24 @@
       const fmtRange = (a,b) => isLatestValue 
           ? `${fmtPct(a)} to ${fmtPct(b)}` 
           : `${signedPP(a)} to ${signedPP(b)}`;
+      const fmtValue = (v) => isLatestValue ? fmtPct(v) : signedPP(v);
 
       labels.push(`<div style="font-weight:600;margin-bottom:.25rem">${title}</div>`);
       
-      labels.push(row(CHORO_COLORS[0], isLatestValue ? `≤ ${fmtPct(breaks[0])}` : `≤ ${signedPP(breaks[0])}`));
+      labels.push(row(CHORO_COLORS[0], `≤ ${fmtValue(breaks[0])}`));
       labels.push(row(CHORO_COLORS[1], fmtRange(breaks[0], breaks[1])));
       labels.push(row(CHORO_COLORS[2], fmtRange(breaks[1], breaks[2])));
       labels.push(row(CHORO_COLORS[3], fmtRange(breaks[2], breaks[3])));
       labels.push(row(CHORO_COLORS[4], fmtRange(breaks[3], breaks[4])));
-      labels.push(row(CHORO_COLORS[5], isLatestValue ? `> ${fmtPct(breaks[4])}` : `> ${signedPP(breaks[4])}`));
+      labels.push(row(CHORO_COLORS[5], `> ${fmtValue(breaks[4])}`));
 
       legend._div.innerHTML = labels.join('');
     }
 
     // Compute ABS breaks from current data (quantile-ish, robust)
     function computeBreaks(){
-      const values = [];
-      _rows.filter(r => r.Municipio !== 'Puerto Rico').forEach(row => {
-        const firstYear = YEARS[0];
-        const lastYear = YEARS[YEARS.length - 1];
-        const abs = row[`Cum_Change_${firstYear}_${lastYear}`];
-        if (Number.isFinite(abs)) values.push(abs);
-      });
-      
-      // Calculate quantiles for cumulative change (ABS_BREAKS)
-      const q = (arr, t) => {
-        if (!arr.length) return null;
-        const i = (arr.length - 1) * t;
-        const lo = Math.floor(i), hi = Math.ceil(i);
-        if (lo === hi) return arr[lo];
-        return arr[lo] * (hi - i) + arr[hi] * (i - lo);
-      };
-      
-      const neg = values.filter(v => v < 0).sort((a,b)=>a-b);
-      const pos = values.filter(v => v >= 0).sort((a,b)=>a-b);
-
-      // Use a blend of fixed and data-derived breaks for robustness
-      const n1 = q(neg, 0.25) ?? -200;
-      const n2 = q(neg, 0.75) ?? -50;
-      const p1 = q(pos, 0.25) ?? 100;
-      const p2 = q(pos, 0.75) ?? 500;
-      
-      // FIXED PP BREAKS for Educational Attainment Change (Positive is generally good)
-      // Small/no gain (Red) to High gain (Green)
+      // ABS_BREAKS are hardcoded since the logic in the provided file seemed intentionally fixed
+      // for percentage point changes. (Positive is generally good)
       ABS_BREAKS = [-0.5, 0.0, 1.0, 2.0, 3.0];
       
       // PCT_BREAKS (Latest Attainment) remain fixed since they are raw percentages
