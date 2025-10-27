@@ -241,11 +241,12 @@
         <div class="section-title col-span-full">Selected Municipality Trends: <span id="trendMuniName" class="text-blue-400">Puerto Rico</span></div>
 
         <div id="trendCharts" class="card grid grid-cols-1 md:grid-cols-2 gap-4 col-span-full p-4">
-            <div class="chart-container">
+            <!-- FIXED: Added h-96 class to chart containers to limit vertical growth -->
+            <div class="chart-container h-96"> 
                 <h3 class="text-base font-semibold mb-2 text-gray-100">Population & Housing Trend</h3>
                 <canvas id="trendChart1"></canvas>
             </div>
-            <div class="chart-container">
+            <div class="chart-container h-96"> 
                 <h3 class="text-base font-semibold mb-2 text-gray-100">Employment & Income Trend</h3>
                 <canvas id="trendChart2"></canvas>
             </div>
