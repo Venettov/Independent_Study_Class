@@ -145,7 +145,6 @@
     <section class="card p-6">
       <h2 class="text-lg font-semibold mb-4">Health Coverage Details</h2>
       
-      <!-- GRID 1: Details and Two Charts -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div>
           <div class="text-sm">
@@ -184,17 +183,12 @@
         </div>
       </div>
       
-      <!-- NEW FULL-WIDTH CHART SECTION -->
       <div class="mt-6 pt-6 border-t border-gray-200">
         <h3 class="font-semibold mb-2">Comparison of Coverage Gap Change by Period (pp)</h3>
         <div class="w-full h-80 bg-gray-50 rounded p-3">
-            <!-- Canvas container takes up more vertical space -->
             <canvas id="compareChart"></canvas>
         </div>
       </div>
-      <!-- END NEW FULL-WIDTH CHART SECTION -->
-      
-      <!-- EXPLANATION SECTION -->
       <div class="mt-10 pt-6 border-t border-gray-200">
           <h3 class="text-xl font-semibold mb-3">Understanding the Health Coverage Trend</h3>
           <p class="text-gray-700 text-base">
@@ -225,8 +219,7 @@
               </li>
           </ul>
       </div>
-      <!-- END EXPLANATION SECTION -->
-    </section>
+      </section>
   </main>
 
   <script>
@@ -242,13 +235,24 @@
     const signedPP = (n) => (n > 0 ? '+' : '') + ppFmt(n);
 
     // ---------------------- Choropleth colors ----------------------
+    // Note: Health Coverage Gap (Uninsured Rate) is LOWER is BETTER.
+    // CHORO_COLORS are defined Red(0) -> Deep Red(5).
+    // The legend is currently coded to use CHORO_COLORS[0] for <= breaks[0]
+    // Since Lower is Better, we reverse the color assignment logic in colorFor (Green -> Red)
     const CHORO_COLORS = ['#15803d', '#22c55e', '#bbf7d0', '#f97316', '#b91c1c', '#7f1d1d']; 
-    const PCT_BREAKS = [2.5, 4.0, 6.0, 8.0, 10.0]; 
-    let ABS_BREAKS = [-2.0, -1.0, 0.0, 1.0, 2.0]; 
+    const PCT_BREAKS = [2.5, 4.0, 6.0, 8.0, 10.0]; // Latest Value Breaks (%)
+    let ABS_BREAKS = [-4.0, -2.0, 0.0, 1.0, 2.0]; // Cumulative Change Breaks (pp)
+
+    // Stores the global min and max values for the current map mode
+    let _extremeValues = { min: Infinity, max: -Infinity };
 
     // Utility: color for a value given breaks
     function colorFor(value, breaks) {
       if (!Number.isFinite(value)) return '#93c5fd';
+      
+      // Because CHORO_COLORS is defined (Green -> Red), but the breaks are ascending,
+      // we match the breaks to the colors directly to maintain the desired visual:
+      // LOWEST Break (Best/Lowest Gap) -> CHORO_COLORS[0] (Deep Green)
       if (value <= breaks[0]) return CHORO_COLORS[0];
       if (value <= breaks[1]) return CHORO_COLORS[1];
       if (value <= breaks[2]) return CHORO_COLORS[2];
@@ -309,6 +313,36 @@
         chg_2123
       };
     }
+    
+    // NEW: Function to pre-calculate global min/max for the current metric
+    function calculateExtremeValues() {
+        _extremeValues = { min: Infinity, max: -Infinity };
+        let valueKey;
+        const firstYear = YEARS[0];
+        const lastYear = YEARS[YEARS.length - 1];
+
+        // Map modes to the correct data keys
+        if (currentMode === 'abs') valueKey = `${lastYear}`; // Latest Value
+        else if (currentMode === 'pct') valueKey = `Cum_Change_${firstYear}_${lastYear}`; // Cumulative Change in PP
+        else return;
+
+        // Iterate through all municipalities to find the global min and max value
+        const municipioRows = _rows.filter(r => r.Municipio !== 'Puerto Rico' && !r.metadata);
+        
+        municipioRows.forEach(row => {
+            const value = Number(row[valueKey]);
+
+            if (Number.isFinite(value)) {
+                _extremeValues.min = Math.min(_extremeValues.min, value);
+                _extremeValues.max = Math.max(_extremeValues.max, value);
+            }
+        });
+        
+        // Handle floating point precision for comparison
+        _extremeValues.min = parseFloat(_extremeValues.min.toFixed(2));
+        _extremeValues.max = parseFloat(_extremeValues.max.toFixed(2));
+    }
+
 
     function censusLink(name){
       return `https://data.census.gov/table?q=S2701:+HEALTH+INSURANCE+COVERAGE+STATUS+Puerto+Rico`;
@@ -520,6 +554,10 @@
       const rawData = await res.json();
       _rows = rawData.filter(row => !row.metadata);
 
+      // Calculate initial extremes
+      calculateExtremeValues();
+
+
       const prBounds = L.latLngBounds([[17.85, -67.45],[18.55, -65.25]]);
       prBoundsGlobal = prBounds;
       map = L.map('map', { zoomSnap: .25 }).fitBounds(prBounds);
@@ -633,6 +671,9 @@
         btnAbs.classList.toggle('bg-blue-600', mode==='abs');
         btnAbs.classList.toggle('text-white', mode==='abs');
         btnAbs.classList.toggle('hover:bg-gray-50', mode!=='abs');
+        
+        // Re-calculate extremes before restyling
+        calculateExtremeValues();
 
         layer.eachLayer(l => l.setStyle(styleForFeature(l.feature)));
         if (selectedLayer) selectedLayer.setStyle(selectedOutline);
@@ -661,13 +702,35 @@
     function styleForFeature(feature){
       const p = feature.properties || {};
       const name = p.NAME || p.NAMELSAD || p.name || 'Unknown';
-      const st = statsForMunicipio(name);
+      const statsName = sanitizeName(name);
+      const st = statsForMunicipio(statsName);
       
-      const value = !st ? NaN : (currentMode === 'pct' ? st.abs : st.latestVal);
-      const breaks = (currentMode === 'pct') ? ABS_BREAKS : PCT_BREAKS;
+      const isLatestValue = currentMode === 'abs'; // 'abs' mode maps to latest (2023) uninsured percentage
+      const value = !st ? NaN : (isLatestValue ? st.latestVal : st.abs);
+      const breaks = isLatestValue ? PCT_BREAKS : ABS_BREAKS;
       
       const col = colorFor(value, breaks);
-      return { fillColor: col, weight: 1.2, color:'#111827', fillOpacity:.75 };
+      
+      // Default style
+      let style = { fillColor: col, weight: 1.2, color:'#111827', fillOpacity:.75 };
+      
+      // >>> START: Custom logic to highlight only the single min and max values (Thicker Yellow Line) <<<
+      if (Number.isFinite(value) && _extremeValues.min !== Infinity) {
+          // Compare value to the globally calculated min and max, accounting for floating point
+          const valRounded = parseFloat(value.toFixed(2));
+          const isExtreme = valRounded === _extremeValues.min || valRounded === _extremeValues.max;
+          
+          // Only highlight if min is not equal to max (i.e., not all values are the same)
+          if (isExtreme && _extremeValues.min !== _extremeValues.max) { 
+              style.weight = 5;            // Thicker border
+              style.color = '#facc15';     // Yellow border (tailwind yellow-400)
+              style.dashArray = '';        // Solid line
+              style.fillOpacity = 0.95;    // Max fill opacity to make the interior color stand out
+          }
+      }
+      // >>> END: Custom logic to highlight only the single min and max values (Thicker Yellow Line) <<<
+
+      return style;
     }
 
     // Legend render (updates title + ranges)
@@ -693,15 +756,16 @@
       const fmtRange = (a,b) => isLatestValue 
           ? `${fmtPct(a)} to ${fmtPct(b)}` 
           : `${signedPP(a)} to ${signedPP(b)}`;
+      const fmtValue = (v) => isLatestValue ? fmtPct(v) : signedPP(v);
 
       labels.push(`<div style="font-weight:600;margin-bottom:.25rem">${title}</div>`);
       
-      labels.push(row(CHORO_COLORS[0], isLatestValue ? `≤ ${fmtPct(breaks[0])}` : `≤ ${signedPP(breaks[0])}`));
+      labels.push(row(CHORO_COLORS[0], `≤ ${fmtValue(breaks[0])}`));
       labels.push(row(CHORO_COLORS[1], fmtRange(breaks[0], breaks[1])));
       labels.push(row(CHORO_COLORS[2], fmtRange(breaks[1], breaks[2])));
       labels.push(row(CHORO_COLORS[3], fmtRange(breaks[2], breaks[3])));
       labels.push(row(CHORO_COLORS[4], fmtRange(breaks[3], breaks[4])));
-      labels.push(row(CHORO_COLORS[5], isLatestValue ? `> ${fmtPct(breaks[4])}` : `> ${signedPP(breaks[4])}`));
+      labels.push(row(CHORO_COLORS[5], `> ${fmtValue(breaks[4])}`));
 
       legend._div.innerHTML = labels.join('');
     }
