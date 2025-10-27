@@ -50,7 +50,8 @@
         overflow-y: auto;
     }
     .municipio-item {
-        @apply cursor-pointer p-2 rounded-lg text-sm transition-all text-gray-300;
+        /* FIX: Ensure high contrast text */
+        @apply cursor-pointer p-2 rounded-lg text-sm transition-all text-white; 
     }
     .municipio-item:hover {
         background-color: #374151; /* Darker gray on hover */
@@ -59,8 +60,8 @@
         @apply bg-blue-600 text-white font-semibold;
     }
     #scatterPlotContainer {
-        height: 550px;
-        min-height: 550px;
+        /* FIX: Changed height to min-height to ensure charts render correctly */
+        min-height: 550px; 
         @apply bg-gray-900 rounded-xl p-4;
     }
     .loader {
@@ -155,10 +156,10 @@
       </div>
     </header>
     
-    <!-- CONSOLIDATED DASHBOARD CONTENT STARTS HERE (Wrapped in new block) -->
+    <!-- CONSOLIDATED DASHBOARD CONTENT STARTS HERE (Wrapped in new light gray block) -->
     <section class="dashboard-block">
       
-        <!-- KPI SUMMARY SECTION (Card style) -->
+        <!-- KPI SUMMARY SECTION -->
         <div id="kpi-summary" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div class="kpi-card">
             <div class="text-xs font-semibold text-gray-400">Total Population (2024 Est.)</div>
@@ -178,10 +179,11 @@
           </div>
         </div>
         
-        <!-- MAIN INTERACTIVE PLOT & FILTER PANEL (Card style) -->
-        <div id="main-panel" class="card grid grid-cols-1 lg:grid-cols-4 gap-4 mt-6 p-4">
+        <!-- MAIN INTERACTIVE PLOT & FILTER PANEL (Grouped into a white card for separation) -->
+        <div id="main-panel" class="card grid grid-cols-1 lg:grid-cols-4 gap-4 mt-6 p-0">
             
             <!-- SCATTER PLOT (3/4 width) -->
+            <!-- The inner container ensures the dark background for the chart itself -->
             <div class="lg:col-span-3 p-4" id="scatterPlotContainer">
                 <h2 class="text-lg font-semibold mb-3 text-gray-100">Socio-Economic Relationship by Municipality</h2>
                 <div id="chart-loader" class="text-center mt-20 hidden">
@@ -229,7 +231,7 @@
             </div>
         </div>
         
-        <!-- DETAILED TREND CHARTS SECTION (Grouped into a single card) -->
+        <!-- DETAILED TREND CHARTS SECTION (Grouped into a separate white card) -->
         <div class="section-title col-span-full">Selected Municipality Trends: <span id="trendMuniName" class="text-blue-400">Puerto Rico</span></div>
 
         <div id="trendCharts" class="card grid grid-cols-1 md:grid-cols-2 gap-4 col-span-full p-4">
@@ -313,7 +315,8 @@
                     const popLatest = Number(row['2024']);
                     
                     merged[muniName].Population_2024 = popLatest;
-                    merged[muniName].Population_Density = Number(row.popDensity) || 0;
+                    // Note: popDensity is calculated in the population script. Assuming zero for aggregate here.
+                    merged[muniName].Population_Density = Number(row.popDensity) || 0; 
                     merged[muniName].Population_PctChange = ((popLatest - popStart) / popStart) * 100;
                     
                     merged[muniName].Population_TimeSeries = YEARS.POP.map(y => Number(row[y]) || 0);
