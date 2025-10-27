@@ -613,26 +613,7 @@
       }
       
       const col = colorFor(value, breaks);
-      
-      // Default style based on color
-      let style = { fillColor: col, weight: 1.2, color:'#111827', fillOpacity:.75 };
-
-      // >>> START: Custom logic to highlight extreme % change values <<<
-      if (currentMode === 'pct' && Number.isFinite(value)) {
-          // Extreme loss: <= -10% (PCT_BREAKS[0])
-          // Extreme gain: > 2% (PCT_BREAKS[PCT_BREAKS.length - 1])
-          const isExtreme = value <= breaks[0] || value > breaks[breaks.length - 1];
-          
-          if (isExtreme) {
-              style.weight = 3;            // Thicker border
-              style.color = '#000000';     // Black border
-              style.dashArray = '5, 5';    // Dashed line
-              style.fillOpacity = 0.9;     // Slight increase in fill opacity
-          }
-      }
-      // >>> END: Custom logic to highlight extreme % change values <<<
-
-      return style;
+      return { fillColor: col, weight: 1.2, color:'#111827', fillOpacity:.75 };
     }
 
     function colorFor(value, breaks) {

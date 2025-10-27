@@ -117,10 +117,9 @@
       <div class="flex items-center justify-between gap-3">
         <div class="text-sm text-gray-700 font-medium">Map shading by</div>
         <div class="flex items-center gap-2">
-          <div class="inline-flex rounded-lg border bg-white shadow-sm overflow-hidden" id="metric-toggles">
+          <div class="inline-flex rounded-lg border bg-white shadow-sm overflow-hidden">
             <button id="metricPct" type="button" class="px-3 py-1.5 text-sm font-medium bg-blue-600 text-white">% change</button>
             <button id="metricAbs" type="button" class="px-3 py-1.5 text-sm font-medium hover:bg-gray-50">abs change</button>
-            <button id="metricDensity" type="button" class="px-3 py-1.5 text-sm font-medium hover:bg-gray-50">Density</button>
           </div>
           <button id="clearSel" class="px-3 py-1.5 text-sm rounded-lg border bg-white hover:bg-gray-50">Clear selection</button>
         </div>
@@ -143,8 +142,7 @@
               <li>2024: <span id="d-2024" class="font-semibold">—</span></li>
               <li>Change since 2010: <span id="d-chg" class="font-semibold">—</span></li>
               <li>2023→2024: <span id="d-2324" class="font-semibold">—</span></li>
-              <li>2024 Density (per sq mi): <span id="d-density" class="font-semibold">—</span></li>
-              </ul>
+            </ul>
           </div>
 
           <div class="mt-4 text-sm">
@@ -169,54 +167,7 @@
         </div>
       </div>
     </section>
-    
-    <hr class="border-gray-300">
 
-    <section class="card p-6 space-y-6">
-      <h2 class="text-lg font-semibold">Analysis of Population Dynamics (2010–2024)</h2>
-
-      <div class="space-y-4">
-        <h3 class="text-base font-semibold text-gray-700">The Overall Trend: Population Decline</h3>
-        <p>
-          The <strong>Population Trend (2010–2024) line chart</strong>clearly shows a significant, sustained decline in the resident population of Puerto Rico since 2010. This decline is not a recent phenomenon but an acceleration of a trend spanning over a decade, driven primarily by <strong>negative net migration</strong>.
-        </p>
-        <p>
-          The <strong>Annual % Change bar chart</strong> illustrates the severity of this loss, with nearly every year showing a negative percentage change, often exceeding $-1.00\%$ per year, especially following the major hurricanes (Maria and Irma in 2017) and the ongoing fiscal crisis. Periods of negative economic growth and lack of opportunity fuel this out-migration, particularly among the working-age population.
-        </p>
-      </div>
-
-      <div class="space-y-4">
-        <h3 class="text-base font-semibold text-gray-700">Geographic Disparities and Density</h3>
-        <p>
-          The <strong>Map Shading</strong> (when set to `% change` or `abs change`) reveals that population loss is widespread, impacting both urban and rural municipalities, though highly populated areas like the San Juan metropolitan area have lost the largest <strong>absolute number of people</strong>.
-        </p>
-        <p>
-          When switching the map to <strong>Density</strong> mode, one can visualize the distribution of the remaining population. High-density areas (urban centers, visible in reds/oranges) are vital economic hubs, but the simultaneous population loss in these areas represents a high concentration of demographic stress. Conversely, lower-density, often more mountainous or peripheral municipalities (visible in greens) face distinct challenges related to providing basic services and infrastructure to a highly dispersed and aging population.
-        </p>
-      </div>
-
-      <div class="space-y-4">
-        <h3 class="text-base font-semibold text-gray-700">Supporting Resources and Data</h3>
-        <p>
-          The primary source for these detailed annual population estimates is the <strong>U.S. Census Bureau’s Population Estimates Program</strong>, which provides vintages for Puerto Rico's municipalities.
-        </p>
-        <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
-          <li>
-            <a href="https://www.census.gov/data/datasets/time-series/demo/popest/2020s-total-puerto-rico-municipios.html"
-               target="_blank" rel="noopener" class="text-blue-600 underline">
-              U.S. Census Bureau: 2020s Census Estimates – Puerto Rico Municipalities
-            </a> (for post-2020 data).
-          </li>
-          <li>
-            <a href="https://www.census.gov/data/tables/time-series/demo/popest/intercensal-2010-2020-puerto-rico-municipios.html"
-               target="_blank" rel="noopener" class="text-blue-600 underline">
-              U.S. Census Bureau: Intercensal Estimates 2010–2020 – Puerto Rico Municipalities
-            </a> (for historical data).
-          </li>
-          <li><strong>Economic Research Institutions:</strong> Further analysis of the drivers of migration (economic stagnation, debt crisis, and natural disasters) is routinely published by the Federal Reserve Bank of New York and various Puerto Rican and U.S. think tanks.</li>
-        </ul>
-      </div>
-    </section>
     <section class="card p-6">
       <h2 class="text-lg font-semibold mb-4">File Sources</h2>
       <div class="space-y-4">
@@ -256,15 +207,10 @@
     const fmt = new Intl.NumberFormat('en-US');
     const pctFmt = (v) => `${(Number(v)||0).toFixed(2)}%`;
     const signed = (n) => (n > 0 ? '+' : '') + fmt.format(n);
-    
-    // NEW DENSITY FORMATTER
-    const densityFmt = (v) => `${(Number(v)||0).toFixed(0)}`;
 
     const CHORO_COLORS = ['#7f1d1d', '#b91c1c', '#f97316', '#bbf7d0', '#22c55e', '#15803d'];
     const PCT_BREAKS = [-10, -6, -3, 0, 2];
     let ABS_BREAKS = [-10000, -6000, -3000, 0, 1000];
-    // NEW DENSITY BREAKS 
-    const DENSITY_BREAKS = [200, 400, 600, 800, 1000]; 
 
     const sanitizeName = s => String(s||'').trim();
     const yearVal = (row,y) => {
@@ -272,104 +218,6 @@
       const n = Number(v);
       return Number.isFinite(n) ? n : NaN;
     };
-    
-    // GLOBAL VARIABLE FOR AREA DATA (SIMULATED FROM GEOJSON PROPERTIES)
-    let _areaData = {};
-    
-    // Placeholder function to simulate extracting area from GeoJSON features.
-    function buildAreaMap(features) {
-        // --- SIMULATION START ---
-        // Real PR area: 3515.1 sq mi. Average density: ~911/sq mi
-        const simAreas = {
-            'Puerto Rico': 3515.1, 
-            'San Juan': 47.7,
-            'Bayamón': 44.2,
-            'Ponce': 116.3,
-            'Caguas': 58.7,
-            'Guaynabo': 27.2,
-            'Carolina': 46.2,
-            'Aguas Buenas': 29.8, 
-            'Comerío': 28.3,
-            'Loíza': 19.4,
-            'Adjuntas': 66.6,
-            'Aguada': 30.6,
-            'Aguadilla': 36.1,
-            'Aibonito': 39.8,
-            'Añasco': 38.6,
-            'Arecibo': 125.7,
-            'Arroyo': 4.7,
-            'Barceloneta': 17.5,
-            'Barranquitas': 33.9,
-            'Cabo Rojo': 59.8,
-            'Camuy': 46.3,
-            'Canóvanas': 46.9,
-            'Cataño': 4.8,
-            'Cayey': 50.7,
-            'Ceiba': 28.5,
-            'Ciales': 67.5,
-            'Cidra': 36.5,
-            'Coamo': 76.5,
-            'Corozal': 42.1,
-            'Culebra': 11.7,
-            'Dorado': 23.4,
-            'Fajardo': 30.1,
-            'Florida': 15.6,
-            'Guánica': 37.8,
-            'Guayama': 64.9,
-            'Guayanilla': 42.9,
-            'Gurabo': 28.1,
-            'Hatillo': 66.8,
-            'Hormigueros': 11.6,
-            'Humacao': 44.7,
-            'Isabela': 47.6,
-            'Jayuya': 67.8,
-            'Juana Díaz': 59.8,
-            'Juncos': 26.6,
-            'Lajas': 60.1,
-            'Lares': 61.6,
-            'Las Marías': 46.6,
-            'Las Piedras': 33.8,
-            'Luquillo': 26.7,
-            'Manatí': 46.5,
-            'Maricao': 36.8,
-            'Maunabo': 20.2,
-            'Mayagüez': 77.5,
-            'Moca': 50.3,
-            'Morovis': 40.5,
-            'Naguabo': 52.4,
-            'Naranjito': 26.1,
-            'Orocovis': 62.3,
-            'Patillas': 47.7,
-            'Peñuelas': 43.1,
-            'Quebradillas': 22.8,
-            'Rincón': 14.7,
-            'Río Grande': 60.1,
-            'Sabana Grande': 36.0,
-            'Salinas': 69.9,
-            'San Germán': 55.4,
-            'San Lorenzo': 53.0,
-            'San Sebastián': 69.4,
-            'Santa Isabel': 36.3,
-            'Toa Alta': 26.3,
-            'Toa Baja': 18.0,
-            'Trujillo Alto': 20.6,
-            'Utuado': 113.8,
-            'Vega Alta': 27.8,
-            'Vega Baja': 46.4,
-            'Vieques': 50.9,
-            'Villalba': 35.8,
-            'Yabucoa': 53.6,
-            'Yauco': 65.5
-        };
-        features.forEach(f => {
-            const p = f.properties || {};
-            const name = (p.NAME || p.NAMELSAD || p.name || 'Unknown').replace(/\s*Municipio$/,'');
-            const area = simAreas[name] || 50; 
-            _areaData[name] = area;
-        });
-        // --- SIMULATION END ---
-    }
-
 
     function statsForMunicipio(name){
       const key = sanitizeName(name).replace(/\s*Municipio$/,'');
@@ -388,12 +236,7 @@
       for (let i=1;i<YEARS.length;i++){
         pctYear.push(((vals[i]-vals[i-1]) / vals[i-1]) * 100);
       }
-      
-      // Calculate Density (using area data extracted/simulated from GeoJSON)
-      const area = _areaData[key];
-      const popDensity = Number.isFinite(area) && area > 0 ? pop2024 / area : NaN;
-
-      return { vals, abs, pctTot, pctYear, pop2024, popDensity };
+      return { vals, abs, pctTot, pctYear, pop2024 };
     }
 
     function censusLink(name){
@@ -436,7 +279,6 @@
     const d2024 = document.getElementById('d-2024');
     const dChg  = document.getElementById('d-chg');
     const d2324 = document.getElementById('d-2324');
-    const dDensity = document.getElementById('d-density'); 
     const dCenL = document.getElementById('d-census');
 
     function updateDetails(name, st, centroid){
@@ -446,13 +288,12 @@
       dChg.textContent  = st ? `${signed(st.abs)} (${pctFmt(st.pctTot)})` : '—';
       const last = st && st.pctYear.length ? st.pctYear[st.pctYear.length-1] : NaN;
       d2324.textContent = Number.isFinite(last) ? pctFmt(last) : '—';
-      dDensity.textContent = Number.isFinite(st?.popDensity) ? densityFmt(st.popDensity) : '—';
       dCenL.href = censusLink(name);
       drawCharts(name, st);
     }
 
     let _rows = [], map, layer, fc, legend;
-    let currentMode = 'pct'; // Modes: 'pct', 'abs', 'density'
+    let currentMode = 'pct';
     let lockedName = null, selectedLayer = null;
     const selectedOutline = { weight: 4, color: '#111827', dashArray: '3', fillOpacity: 0.85 };
     let prBoundsGlobal = null;
@@ -472,9 +313,6 @@
 
       const gjRes = await fetch(GEOJSON_URL + (GEOJSON_URL.includes('?')?'&':'?') + 'cb=' + Date.now());
       fc = await gjRes.json();
-      
-      // STEP 1: Process GeoJSON to build Area Map
-      buildAreaMap(fc.features);
 
       const hiStyle = { weight:3, color:'#111827', fillOpacity:0.9 };
 
@@ -557,22 +395,15 @@
     function wireMetricToggle(){
       const btnPct = document.getElementById('metricPct');
       const btnAbs = document.getElementById('metricAbs');
-      const btnDensity = document.getElementById('metricDensity'); 
 
       function setActive(mode){
         currentMode = mode;
-        
         btnPct.classList.toggle('bg-blue-600', mode==='pct');
         btnPct.classList.toggle('text-white', mode==='pct');
         btnPct.classList.toggle('hover:bg-gray-50', mode!=='pct');
-        
         btnAbs.classList.toggle('bg-blue-600', mode==='abs');
         btnAbs.classList.toggle('text-white', mode==='abs');
         btnAbs.classList.toggle('hover:bg-gray-50', mode!=='abs');
-
-        btnDensity.classList.toggle('bg-blue-600', mode==='density');
-        btnDensity.classList.toggle('text-white', mode==='density');
-        btnDensity.classList.toggle('hover:bg-gray-50', mode!=='density');
 
         layer.eachLayer(l => l.setStyle(styleForFeature(l.feature)));
         if (selectedLayer) selectedLayer.setStyle(selectedOutline);
@@ -581,7 +412,6 @@
 
       btnPct.addEventListener('click', () => setActive('pct'));
       btnAbs.addEventListener('click', () => setActive('abs'));
-      btnDensity.addEventListener('click', () => setActive('density')); 
       setActive(currentMode);
     }
 
@@ -599,56 +429,14 @@
       const p = feature.properties || {};
       const name = (p.NAME || p.NAMELSAD || p.name || 'Unknown').replace(/\s*Municipio$/,'');
       const st = statsForMunicipio(name);
-      
-      let value, breaks;
-      if (currentMode === 'pct') {
-        value = !st ? NaN : st.pctTot;
-        breaks = PCT_BREAKS;
-      } else if (currentMode === 'abs') {
-        value = !st ? NaN : st.abs;
-        breaks = ABS_BREAKS;
-      } else if (currentMode === 'density') { 
-        value = !st ? NaN : st.popDensity;
-        breaks = DENSITY_BREAKS;
-      }
-      
+      const value = !st ? NaN : (currentMode === 'pct' ? st.pctTot : st.abs);
+      const breaks = (currentMode === 'pct') ? PCT_BREAKS : ABS_BREAKS;
       const col = colorFor(value, breaks);
-      
-      // Default style based on color
-      let style = { fillColor: col, weight: 1.2, color:'#111827', fillOpacity:.75 };
-
-      // >>> START: Custom logic to highlight extreme % change values <<<
-      if (currentMode === 'pct' && Number.isFinite(value)) {
-          // Extreme loss: <= -10% (PCT_BREAKS[0])
-          // Extreme gain: > 2% (PCT_BREAKS[PCT_BREAKS.length - 1])
-          const isExtreme = value <= breaks[0] || value > breaks[breaks.length - 1];
-          
-          if (isExtreme) {
-              style.weight = 3;            // Thicker border
-              style.color = '#000000';     // Black border
-              style.dashArray = '5, 5';    // Dashed line
-              style.fillOpacity = 0.9;     // Slight increase in fill opacity
-          }
-      }
-      // >>> END: Custom logic to highlight extreme % change values <<<
-
-      return style;
+      return { fillColor: col, weight: 1.2, color:'#111827', fillOpacity:.75 };
     }
 
     function colorFor(value, breaks) {
       if (!Number.isFinite(value)) return '#93c5fd';
-      
-      // Density: High Density = Dark Red (CHORO_COLORS[0]), Low Density = Dark Green (CHORO_COLORS[5])
-      if (currentMode === 'density') {
-        if (value <= breaks[0]) return CHORO_COLORS[5]; 
-        if (value <= breaks[1]) return CHORO_COLORS[4]; 
-        if (value <= breaks[2]) return CHORO_COLORS[3]; 
-        if (value <= breaks[3]) return CHORO_COLORS[2]; 
-        if (value <= breaks[4]) return CHORO_COLORS[1]; 
-        return CHORO_COLORS[0]; 
-      }
-      
-      // Pct/Abs Change: Negative/Low Change = Dark Red (CHORO_COLORS[0]), High Change = Dark Green (CHORO_COLORS[5])
       if (value <= breaks[0]) return CHORO_COLORS[0];
       if (value <= breaks[1]) return CHORO_COLORS[1];
       if (value <= breaks[2]) return CHORO_COLORS[2];
@@ -659,26 +447,8 @@
 
     function renderLegend(){
       if (!legend || !legend._div) return;
-      
-      let breaks, title, fmtRange, fmtValue;
-      
-      if (currentMode === 'pct') {
-        breaks = PCT_BREAKS;
-        title = 'Change since 2010 — %';
-        fmtValue = (v) => `${v}%`;
-        fmtRange = (a,b) => `${a}% to ${b}%`;
-      } else if (currentMode === 'abs') {
-        breaks = ABS_BREAKS;
-        title = 'Change since 2010 — people';
-        fmtValue = (v) => signed(v);
-        fmtRange = (a,b) => `${signed(a)} to ${signed(b)}`;
-      } else if (currentMode === 'density') { 
-        breaks = DENSITY_BREAKS;
-        title = '2024 Population Density (per sq mi)';
-        fmtValue = (v) => densityFmt(v);
-        fmtRange = (a,b) => `${fmtValue(a)} to ${fmtValue(b)}`;
-      }
-      
+      const breaks = (currentMode === 'pct') ? PCT_BREAKS : ABS_BREAKS;
+      const title  = (currentMode === 'pct') ? 'Change since 2010 — %' : 'Change since 2010 — people';
 
       const labels = [];
       const row = (color, label) =>
@@ -688,32 +458,21 @@
            <span>${label}</span>
          </div>`;
 
+      const fmtRange = (a,b) => (currentMode==='pct') ? `${a}% to ${b}%` : `${signed(a)} to ${signed(b)}`;
+
       labels.push(`<div style="font-weight:600;margin-bottom:.25rem">${title}</div>`);
-      
-      // Density legend is reversed (Low Density=Green/CHORO_COLORS[5], High Density=Red/CHORO_COLORS[0])
-      if (currentMode === 'density') {
-        labels.push(row(CHORO_COLORS[5], `≤ ${fmtValue(breaks[0])}`)); 
-        labels.push(row(CHORO_COLORS[4], fmtRange(breaks[0], breaks[1])));
-        labels.push(row(CHORO_COLORS[3], fmtRange(breaks[1], breaks[2])));
-        labels.push(row(CHORO_COLORS[2], fmtRange(breaks[2], breaks[3])));
-        labels.push(row(CHORO_COLORS[1], fmtRange(breaks[3], breaks[4])));
-        labels.push(row(CHORO_COLORS[0], `> ${fmtValue(breaks[4])}`)); 
-      } else {
-        // Pct and Abs Change 
-        labels.push(row(CHORO_COLORS[0], `≤ ${fmtValue(breaks[0])}`));
-        labels.push(row(CHORO_COLORS[1], fmtRange(breaks[0], breaks[1])));
-        labels.push(row(CHORO_COLORS[2], fmtRange(breaks[1], breaks[2])));
-        labels.push(row(CHORO_COLORS[3], fmtRange(breaks[2], breaks[3])));
-        labels.push(row(CHORO_COLORS[4], fmtRange(breaks[3], breaks[4])));
-        labels.push(row(CHORO_COLORS[5], `> ${fmtValue(breaks[4])}`));
-      }
+      labels.push(row(CHORO_COLORS[0], (currentMode==='pct') ? `≤ ${breaks[0]}%` : `≤ ${signed(breaks[0])}`));
+      labels.push(row(CHORO_COLORS[1], fmtRange(breaks[0], breaks[1])));
+      labels.push(row(CHORO_COLORS[2], fmtRange(breaks[1], breaks[2])));
+      labels.push(row(CHORO_COLORS[3], fmtRange(breaks[2], breaks[3])));
+      labels.push(row(CHORO_COLORS[4], fmtRange(breaks[3], breaks[4])));
+      labels.push(row(CHORO_COLORS[5], (currentMode==='pct') ? `> ${breaks[4]}%` : `> ${signed(breaks[4])}`));
 
       legend._div.innerHTML = labels.join('');
     }
 
     function computeAbsBreaks(){
       const values = [];
-      // Use fc (GeoJSON feature collection) which is now available globally
       (fc.features || []).forEach(f => {
         const p = f.properties || {};
         const name = (p.NAME || p.NAMELSAD || p.name || 'Unknown').replace(/\s*Municipio$/,'');
