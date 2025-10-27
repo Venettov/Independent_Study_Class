@@ -95,7 +95,6 @@
     <header class="card hero p-6 sm:p-8 lg:p-10 relative">
       <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between">
         <div>
-          <!-- Standardized Project Title -->
           <p class="text-sm font-semibold text-gray-500 uppercase">Graduate Independent Study</p>
           <h1 class="mt-2 text-4xl sm:text-5xl font-extrabold leading-tight">
             Population & Economic Dynamics in Puerto Rico
@@ -103,7 +102,6 @@
           <p class="mt-3 text-lg text-gray-700">
             A graduate research project examining demographic shifts, out-migration, and sustainable development strategies through linked data analysis and policy synthesis.
           </p>
-          <!-- Added the hover tip back in -->
           <div class="mt-5">
             <span class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-100 text-slate-800">
               <span class="inline-flex w-5 h-5 items-center justify-center rounded-full bg-slate-800 text-white text-xs">i</span>
@@ -237,6 +235,10 @@
     const LABOR_BREAKS = [35, 38, 41, 44, 47]; // labor force participation % bins (Higher is better)
 
     const sanitizeName = s => String(s||'').trim();
+    
+    // Stores the global min and max values for the current map mode
+    let _extremeValues = { min: Infinity, max: -Infinity };
+
 
     // ---- Data helpers ----
     function statsForMunicipio(name){
@@ -253,6 +255,7 @@
     
     function colorFor(value, breaks, mode) {
       if (!Number.isFinite(value)) return '#93c5fd';
+      // Note: Higher is better for EmpPop and Labor, so reverse the color scale
       const isHigherBetter = (mode === 'emp' || mode === 'labor');
       
       let colors = [...CHORO_COLORS];
@@ -285,6 +288,34 @@
             values: data.map(d => d.change)
         };
     }
+    
+    // NEW: Function to pre-calculate global min/max for the current metric
+    function calculateExtremeValues() {
+        _extremeValues = { min: Infinity, max: -Infinity };
+        let valueKey;
+        if (currentMode === 'emp') valueKey = 'EmpPop_2023';
+        else if (currentMode === 'unemp') valueKey = 'Unemp_2023';
+        else if (currentMode === 'labor') valueKey = 'LaborForce_2023';
+        else return;
+
+        // Iterate through all municipalities to find the global min and max value
+        // Note: Exclude the overall "Puerto Rico" row.
+        const municipioRows = _rows.filter(r => r.Municipio !== 'Puerto Rico');
+        
+        municipioRows.forEach(row => {
+            const value = Number(row[valueKey]);
+
+            if (Number.isFinite(value)) {
+                _extremeValues.min = Math.min(_extremeValues.min, value);
+                _extremeValues.max = Math.max(_extremeValues.max, value);
+            }
+        });
+        
+        // Handle floating point precision for comparison
+        _extremeValues.min = parseFloat(_extremeValues.min.toFixed(2));
+        _extremeValues.max = parseFloat(_extremeValues.max.toFixed(2));
+    }
+
 
     // ---- Charts + Details ----
     let lineChartEmpPop=null, lineChartLabor=null, barChartUnemp=null, barChartAnnualChange=null;
@@ -423,23 +454,45 @@
       const p = feature.properties || {};
       const name = (p.NAME || p.NAMELSAD || p.name || 'Unknown').replace(/\s*Municipio$/,'');
       const st = statsForMunicipio(name);
-      let value = NaN, breaks = EMP_BREAKS, mode = currentMode;
+      let value = NaN, breaks = EMP_BREAKS, mode = currentMode, valueKey;
       
       if (st && st.row) {
         if (currentMode === 'emp') {
-          value = st.row.EmpPop_2023;
+          value = Number(st.row.EmpPop_2023);
           breaks = EMP_BREAKS;
+          valueKey = 'EmpPop_2023';
         } else if (currentMode === 'unemp') {
-          value = st.row.Unemp_2023;
+          value = Number(st.row.Unemp_2023);
           breaks = UNEMP_BREAKS;
+          valueKey = 'Unemp_2023';
         } else if (currentMode === 'labor') {
-          value = st.row.LaborForce_2023;
+          value = Number(st.row.LaborForce_2023);
           breaks = LABOR_BREAKS;
+          valueKey = 'LaborForce_2023';
         }
       }
       
       const col = colorFor(value, breaks, mode); 
-      return { fillColor: col, weight: 1.2, color:'#111827', fillOpacity:.75 };
+      // Default style
+      let style = { fillColor: col, weight: 1.2, color:'#111827', fillOpacity:.75 };
+      
+      // >>> START: Custom logic to highlight only the single min and max values (Thicker Yellow Line) <<<
+      if (Number.isFinite(value) && _extremeValues.min !== Infinity) {
+          // Compare value to the globally calculated min and max, accounting for floating point
+          const valRounded = parseFloat(value.toFixed(2));
+          const isExtreme = valRounded === _extremeValues.min || valRounded === _extremeValues.max;
+          
+          // Only highlight if min is not equal to max (i.e., not all values are the same)
+          if (isExtreme && _extremeValues.min !== _extremeValues.max) { 
+              style.weight = 5;            // Thicker border
+              style.color = '#facc15';     // Yellow border (tailwind yellow-400)
+              style.dashArray = '';        // Solid line
+              style.fillOpacity = 0.95;    // Max fill opacity to make the interior color stand out
+          }
+      }
+      // >>> END: Custom logic to highlight only the single min and max values (Thicker Yellow Line) <<<
+      
+      return style;
     }
 
     function renderLegend(){
@@ -474,12 +527,24 @@
 
       const fmtRange = (a,b) => `${a}% – ${b}%`;
       rows.push(`<div style="font-weight:600;margin-bottom:.25rem">${title}</div>`);
-      rows.push(row(colors[0], isHigherBetter ? `≤ ${breaks[0]}%` : `> ${breaks[4]}%`));
-      rows.push(row(colors[1], fmtRange(breaks[0], breaks[1])));
-      rows.push(row(colors[2], fmtRange(breaks[1], breaks[2])));
-      rows.push(row(colors[3], fmtRange(breaks[2], breaks[3])));
-      rows.push(row(colors[4], fmtRange(breaks[3], breaks[4])));
-      rows.push(row(colors[5], isHigherBetter ? `> ${breaks[4]}%` : `≤ ${breaks[0]}%`));
+      
+      // Logic for Higher Better (Emp-Pop, Labor)
+      if (isHigherBetter) {
+        rows.push(row(colors[0], `≤ ${breaks[0]}%`));
+        rows.push(row(colors[1], fmtRange(breaks[0], breaks[1])));
+        rows.push(row(colors[2], fmtRange(breaks[1], breaks[2])));
+        rows.push(row(colors[3], fmtRange(breaks[2], breaks[3])));
+        rows.push(row(colors[4], fmtRange(breaks[3], breaks[4])));
+        rows.push(row(colors[5], `> ${breaks[4]}%`));
+      } else {
+        // Logic for Lower Better (Unemployment)
+        rows.push(row(colors[0], `> ${breaks[4]}%`));
+        rows.push(row(colors[1], fmtRange(breaks[3], breaks[4])));
+        rows.push(row(colors[2], fmtRange(breaks[2], breaks[3])));
+        rows.push(row(colors[3], fmtRange(breaks[1], breaks[2])));
+        rows.push(row(colors[4], fmtRange(breaks[0], breaks[1])));
+        rows.push(row(colors[5], `≤ ${breaks[0]}%`));
+      }
 
       legend._div.innerHTML = rows.join('');
     }
@@ -503,6 +568,9 @@
         btnLab.classList.toggle('bg-blue-600', mode==='labor');
         btnLab.classList.toggle('text-white', mode==='labor');
         btnLab.classList.toggle('hover:bg-gray-50', mode!=='labor');
+        
+        // RE-CALCULATE EXTREMES BEFORE RESTYLING
+        calculateExtremeValues();
 
         layer.eachLayer(l => l.setStyle(styleForFeature(l.feature)));
         if (selectedLayer) selectedLayer.setStyle(selectedOutline);
@@ -560,6 +628,9 @@
       fc = await gjRes.json();
 
       const hiStyle = { weight:3, color:'#111827', fillOpacity:0.9 };
+      
+      // Calculate initial extremes
+      calculateExtremeValues();
 
       layer = L.geoJSON(fc, {
         style: (feature) => styleForFeature(feature),
