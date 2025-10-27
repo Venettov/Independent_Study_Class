@@ -613,7 +613,26 @@
       }
       
       const col = colorFor(value, breaks);
-      return { fillColor: col, weight: 1.2, color:'#111827', fillOpacity:.75 };
+      
+      // Default style based on color
+      let style = { fillColor: col, weight: 1.2, color:'#111827', fillOpacity:.75 };
+
+      // >>> START: Custom logic to highlight only the extreme low (<= -10%) and extreme high (> 2%) % change values <<<
+      if (currentMode === 'pct' && Number.isFinite(value)) {
+          // Extreme loss: <= -10% (PCT_BREAKS[0])
+          // Extreme gain: > 2% (The last break point in PCT_BREAKS is 2, so the highest category is > 2)
+          const isExtreme = value <= breaks[0] || value > breaks[breaks.length - 1];
+          
+          if (isExtreme) {
+              style.weight = 3;            // Thicker border
+              style.color = '#3b82f6';     // Blue border (tailwind blue-500)
+              style.dashArray = '5, 5';    // Dashed line
+              style.fillOpacity = 0.9;     // Slight increase in fill opacity
+          }
+      }
+      // >>> END: Custom logic to highlight only the extreme low (<= -10%) and extreme high (> 2%) % change values <<<
+
+      return style;
     }
 
     function colorFor(value, breaks) {
@@ -709,7 +728,7 @@
         const lo = Math.floor(i), hi = Math.ceil(i);
         if (lo === hi) return arr[lo];
         return arr[lo] * (hi - i) + arr[hi] * (i - lo);
-      };
+      }
       const n1 = q(neg, 0.2) ?? -1000;
       const n2 = q(neg, 0.5) ?? -500;
       const n3 = q(neg, 0.8) ?? -100;
