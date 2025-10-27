@@ -617,20 +617,33 @@
       // Default style based on color
       let style = { fillColor: col, weight: 1.2, color:'#111827', fillOpacity:.75 };
 
-      // >>> START: Custom logic to highlight only the extreme low (<= -10%) and extreme high (> 2%) % change values <<<
-      if (currentMode === 'pct' && Number.isFinite(value)) {
-          // Extreme loss: <= -10% (PCT_BREAKS[0])
-          // Extreme gain: > 2% (The last break point in PCT_BREAKS is 2, so the highest category is > 2)
-          const isExtreme = value <= breaks[0] || value > breaks[breaks.length - 1];
+      // >>> START: Custom logic to highlight only the extreme low and extreme high values for any mode <<<
+      if (Number.isFinite(value) && breaks && breaks.length > 1) {
+          let isExtreme = false;
+          
+          // The last element of the breaks array defines the threshold for the highest category.
+          const max_break = breaks[breaks.length - 1]; 
+          // The first element of the breaks array defines the threshold for the lowest category.
+          const min_break = breaks[0]; 
+
+          if (currentMode === 'density') {
+              // For density, extreme high is the highest bin (> max_break, colored CHORO_COLORS[0]) 
+              // and extreme low is the lowest bin (<= min_break, colored CHORO_COLORS[5])
+              isExtreme = value > max_break || value <= min_break;
+          } else {
+              // For pct and abs change, extreme low is the lowest bin (<= min_break, colored CHORO_COLORS[0])
+              // and extreme high is the highest bin (> max_break, colored CHORO_COLORS[5])
+              isExtreme = value <= min_break || value > max_break;
+          }
           
           if (isExtreme) {
               style.weight = 3;            // Thicker border
-              style.color = '#3b82f6';     // Blue border (tailwind blue-500)
-              style.dashArray = '5, 5';    // Dashed line
+              style.color = '#facc15';     // Yellow border (tailwind yellow-400)
+              style.dashArray = '';        // Solid line (remove dashArray property)
               style.fillOpacity = 0.9;     // Slight increase in fill opacity
           }
       }
-      // >>> END: Custom logic to highlight only the extreme low (<= -10%) and extreme high (> 2%) % change values <<<
+      // >>> END: Custom logic to highlight only the extreme low and extreme high values for any mode <<<
 
       return style;
     }
