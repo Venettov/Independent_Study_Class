@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Population & Economic Dynamics in Puerto Rico</title>
+  <title>Housing Units & Economic Dynamics in Puerto Rico</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
 
@@ -74,11 +74,11 @@
           <div class="py-2">
             <a href="../metrics.html" class="block px-4 py-2 hover:bg-gray-50 font-semibold">All Metrics Overview</a>
             <div class="my-1 border-t border-gray-100"></div>
-            <a href="population.html"     class="block px-4 py-2 bg-gray-100 font-semibold">Population</a>
+            <a href="population.html"     class="block px-4 py-2 hover:bg-gray-50">Population</a>
             <a href="employment.html"     class="block px-4 py-2 hover:bg-gray-50">Employment Rate</a>
             <a href="establishments.html" class="block px-4 py-2 hover:bg-gray-50">Employer Establishments</a>
             <a href="income.html"         class="block px-4 py-2 hover:bg-gray-50">Household Income</a>
-            <a href="housing.html"        class="block px-4 py-2 hover:bg-gray-50">Housing Units</a>
+            <a href="housing.html"        class="block px-4 py-2 bg-gray-100 font-semibold">Housing Units</a>
             <a href="education.html"      class="block px-4 py-2 hover:bg-gray-50">Education</a>
             <a href="health.html"         class="block px-4 py-2 hover:bg-gray-50">Health</a>
           </div>
@@ -97,11 +97,11 @@
         <div>
           <p class="text-sm font-semibold text-gray-500 uppercase">Graduate Independent Study</p>
           <h1 class="mt-2 text-4xl sm:text-5xl font-extrabold leading-tight">
-            Population & Economic Dynamics in Puerto Rico
+            Housing Units & Economic Dynamics in Puerto Rico
           </h1>
           <p class="mt-3 text-lg text-gray-700">
-            A graduate research project examining demographic shifts, out-migration, and sustainable development
-            strategies through linked data analysis and policy synthesis.
+            Analysis of housing stock changes (total units), focusing on the long-term trends (2013-2023)
+            and recent year changes derived from the ACS 5-Year estimates.
           </p>
           <div class="mt-5">
             <span class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-100 text-slate-800">
@@ -128,7 +128,7 @@
     </section>
 
     <section class="card p-6">
-      <h2 class="text-lg font-semibold mb-4">Population details</h2>
+      <h2 class="text-lg font-semibold mb-4">Housing Unit details</h2>
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div>
           <div class="text-sm">
@@ -137,11 +137,11 @@
           </div>
 
           <div class="mt-4 text-sm">
-            <div class="font-semibold text-gray-700">Population (Vintage 2024):</div>
+            <div class="font-semibold text-gray-700">Housing Units (Vintage 2023):</div>
             <ul class="mt-1 space-y-1">
-              <li>2024: <span id="d-2024" class="font-semibold">—</span></li>
-              <li>Change since 2010: <span id="d-chg" class="font-semibold">—</span></li>
-              <li>2023→2024: <span id="d-2324" class="font-semibold">—</span></li>
+              <li>2023: <span id="d-2024" class="font-semibold">—</span></li>
+              <li>Change since 2013: <span id="d-chg" class="font-semibold">—</span></li>
+              <li>2022→2023: <span id="d-2324" class="font-semibold">—</span></li>
             </ul>
           </div>
 
@@ -153,14 +153,14 @@
         </div>
 
         <div>
-          <h3 class="font-semibold mb-2">Population trend (2010–2024)</h3>
+          <h3 class="font-semibold mb-2">Housing Unit trend (2013–2023)</h3>
           <div class="mini bg-gray-50 rounded p-3">
             <canvas id="lineChart"></canvas>
           </div>
         </div>
 
         <div>
-          <h3 class="font-semibold mb-2">Annual % Change</h3>
+          <h3 class="font-semibold mb-2">Annual % Change (2013–2023)</h3>
           <div class="mini bg-gray-50 rounded p-3">
             <canvas id="barChart"></canvas>
           </div>
@@ -174,43 +174,44 @@
         <p>Data for this project was derived from the U.S. Census Bureau:</p>
         <ul class="list-disc list-inside space-y-1">
           <li>
-            <a href="https://www.census.gov/data/datasets/time-series/demo/popest/2020s-total-puerto-rico-municipios.html"
+            <a href="https://data.census.gov/cedsci/table?q=B25001%3A%20HOUSING%20UNITS&g=0400000US72&tid=ACSDT5Y2023.B25001"
                target="_blank" rel="noopener" class="text-blue-600 underline">
-              2020s Census Estimates – Puerto Rico Municipalities
+              ACS 5-Year Detailed Table B25001 (Total Housing Units)
             </a>
-          </li>
-          <li>
-            <a href="https://www.census.gov/data/tables/time-series/demo/popest/intercensal-2010-2020-puerto-rico-municipios.html"
-               target="_blank" rel="noopener" class="text-blue-600 underline">
-              Intercensal Estimates 2010–2020 – Puerto Rico Municipalities
-            </a>
-            <span class="text-gray-600"> (download: <em>prm-est2020int-pop-72.xlsx</em>)</span>
           </li>
         </ul>
 
         <p>Specific files used:</p>
         <ul class="list-disc list-inside">
-          <li>prm-est2010_2024.json (site build)</li>
-          <li>prm-est2010_2024.csv (analysis)</li>
-          <li>prm-est2020int-pop-72.xlsx (2010–2020 intercensal)</li>
+          <li>municipios_acs_housing_2013_2023_wide.json (site build)</li>
         </ul>
       </div>
     </section>
   </main>
 
   <script>
+    // --- Configuration Updated for Housing Data ---
     const GEOJSON_URL = '../data/tl_2022_72_cousub/pr_municipalities.geojson';
-    const POP_JSON    = '../data/population/prm-est2010_2024.json';
+    // Updated to load the new housing data file
+    const POP_JSON    = '../data/housing/municipios_acs_housing_2013_2023_wide.json';
 
-    const YEARS = [2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024];
+    // Years reflect the ACS 5-Year estimates available in the JSON file
+    const YEARS = [2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023];
+    const START_YEAR = YEARS[0];
+    const END_YEAR = YEARS[YEARS.length - 1];
+    const PREV_YEAR = YEARS[YEARS.length - 2];
 
     const fmt = new Intl.NumberFormat('en-US');
+    // Percentage formatter
     const pctFmt = (v) => `${(Number(v)||0).toFixed(2)}%`;
+    // Signed number formatter (for absolute change)
     const signed = (n) => (n > 0 ? '+' : '') + fmt.format(n);
 
+    // Color definitions (assuming same colors/breaks logic applies, adjusted for housing context)
     const CHORO_COLORS = ['#7f1d1d', '#b91c1c', '#f97316', '#bbf7d0', '#22c55e', '#15803d'];
-    const PCT_BREAKS = [-10, -6, -3, 0, 2];
-    let ABS_BREAKS = [-10000, -6000, -3000, 0, 1000];
+    // Default breaks for % change (Housing context: Low change is bad/red, High is good/green)
+    const PCT_BREAKS = [-4, -2, 0, 2, 4];
+    let ABS_BREAKS = [-500, -200, 0, 200, 500]; // Default breaks for abs change (will be recalculated later)
 
     const sanitizeName = s => String(s||'').trim();
     const yearVal = (row,y) => {
@@ -218,26 +219,76 @@
       const n = Number(v);
       return Number.isFinite(n) ? n : NaN;
     };
+    
+    let _extremeValues = { min: NaN, max: NaN };
+
 
     function statsForMunicipio(name){
       const key = sanitizeName(name).replace(/\s*Municipio$/,'');
+      // Find the row for the municipality
       const row = _rows.find(r => sanitizeName(r.Municipio) === key);
       if (!row) return null;
 
+      // Extract raw data points for the line chart
       const vals = YEARS.map(y => yearVal(row,y));
       if (vals.some(v => !Number.isFinite(v))) return null;
 
-      const pop2010 = vals[YEARS.indexOf(2010)];
-      const pop2024 = vals[YEARS.indexOf(2024)];
-      const abs = pop2024 - pop2010;
-      const pctTot = (abs / pop2010) * 100;
+      // Extract calculated change metrics from the JSON
+      const final_val = yearVal(row, END_YEAR);
+      const abs_change = row[`Cum_Change_${START_YEAR}_${END_YEAR}`];
+      const pct_change = row[`Cum_Pct_Change_${START_YEAR}_${END_YEAR}`];
+      const pct_year_change = row[`Pct_Change_${PREV_YEAR}_${END_YEAR}`];
 
+      // Calculate annual % change array (for the bar chart)
       const pctYear = [];
       for (let i=1;i<YEARS.length;i++){
-        pctYear.push(((vals[i]-vals[i-1]) / vals[i-1]) * 100);
+        // Note: The raw data contains the cumulative change, but the bar chart needs annual change.
+        // Since the JSON provided does *not* contain individual annual percentage columns, 
+        // we manually calculate it here using sequential years.
+        const v_curr = vals[i];
+        const v_prev = vals[i-1];
+        if (Number.isFinite(v_curr) && Number.isFinite(v_prev) && v_prev !== 0) {
+            pctYear.push(((v_curr - v_prev) / v_prev) * 100);
+        } else {
+            pctYear.push(NaN); // Handle missing data or division by zero
+        }
       }
-      return { vals, abs, pctTot, pctYear, pop2024 };
+
+      return { 
+        vals: vals, // Raw values for line chart
+        abs: Number(abs_change), 
+        pctTot: Number(pct_change), 
+        pctYear: pctYear, // Annual percentage change for bar chart
+        finalVal: Number(final_val),
+        pctYearChange: Number(pct_year_change)
+      };
     }
+
+    // Function to calculate extreme values for min/max highlighting (copied from population.html)
+    function calculateExtremeValues() {
+        _extremeValues = { min: Infinity, max: -Infinity };
+        let valueKey;
+        if (currentMode === 'pct') valueKey = 'Cum_Pct_Change_2013_2023';
+        else if (currentMode === 'abs') valueKey = 'Cum_Change_2013_2023';
+        else return;
+
+        (fc.features || []).forEach(f => {
+            const p = f.properties || {};
+            const name = (p.NAME || p.NAMELSAD || p.name || 'Unknown').replace(/\s*Municipio$/,'');
+            const row = _rows.find(r => sanitizeName(r.Municipio) === name);
+            const value = row ? row[valueKey] : NaN;
+
+            if (Number.isFinite(value)) {
+                _extremeValues.min = Math.min(_extremeValues.min, value);
+                _extremeValues.max = Math.max(_extremeValues.max, value);
+            }
+        });
+        
+        // Handle floating point precision for comparison
+        _extremeValues.min = parseFloat(_extremeValues.min.toFixed(2));
+        _extremeValues.max = parseFloat(_extremeValues.max.toFixed(2));
+    }
+
 
     function censusLink(name){
       const g = '040XX00US72';
@@ -253,7 +304,10 @@
       if (lineChart) lineChart.destroy();
       lineChart = new Chart(ctxL, {
         type: 'line',
-        data: { labels: YEARS, datasets:[{ label:'Population', data: st.vals, tension:.2, pointRadius:3 }] },
+        data: { 
+            labels: YEARS, 
+            datasets:[{ label:'Housing Units', data: st.vals, tension:.2, pointRadius:3 }] 
+        },
         options: {
           plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label:(c)=>fmt.format(c.parsed.y) } } },
           scales:{ y:{ ticks:{ callback:v=>fmt.format(v) } } },
@@ -276,7 +330,8 @@
 
     const dName = document.getElementById('d-name');
     const dCent = document.getElementById('d-centroid');
-    const d2024 = document.getElementById('d-2024');
+    // Renamed D-2024 to D-FinalYear to reflect 2023 data
+    const dFinalYear = document.getElementById('d-2024'); 
     const dChg  = document.getElementById('d-chg');
     const d2324 = document.getElementById('d-2324');
     const dCenL = document.getElementById('d-census');
@@ -284,10 +339,12 @@
     function updateDetails(name, st, centroid){
       dName.textContent = name.replace(/\s*Municipio$/,'');
       dCent.textContent = centroid ? `${centroid.lat.toFixed(4)}, ${centroid.lng.toFixed(4)}` : '—';
-      d2024.textContent = Number.isFinite(st?.pop2024) ? fmt.format(st.pop2024) : '—';
-      dChg.textContent  = st ? `${signed(st.abs)} (${pctFmt(st.pctTot)})` : '—';
-      const last = st && st.pctYear.length ? st.pctYear[st.pctYear.length-1] : NaN;
-      d2324.textContent = Number.isFinite(last) ? pctFmt(last) : '—';
+      // Use finalVal property
+      dFinalYear.textContent = Number.isFinite(st?.finalVal) ? fmt.format(st.finalVal) : '—';
+      // Use cumulative change properties
+      dChg.textContent  = st ? `${signed(st.abs)} (${pctFmt(st.pctTot)})` : '—'; 
+      // Use 2022->2023 change property
+      d2324.textContent = Number.isFinite(st?.pctYearChange) ? pctFmt(st.pctYearChange) : '—';
       dCenL.href = censusLink(name);
       drawCharts(name, st);
     }
@@ -315,6 +372,9 @@
       fc = await gjRes.json();
 
       const hiStyle = { weight:3, color:'#111827', fillOpacity:0.9 };
+      
+      // Calculate initial extremes for min/max highlighting
+      calculateExtremeValues();
 
       layer = L.geoJSON(fc, {
         style: (feature) => styleForFeature(feature),
@@ -324,8 +384,9 @@
           const name = rawName.replace(/\s*Municipio$/,'');
           const geoid = p.GEOID || p.geoid || '';
           const st = statsForMunicipio(name);
+          // Update tooltip/popup line to reflect new years and data
           const changeLine = st
-            ? `<br><small>2010→2024: ${signed(st.abs)} (${st.pctTot.toFixed(2)}%)</small>`
+            ? `<br><small>${START_YEAR}→${END_YEAR}: ${signed(st.abs)} (${st.pctTot.toFixed(2)}%)</small>`
             : '';
           lyr.bindTooltip(rawName, { direction:'center', className:'leaflet-tooltip' });
           lyr.bindPopup(`<strong>${rawName}</strong>${geoid?`<br><small>GEOID: ${geoid}</small>`:''}${changeLine}`);
@@ -404,6 +465,9 @@
         btnAbs.classList.toggle('bg-blue-600', mode==='abs');
         btnAbs.classList.toggle('text-white', mode==='abs');
         btnAbs.classList.toggle('hover:bg-gray-50', mode!=='abs');
+        
+        // Re-calculate extremes for min/max highlighting
+        calculateExtremeValues(); 
 
         layer.eachLayer(l => l.setStyle(styleForFeature(l.feature)));
         if (selectedLayer) selectedLayer.setStyle(selectedOutline);
@@ -429,26 +493,55 @@
       const p = feature.properties || {};
       const name = (p.NAME || p.NAMELSAD || p.name || 'Unknown').replace(/\s*Municipio$/,'');
       const st = statsForMunicipio(name);
-      const value = !st ? NaN : (currentMode === 'pct' ? st.pctTot : st.abs);
-      const breaks = (currentMode === 'pct') ? PCT_BREAKS : ABS_BREAKS;
+      
+      let value, breaks, valueKey;
+      if (currentMode === 'pct') {
+        value = !st ? NaN : st.pctTot;
+        breaks = PCT_BREAKS;
+        valueKey = 'Cum_Pct_Change_2013_2023';
+      } else if (currentMode === 'abs') {
+        value = !st ? NaN : st.abs;
+        breaks = ABS_BREAKS;
+        valueKey = 'Cum_Change_2013_2023';
+      }
+      
       const col = colorFor(value, breaks);
-      return { fillColor: col, weight: 1.2, color:'#111827', fillOpacity:.75 };
+      
+      // Default style based on color
+      let style = { fillColor: col, weight: 1.2, color:'#111827', fillOpacity:.75 };
+
+      // Highlighting logic: Find single highest/lowest for the current metric
+      if (Number.isFinite(value) && _extremeValues.min !== Infinity) {
+          // Compare value to the globally calculated min and max, accounting for floating point
+          const valRounded = parseFloat(value.toFixed(2));
+          const isExtreme = valRounded === _extremeValues.min || valRounded === _extremeValues.max;
+          
+          if (isExtreme && _extremeValues.min !== _extremeValues.max) { 
+              style.weight = 5;            // Thicker border
+              style.color = '#facc15';     // Yellow border
+              style.dashArray = '';        // Solid line
+              style.fillOpacity = 0.95;    // Max fill opacity to make the interior color stand out
+          }
+      }
+
+      return style;
     }
 
     function colorFor(value, breaks) {
       if (!Number.isFinite(value)) return '#93c5fd';
-      if (value <= breaks[0]) return CHORO_COLORS[0];
+      // Positive (Green) means growth in housing units. Negative (Red) means loss.
+      if (value <= breaks[0]) return CHORO_COLORS[0]; // Most Negative/Loss (Dark Red)
       if (value <= breaks[1]) return CHORO_COLORS[1];
       if (value <= breaks[2]) return CHORO_COLORS[2];
       if (value <= breaks[3]) return CHORO_COLORS[3];
       if (value <= breaks[4]) return CHORO_COLORS[4];
-      return CHORO_COLORS[5];
+      return CHORO_COLORS[5]; // Most Positive/Growth (Dark Green)
     }
 
     function renderLegend(){
       if (!legend || !legend._div) return;
       const breaks = (currentMode === 'pct') ? PCT_BREAKS : ABS_BREAKS;
-      const title  = (currentMode === 'pct') ? 'Change since 2010 — %' : 'Change since 2010 — people';
+      const title  = (currentMode === 'pct') ? `Change since ${START_YEAR} — %` : `Change since ${START_YEAR} — units`;
 
       const labels = [];
       const row = (color, label) =>
@@ -459,26 +552,35 @@
          </div>`;
 
       const fmtRange = (a,b) => (currentMode==='pct') ? `${a}% to ${b}%` : `${signed(a)} to ${signed(b)}`;
+      const fmtValue = (v) => (currentMode==='pct') ? `${v}%` : signed(v);
+
 
       labels.push(`<div style="font-weight:600;margin-bottom:.25rem">${title}</div>`);
-      labels.push(row(CHORO_COLORS[0], (currentMode==='pct') ? `≤ ${breaks[0]}%` : `≤ ${signed(breaks[0])}`));
+      labels.push(row(CHORO_COLORS[0], `≤ ${fmtValue(breaks[0])}`));
       labels.push(row(CHORO_COLORS[1], fmtRange(breaks[0], breaks[1])));
       labels.push(row(CHORO_COLORS[2], fmtRange(breaks[1], breaks[2])));
       labels.push(row(CHORO_COLORS[3], fmtRange(breaks[2], breaks[3])));
       labels.push(row(CHORO_COLORS[4], fmtRange(breaks[3], breaks[4])));
-      labels.push(row(CHORO_COLORS[5], (currentMode==='pct') ? `> ${breaks[4]}%` : `> ${signed(breaks[4])}`));
+      labels.push(row(CHORO_COLORS[5], `> ${fmtValue(breaks[4])}`));
 
       legend._div.innerHTML = labels.join('');
     }
 
     function computeAbsBreaks(){
       const values = [];
+      // Use the Cumulative Change column for break calculation
+      const valueKey = `Cum_Change_${START_YEAR}_${END_YEAR}`;
+      
       (fc.features || []).forEach(f => {
         const p = f.properties || {};
         const name = (p.NAME || p.NAMELSAD || p.name || 'Unknown').replace(/\s*Municipio$/,'');
-        const st = statsForMunicipio(name);
-        if (st && Number.isFinite(st.abs)) values.push(st.abs);
+        const row = _rows.find(r => sanitizeName(r.Municipio) === name);
+        const abs_value = row ? row[valueKey] : NaN;
+
+        if (Number.isFinite(abs_value)) values.push(abs_value);
       });
+      
+      // Calculate quartiles for adaptive breaks
       const neg = values.filter(v => v < 0).sort((a,b)=>a-b);
       const pos = values.filter(v => v > 0).sort((a,b)=>a-b);
       const q = (arr, t) => {
@@ -488,11 +590,14 @@
         if (lo === hi) return arr[lo];
         return arr[lo] * (hi - i) + arr[hi] * (i - lo);
       };
-      const n1 = q(neg, 0.2) ?? -1000;
-      const n2 = q(neg, 0.5) ?? -500;
-      const n3 = q(neg, 0.8) ?? -100;
-      const p1 = q(pos, 0.5) ?? 100;
-      ABS_BREAKS = [n1, n2, n3, 0, p1];
+      
+      // Calculate custom breaks for ABSOLUTE CHANGE
+      const n1 = q(neg, 0.25) ?? -100; // 25th percentile of negative change
+      const n2 = q(neg, 0.5) ?? -50;  // 50th percentile of negative change
+      const n3 = q(neg, 0.75) ?? -10; // 75th percentile of negative change
+      const p1 = q(pos, 0.5) ?? 100;  // 50th percentile of positive change
+      
+      ABS_BREAKS = [Math.round(n1), Math.round(n2), Math.round(n3), 0, Math.round(p1)];
     }
 
     function wireDropdown() {
