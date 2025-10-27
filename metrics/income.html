@@ -77,7 +77,7 @@
             <a href="population.html"     class="block px-4 py-2 bg-gray-100 font-semibold">Population</a>
             <a href="employment.html"     class="block px-4 py-2 hover:bg-gray-50">Employment Rate</a>
             <a href="establishments.html" class="block px-4 py-2 hover:bg-gray-50">Employer Establishments</a>
-            <a href="income.html"         class="block px-4 py-2 hover:bg-gray-50">Household Income</a>
+            <a href="income.html"         class="block px-4 py-2 bg-gray-100 font-semibold">Household Income</a>
             <a href="housing.html"        class="block px-4 py-2 hover:bg-gray-50">Housing Units</a>
             <a href="education.html"      class="block px-4 py-2 hover:bg-gray-50">Education</a>
             <a href="health.html"         class="block px-4 py-2 hover:bg-gray-50">Health</a>
@@ -283,6 +283,9 @@
       const n = Number(v);
       return Number.isFinite(n) ? n : NaN;
     };
+    
+    // Stores the global min and max values for the current map mode
+    let _extremeValues = { min: Infinity, max: -Infinity };
 
 
     let lineChartNominal = null, barChartNominal = null, barChartReal = null;
@@ -336,6 +339,36 @@
         realVals, realCumAbs, realCumPct, realPctYear, realVal2023 
       };
     }
+
+    // NEW: Function to pre-calculate global min/max for the current metric
+    function calculateExtremeValues() {
+        _extremeValues = { min: Infinity, max: -Infinity };
+        let valueKey;
+        const firstYear = YEARS[0];
+        const lastYear = YEARS[YEARS.length - 1];
+
+        if (currentMode === MODE_NOMINAL_PCT) valueKey = `Cum_Pct_Change_${firstYear}_${lastYear}`;
+        else if (currentMode === MODE_NOMINAL_ABS) valueKey = `Cum_Change_${firstYear}_${lastYear}`;
+        else if (currentMode === MODE_REAL_PCT) valueKey = `Real_Cum_Pct_Change_${firstYear}_${lastYear}`;
+        else return;
+
+        // Iterate through all municipalities to find the global min and max value
+        const municipioRows = _rows.filter(r => r.Municipio !== 'Puerto Rico' && !r.metadata);
+        
+        municipioRows.forEach(row => {
+            const value = Number(row[valueKey]);
+
+            if (Number.isFinite(value)) {
+                _extremeValues.min = Math.min(_extremeValues.min, value);
+                _extremeValues.max = Math.max(_extremeValues.max, value);
+            }
+        });
+        
+        // Handle floating point precision for comparison
+        _extremeValues.min = parseFloat(_extremeValues.min.toFixed(2));
+        _extremeValues.max = parseFloat(_extremeValues.max.toFixed(2));
+    }
+
 
     function censusLink(name){
       return `https://data.census.gov/cedsci/table?g=0400000US72&tid=ACSST5Y2023.S1901`;
@@ -428,6 +461,9 @@
       fc = await gjRes.json();
 
       const hiStyle = { weight:3, color:'#111827', fillOpacity:0.9 };
+
+      // Calculate initial extremes
+      calculateExtremeValues();
 
       layer = L.geoJSON(fc, {
         style: (feature) => styleForFeature(feature),
@@ -525,6 +561,9 @@
           btn.classList.toggle('text-white', isActive);
           btn.classList.toggle('hover:bg-gray-50', !isActive);
         });
+        
+        // Calculate extremes after setting the mode
+        calculateExtremeValues();
 
         layer.eachLayer(l => l.setStyle(styleForFeature(l.feature)));
         if (selectedLayer) selectedLayer.setStyle(selectedOutline);
@@ -560,21 +599,44 @@
 
       let value;
       let breaks;
+      let valueKey;
 
       if (currentMode === MODE_NOMINAL_PCT) {
           value = st.nominalCumPct;
           breaks = NOMINAL_PCT_BREAKS;
+          valueKey = `Cum_Pct_Change_${YEARS[0]}_${YEARS[YEARS.length - 1]}`;
       } else if (currentMode === MODE_NOMINAL_ABS) {
           value = st.nominalCumAbs;
           breaks = NOMINAL_ABS_BREAKS;
+          valueKey = `Cum_Change_${YEARS[0]}_${YEARS[YEARS.length - 1]}`;
       } else if (currentMode === MODE_REAL_PCT) {
           value = st.realCumPct;
           breaks = REAL_PCT_BREAKS;
+          valueKey = `Real_Cum_Pct_Change_${YEARS[0]}_${YEARS[YEARS.length - 1]}`;
       }
       
       const col = colorFor(value, breaks);
       
-      return { fillColor: col, weight: 1.2, color:'#111827', fillOpacity:.75 };
+      // Default style
+      let style = { fillColor: col, weight: 1.2, color:'#111827', fillOpacity:.75 };
+      
+      // >>> START: Custom logic to highlight only the single min and max values (Thicker Yellow Line) <<<
+      if (Number.isFinite(value) && _extremeValues.min !== Infinity) {
+          // Compare value to the globally calculated min and max, accounting for floating point
+          const valRounded = parseFloat(value.toFixed(2));
+          const isExtreme = valRounded === _extremeValues.min || valRounded === _extremeValues.max;
+          
+          // Only highlight if min is not equal to max (i.e., not all values are the same)
+          if (isExtreme && _extremeValues.min !== _extremeValues.max) { 
+              style.weight = 5;            // Thicker border
+              style.color = '#facc15';     // Yellow border (tailwind yellow-400)
+              style.dashArray = '';        // Solid line
+              style.fillOpacity = 0.95;    // Max fill opacity to make the interior color stand out
+          }
+      }
+      // >>> END: Custom logic to highlight only the single min and max values (Thicker Yellow Line) <<<
+      
+      return style;
     }
 
     function colorFor(value, breaks) {
