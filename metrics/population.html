@@ -277,7 +277,7 @@
     let _areaData = {};
     
     // Stores the global min and max values for the current map mode
-    let _extremeValues = { min: NaN, max: NaN };
+    let _extremeValues = { min: Infinity, max: -Infinity };
 
     // Placeholder function to simulate extracting area from GeoJSON features.
     function buildAreaMap(features) {
@@ -657,20 +657,21 @@
       // Default style based on color
       let style = { fillColor: col, weight: 1.2, color:'#111827', fillOpacity:.75 };
 
-      // >>> START: Custom logic to highlight only the single min and max values <<<
+      // >>> START: Custom logic to highlight only the single min and max values (Thicker Yellow Line) <<<
       if (Number.isFinite(value) && _extremeValues.min !== Infinity) {
           // Compare value to the globally calculated min and max, accounting for floating point
           const valRounded = parseFloat(value.toFixed(2));
           const isExtreme = valRounded === _extremeValues.min || valRounded === _extremeValues.max;
           
+          // Only highlight if min is not equal to max (i.e., not all values are the same)
           if (isExtreme && _extremeValues.min !== _extremeValues.max) { 
-              style.weight = 3;            // Thicker border
+              style.weight = 5;            // Thicker border
               style.color = '#facc15';     // Yellow border (tailwind yellow-400)
               style.dashArray = '';        // Solid line
-              style.fillOpacity = 0.9;     // Slight increase in fill opacity
+              style.fillOpacity = 0.95;    // Max fill opacity to make the interior color stand out
           }
       }
-      // >>> END: Custom logic to highlight only the single min and max values <<<
+      // >>> END: Custom logic to highlight only the single min and max values (Thicker Yellow Line) <<<
 
       return style;
     }
