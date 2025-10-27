@@ -97,7 +97,7 @@
         <div>
           <p class="text-sm font-semibold text-gray-500 uppercase">Graduate Independent Study</p>
           <h1 class="mt-2 text-4xl sm:text-5xl font-extrabold leading-tight">
-            Housing Units & Economic Dynamics in Puerto Rico
+            Population & Economic Dynamics in Puerto Rico
           </h1>
           <p class="mt-3 text-lg text-gray-700">
             Analysis of housing stock changes (total units), focusing on the long-term trends (2013-2023)
@@ -220,7 +220,7 @@
       return Number.isFinite(n) ? n : NaN;
     };
     
-    let _extremeValues = { min: NaN, max: NaN };
+    let _extremeValues = { min: Infinity, max: -Infinity };
 
 
     function statsForMunicipio(name){
@@ -268,8 +268,9 @@
     function calculateExtremeValues() {
         _extremeValues = { min: Infinity, max: -Infinity };
         let valueKey;
-        if (currentMode === 'pct') valueKey = 'Cum_Pct_Change_2013_2023';
-        else if (currentMode === 'abs') valueKey = 'Cum_Change_2013_2023';
+        // Adjust the key names to match the Housing JSON structure
+        if (currentMode === 'pct') valueKey = `Cum_Pct_Change_${START_YEAR}_${END_YEAR}`;
+        else if (currentMode === 'abs') valueKey = `Cum_Change_${START_YEAR}_${END_YEAR}`;
         else return;
 
         (fc.features || []).forEach(f => {
@@ -306,6 +307,7 @@
         type: 'line',
         data: { 
             labels: YEARS, 
+            // Updated label text
             datasets:[{ label:'Housing Units', data: st.vals, tension:.2, pointRadius:3 }] 
         },
         options: {
@@ -341,7 +343,7 @@
       dCent.textContent = centroid ? `${centroid.lat.toFixed(4)}, ${centroid.lng.toFixed(4)}` : '—';
       // Use finalVal property
       dFinalYear.textContent = Number.isFinite(st?.finalVal) ? fmt.format(st.finalVal) : '—';
-      // Use cumulative change properties
+      // Use cumulative change properties, updating the text based on data format (Abs (Pct))
       dChg.textContent  = st ? `${signed(st.abs)} (${pctFmt(st.pctTot)})` : '—'; 
       // Use 2022->2023 change property
       d2324.textContent = Number.isFinite(st?.pctYearChange) ? pctFmt(st.pctYearChange) : '—';
@@ -357,7 +359,9 @@
 
     (async function init(){
       const res = await fetch(POP_JSON, { cache:'no-store' });
-      _rows = await res.json();
+      // Remove the last item (metadata) when setting _rows
+      const data = await res.json();
+      _rows = data.filter(item => item.Municipio);
 
       const prBounds = L.latLngBounds([[17.85, -67.45],[18.55, -65.25]]);
       prBoundsGlobal = prBounds;
@@ -498,11 +502,11 @@
       if (currentMode === 'pct') {
         value = !st ? NaN : st.pctTot;
         breaks = PCT_BREAKS;
-        valueKey = 'Cum_Pct_Change_2013_2023';
+        valueKey = `Cum_Pct_Change_${START_YEAR}_${END_YEAR}`;
       } else if (currentMode === 'abs') {
         value = !st ? NaN : st.abs;
         breaks = ABS_BREAKS;
-        valueKey = 'Cum_Change_2013_2023';
+        valueKey = `Cum_Change_${START_YEAR}_${END_YEAR}`;
       }
       
       const col = colorFor(value, breaks);
@@ -592,10 +596,11 @@
       };
       
       // Calculate custom breaks for ABSOLUTE CHANGE
-      const n1 = q(neg, 0.25) ?? -100; // 25th percentile of negative change
-      const n2 = q(neg, 0.5) ?? -50;  // 50th percentile of negative change
-      const n3 = q(neg, 0.75) ?? -10; // 75th percentile of negative change
-      const p1 = q(pos, 0.5) ?? 100;  // 50th percentile of positive change
+      // Use reasonable thresholds based on the actual max/min values seen in the data
+      const n1 = q(neg, 0.25) ?? -500; 
+      const n2 = q(neg, 0.5) ?? -200;  
+      const n3 = q(neg, 0.75) ?? -50; 
+      const p1 = q(pos, 0.5) ?? 200;  
       
       ABS_BREAKS = [Math.round(n1), Math.round(n2), Math.round(n3), 0, Math.round(p1)];
     }
