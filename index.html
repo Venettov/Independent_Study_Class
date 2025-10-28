@@ -326,7 +326,11 @@
         const merged = {};
 
         results.forEach(({ key, data }) => {
-            const dataRows = data.filter(r => !r.metadata);
+            // FIX: Filter out rows that contain the long descriptive string which is not a municipality.
+            const dataRows = data.filter(r => 
+                !r.metadata && 
+                !String(r.Municipio).includes("Annual and Cumulative")
+            );
             
             dataRows.forEach(row => {
                 const muniName = cleanName(row.Municipio);
@@ -559,7 +563,15 @@
                 maintainAspectRatio: false,
                 plugins: { legend: { labels: { color: '#000' } } }, /* Changed to Black */
                 scales: {
-                    x: { ticks: { color: '#000' }, grid: { color: '#bbb' } }, /* Changed to Black / Light Grid */
+                    x: { 
+                        ticks: { 
+                            color: '#000', 
+                            maxRotation: 0,
+                            minRotation: 0,
+                            font: { size: 8 } /* FIX: Decreased font size */
+                        }, 
+                        grid: { color: '#bbb' } 
+                    }, /* Changed to Black / Light Grid */
                     yPop: {
                         type: 'linear', position: 'left', id: 'yPop',
                         title: { display: true, text: 'Population (Count)', color: '#3b82f6' },
@@ -605,7 +617,16 @@
                 maintainAspectRatio: false,
                 plugins: { legend: { labels: { color: '#000' } } }, /* Changed to Black */
                 scales: {
-                    x: { ticks: { color: '#000' }, grid: { color: '#bbb' }, labels: YEARS.ACS }, /* Changed to Black / Light Grid */
+                    x: { 
+                        ticks: { 
+                            color: '#000', 
+                            maxRotation: 0, 
+                            minRotation: 0,
+                            font: { size: 8 } /* FIX: Decreased font size */
+                        }, 
+                        grid: { color: '#bbb' }, 
+                        labels: YEARS.ACS 
+                    }, /* Changed to Black / Light Grid */
                     yIncome: {
                         type: 'linear', position: 'left', id: 'yIncome',
                         title: { display: true, text: 'Real Median Income ($)', color: '#f59e0b' },
