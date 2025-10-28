@@ -205,10 +205,11 @@
         </div>
         
         <!-- MAIN INTERACTIVE PLOT & FILTER PANEL (Grouped into a white card for separation) -->
-        <div id="main-panel" class="card grid grid-cols-1 lg:grid-cols-4 gap-4 mt-6 p-0">
+        <div id="main-panel" class="card grid grid-cols-1 lg:grid-cols-12 gap-4 mt-6 p-0">
             
-            <!-- SCATTER PLOT (3/4 width) -->
-            <div class="lg:col-span-3 p-4" id="scatterPlotContainer">
+            <!-- SCATTER PLOT (8/12 width) -->
+            <!-- Changed lg:col-span-3 to lg:col-span-8 -->
+            <div class="lg:col-span-8 p-4" id="scatterPlotContainer">
                 <h2 class="text-lg font-semibold mb-3 text-black">Socio-Economic Relationship by Municipality</h2>
                 <div id="chart-loader" class="text-center mt-20 hidden">
                     <div class="loader"></div>
@@ -223,25 +224,25 @@
                     <div>
                         <label class="block text-xs font-medium text-black">X-Axis (Change/Density)</label>
                         <select id="xAxisSelect" class="mt-1 block w-full rounded-md border border-gray-400 bg-white py-1.5 pl-3 pr-10 text-base focus:border-blue-500 focus:ring-blue-500 text-black">
-                            <option value="Population_PctChange">Pop. Change (2010-24 %)</option>
-                            <option value="Housing_PctChange">Housing Unit Change (2013-23 %)</option>
-                            <option value="Establishments_PctChange">Establishment Change (2012-23 %)</option>
+                            <option value="Population_PctChange">Pop. Chg (2010-24 %)</option>
+                            <option value="Housing_PctChange">Housing Chg (2013-23 %)</option>
+                            <option value="Establishments_PctChange">Est. Chg (2012-23 %)</option>
                         </select>
                     </div>
                     <div>
                         <label class="block text-xs font-medium text-black">Y-Axis (Income/Attainment/Rates)</label>
                         <select id="yAxisSelect" class="mt-1 block w-full rounded-md border border-gray-400 bg-white py-1.5 pl-3 pr-10 text-base focus:border-blue-500 focus:ring-blue-500 text-black">
-                            <option value="Income_Real2023">Median Income (2023 Real $)</option>
-                            <option value="Education_2023">Education Attainment (2023 %)</option>
-                            <option value="Employment_Unemp2023">Unemployment Rate (2023 %)</option>
+                            <option value="Income_Real2023">Median Income (Real $)</option>
+                            <option value="Education_2023">Ed. Attainment (%)</option>
+                            <option value="Employment_Unemp2023">Unemployment Rate (%)</option>
                         </select>
                     </div>
                     <div>
                         <label class="block text-xs font-medium text-black">Point Color (Third Metric)</label>
                         <select id="colorSelect" class="mt-1 block w-full rounded-md border border-gray-400 bg-white py-1.5 pl-3 pr-10 text-base focus:border-blue-500 focus:ring-blue-500 text-black">
-                            <option value="Employment_Unemp2023">Unemployment Rate (2023 %)</option>
-                            <option value="Health_2023">Health Gap (2023 % Uninsured)</option>
-                            <option value="Population_Density">Population Density (2024)</option>
+                            <option value="Employment_Unemp2023">Unemployment Rate (%)</option>
+                            <option value="Health_2023">Health Gap (%)</option>
+                            <option value="Population_Density">Pop. Density</option>
                         </select>
                     </div>
                 </div>
@@ -253,8 +254,9 @@
                 </p>
             </div>
             
-            <!-- MUNICIPALITY SELECTOR (1/4 width) -->
-            <div class="p-4 rounded-xl" style="background-color: #f0fff0;">
+            <!-- MUNICIPALITY SELECTOR (4/12 width) -->
+            <!-- Changed bg-gray-800 to light green. Changed implicit 1/4 to lg:col-span-4 -->
+            <div class="lg:col-span-4 p-4 rounded-xl" style="background-color: #f0fff0;">
                 <h2 class="text-lg font-semibold mb-3 text-black">Municipality Selector</h2>
                 <input type="text" id="muniSearch" placeholder="Search municipality..." 
                        class="mb-3 block w-full rounded-md border border-gray-400 bg-white py-1.5 px-3 text-base text-black placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500"/>
@@ -594,9 +596,37 @@
             housingNarrative = `<strong>Housing Units</strong> have declined by <strong>${fmtPct(Math.abs(housingChange))}</strong> since 2013, suggesting housing stock is contracting in line with population loss.`;
         }
 
+        // --- Employment & Income Narrative (Chart 2) ---
+        const incomeLatest = muniData.Income_Real2023;
+        const unempLatest = muniData.Employment_Unemp2023;
+        
+        const incomeTimeSeries = muniData.Income_TimeSeries.slice(0);
+        const incomeMax = Math.max(...incomeTimeSeries);
+        const incomePeakYear = YEARS.ACS[incomeTimeSeries.indexOf(incomeMax)];
+        
+        let incomeNarrative, unempNarrative;
+        
+        // Income Trend
+        if (incomeLatest > 25000) {
+            incomeNarrative = `<strong>Real Median Income</strong> (amber line) is relatively strong at <strong>${fmtCurr(incomeLatest)}</strong>, though it peaked around ${incomePeakYear}.`;
+        } else if (incomeLatest > 20000) {
+            incomeNarrative = `<strong>Real Median Income</strong> sits at <strong>${fmtCurr(incomeLatest)}</strong>, reflecting moderate real earning power.`;
+        } else {
+            incomeNarrative = `<strong>Real Median Income</strong> is low at <strong>${fmtCurr(incomeLatest)}</strong>, indicating significant economic hardship.`;
+        }
+        
+        // Unemployment Trend
+        if (unempLatest < 8) {
+            unempNarrative = `The <strong>Unemployment Rate</strong> (red line) is low at <strong>${fmtPct(unempLatest)}</strong>, suggesting a tighter local labor market.`;
+        } else if (unempLatest < 12) {
+            unempNarrative = `The <strong>Unemployment Rate</strong> is moderate at <strong>${fmtPct(unempLatest)}</strong>.`;
+        } else {
+            unempNarrative = `The <strong>Unemployment Rate</strong> remains high at <strong>${fmtPct(unempLatest)}</strong>, indicating persistent employment challenges.`;
+        }
+
         return {
             chart1: `${popNarrative} ${housingNarrative}`,
-            chart2: `Income and employment narrative for ${muniData.Municipio}.`
+            chart2: `${incomeNarrative} ${unempNarrative}`
         };
     }
     
