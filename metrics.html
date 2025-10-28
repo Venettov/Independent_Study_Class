@@ -8,7 +8,6 @@
   <script src="https://cdn.tailwindcss.com"></script>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-  <!-- NEW: Annotation plugin for Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.2.1/dist/chartjs-plugin-annotation.min.js"></script>
 
   <style>
@@ -198,86 +197,16 @@
       </div>
     </header>
     
-    <!-- CONSOLIDATED DASHBOARD CONTENT STARTS HERE (Wrapped in new light gray block) -->
     <section class="dashboard-block">
       
-        <!-- KPI SUMMARY SECTION -->
-        <div id="kpi-summary" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div class="space-y-6">
-              <h2 class="font-semibold text-lg">Populations and People</h2>
-              <div class="stat-card">
-                <div class="stat-icon">👥</div>
-                <div class="stat-body min-w-0">
-                  <div class="label">Total Population</div>
-                  <div class="value">3,285,874</div>
-                  <a target="_blank" rel="noopener" href="https://data.census.gov/table?q=P1&g=040XX00US72">P1 • 2020 Decennial Census (Puerto Rico)</a>
-                </div>
-              </div>
-              <div class="stat-card">
-                <div class="stat-icon">📈</div>
-                <div class="stat-body min-w-0">
-                  <div class="label">Employment Rate</div>
-                  <div class="value">43.4%</div>
-                  <a target="_blank" rel="noopener" href="https://data.census.gov/table?q=DP03&g=040XX00US72">DP03 • 2024 ACS 1-Year (Puerto Rico)</a>
-                </div>
-              </div>
-            </div>
-
-            <div class="space-y-6">
-              <h2 class="font-semibold text-lg">Business and Economy</h2>
-              <div class="stat-card">
-                <div class="stat-icon">🏢</div>
-                <div class="stat-body min-w-0">
-                  <div class="label">Employer Establishments</div>
-                  <div class="value">50,332</div>
-                  <a target="_blank" rel="noopener" href="https://www.census.gov/programs-surveys/cbp.html">CBP • County Business Patterns (Program Page)</a>
-                </div>
-              </div>
-              <div class="stat-card">
-                <div class="stat-icon">💵</div>
-                <div class="stat-body min-w-0">
-                  <div class="label">Median Household Income</div>
-                  <div class="value">$27,213</div>
-                  <a target="_blank" rel="noopener" href="https://data.census.gov/table?q=S1901&g=040XX00US72">S1901 • 2024 ACS 1-Year (Puerto Rico)</a>
-                </div>
-              </div>
-            </div>
-
-            <div class="space-y-6">
-              <h2 class="font-semibold text-lg">Education & Health</h2>
-              <div class="stat-card">
-                <div class="stat-icon">🎓</div>
-                <div class="stat-body min-w-0">
-                  <div class="label">Bachelor’s Degree or Higher</div>
-                  <div class="value">29.7%</div>
-                  <a target="_blank" rel="noopener" href="https://data.census.gov/table?q=S1501&g=040XX00US72">S1501 • 2024 ACS 1-Year (Puerto Rico)</a>
-                </div>
-              </div>
-              <div class="stat-card">
-                <div class="stat-icon">🏥</div>
-                <div class="stat-body min-w-0">
-                  <div class="label">Without Health Coverage</div>
-                  <div class="value">5.6%</div>
-                  <a target="_blank" rel="noopener" href="https://data.census.gov/table?q=S2701&g=040XX00US72">S2701 • 2024 ACS 1-Year (Puerto Rico)</a>
-                </div>
-              </div>
-            </div>
-          </section>
-        </div>
-        
-        <!-- MAIN INTERACTIVE PLOT & FILTER PANEL (Grouped into a white card for separation) -->
-        <!-- Adjusted grid to 12 columns: 10 for Scatter Plot, 2 for Selector -->
         <div id="main-panel" class="card grid grid-cols-1 lg:grid-cols-12 gap-4 mt-6 p-0">
             
-            <!-- SCATTER PLOT (10/12 width) -->
             <div class="lg:col-span-10 p-4" id="scatterPlotContainer">
                 <h2 class="text-lg font-semibold mb-3 text-black">Socio-Economic Relationship by Municipality</h2>
                 <div id="chart-loader" class="text-center mt-20 hidden">
                     <div class="loader"></div>
                     <div class="mt-4 text-black">Loading and merging data...</div>
                 </div>
-                <!-- Wrapper added with fixed height to ensure Chart.js canvas renders correctly -->
                 <div id="scatter-canvas-wrapper" class="hidden"> 
                     <canvas id="scatterPlot"></canvas>
                 </div>
@@ -308,7 +237,6 @@
                         </select>
                     </div>
                 </div>
-                <!-- Scatter Plot Explanation -->
                 <p id="scatter-narrative" class="text-xs mt-4 text-gray-700">
                     This scatter plot compares two selected municipal metrics (X and Y axis) against each other. 
                     Each dot represents one municipality in Puerto Rico. The <strong>color of the dot</strong> represents the value of the third selected metric. 
@@ -316,22 +244,18 @@
                 </p>
             </div>
             
-            <!-- MUNICIPALITY SELECTOR (2/12 width) -->
             <div class="lg:col-span-2 p-4 rounded-xl" style="background-color: #f0fff0;">
                 <h2 class="text-lg font-semibold mb-3 text-black">Municipality Selector</h2>
                 <input type="text" id="muniSearch" placeholder="Search" 
                        class="mb-3 block w-full rounded-md border border-gray-400 bg-white py-1.5 px-3 text-base text-black placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500"/>
                 <div id="municipioList" class="space-y-1">
-                    <!-- List items loaded here -->
-                </div>
+                    </div>
             </div>
         </div>
         
-        <!-- DETAILED TREND CHARTS SECTION (Grouped into a separate white card) -->
         <div class="section-title col-span-full">Selected Municipality Trends: <span id="trendMuniName" class="text-blue-400">Puerto Rico</span></div>
 
         <div id="trendCharts" class="card grid grid-cols-1 md:grid-cols-2 gap-4 col-span-full p-4">
-            <!-- Population & Housing Trend -->
             <div class="chart-container"> 
                 <h3 class="text-base font-semibold mb-2 text-black">Population & Housing Trend</h3>
                 <div class="chart-content-wrapper">
@@ -339,7 +263,6 @@
                 </div>
                 <p id="chart-narrative-1" class="text-xs mt-2 text-gray-700"></p>
             </div>
-            <!-- Employment & Income Trend -->
             <div class="chart-container"> 
                 <h3 class="text-base font-semibold mb-2 text-black">Employment & Income Trend</h3>
                 <div class="chart-content-wrapper">
@@ -349,9 +272,7 @@
             </div>
         </div>
     </section>
-    <!-- CONSOLIDATED DASHBOARD CONTENT ENDS HERE -->
-
-  </main>
+    </main>
 
   <script>
     // --- Configuration & Paths ---
@@ -852,15 +773,21 @@
     // --- Interaction Handlers ---
 
     function updateKPIs() {
+        // The updateKPIs function is no longer needed to display the KPIs since the HTML is removed.
+        // However, the Education KPI FIX logic is still relevant for the underlying data model 
+        // if other charts/calculations rely on the corrected PR Education value.
         const prData = getMuniData('Puerto Rico');
         if (!prData) return;
 
+        // The following lines were for displaying the KPIs and can be safely removed, 
+        // but for completeness, we'll keep the function signature and the data logic 
+        // (which runs inside processData() now anyway) but strip the DOM manipulation.
+        /*
         document.getElementById('kpi-pop').textContent = fmtInt(prData.Population_2024);
         document.getElementById('kpi-income').textContent = fmtCurr(prData.Income_Real2023);
         document.getElementById('kpi-unemp').textContent = fmtPct(prData.Employment_Unemp2023);
-        
-        // FIX: Education KPI should use the correct average percentage (~30.9%), not the raw count.
         document.getElementById('kpi-edu').textContent = fmtPct(prData.Education_2023); 
+        */
     }
     
     function updateMunicipioList() {
@@ -944,7 +871,7 @@
             document.getElementById('scatter-canvas-wrapper').classList.remove('hidden');
 
             // Initial render
-            updateKPIs();
+            updateKPIs(); // This function is now mostly a placeholder
             updateMunicipioList();
             drawScatterPlot();
             drawTrendCharts(selectedMunicipio);
