@@ -24,7 +24,7 @@
         linear-gradient(180deg, #fafafa 0%, #f3f4f6 100%);
     }
 
-    /* --- DASHBOARD SPECIFIC STYLES (Dark Theme on Light Background) --- */
+    /* --- DASHBOARD SPECIFIC STYLES (High Contrast Light Theme) --- */
     /* Container for the entire dashboard section (light gray background, rounded corners) */
     .dashboard-block {
       background: #f3f4f6; /* light gray background color for the overall section */
@@ -38,9 +38,10 @@
         @apply p-4 h-full flex flex-col justify-center bg-gray-900 text-white rounded-lg shadow-inner;
         min-height: 100px;
     }
+    /* CHART BACKGROUND FIX: Light Blue/Cyan Background */
     .chart-container {
-        @apply p-4 bg-gray-900 text-white rounded-xl;
-        /* Removed fixed height here, using inner container height */
+        background-color: #f0f8ff; /* AliceBlue */
+        @apply p-4 text-black rounded-xl; 
     }
     .section-title {
         @apply text-xl font-bold text-gray-800 mb-4 pt-4;
@@ -50,26 +51,42 @@
         overflow-y: auto;
     }
     .municipio-item {
-        /* FIX: Ensure high contrast text */
-        @apply cursor-pointer p-2 rounded-lg text-sm transition-all text-white; 
+        /* FIX: Black text against light green/white background */
+        @apply cursor-pointer p-2 rounded-lg text-sm transition-all text-black; 
     }
     .municipio-item:hover {
-        background-color: #374151; /* Darker gray on hover */
+        background-color: #d1fae5; /* Lighter green on hover */
     }
     .selected-muni {
         @apply bg-blue-600 text-white font-semibold;
     }
+    /* SCATTER PLOT BACKGROUND FIX: Light Blue/Cyan Background */
     #scatterPlotContainer {
-        /* FIX: Removed min-height to allow vertical space to render correctly */
-        /* min-height: 550px; */
-        @apply bg-gray-900 rounded-xl p-4;
+        background-color: #f0f8ff; /* AliceBlue */
+        @apply rounded-xl p-4;
     }
-    /* FIX: Added fixed height for the canvas parent container to prevent collapse/expansion */
+    /* MUNICIPALITY SELECTOR BACKGROUND FIX: Light Green Background */
+    #main-panel .p-4.bg-gray-800 {
+        background-color: #f0fff0; /* Honeydew */
+        @apply rounded-xl text-black; /* Default text color for the panel */
+    }
+    
+    /* Input and internal text within the light green selector */
+    #main-panel .p-4.bg-gray-800 h2,
+    #main-panel .p-4.bg-gray-800 input,
+    #main-panel .p-4.bg-gray-800 .municipio-item {
+        color: #000 !important;
+    }
+    #main-panel .p-4.bg-gray-800 input {
+        background-color: #e5f5e5; /* Slightly darker green input background */
+        border-color: #10b981;
+    }
+    
     #scatter-canvas-wrapper {
         height: 450px; 
     }
     .loader {
-      border: 4px solid rgba(255, 255, 255, 0.3);
+      border: 4px solid rgba(0, 0, 0, 0.3); /* Darker loader for light background */
       border-radius: 50%;
       border-top: 4px solid #3b82f6;
       width: 40px;
@@ -188,36 +205,36 @@
             
             <!-- SCATTER PLOT (3/4 width) -->
             <div class="lg:col-span-3 p-4" id="scatterPlotContainer">
-                <h2 class="text-lg font-semibold mb-3 text-gray-100">Socio-Economic Relationship by Municipality</h2>
+                <h2 class="text-lg font-semibold mb-3 text-black">Socio-Economic Relationship by Municipality</h2>
                 <div id="chart-loader" class="text-center mt-20 hidden">
                     <div class="loader"></div>
-                    <div class="mt-4 text-gray-400">Loading and merging data...</div>
+                    <div class="mt-4 text-black">Loading and merging data...</div>
                 </div>
                 <!-- FIXED: Wrapper added with fixed height to ensure Chart.js canvas renders correctly -->
                 <div id="scatter-canvas-wrapper" class="hidden"> 
                     <canvas id="scatterPlot"></canvas>
                 </div>
                 
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t border-gray-700 mt-2">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t border-gray-300 mt-2">
                     <div>
-                        <label class="block text-xs font-medium text-gray-400">X-Axis (Change/Density)</label>
-                        <select id="xAxisSelect" class="mt-1 block w-full rounded-md border border-gray-600 bg-gray-700 py-1.5 pl-3 pr-10 text-base focus:border-blue-500 focus:ring-blue-500 text-white">
+                        <label class="block text-xs font-medium text-black">X-Axis (Change/Density)</label>
+                        <select id="xAxisSelect" class="mt-1 block w-full rounded-md border border-gray-400 bg-white py-1.5 pl-3 pr-10 text-base focus:border-blue-500 focus:ring-blue-500 text-black">
                             <option value="Population_PctChange">Population Change (2010-2024 %)</option>
                             <option value="Housing_PctChange">Housing Unit Change (2013-2023 %)</option>
                             <option value="Establishments_PctChange">Establishment Change (2012-2023 %)</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-gray-400">Y-Axis (Income/Attainment/Rates)</label>
-                        <select id="yAxisSelect" class="mt-1 block w-full rounded-md border border-gray-600 bg-gray-700 py-1.5 pl-3 pr-10 text-base focus:border-blue-500 focus:ring-blue-500 text-white">
+                        <label class="block text-xs font-medium text-black">Y-Axis (Income/Attainment/Rates)</label>
+                        <select id="yAxisSelect" class="mt-1 block w-full rounded-md border border-gray-400 bg-white py-1.5 pl-3 pr-10 text-base focus:border-blue-500 focus:ring-blue-500 text-black">
                             <option value="Income_Real2023">Median Income (2023 Real $)</option>
                             <option value="Education_2023">Education Attainment (2023 %)</option>
                             <option value="Employment_Unemp2023">Unemployment Rate (2023 %)</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-gray-400">Point Color (Third Metric)</label>
-                        <select id="colorSelect" class="mt-1 block w-full rounded-md border border-gray-600 bg-gray-700 py-1.5 pl-3 pr-10 text-base focus:border-blue-500 focus:ring-blue-500 text-white">
+                        <label class="block text-xs font-medium text-black">Point Color (Third Metric)</label>
+                        <select id="colorSelect" class="mt-1 block w-full rounded-md border border-gray-400 bg-white py-1.5 pl-3 pr-10 text-base focus:border-blue-500 focus:ring-blue-500 text-black">
                             <option value="Employment_Unemp2023">Unemployment Rate (2023 %)</option>
                             <option value="Health_2023">Health Gap (2023 % Uninsured)</option>
                             <option value="Population_Density">Population Density (2024)</option>
@@ -227,10 +244,10 @@
             </div>
             
             <!-- MUNICIPALITY SELECTOR (1/4 width) -->
-            <div class="p-4 bg-gray-800 rounded-xl">
-                <h2 class="text-lg font-semibold mb-3 text-gray-100">Municipality Selector</h2>
+            <div class="p-4 rounded-xl" style="background-color: #f0fff0;">
+                <h2 class="text-lg font-semibold mb-3 text-black">Municipality Selector</h2>
                 <input type="text" id="muniSearch" placeholder="Search municipality..." 
-                       class="mb-3 block w-full rounded-md border border-gray-600 bg-gray-700 py-1.5 px-3 text-base text-white placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500"/>
+                       class="mb-3 block w-full rounded-md border border-gray-400 bg-white py-1.5 px-3 text-base text-black placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500"/>
                 <div id="municipioList" class="space-y-1">
                     <!-- List items loaded here -->
                 </div>
@@ -243,11 +260,11 @@
         <div id="trendCharts" class="card grid grid-cols-1 md:grid-cols-2 gap-4 col-span-full p-4">
             <!-- FIXED: Added h-96 class to chart containers to limit vertical growth -->
             <div class="chart-container h-96"> 
-                <h3 class="text-base font-semibold mb-2 text-gray-100">Population & Housing Trend</h3>
+                <h3 class="text-base font-semibold mb-2 text-black">Population & Housing Trend</h3>
                 <canvas id="trendChart1"></canvas>
             </div>
             <div class="chart-container h-96"> 
-                <h3 class="text-base font-semibold mb-2 text-gray-100">Employment & Income Trend</h3>
+                <h3 class="text-base font-semibold mb-2 text-black">Employment & Income Trend</h3>
                 <canvas id="trendChart2"></canvas>
             </div>
         </div>
@@ -490,14 +507,14 @@
                 },
                 scales: {
                     x: {
-                        title: { display: true, text: getAxisLabel(xKey), color: '#ccc' },
-                        grid: { color: '#374151' },
-                        ticks: { color: '#ccc', callback: v => getAxisFormat(xKey)(v) }
+                        title: { display: true, text: getAxisLabel(xKey), color: '#000' }, /* Changed to Black */
+                        grid: { color: '#bbb' }, /* Changed grid color */
+                        ticks: { color: '#000', callback: v => getAxisFormat(xKey)(v) } /* Changed to Black */
                     },
                     y: {
-                        title: { display: true, text: getAxisLabel(yKey), color: '#ccc' },
-                        grid: { color: '#374151' },
-                        ticks: { color: '#ccc', callback: v => getAxisFormat(yKey)(v) }
+                        title: { display: true, text: getAxisLabel(yKey), color: '#000' }, /* Changed to Black */
+                        grid: { color: '#bbb' }, /* Changed grid color */
+                        ticks: { color: '#000', callback: v => getAxisFormat(yKey)(v) } /* Changed to Black */
                     }
                 }
             }
@@ -540,14 +557,14 @@
             },
             options: {
                 maintainAspectRatio: false,
-                plugins: { legend: { labels: { color: '#ccc' } } },
+                plugins: { legend: { labels: { color: '#000' } } }, /* Changed to Black */
                 scales: {
-                    x: { ticks: { color: '#ccc' }, grid: { color: '#374151' } },
+                    x: { ticks: { color: '#000' }, grid: { color: '#bbb' } }, /* Changed to Black / Light Grid */
                     yPop: {
                         type: 'linear', position: 'left', id: 'yPop',
                         title: { display: true, text: 'Population (Count)', color: '#3b82f6' },
                         ticks: { color: '#3b82f6', callback: v => fmtInt(v) },
-                        grid: { color: '#374151' }
+                        grid: { color: '#bbb' } /* Changed grid color */
                     },
                     yHousing: {
                         type: 'linear', position: 'right', id: 'yHousing',
@@ -586,14 +603,14 @@
             },
             options: {
                 maintainAspectRatio: false,
-                plugins: { legend: { labels: { color: '#ccc' } } },
+                plugins: { legend: { labels: { color: '#000' } } }, /* Changed to Black */
                 scales: {
-                    x: { ticks: { color: '#ccc' }, grid: { color: '#374151' }, labels: YEARS.ACS },
+                    x: { ticks: { color: '#000' }, grid: { color: '#bbb' }, labels: YEARS.ACS }, /* Changed to Black / Light Grid */
                     yIncome: {
                         type: 'linear', position: 'left', id: 'yIncome',
                         title: { display: true, text: 'Real Median Income ($)', color: '#f59e0b' },
                         ticks: { color: '#f59e0b', callback: v => fmtCurr(v) },
-                        grid: { color: '#374151' }
+                        grid: { color: '#bbb' } /* Changed grid color */
                     },
                     yUnemp: {
                         type: 'linear', position: 'right', id: 'yUnemp',
