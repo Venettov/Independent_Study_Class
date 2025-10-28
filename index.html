@@ -248,7 +248,7 @@
                 <!-- Scatter Plot Explanation -->
                 <p id="scatter-narrative" class="text-xs mt-4 text-gray-700">
                     This scatter plot compares two selected municipal metrics (X and Y axis) against each other. 
-                    Each dot represents one municipality in Puerto Rico. The **color of the dot** represents the value of the third selected metric. 
+                    Each dot represents one municipality in Puerto Rico. The <strong>color of the dot</strong> represents the value of the third selected metric. 
                     Clicking on a dot will select that municipality, highlight it in yellow, and update the detailed trend charts below.
                 </p>
             </div>
@@ -547,8 +547,8 @@
     function generateChartNarrative(muniData) {
         if (muniData.Municipio === 'Puerto Rico') {
             return {
-                chart1: "The **Population & Housing Trend** for Puerto Rico shows a **steady population decline** since 2010 (blue line), while the total number of **Housing Units has increased** (green line). This divergence indicates a substantial rise in vacancy rates and housing stock oversupply across the island.",
-                chart2: "The **Employment & Income Trend** shows the island-wide **Real Median Income** (2023$, amber line) fluctuating around the $20,000–$25,000 range, while the **Unemployment Rate** (red line) has shown a long-term decline from the early 2010s peak, reflecting an improving job market but stagnant real earning power."
+                chart1: "The <strong>Population & Housing Trend</strong> for Puerto Rico shows a <strong>steady population decline</strong> since 2010 (blue line), while the total number of <strong>Housing Units has increased</strong> (green line). This divergence indicates a substantial rise in vacancy rates and housing stock oversupply across the island.",
+                chart2: "The <strong>Employment & Income Trend</strong> shows the island-wide <strong>Real Median Income</strong> (2023$, amber line) fluctuating around the $20,000–$25,000 range, while the <strong>Unemployment Rate</strong> (red line) has shown a long-term decline from the early 2010s peak, reflecting an improving job market but stagnant real earning power."
             };
         }
 
@@ -565,20 +565,20 @@
 
         // Population Trend
         if (popChange < -10) {
-            popNarrative = `The **population** of ${muniData.Municipio} has seen severe decline, dropping by **${fmtPct(Math.abs(popChange))}** since 2010.`;
+            popNarrative = `The <strong>population</strong> of ${muniData.Municipio} has seen severe decline, dropping by <strong>${fmtPct(Math.abs(popChange))}</strong> since 2010.`;
         } else if (popChange < 0) {
-            popNarrative = `The **population** has experienced a notable decrease, falling by **${fmtPct(Math.abs(popChange))}** since 2010.`;
+            popNarrative = `The <strong>population</strong> has experienced a notable decrease, falling by <strong>${fmtPct(Math.abs(popChange))}</strong> since 2010.`;
         } else {
-            popNarrative = `The **population** has managed to stabilize or slightly grow, rising by **${fmtPct(popChange)}** since 2010.`;
+            popNarrative = `The <strong>population</strong> has managed to stabilize or slightly grow, rising by <strong>${fmtPct(popChange)}</strong> since 2010.`;
         }
 
         // Housing Trend
         if (housingChange > 5) {
-             housingNarrative = `Meanwhile, **Housing Units** have grown significantly, increasing by **${fmtPct(housingChange)}** since 2013, indicating new construction despite demographic contraction.`;
+             housingNarrative = `Meanwhile, <strong>Housing Units</strong> have grown significantly, increasing by <strong>${fmtPct(housingChange)}</strong> since 2013, indicating new construction despite demographic contraction.`;
         } else if (housingChange > 0) {
-            housingNarrative = `**Housing Units** have seen moderate growth, up **${fmtPct(housingChange)}** since 2013, contributing to increased vacancy.`;
+            housingNarrative = `<strong>Housing Units</strong> have seen moderate growth, up <strong>${fmtPct(housingChange)}</strong> since 2013, contributing to increased vacancy.`;
         } else {
-            housingNarrative = `**Housing Units** have declined by **${fmtPct(Math.abs(housingChange))}** since 2013, suggesting housing stock is contracting in line with population loss.`;
+            housingNarrative = `<strong>Housing Units</strong> have declined by <strong>${fmtPct(Math.abs(housingChange))}</strong> since 2013, suggesting housing stock is contracting in line with population loss.`;
         }
 
         return {
