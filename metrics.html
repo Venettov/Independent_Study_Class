@@ -34,7 +34,7 @@
       box-shadow: 0 4px 6px -1px rgba(0,0,0,.1), 0 2px 4px -2px rgba(0,0,0,.06);
     }
 
-    /* Styles for the new KPI cards (Minimalist/Clean Look) */
+    /* Styles for the new static KPI section (Minimalist/Clean Look) */
     .kpi-group-heading {
         /* Styles applied to Populations and People, Business and Economy, etc. */
         @apply text-lg font-bold text-gray-800 mb-3;
@@ -44,6 +44,7 @@
         @apply bg-white p-3 rounded-lg shadow-sm border border-gray-100 flex items-start gap-3;
     }
     .stat-icon {
+        /* Using Unicode/Emoji and setting font size for consistency */
         @apply text-xl text-gray-700 flex-shrink-0 pt-0.5;
     }
     .stat-label {
@@ -55,6 +56,7 @@
     .stat-link {
         @apply text-xs text-blue-600 mt-0.5 block;
     }
+
 
     /* CHART BACKGROUND FIX: Light Blue/Cyan Background */
     .chart-container {
@@ -215,13 +217,12 @@
       </div>
     </header>
     
-    <section class="dashboard-block">
-      
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        
+        <div class="space-y-3">
+            <h2 class="kpi-group-heading">Populations and People</h2>
             
             <div class="space-y-3">
-                <h2 class="kpi-group-heading">Populations and People</h2>
-                
                 <div class="stat-box">
                     <div class="stat-icon">👥</div>
                     <div class="min-w-0">
@@ -240,10 +241,12 @@
                     </div>
                 </div>
             </div>
+        </div>
 
+        <div class="space-y-3">
+            <h2 class="kpi-group-heading">Business and Economy</h2>
+            
             <div class="space-y-3">
-                <h2 class="kpi-group-heading">Business and Economy</h2>
-                
                 <div class="stat-box">
                     <div class="stat-icon">🏢</div>
                     <div class="min-w-0">
@@ -262,10 +265,12 @@
                     </div>
                 </div>
             </div>
+        </div>
 
+        <div class="space-y-3">
+            <h2 class="kpi-group-heading">Education & Health</h2>
+            
             <div class="space-y-3">
-                <h2 class="kpi-group-heading">Education & Health</h2>
-                
                 <div class="stat-box">
                     <div class="stat-icon">🎓</div>
                     <div class="min-w-0">
@@ -285,6 +290,8 @@
                 </div>
             </div>
         </div>
+    </div>
+    <section class="dashboard-block">
         
         <div id="main-panel" class="card grid grid-cols-1 lg:grid-cols-12 gap-4 mt-6 p-0">
             
