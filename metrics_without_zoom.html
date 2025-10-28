@@ -147,18 +147,6 @@
     #metrics-menu { opacity: 0; visibility: hidden; transform: translateY(4px); pointer-events: none; transition: opacity .15s ease, transform .15s ease, visibility .15s ease; }
     #metrics-dropdown-root:hover #metrics-menu, #metrics-dropdown-root.hovering #metrics-menu { opacity: 1; visibility: visible; transform: translateY(0); pointer-events: auto; }
     #metrics-dropdown-root:hover #metrics-chevron, #metrics-dropdown-root.hovering #metrics-chevron { transform: rotate(180deg); }
-
-    /* New style for simulating 65% zoom on the main content */
-    #scale-wrapper {
-        /* Apply the scale transformation */
-        transform: scale(0.65); 
-        transform-origin: top center; /* Scale from the top-center */
-        
-        /* Adjust the height to accommodate the scaled content */
-        height: 154%; /* Set height to approx 1/0.65 to fit content without scroll */
-        padding-bottom: 200px; /* Add extra padding for safety */
-        margin-bottom: -35%; /* Compensate for the scale to pull up following elements */
-    }
   </style>
 </head>
 <body class="bg-gray-50 text-gray-900 font-sans">
@@ -195,196 +183,196 @@
       <a href="about.html"   class="nav-link border-b-2 border-transparent">About</a>
     </div>
   </nav>
-  
-  <div id="scale-wrapper">
-    <main class="max-w-7xl mx-auto px-4 py-8 space-y-8">
 
-      <header class="card hero p-6 sm:p-8 lg:p-10 relative">
-        <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between">
-            <div>
-                <p class="text-sm font-semibold text-gray-500 uppercase">Graduate Independent Study</p>
-                <h1 class="mt-2 text-4xl sm:text-5xl font-extrabold leading-tight">
-                    Population & Economic Dynamics in Puerto Rico
-                </h1>
-                <p class="mt-3 text-lg text-gray-700">
-                    A graduate research project examining demographic shifts, out-migration, and sustainable development
-                    strategies through linked data analysis and policy synthesis.
-                </p>
+  <main class="max-w-7xl mx-auto px-4 py-8 space-y-8">
+
+    <header class="card hero p-6 sm:p-8 lg:p-10 relative">
+      <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between">
+          <div>
+              <p class="text-sm font-semibold text-gray-500 uppercase">Graduate Independent Study</p>
+              <h1 class="mt-2 text-4xl sm:text-5xl font-extrabold leading-tight">
+                  Population & Economic Dynamics in Puerto Rico
+              </h1>
+              <p class="mt-3 text-lg text-gray-700">
+                  A graduate research project examining demographic shifts, out-migration, and sustainable development
+                  strategies through linked data analysis and policy synthesis.
+              </p>
+          </div>
+      </div>
+
+      <div class="absolute bottom-4 right-4 group">
+        <div class="text-right">
+          <span class="text-sm font-semibold text-gray-700 cursor-pointer group-hover:text-blue-700 transition">
+            Project Customer: Puerto Rico Planning Board
+          </span>
+        </div>
+
+        <div class="absolute right-0 bottom-full mb-2 w-96 bg-white text-gray-800 p-4 rounded-lg shadow-xl border border-gray-200 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50">
+          <p class="text-gray-700 text-sm">
+            The Planning Board oversees long-term economic development, demographic analysis, and land-use
+            planning for Puerto Rico. This project’s interactive maps, municipal-level dashboards, and
+            population change analyses provide actionable insights that could directly support their policy
+            models and strategic decision-making.
+          </p>
+          <p class="text-sm mt-3">
+            🔗 <a href="https://jp.pr.gov" target="_blank" rel="noopener" class="text-blue-600 underline">
+              Visit Puerto Rico Planning Board Website
+            </a>
+          </p>
+        </div>
+      </div>
+    </header>
+    
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        
+        <div class="space-y-4">
+            <h2 class="kpi-group-heading"><strong>Populations and People</strong></h2>
+            
+            <div class="space-y-4">
+                <div class="stat-card">
+                  <div class="stat-icon">👥</div>
+                  <div class="stat-body min-w-0">
+                    <div class="label">Total Population</div>
+                    <div class="value">3,285,874</div>
+                    <a target="_blank" rel="noopener" href="https://data.census.gov/table?q=P1&g=040XX00US72">P1 • 2020 Decennial Census</a>
+                  </div>
+                </div>
+                
+                <div class="stat-card">
+                  <div class="stat-icon">📈</div>
+                  <div class="stat-body min-w-0">
+                    <div class="label">Employment Rate</div>
+                    <div class="value">43.4%</div>
+                    <a target="_blank" rel="noopener" href="https://data.census.gov/table?q=DP03&g=040XX00US72">DP03 • 2024 ACS 1-Year</a>
+                  </div>
+                </div>
             </div>
         </div>
 
-        <div class="absolute bottom-4 right-4 group">
-          <div class="text-right">
-            <span class="text-sm font-semibold text-gray-700 cursor-pointer group-hover:text-blue-700 transition">
-              Project Customer: Puerto Rico Planning Board
-            </span>
-          </div>
-
-          <div class="absolute right-0 bottom-full mb-2 w-96 bg-white text-gray-800 p-4 rounded-lg shadow-xl border border-gray-200 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50">
-            <p class="text-gray-700 text-sm">
-              The Planning Board oversees long-term economic development, demographic analysis, and land-use
-              planning for Puerto Rico. This project’s interactive maps, municipal-level dashboards, and
-              population change analyses provide actionable insights that could directly support their policy
-              models and strategic decision-making.
-            </p>
-            <p class="text-sm mt-3">
-              🔗 <a href="https://jp.pr.gov" target="_blank" rel="noopener" class="text-blue-600 underline">
-                Visit Puerto Rico Planning Board Website
-              </a>
-            </p>
-          </div>
+        <div class="space-y-4">
+            <h2 class="kpi-group-heading"><strong>Business and Economy</strong></h2>
+            
+            <div class="space-y-4">
+                <div class="stat-card">
+                  <div class="stat-icon">🏢</div>
+                  <div class="stat-body min-w-0">
+                    <div class="label">Employer Establishments</div>
+                    <div class="value">50,332</div>
+                    <a target="_blank" rel="noopener" href="https://www.census.gov/programs-surveys/cbp.html">CBP • County Business Patterns</a>
+                  </div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-icon">💵</div>
+                  <div class="stat-body min-w-0">
+                    <div class="label">Median Household Income</div>
+                    <div class="value">$27,213</div>
+                    <a target="_blank" rel="noopener" href="https://data.census.gov/table?q=S1901&g=040XX00US72">S1901 • 2024 ACS 1-Year</a>
+                  </div>
+                </div>
+            </div>
         </div>
-      </header>
-      
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-          
-          <div class="space-y-4">
-              <h2 class="kpi-group-heading"><strong>Populations and People</strong></h2>
-              
-              <div class="space-y-4">
-                  <div class="stat-card">
-                    <div class="stat-icon">👥</div>
-                    <div class="stat-body min-w-0">
-                      <div class="label">Total Population</div>
-                      <div class="value">3,285,874</div>
-                      <a target="_blank" rel="noopener" href="https://data.census.gov/table?q=P1&g=040XX00US72">P1 • 2020 Decennial Census</a>
-                    </div>
-                  </div>
-                  
-                  <div class="stat-card">
-                    <div class="stat-icon">📈</div>
-                    <div class="stat-body min-w-0">
-                      <div class="label">Employment Rate</div>
-                      <div class="value">43.4%</div>
-                      <a target="_blank" rel="noopener" href="https://data.census.gov/table?q=DP03&g=040XX00US72">DP03 • 2024 ACS 1-Year</a>
-                    </div>
-                  </div>
-              </div>
-          </div>
 
-          <div class="space-y-4">
-              <h2 class="kpi-group-heading"><strong>Business and Economy</strong></h2>
-              
-              <div class="space-y-4">
-                  <div class="stat-card">
-                    <div class="stat-icon">🏢</div>
-                    <div class="stat-body min-w-0">
-                      <div class="label">Employer Establishments</div>
-                      <div class="value">50,332</div>
-                      <a target="_blank" rel="noopener" href="https://www.census.gov/programs-surveys/cbp.html">CBP • County Business Patterns</a>
-                    </div>
+        <div class="space-y-4">
+            <h2 class="kpi-group-heading"><strong>Education & Health</strong></h2>
+            
+            <div class="space-y-4">
+                <div class="stat-card">
+                  <div class="stat-icon">🎓</div>
+                  <div class="stat-body min-w-0">
+                    <div class="label">Bachelor’s Degree or Higher</div>
+                    <div class="value">29.7%</div>
+                    <a target="_blank" rel="noopener" href="https://data.census.gov/table?q=S1501&g=040XX00US72">S1501 • 2024 ACS 1-Year</a>
                   </div>
-                  <div class="stat-card">
-                    <div class="stat-icon">💵</div>
-                    <div class="stat-body min-w-0">
-                      <div class="label">Median Household Income</div>
-                      <div class="value">$27,213</div>
-                      <a target="_blank" rel="noopener" href="https://data.census.gov/table?q=S1901&g=040XX00US72">S1901 • 2024 ACS 1-Year</a>
-                    </div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-icon">🏥</div>
+                  <div class="stat-body min-w-0">
+                    <div class="label">Without Health Coverage</div>
+                    <div class="value">5.6%</div>
+                    <a target="_blank" rel="noopener" href="https://data.census.gov/table?q=S2701&g=040XX00US72">S2701 • 2024 ACS 1-Year</a>
                   </div>
-              </div>
-          </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <section class="dashboard-block">
+        
+        <div id="main-panel" class="card grid grid-cols-1 lg:grid-cols-12 gap-4 mt-6 p-0">
+            
+            <div class="lg:col-span-10 p-4" id="scatterPlotContainer">
+                <h2 class="text-lg font-semibold mb-3 text-black">Socio-Economic Relationship by Municipality</h2>
+                <div id="chart-loader" class="text-center mt-20 hidden">
+                    <div class="loader"></div>
+                    <div class="mt-4 text-black">Loading and merging data...</div>
+                </div>
+                <div id="scatter-canvas-wrapper" class="hidden"> 
+                    <canvas id="scatterPlot"></canvas>
+                </div>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t border-gray-300 mt-2">
+                    <div>
+                        <label class="block text-xs font-medium text-black">X-Axis (Change/Density)</label>
+                        <select id="xAxisSelect" class="mt-1 block w-full rounded-md border border-gray-400 bg-white py-1.5 pl-3 pr-10 text-base focus:border-blue-500 focus:ring-blue-500 text-black">
+                            <option value="Population_PctChange">Pop. Chg (2010-24 %)</option>
+                            <option value="Housing_PctChange">Housing Chg (2013-23 %)</option>
+                            <option value="Establishments_PctChange">Est. Chg (2012-23 %)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-black">Y-Axis (Income/Attainment/Rates)</label>
+                        <select id="yAxisSelect" class="mt-1 block w-full rounded-md border border-gray-400 bg-white py-1.5 pl-3 pr-10 text-base focus:border-blue-500 focus:ring-blue-500 text-black">
+                            <option value="Income_Real2023">Median Income (Real $)</option>
+                            <option value="Education_2023">Ed. Attainment (%)</option>
+                            <option value="Employment_Unemp2023">Unemployment Rate (%)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-black">Point Color (Third Metric)</label>
+                        <select id="colorSelect" class="mt-1 block w-full rounded-md border border-gray-400 bg-white py-1.5 pl-3 pr-10 text-base focus:border-blue-500 focus:ring-blue-500 text-black">
+                            <option value="Employment_Unemp2023">Unemployment Rate (%)</option>
+                            <option value="Health_2023">Health Gap (%)</option>
+                            <option value="Population_Density">Pop. Density</option>
+                        </select>
+                    </div>
+                </div>
+                <p id="scatter-narrative" class="text-xs mt-4 text-gray-700">
+                    This scatter plot compares two selected municipal metrics (X and Y axis) against each other. 
+                    Each dot represents one municipality in Puerto Rico. The <strong>color of the dot</strong> represents the value of the third selected metric. 
+                    Clicking on a dot will select that municipality, highlight it in yellow, and update the detailed trend charts below.
+                </p>
+            </div>
+            
+            <div class="lg:col-span-2 p-4 rounded-xl" style="background-color: #f0fff0;">
+                <h2 class="text-lg font-semibold mb-3 text-black">Municipality Selector</h2>
+                <input type="text" id="muniSearch" placeholder="Search" 
+                       class="mb-3 block w-full rounded-md border border-gray-400 bg-white py-1.5 px-3 text-base text-black placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500"/>
+                <div id="municipioList" class="space-y-1">
+                    </div>
+            </div>
+        </div>
+        
+        <div class="section-title col-span-full">Selected Municipality Trends: <span id="trendMuniName" class="text-blue-400">Puerto Rico</span></div>
 
-          <div class="space-y-4">
-              <h2 class="kpi-group-heading"><strong>Education & Health</strong></h2>
-              
-              <div class="space-y-4">
-                  <div class="stat-card">
-                    <div class="stat-icon">🎓</div>
-                    <div class="stat-body min-w-0">
-                      <div class="label">Bachelor’s Degree or Higher</div>
-                      <div class="value">29.7%</div>
-                      <a target="_blank" rel="noopener" href="https://data.census.gov/table?q=S1501&g=040XX00US72">S1501 • 2024 ACS 1-Year</a>
-                    </div>
-                  </div>
-                  <div class="stat-card">
-                    <div class="stat-icon">🏥</div>
-                    <div class="stat-body min-w-0">
-                      <div class="label">Without Health Coverage</div>
-                      <div class="value">5.6%</div>
-                      <a target="_blank" rel="noopener" href="https://data.census.gov/table?q=S2701&g=040XX00US72">S2701 • 2024 ACS 1-Year</a>
-                    </div>
-                  </div>
-              </div>
-          </div>
-      </div>
-      <section class="dashboard-block">
-          
-          <div id="main-panel" class="card grid grid-cols-1 lg:grid-cols-12 gap-4 mt-6 p-0">
-              
-              <div class="lg:col-span-10 p-4" id="scatterPlotContainer">
-                  <h2 class="text-lg font-semibold mb-3 text-black">Socio-Economic Relationship by Municipality</h2>
-                  <div id="chart-loader" class="text-center mt-20 hidden">
-                      <div class="loader"></div>
-                      <div class="mt-4 text-black">Loading and merging data...</div>
-                  </div>
-                  <div id="scatter-canvas-wrapper" class="hidden"> 
-                      <canvas id="scatterPlot"></canvas>
-                  </div>
-                  
-                  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t border-gray-300 mt-2">
-                      <div>
-                          <label class="block text-xs font-medium text-black">X-Axis (Change/Density)</label>
-                          <select id="xAxisSelect" class="mt-1 block w-full rounded-md border border-gray-400 bg-white py-1.5 pl-3 pr-10 text-base focus:border-blue-500 focus:ring-blue-500 text-black">
-                              <option value="Population_PctChange">Pop. Chg (2010-24 %)</option>
-                              <option value="Housing_PctChange">Housing Chg (2013-23 %)</option>
-                              <option value="Establishments_PctChange">Est. Chg (2012-23 %)</option>
-                          </select>
-                      </div>
-                      <div>
-                          <label class="block text-xs font-medium text-black">Y-Axis (Income/Attainment/Rates)</label>
-                          <select id="yAxisSelect" class="mt-1 block w-full rounded-md border border-gray-400 bg-white py-1.5 pl-3 pr-10 text-base focus:border-blue-500 focus:ring-blue-500 text-black">
-                              <option value="Income_Real2023">Median Income (Real $)</option>
-                              <option value="Education_2023">Ed. Attainment (%)</option>
-                              <option value="Employment_Unemp2023">Unemployment Rate (%)</option>
-                          </select>
-                      </div>
-                      <div>
-                          <label class="block text-xs font-medium text-black">Point Color (Third Metric)</label>
-                          <select id="colorSelect" class="mt-1 block w-full rounded-md border border-gray-400 bg-white py-1.5 pl-3 pr-10 text-base focus:border-blue-500 focus:ring-blue-500 text-black">
-                              <option value="Employment_Unemp2023">Unemployment Rate (%)</option>
-                              <option value="Health_2023">Health Gap (%)</option>
-                              <option value="Population_Density">Pop. Density</option>
-                          </select>
-                      </div>
-                  </div>
-                  <p id="scatter-narrative" class="text-xs mt-4 text-gray-700">
-                      This scatter plot compares two selected municipal metrics (X and Y axis) against each other. 
-                      Each dot represents one municipality in Puerto Rico. The <strong>color of the dot</strong> represents the value of the third selected metric. 
-                      Clicking on a dot will select that municipality, highlight it in yellow, and update the detailed trend charts below.
-                  </p>
-              </div>
-              
-              <div class="lg:col-span-2 p-4 rounded-xl" style="background-color: #f0fff0;">
-                  <h2 class="text-lg font-semibold mb-3 text-black">Municipality Selector</h2>
-                  <input type="text" id="muniSearch" placeholder="Search" 
-                        class="mb-3 block w-full rounded-md border border-gray-400 bg-white py-1.5 px-3 text-base text-black placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500"/>
-                  <div id="municipioList" class="space-y-1">
-                      </div>
-              </div>
-          </div>
-          
-          <div class="section-title col-span-full">Selected Municipality Trends: <span id="trendMuniName" class="text-blue-400">Puerto Rico</span></div>
+        <div id="trendCharts" class="card grid grid-cols-1 md:grid-cols-2 gap-4 col-span-full p-4">
+            <div class="chart-container"> 
+                <h3 class="text-base font-semibold mb-2 text-black">Population & Housing Trend</h3>
+                <div class="chart-content-wrapper">
+                    <canvas id="trendChart1"></canvas>
+                </div>
+                <p id="chart-narrative-1" class="text-xs mt-2 text-gray-700"></p>
+            </div>
+            <div class="chart-container"> 
+                <h3 class="text-base font-semibold mb-2 text-black">Employment & Income Trend</h3>
+                <div class="chart-content-wrapper">
+                    <canvas id="trendChart2"></canvas>
+                </div>
+                <p id="chart-narrative-2" class="text-xs mt-2 text-gray-700"></p>
+            </div>
+        </div>
+    </section>
+    </main>
 
-          <div id="trendCharts" class="card grid grid-cols-1 md:grid-cols-2 gap-4 col-span-full p-4">
-              <div class="chart-container"> 
-                  <h3 class="text-base font-semibold mb-2 text-black">Population & Housing Trend</h3>
-                  <div class="chart-content-wrapper">
-                      <canvas id="trendChart1"></canvas>
-                  </div>
-                  <p id="chart-narrative-1" class="text-xs mt-2 text-gray-700"></p>
-              </div>
-              <div class="chart-container"> 
-                  <h3 class="text-base font-semibold mb-2 text-black">Employment & Income Trend</h3>
-                  <div class="chart-content-wrapper">
-                      <canvas id="trendChart2"></canvas>
-                  </div>
-                  <p id="chart-narrative-2" class="text-xs mt-2 text-gray-700"></p>
-              </div>
-          </div>
-      </section>
-      </main>
-    </div> <script>
+  <script>
     // --- Configuration & Paths ---
     // NOTE: Paths adjusted relative to index.html (removed '../' or used '.')
     const JSON_FILES = {
