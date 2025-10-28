@@ -6,31 +6,14 @@
   <title>Puerto Rico — Metrics</title>
   <meta name="description" content="Graduate Independent Study — Population & Economic Dynamics in Puerto Rico: key metrics and sources." />
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- ADDED: Chart.js and Annotation plugin for the dashboard -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.2.1/dist/chartjs-plugin-annotation.min.js"></script>
-  
   <style>
-    /* Cards + hero */
+    /* Global Card Style (White Background) */
     .card {
       background:#fff;
       border-radius:1rem;
       box-shadow:0 10px 15px -3px rgba(0,0,0,.1), 0 4px 6px -2px rgba(0,0,0,.05);
-      overflow:hidden;
+      overflow:visible;
     }
-    .stat-card {
-      display:flex; gap:.75rem; align-items:flex-start;
-      background:#fff; border-radius:.75rem; padding:1rem;
-      box-shadow: 0 4px 10px rgba(0,0,0,.06);
-    }
-    .stat-icon {
-      flex:none; display:flex; align-items:center; justify-content:center;
-      width:2.5rem; height:2.5rem; border-radius:.75rem; background:#f3f4f6; color:#6b7280;
-    }
-    .stat-body .label { font-size:.85rem; color:#6b7280; }
-    .stat-body .value { font-weight:800; font-size:1.5rem; line-height:1.1; }
-    .stat-body a { font-size:.75rem; color:#2563eb; }
-
     .hero {
       background:
         radial-gradient(1200px 600px at 20% -10%, rgba(239,68,68,.12), transparent 60%),
@@ -38,49 +21,26 @@
         linear-gradient(180deg, #fafafa 0%, #f3f4f6 100%);
     }
 
-    html { scroll-behavior: smooth; }
-
-    /* --- Dropdown base state --- */
-    #metrics-menu {
-      opacity: 0;
-      visibility: hidden;
-      transform: translateY(4px);
-      pointer-events: none;
-      transition: opacity .15s ease, transform .15s ease, visibility .15s ease;
-    }
-
-    /* Show on hover OR while JS adds .hovering (grace period) */
-    #metrics-dropdown-root:hover #metrics-menu,
-    #metrics-dropdown-root.hovering #metrics-menu {
-      opacity: 1;
-      visibility: visible;
-      transform: translateY(0);
-      pointer-events: auto;
-    }
-
-    /* Rotate chevron when open */
-    #metrics-dropdown-root:hover #metrics-chevron,
-    #metrics-dropdown-root.hovering #metrics-chevron {
-      transform: rotate(180deg);
-    }
-
-    /* --- DASHBOARD SPECIFIC STYLES (Copied from index.html) --- */
+    /* --- DASHBOARD SPECIFIC STYLES (High Contrast Light Theme) --- */
+    /* Container for the entire dashboard section (light gray background, rounded corners) */
     .dashboard-block {
       background: #f3f4f6; /* light gray background color for the overall section */
       border-radius: 1rem;
       padding: 1.5rem;
       box-shadow: 0 4px 6px -1px rgba(0,0,0,.1), 0 2px 4px -2px rgba(0,0,0,.06);
-      margin-top: 1.5rem; /* Ensure space below the stat cards */
     }
 
+    /* KPI cards, Main Plot, and Selector List are all dark-themed elements */
     .kpi-card {
         @apply p-4 h-full flex flex-col justify-center bg-gray-900 text-white rounded-lg shadow-inner;
         min-height: 100px;
     }
+    /* CHART BACKGROUND FIX: Light Blue/Cyan Background */
     .chart-container {
         background-color: #f0f8ff; /* AliceBlue */
         @apply p-4 text-black rounded-xl; 
     }
+    /* CHART CONTENT WRAPPER - This inner div ensures the canvas maintains height */
     .chart-content-wrapper {
         height: 400px; 
     }
@@ -88,45 +48,52 @@
         @apply text-xl font-bold text-gray-800 mb-4 pt-4;
     }
     #municipioList {
+        /* Adjusted max-height to better utilize space in the narrower column */
         max-height: 480px; 
+        /* FIX: Forces scrollbar to be always visible */
         overflow-y: scroll; 
         padding-top: 4px; 
     }
+    /* Webkit Scrollbar Styling (Forces visibility) */
     #municipioList::-webkit-scrollbar {
         width: 8px;
     }
     #municipioList::-webkit-scrollbar-thumb {
-        background-color: #a7f3d0; 
+        background-color: #a7f3d0; /* Light green thumb */
         border-radius: 4px;
     }
     #municipioList::-webkit-scrollbar-track {
-        background: #f0fff0; 
+        background: #f0fff0; /* Honeydew background of the list */
     }
     .municipio-item {
+        /* FIX: Reduced text size for narrower column */
         @apply cursor-pointer p-1 rounded-lg text-xs transition-all text-black; 
     }
     .municipio-item:hover {
-        background-color: #d1fae5; 
+        background-color: #d1fae5; /* Lighter green on hover */
     }
     .selected-muni {
         @apply bg-blue-600 text-white font-semibold;
     }
+    /* SCATTER PLOT BACKGROUND FIX: Light Blue/Cyan Background */
     #scatterPlotContainer {
-        background-color: #f0f8ff; 
+        background-color: #f0f8ff; /* AliceBlue */
         @apply rounded-xl p-4;
     }
+    /* MUNICIPALITY SELECTOR BACKGROUND FIX: Light Green Background */
     #main-panel .p-4.bg-gray-800 {
-        background-color: #f0fff0; 
-        @apply rounded-xl text-black; 
+        background-color: #f0fff0; /* Honeydew */
+        @apply rounded-xl text-black; /* Default text color for the panel */
     }
     
+    /* Input and internal text within the light green selector */
     #main-panel .p-4.bg-gray-800 h2,
     #main-panel .p-4.bg-gray-800 input,
     #main-panel .p-4.bg-gray-800 .municipio-item {
         color: #000 !important;
     }
     #main-panel .p-4.bg-gray-800 input {
-        background-color: #e5f5e5; 
+        background-color: #e5f5e5; /* Slightly darker green input background */
         border-color: #10b981;
     }
     
@@ -134,7 +101,7 @@
         height: 450px; 
     }
     .loader {
-      border: 4px solid rgba(0, 0, 0, 0.3); 
+      border: 4px solid rgba(0, 0, 0, 0.3); /* Darker loader for light background */
       border-radius: 50%;
       border-top: 4px solid #3b82f6;
       width: 40px;
@@ -143,14 +110,13 @@
       animation: spin 2s linear infinite;
       margin: 0 auto;
     }
+    /* --- END DASHBOARD SPECIFIC STYLES --- */
     
-    /* Scroll Indicator Styles */
-    .scroll-indicator {
-        font-size: 14px;
-        text-align: center;
-        color: #3b82f6;
-        padding: 2px 0;
-    }
+    /* Standard project styles */
+    .mini { min-height: 260px; }
+    #metrics-menu { opacity: 0; visibility: hidden; transform: translateY(4px); pointer-events: none; transition: opacity .15s ease, transform .15s ease, visibility .15s ease; }
+    #metrics-dropdown-root:hover #metrics-menu, #metrics-dropdown-root.hovering #metrics-menu { opacity: 1; visibility: visible; transform: translateY(0); pointer-events: auto; }
+    #metrics-dropdown-root:hover #metrics-chevron, #metrics-dropdown-root.hovering #metrics-chevron { transform: rotate(180deg); }
   </style>
 </head>
 <body class="bg-gray-50 text-gray-900 font-sans">
@@ -257,11 +223,11 @@
         </div>
       </div>
     </section>
-    
-    <!-- CONSOLIDATED DASHBOARD CONTENT STARTS HERE (Copied from index.html, with path adjustments) -->
+  </main>
+<!-- CONSOLIDATED DASHBOARD CONTENT STARTS HERE (Wrapped in new light gray block) -->
     <section class="dashboard-block">
       
-        <!-- KPI SUMMARY SECTION (Uses dummy values here, actual values calculated in script) -->
+        <!-- KPI SUMMARY SECTION -->
         <div id="kpi-summary" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div class="kpi-card">
             <div class="text-xs font-semibold text-gray-400">Total Population (2024 Est.)</div>
@@ -282,12 +248,13 @@
         </div>
         
         <!-- MAIN INTERACTIVE PLOT & FILTER PANEL (Grouped into a white card for separation) -->
+        <!-- Adjusted grid to 12 columns: 10 for Scatter Plot, 2 for Selector -->
         <div id="main-panel" class="card grid grid-cols-1 lg:grid-cols-12 gap-4 mt-6 p-0">
             
             <!-- SCATTER PLOT (10/12 width) -->
             <div class="lg:col-span-10 p-4" id="scatterPlotContainer">
                 <h2 class="text-lg font-semibold mb-3 text-black">Socio-Economic Relationship by Municipality</h2>
-                <div id="chart-loader" class="text-center mt-20">
+                <div id="chart-loader" class="text-center mt-20 hidden">
                     <div class="loader"></div>
                     <div class="mt-4 text-black">Loading and merging data...</div>
                 </div>
@@ -336,9 +303,7 @@
                 <input type="text" id="muniSearch" placeholder="Search" 
                        class="mb-3 block w-full rounded-md border border-gray-400 bg-white py-1.5 px-3 text-base text-black placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500"/>
                 <div id="municipioList" class="space-y-1">
-                    <div class="scroll-indicator">▲</div>
                     <!-- List items loaded here -->
-                    <div class="scroll-indicator">▼</div>
                 </div>
             </div>
         </div>
@@ -371,7 +336,7 @@
 
   <script>
     // --- Configuration & Paths ---
-    // FIX: Corrected paths to point to the data directory (./data/) relative to the root metrics.html file.
+    // NOTE: Paths adjusted relative to index.html (removed '../' or used '.')
     const JSON_FILES = {
         POP:        './data/population/prm-est2010_2024.json',
         HOUSING:    './data/housing/municipios_acs_housing_2013_2023_wide.json',
@@ -422,6 +387,7 @@
         const merged = {};
 
         results.forEach(({ key, data }) => {
+            // FIX: Filter out rows that contain the long descriptive string which is not a municipality.
             const dataRows = data.filter(r => 
                 !r.metadata && 
                 !String(r.Municipio).includes("Annual and Cumulative")
@@ -438,6 +404,7 @@
                     const popLatest = Number(row['2024']);
                     
                     merged[muniName].Population_2024 = popLatest;
+                    // Note: popDensity is calculated in the population script. Assuming zero for aggregate here.
                     merged[muniName].Population_Density = Number(row.popDensity) || 0; 
                     merged[muniName].Population_PctChange = ((popLatest - popStart) / popStart) * 100;
                     
@@ -480,7 +447,7 @@
                     merged[muniName].Establishments_TimeSeries = YEARS.EST.map(y => Number(row[y]) || 0);
 
                 } else if (key === 'HEALTH') {
-                    merged[muniName].Health_2023 = Number(row['2023']); 
+                    merged[muniName].Health_2023 = Number(row['2023']); // % without coverage
                     
                     merged[muniName].Health_TimeSeries = YEARS.ACS.map(y => Number(row[y]) || 0);
                 }
@@ -910,21 +877,6 @@
                 drawTrendCharts(selectedMunicipio);
             });
         });
-        
-        // Scroll Indicator visibility check (simple text display)
-        const isScrollable = listEl.scrollHeight > listEl.clientHeight;
-        const upIndicator = listEl.previousElementSibling;
-        const downIndicator = listEl.nextElementSibling;
-        
-        // FIX: If the list is not scrollable, hide the indicators.
-        if (isScrollable) {
-            upIndicator.style.display = 'block';
-            downIndicator.style.display = 'block';
-        } else {
-            upIndicator.style.display = 'none';
-            downIndicator.style.display = 'none';
-        }
-
     }
 
     function handleScatterClick(event) {
@@ -934,12 +886,13 @@
             const firstPoint = points[0];
             const index = firstPoint.index;
             
-            // Get the data point object
             const dataPoint = scatterChart.data.datasets[0].data[index]; 
             
             if (dataPoint && dataPoint.name) {
                 selectedMunicipio = dataPoint.name;
-            } 
+            } else if (dataPoint.name === 'Puerto Rico') {
+                selectedMunicipio = 'Puerto Rico';
+            }
             
             updateMunicipioList();
             drawScatterPlot(); // Re-render to draw the highlight
@@ -1013,3 +966,5 @@
   </script>
 </body>
 </html>
+
+  
