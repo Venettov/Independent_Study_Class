@@ -43,6 +43,10 @@
         background-color: #f0f8ff; /* AliceBlue */
         @apply p-4 text-black rounded-xl; 
     }
+    /* CHART CONTENT WRAPPER - Increased height to accommodate the narrative text */
+    .chart-content-wrapper {
+        height: 480px; 
+    }
     .section-title {
         @apply text-xl font-bold text-gray-800 mb-4 pt-4;
     }
@@ -259,15 +263,19 @@
 
         <div id="trendCharts" class="card grid grid-cols-1 md:grid-cols-2 gap-4 col-span-full p-4">
             <!-- Population & Housing Trend -->
-            <div class="chart-container h-96"> 
+            <div class="chart-container"> 
                 <h3 class="text-base font-semibold mb-2 text-black">Population & Housing Trend</h3>
-                <canvas id="trendChart1"></canvas>
+                <div class="chart-content-wrapper">
+                    <canvas id="trendChart1"></canvas>
+                </div>
                 <p id="chart-narrative-1" class="text-xs mt-2 text-gray-700"></p>
             </div>
             <!-- Employment & Income Trend -->
-            <div class="chart-container h-96"> 
+            <div class="chart-container"> 
                 <h3 class="text-base font-semibold mb-2 text-black">Employment & Income Trend</h3>
-                <canvas id="trendChart2"></canvas>
+                <div class="chart-content-wrapper">
+                    <canvas id="trendChart2"></canvas>
+                </div>
                 <p id="chart-narrative-2" class="text-xs mt-2 text-gray-700"></p>
             </div>
         </div>
@@ -866,7 +874,7 @@
       root.addEventListener('mouseleave', removeHovering);
       if (menu) {
         menu.addEventListener('mouseenter', addHovering);
-        menu.addEventListener('mouseleave', removeHovering);
+        menu.addEventListener('mouseleave', removeDoing);
       }
     }
   </script>
