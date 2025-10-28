@@ -6,6 +6,10 @@
   <title>Puerto Rico — Metrics</title>
   <meta name="description" content="Graduate Independent Study — Population & Economic Dynamics in Puerto Rico: key metrics and sources." />
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- ADDED: Chart.js and Annotation plugin for the dashboard -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.2.1/dist/chartjs-plugin-annotation.min.js"></script>
+  
   <style>
     /* Cards + hero */
     .card {
@@ -58,6 +62,86 @@
     #metrics-dropdown-root:hover #metrics-chevron,
     #metrics-dropdown-root.hovering #metrics-chevron {
       transform: rotate(180deg);
+    }
+
+    /* --- DASHBOARD SPECIFIC STYLES (Copied from index.html) --- */
+    .dashboard-block {
+      background: #f3f4f6; /* light gray background color for the overall section */
+      border-radius: 1rem;
+      padding: 1.5rem;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,.1), 0 2px 4px -2px rgba(0,0,0,.06);
+      margin-top: 1.5rem; /* Ensure space below the stat cards */
+    }
+
+    .kpi-card {
+        @apply p-4 h-full flex flex-col justify-center bg-gray-900 text-white rounded-lg shadow-inner;
+        min-height: 100px;
+    }
+    .chart-container {
+        background-color: #f0f8ff; /* AliceBlue */
+        @apply p-4 text-black rounded-xl; 
+    }
+    .chart-content-wrapper {
+        height: 400px; 
+    }
+    .section-title {
+        @apply text-xl font-bold text-gray-800 mb-4 pt-4;
+    }
+    #municipioList {
+        max-height: 480px; 
+        overflow-y: scroll; 
+        padding-top: 4px; 
+    }
+    #municipioList::-webkit-scrollbar {
+        width: 8px;
+    }
+    #municipioList::-webkit-scrollbar-thumb {
+        background-color: #a7f3d0; 
+        border-radius: 4px;
+    }
+    #municipioList::-webkit-scrollbar-track {
+        background: #f0fff0; 
+    }
+    .municipio-item {
+        @apply cursor-pointer p-1 rounded-lg text-xs transition-all text-black; 
+    }
+    .municipio-item:hover {
+        background-color: #d1fae5; 
+    }
+    .selected-muni {
+        @apply bg-blue-600 text-white font-semibold;
+    }
+    #scatterPlotContainer {
+        background-color: #f0f8ff; 
+        @apply rounded-xl p-4;
+    }
+    #main-panel .p-4.bg-gray-800 {
+        background-color: #f0fff0; 
+        @apply rounded-xl text-black; 
+    }
+    
+    #main-panel .p-4.bg-gray-800 h2,
+    #main-panel .p-4.bg-gray-800 input,
+    #main-panel .p-4.bg-gray-800 .municipio-item {
+        color: #000 !important;
+    }
+    #main-panel .p-4.bg-gray-800 input {
+        background-color: #e5f5e5; 
+        border-color: #10b981;
+    }
+    
+    #scatter-canvas-wrapper {
+        height: 450px; 
+    }
+    .loader {
+      border: 4px solid rgba(0, 0, 0, 0.3); 
+      border-radius: 50%;
+      border-top: 4px solid #3b82f6;
+      width: 40px;
+      height: 40px;
+      -webkit-animation: spin 2s linear infinite;
+      animation: spin 2s linear infinite;
+      margin: 0 auto;
     }
   </style>
 </head>
@@ -165,42 +249,743 @@
         </div>
       </div>
     </section>
+    
+    <!-- CONSOLIDATED DASHBOARD CONTENT STARTS HERE (Copied from index.html, with path adjustments) -->
+    <section class="dashboard-block">
+      
+        <!-- KPI SUMMARY SECTION (Uses dummy values here, actual values calculated in script) -->
+        <div id="kpi-summary" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="kpi-card">
+            <div class="text-xs font-semibold text-gray-400">Total Population (2024 Est.)</div>
+            <div id="kpi-pop" class="text-3xl font-extrabold mt-1">—</div>
+          </div>
+          <div class="kpi-card">
+            <div class="text-xs font-semibold text-gray-400">Median Income (2023 Real $)</div>
+            <div id="kpi-income" class="text-3xl font-extrabold mt-1">—</div>
+          </div>
+          <div class="kpi-card">
+            <div class="text-xs font-semibold text-gray-400">Unemployment Rate (2023)</div>
+            <div id="kpi-unemp" class="text-3xl font-extrabold mt-1">—</div>
+          </div>
+          <div class="kpi-card">
+            <div class="text-xs font-semibold text-gray-400">Avg. Ed. Attainment (2023 %)</div>
+            <div id="kpi-edu" class="text-3xl font-extrabold mt-1">—</div>
+          </div>
+        </div>
+        
+        <!-- MAIN INTERACTIVE PLOT & FILTER PANEL (Grouped into a white card for separation) -->
+        <div id="main-panel" class="card grid grid-cols-1 lg:grid-cols-12 gap-4 mt-6 p-0">
+            
+            <!-- SCATTER PLOT (10/12 width) -->
+            <div class="lg:col-span-10 p-4" id="scatterPlotContainer">
+                <h2 class="text-lg font-semibold mb-3 text-black">Socio-Economic Relationship by Municipality</h2>
+                <div id="chart-loader" class="text-center mt-20">
+                    <div class="loader"></div>
+                    <div class="mt-4 text-black">Loading and merging data...</div>
+                </div>
+                <!-- Wrapper added with fixed height to ensure Chart.js canvas renders correctly -->
+                <div id="scatter-canvas-wrapper" class="hidden"> 
+                    <canvas id="scatterPlot"></canvas>
+                </div>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t border-gray-300 mt-2">
+                    <div>
+                        <label class="block text-xs font-medium text-black">X-Axis (Change/Density)</label>
+                        <select id="xAxisSelect" class="mt-1 block w-full rounded-md border border-gray-400 bg-white py-1.5 pl-3 pr-10 text-base focus:border-blue-500 focus:ring-blue-500 text-black">
+                            <option value="Population_PctChange">Pop. Chg (2010-24 %)</option>
+                            <option value="Housing_PctChange">Housing Chg (2013-23 %)</option>
+                            <option value="Establishments_PctChange">Est. Chg (2012-23 %)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-black">Y-Axis (Income/Attainment/Rates)</label>
+                        <select id="yAxisSelect" class="mt-1 block w-full rounded-md border border-gray-400 bg-white py-1.5 pl-3 pr-10 text-base focus:border-blue-500 focus:ring-blue-500 text-black">
+                            <option value="Income_Real2023">Median Income (Real $)</option>
+                            <option value="Education_2023">Ed. Attainment (%)</option>
+                            <option value="Employment_Unemp2023">Unemployment Rate (%)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-black">Point Color (Third Metric)</label>
+                        <select id="colorSelect" class="mt-1 block w-full rounded-md border border-gray-400 bg-white py-1.5 pl-3 pr-10 text-base focus:border-blue-500 focus:ring-blue-500 text-black">
+                            <option value="Employment_Unemp2023">Unemployment Rate (%)</option>
+                            <option value="Health_2023">Health Gap (%)</option>
+                            <option value="Population_Density">Pop. Density</option>
+                        </select>
+                    </div>
+                </div>
+                <!-- Scatter Plot Explanation -->
+                <p id="scatter-narrative" class="text-xs mt-4 text-gray-700">
+                    This scatter plot compares two selected municipal metrics (X and Y axis) against each other. 
+                    Each dot represents one municipality in Puerto Rico. The <strong>color of the dot</strong> represents the value of the third selected metric. 
+                    Clicking on a dot will select that municipality, highlight it in yellow, and update the detailed trend charts below.
+                </p>
+            </div>
+            
+            <!-- MUNICIPALITY SELECTOR (2/12 width) -->
+            <div class="lg:col-span-2 p-4 rounded-xl" style="background-color: #f0fff0;">
+                <h2 class="text-lg font-semibold mb-3 text-black">Municipality Selector</h2>
+                <input type="text" id="muniSearch" placeholder="Search" 
+                       class="mb-3 block w-full rounded-md border border-gray-400 bg-white py-1.5 px-3 text-base text-black placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500"/>
+                <div id="municipioList" class="space-y-1">
+                    <!-- List items loaded here -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- DETAILED TREND CHARTS SECTION (Grouped into a separate white card) -->
+        <div class="section-title col-span-full">Selected Municipality Trends: <span id="trendMuniName" class="text-blue-400">Puerto Rico</span></div>
+
+        <div id="trendCharts" class="card grid grid-cols-1 md:grid-cols-2 gap-4 col-span-full p-4">
+            <!-- Population & Housing Trend -->
+            <div class="chart-container"> 
+                <h3 class="text-base font-semibold mb-2 text-black">Population & Housing Trend</h3>
+                <div class="chart-content-wrapper">
+                    <canvas id="trendChart1"></canvas>
+                </div>
+                <p id="chart-narrative-1" class="text-xs mt-2 text-gray-700"></p>
+            </div>
+            <!-- Employment & Income Trend -->
+            <div class="chart-container"> 
+                <h3 class="text-base font-semibold mb-2 text-black">Employment & Income Trend</h3>
+                <div class="chart-content-wrapper">
+                    <canvas id="trendChart2"></canvas>
+                </div>
+                <p id="chart-narrative-2" class="text-xs mt-2 text-gray-700"></p>
+            </div>
+        </div>
+    </section>
+    <!-- CONSOLIDATED DASHBOARD CONTENT ENDS HERE -->
+
   </main>
 
   <script>
-    // Highlights current nav link
-    document.querySelectorAll('.nav-link[href]').forEach(a => {
-      const href = a.getAttribute('href');
-      if (!href) return;
-      if (location.pathname.endsWith(href)) {
-        a.classList.add('text-blue-600','font-semibold','border-blue-600');
-        a.setAttribute('aria-current','page');
-      }
-    });
+    // --- Configuration & Paths ---
+    // NOTE: Paths are relative to metrics.html (now in the root, so need ../data)
+    const JSON_FILES = {
+        POP:        '../data/population/prm-est2010_2024.json',
+        HOUSING:    '../data/housing/municipios_acs_housing_2013_2023_wide.json',
+        EMP:        '../data/employment/municipios_acs_s2301_2010_2023_wide.json',
+        EST:        '../data/employment_establishments/municipios_cbp_establishments_2010_2023_wide.json',
+        INCOME:     '../data/household_income/municipios_acs_s1901_median_income_2010_2023_wide.json',
+        EDU:        '../data/education/municipios_acs_education_2013_2023_wide.json',
+        HEALTH:     '../data/health/municipios_acs_health_2013_2023_wide.json',
+    };
 
-    // Safer hover persistence for Metrics dropdown
-    (function() {
+    const YEARS = {
+        POP: [2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024],
+        ACS: [2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023],
+        EST: [2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023],
+    };
+
+    // --- Global State ---
+    let masterData = [];
+    let scatterChart = null;
+    let trendChart1 = null;
+    let trendChart2 = null;
+    let selectedMunicipio = 'Puerto Rico'; 
+
+    // --- Formatters ---
+    const fmt = new Intl.NumberFormat('en-US');
+    const fmtDec = new Intl.NumberFormat('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+    const fmtCurr = (v) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(v);
+    const fmtPct = (v) => `${(v||0).toFixed(1)}%`;
+    const fmtInt = (v) => fmt.format(Math.round(v));
+    const cleanName = (s) => String(s || '').replace(/\s*Municipio$/g, '').trim();
+
+
+    // --- Data Merging Logic ---
+
+    // Fetches all JSON files
+    async function fetchAllData() {
+        document.getElementById('chart-loader').classList.remove('hidden');
+        const promises = Object.entries(JSON_FILES).map(([key, url]) => 
+            fetch(url).then(res => res.json()).then(data => ({ key, data }))
+        );
+        const results = await Promise.all(promises);
+        document.getElementById('chart-loader').classList.add('hidden');
+        return results;
+    }
+
+    // Merges all data files into a single array of objects, one per municipio
+    function processData(results) {
+        const merged = {};
+
+        results.forEach(({ key, data }) => {
+            const dataRows = data.filter(r => 
+                !r.metadata && 
+                !String(r.Municipio).includes("Annual and Cumulative")
+            );
+            
+            dataRows.forEach(row => {
+                const muniName = cleanName(row.Municipio);
+                if (!merged[muniName]) {
+                    merged[muniName] = { Municipio: muniName };
+                }
+                
+                if (key === 'POP') {
+                    const popStart = Number(row['2010']);
+                    const popLatest = Number(row['2024']);
+                    
+                    merged[muniName].Population_2024 = popLatest;
+                    merged[muniName].Population_Density = Number(row.popDensity) || 0; 
+                    merged[muniName].Population_PctChange = ((popLatest - popStart) / popStart) * 100;
+                    
+                    merged[muniName].Population_TimeSeries = YEARS.POP.map(y => Number(row[y]) || 0);
+
+                } else if (key === 'HOUSING') {
+                    const housingStart = Number(row['2013']);
+                    const housingLatest = Number(row['2023']);
+                    
+                    merged[muniName].Housing_2023 = housingLatest;
+                    merged[muniName].Housing_PctChange = Number(row.Cum_Pct_Change_2013_2023);
+
+                    merged[muniName].Housing_TimeSeries = YEARS.ACS.map(y => Number(row[y]) || 0);
+                    
+                } else if (key === 'EMP') {
+                    merged[muniName].Employment_EmpPop2023 = Number(row.EmpPop_2023);
+                    merged[muniName].Employment_Unemp2023 = Number(row.Unemp_2023);
+                    merged[muniName].Employment_Labor2023 = Number(row.LaborForce_2023);
+                    
+                    merged[muniName].Employment_TimeSeries = YEARS.ACS.map(y => Number(row[`Unemp_${y}`]) || 0);
+
+                } else if (key === 'INCOME') {
+                    merged[muniName].Income_Nominal2023 = Number(row['2023']);
+                    merged[muniName].Income_Real2023 = Number(row.RealIncome_2023);
+                    
+                    merged[muniName].Income_TimeSeries = YEARS.ACS.map(y => Number(row[`RealIncome_${y}`]) || 0);
+                    
+                } else if (key === 'EDU') {
+                    merged[muniName].Education_2023 = Number(row['2023']);
+                    
+                    merged[muniName].Education_TimeSeries = YEARS.ACS.map(y => Number(row[y]) || 0);
+
+                } else if (key === 'EST') {
+                    const estStart = Number(row['2012']);
+                    const estLatest = Number(row['2023']);
+
+                    merged[muniName].Establishments_2023 = estLatest;
+                    merged[muniName].Establishments_PctChange = Number(row.Cum_Pct_Change_2012_2023);
+                    
+                    merged[muniName].Establishments_TimeSeries = YEARS.EST.map(y => Number(row[y]) || 0);
+
+                } else if (key === 'HEALTH') {
+                    merged[muniName].Health_2023 = Number(row['2023']); 
+                    
+                    merged[muniName].Health_TimeSeries = YEARS.ACS.map(y => Number(row[y]) || 0);
+                }
+            });
+        });
+        
+        // FIX for Education KPI: Calculate the true average percentage attainment for Puerto Rico
+        const prData = merged['Puerto Rico'];
+        if (prData) {
+            const allEduValues = masterData.filter(m => m.Municipio !== 'Puerto Rico')
+                                            .map(m => m.Education_2023)
+                                            .filter(v => Number.isFinite(v));
+            if (allEduValues.length > 0) {
+                const average = allEduValues.reduce((a, b) => a + b, 0) / allEduValues.length;
+                prData.Education_2023 = average; // Overwrite the incorrect value from the JSON with the true average
+            }
+        }
+
+
+        // Filter out any municipios that failed to load essential data
+        return Object.values(merged).filter(m => m.Population_2024 != null);
+    }
+
+    // --- Charting Logic ---
+
+    function getAxisLabel(key) {
+        const labels = {
+            'Population_PctChange': 'Population Change (2010-2024, %)',
+            'Housing_PctChange': 'Housing Unit Change (2013-2023, %)',
+            'Establishments_PctChange': 'Establishment Change (2012-2023, %)',
+            'Income_Real2023': 'Median Income (2023 Real $)',
+            'Education_2023': 'Education Attainment (2023, %)',
+            'Employment_Unemp2023': 'Unemployment Rate (2023, %)',
+            'Health_2023': 'Health Gap (2023, % Uninsured)',
+            'Population_Density': 'Population Density (2024 Est.)',
+        };
+        return labels[key] || key;
+    }
+
+    function getAxisFormat(key) {
+        if (key.includes('Income')) return (v) => fmtCurr(v);
+        if (key.includes('Change') || key.includes('Rate') || key.includes('Education') || key.includes('Health') || key.includes('EmpPop')) return (v) => fmtPct(v);
+        return (v) => fmtInt(v);
+    }
+    
+    function getMuniData(municipioName) {
+        return masterData.find(m => cleanName(m.Municipio) === cleanName(municipioName));
+    }
+
+
+    function drawScatterPlot() {
+        const ctx = document.getElementById('scatterPlot').getContext('2d');
+        if (scatterChart) scatterChart.destroy();
+        
+        // Show the chart container now that the data is ready
+        document.getElementById('scatter-canvas-wrapper').classList.remove('hidden');
+
+        const xKey = document.getElementById('xAxisSelect').value;
+        const yKey = document.getElementById('yAxisSelect').value;
+        const colorKey = document.getElementById('colorSelect').value;
+        
+        const muniData = masterData.filter(m => m.Municipio !== 'Puerto Rico');
+
+        // Determine min/max for color scale (linear interpolation for hue/saturation)
+        const colorValues = muniData.map(m => m[colorKey]).filter(v => v !== undefined && Number.isFinite(v));
+        const colorMin = Math.min(...colorValues);
+        const colorMax = Math.max(...colorValues);
+
+        const getColor = (value) => {
+            if (value === undefined || !Number.isFinite(value)) return 'rgba(156, 163, 175, 0.5)';
+            const normalized = (value - colorMin) / (colorMax - colorMin);
+            // Red (high) to Green (low) for Unemployment/Health, or vice-versa for Income/Education
+            const isLowerBetter = (colorKey.includes('Unemp') || colorKey.includes('Health'));
+            
+            const hue = isLowerBetter ? (1 - normalized) * 120 : normalized * 120; // 0 (Red) to 120 (Green)
+            return `hsl(${hue}, 80%, 50%)`;
+        };
+        
+        const dataPoints = muniData.map(m => ({
+            x: m[xKey],
+            y: m[yKey],
+            colorValue: m[colorKey],
+            r: 5,
+            name: m.Municipio
+        })).filter(p => p.x !== undefined && p.y !== undefined && Number.isFinite(p.x) && Number.isFinite(p.y));
+        
+        // Highlight the selected municipality
+        const selectedMuni = getMuniData(selectedMunicipio);
+        if (selectedMuni && selectedMunicipio !== 'Puerto Rico') {
+             dataPoints.push({
+                x: selectedMuni[xKey],
+                y: selectedMuni[yKey],
+                colorValue: selectedMuni[colorKey],
+                r: 12, // Increased size for visibility
+                name: selectedMuni.Municipio,
+                borderColor: '#facc15', // Yellow highlight
+                borderWidth: 4, // Increased border width
+            });
+        }
+        
+        scatterChart = new Chart(ctx, {
+            type: 'scatter',
+            data: {
+                datasets: [{
+                    label: 'Municipalities',
+                    data: dataPoints,
+                    backgroundColor: dataPoints.map(p => getColor(p.colorValue)),
+                    pointBorderColor: dataPoints.map(p => p.borderColor || 'transparent'),
+                    pointBorderWidth: dataPoints.map(p => p.borderWidth || 1),
+                }]
+            },
+            options: {
+                maintainAspectRatio: false,
+                responsive: true,
+                onClick: handleScatterClick,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: (context) => {
+                                const p = context.raw;
+                                const xFormatted = getAxisFormat(xKey)(p.x);
+                                const yFormatted = getAxisFormat(yKey)(p.y);
+                                const colorFormatted = getAxisFormat(colorKey)(p.colorValue);
+
+                                return [
+                                    p.name,
+                                    `${getAxisLabel(xKey).split('(')[0].trim()}: ${xFormatted}`,
+                                    `${getAxisLabel(yKey).split('(')[0].trim()}: ${yFormatted}`,
+                                    `${getAxisLabel(colorKey).split('(')[0].trim()}: ${colorFormatted}`,
+                                ];
+                            }
+                        }
+                    },
+                    annotation: {
+                        annotations: {
+                            // Dynamically add text annotation for the selected municipality
+                            selectedMuniLabel: selectedMunicipio !== 'Puerto Rico' ? {
+                                type: 'label',
+                                xValue: selectedMuni[xKey],
+                                yValue: selectedMuni[yKey],
+                                content: selectedMuni.Municipio,
+                                font: {
+                                    size: 14,
+                                    weight: 'bold'
+                                },
+                                backgroundColor: 'rgba(255, 255, 255, 0.7)',
+                                color: '#f59e0b', // Amber text color
+                                xAdjust: 15,
+                                yAdjust: -15,
+                                position: 'right',
+                                display: true
+                            } : { display: false }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        title: { display: true, text: getAxisLabel(xKey), color: '#000' }, /* Changed to Black */
+                        grid: { color: '#bbb' }, /* Changed grid color */
+                        ticks: { color: '#000', callback: v => getAxisFormat(xKey)(v) } /* Changed to Black */
+                    },
+                    y: {
+                        title: { display: true, text: getAxisLabel(yKey), color: '#000' }, /* Changed to Black */
+                        grid: { color: '#bbb' }, /* Changed grid color */
+                        ticks: { color: '#000', callback: v => getAxisFormat(yKey)(v) } /* Changed to Black */
+                    }
+                }
+            }
+        });
+    }
+
+    // --- Chart Narrative Logic ---
+
+    function generateChartNarrative(muniData) {
+        if (muniData.Municipio === 'Puerto Rico') {
+            return {
+                chart1: "The <strong>Population & Housing Trend</strong> for Puerto Rico shows a <strong>steady population decline</strong> since 2010 (blue line), while the total number of <strong>Housing Units has increased</strong> (green line). This divergence indicates a substantial rise in vacancy rates and housing stock oversupply across the island.",
+                chart2: "The <strong>Employment & Income Trend</strong> shows the island-wide <strong>Real Median Income</strong> (2023$, amber line) fluctuating around the $20,000–$25,000 range, while the <strong>Unemployment Rate</strong> (red line) has shown a long-term decline from the early 2010s peak, reflecting an improving job market but stagnant real earning power."
+            };
+        }
+
+        // --- Population & Housing Narrative (Chart 1) ---
+        const pop2010 = muniData.Population_TimeSeries[YEARS.POP.indexOf(2010)];
+        const pop2024 = muniData.Population_2024;
+        const popChange = muniData.Population_PctChange;
+
+        const housing2013 = muniData.Housing_TimeSeries[0];
+        const housing2023 = muniData.Housing_2023;
+        const housingChange = muniData.Housing_PctChange;
+        
+        let popNarrative, housingNarrative;
+
+        // Population Trend
+        if (popChange < -10) {
+            popNarrative = `The <strong>population</strong> of ${muniData.Municipio} has seen severe decline, dropping by <strong>${fmtPct(Math.abs(popChange))}</strong> since 2010.`;
+        } else if (popChange < 0) {
+            popNarrative = `The <strong>population</strong> has experienced a notable decrease, falling by <strong>${fmtPct(Math.abs(popChange))}</strong> since 2010.`;
+        } else {
+            popNarrative = `The <strong>population</strong> has managed to stabilize or slightly grow, rising by <strong>${fmtPct(popChange)}</strong> since 2010.`;
+        }
+
+        // Housing Trend
+        if (housingChange > 5) {
+             housingNarrative = `Meanwhile, <strong>Housing Units</strong> have grown significantly, increasing by <strong>${fmtPct(housingChange)}</strong> since 2013, indicating new construction despite demographic contraction.`;
+        } else if (housingChange > 0) {
+            housingNarrative = `<strong>Housing Units</strong> have seen moderate growth, up <strong>${fmtPct(housingChange)}</strong> since 2013, contributing to increased vacancy.`;
+        } else {
+            housingNarrative = `<strong>Housing Units</strong> have declined by <strong>${fmtPct(Math.abs(housingChange))}</strong> since 2013, suggesting housing stock is contracting in line with population loss.`;
+        }
+
+        // --- Employment & Income Narrative (Chart 2) ---
+        const incomeLatest = muniData.Income_Real2023;
+        const unempLatest = muniData.Employment_Unemp2023;
+        
+        const incomeTimeSeries = muniData.Income_TimeSeries.slice(0);
+        const incomeMax = Math.max(...incomeTimeSeries);
+        const incomePeakYear = YEARS.ACS[incomeTimeSeries.indexOf(incomeMax)];
+        
+        let incomeNarrative, unempNarrative;
+        
+        // Income Trend
+        if (incomeLatest > 25000) {
+            incomeNarrative = `<strong>Real Median Income</strong> (amber line) is relatively strong at <strong>${fmtCurr(incomeLatest)}</strong>, though it peaked around ${incomePeakYear}.`;
+        } else if (incomeLatest > 20000) {
+            incomeNarrative = `<strong>Real Median Income</strong> sits at <strong>${fmtCurr(incomeLatest)}</strong>, reflecting moderate real earning power.`;
+        } else {
+            incomeNarrative = `<strong>Real Median Income</strong> is low at <strong>${fmtCurr(incomeLatest)}</strong>, indicating significant economic hardship.`;
+        }
+        
+        // Unemployment Trend
+        if (unempLatest < 8) {
+            unempNarrative = `The <strong>Unemployment Rate</strong> (red line) is low at <strong>${fmtPct(unempLatest)}</strong>, suggesting a tighter local labor market.`;
+        } else if (unempLatest < 12) {
+            unempNarrative = `The <strong>Unemployment Rate</strong> is moderate at <strong>${fmtPct(unempLatest)}</strong>.`;
+        } else {
+            unempNarrative = `The <strong>Unemployment Rate</strong> remains high at <strong>${fmtPct(unempLatest)}</strong>, indicating persistent employment challenges.`;
+        }
+
+        return {
+            chart1: `${popNarrative} ${housingNarrative}`,
+            chart2: `${incomeNarrative} ${unempNarrative}`
+        };
+    }
+    
+    function drawTrendCharts(muniName) {
+        const muniData = getMuniData(muniName);
+        if (!muniData) return;
+
+        const ctx1 = document.getElementById('trendChart1').getContext('2d');
+        const ctx2 = document.getElementById('trendChart2').getContext('2d');
+        
+        const narrative = generateChartNarrative(muniData);
+
+        // ------------------ Chart 1: Population & Housing Trends ------------------
+        if (trendChart1) trendChart1.destroy();
+        trendChart1 = new Chart(ctx1, {
+            type: 'line',
+            data: {
+                labels: YEARS.POP,
+                datasets: [
+                    {
+                        label: 'Population',
+                        data: muniData.Population_TimeSeries,
+                        yAxisID: 'yPop',
+                        borderColor: '#3b82f6', // Blue
+                        backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                        fill: false, tension: 0.3
+                    },
+                    {
+                        label: 'Housing Units',
+                        data: muniData.Housing_TimeSeries,
+                        yAxisID: 'yHousing',
+                        borderColor: '#10b981', // Green
+                        backgroundColor: 'rgba(16, 185, 129, 0.2)',
+                        fill: false, tension: 0.3,
+                        // Skip points before 2013 as Housing data starts then
+                        skip: (ctx) => YEARS.POP[ctx.p.parsed.x] < YEARS.ACS[0]
+                    }
+                ]
+            },
+            options: {
+                maintainAspectRatio: false,
+                layout: {
+                    padding: {
+                        bottom: 20 // FIX: Add bottom padding for labels
+                    }
+                },
+                plugins: { legend: { labels: { color: '#000' } } }, /* Changed to Black */
+                scales: {
+                    x: { 
+                        ticks: { 
+                            color: '#000', 
+                            maxRotation: 0,
+                            minRotation: 0,
+                            font: { size: 8 } /* Decreased font size */
+                        }, 
+                        grid: { color: '#bbb' } 
+                    }, /* Changed to Black / Light Grid */
+                    yPop: {
+                        type: 'linear', position: 'left', id: 'yPop',
+                        title: { display: true, text: 'Population (Count)', color: '#3b82f6' },
+                        ticks: { color: '#3b82f6', callback: v => fmtInt(v) },
+                        grid: { color: '#bbb' } /* Changed grid color */
+                    },
+                    yHousing: {
+                        type: 'linear', position: 'right', id: 'yHousing',
+                        title: { display: true, text: 'Housing Units (Count)', color: '#10b981' },
+                        ticks: { color: '#10b981', callback: v => fmtInt(v) },
+                        grid: { drawOnChartArea: false }
+                    }
+                }
+            }
+        });
+
+        // ------------------ Chart 2: Employment & Income Trends ------------------
+        if (trendChart2) trendChart2.destroy();
+        trendChart2 = new Chart(ctx2, {
+            type: 'line',
+            data: {
+                labels: YEARS.ACS, // Use ACS years since both start at 2013
+                datasets: [
+                    {
+                        label: 'Real Income (2023 $)',
+                        data: muniData.Income_TimeSeries,
+                        yAxisID: 'yIncome',
+                        borderColor: '#f59e0b', // Yellow/Amber
+                        backgroundColor: 'rgba(245, 158, 11, 0.2)',
+                        fill: false, tension: 0.3
+                    },
+                    {
+                        label: 'Unemployment Rate (%)',
+                        data: muniData.Employment_TimeSeries,
+                        yAxisID: 'yUnemp',
+                        borderColor: '#dc2626', // Red
+                        backgroundColor: 'rgba(220, 38, 38, 0.2)',
+                        fill: false, tension: 0.3
+                    }
+                ]
+            },
+            options: {
+                maintainAspectRatio: false,
+                layout: {
+                    padding: {
+                        bottom: 20 // FIX: Add bottom padding for labels
+                    }
+                },
+                plugins: { legend: { labels: { color: '#000' } } }, /* Changed to Black */
+                scales: {
+                    x: { 
+                        ticks: { 
+                            color: '#000', 
+                            maxRotation: 0, 
+                            minRotation: 0,
+                            font: { size: 8 } /* Decreased font size */
+                        }, 
+                        grid: { color: '#bbb' }, 
+                        labels: YEARS.ACS 
+                    }, /* Changed to Black / Light Grid */
+                    yIncome: {
+                        type: 'linear', position: 'left', id: 'yIncome',
+                        title: { display: true, text: 'Real Median Income ($)', color: '#f59e0b' },
+                        ticks: { color: '#f59e0b', callback: v => fmtCurr(v) },
+                        grid: { color: '#bbb' } /* Changed grid color */
+                    },
+                    yUnemp: {
+                        type: 'linear', position: 'right', id: 'yUnemp',
+                        title: { display: true, text: 'Unemployment Rate (%)', color: '#dc2626' },
+                        ticks: { color: '#dc2626', callback: v => fmtPct(v) },
+                        grid: { drawOnChartArea: false }
+                    }
+                }
+            }
+        });
+        
+        document.getElementById('trendMuniName').textContent = muniName;
+        
+        // Update Narrative Text
+        document.getElementById('chart-narrative-1').innerHTML = narrative.chart1;
+        document.getElementById('chart-narrative-2').innerHTML = narrative.chart2;
+    }
+
+    // --- Interaction Handlers ---
+
+    function updateKPIs() {
+        const prData = getMuniData('Puerto Rico');
+        if (!prData) return;
+
+        document.getElementById('kpi-pop').textContent = fmtInt(prData.Population_2024);
+        document.getElementById('kpi-income').textContent = fmtCurr(prData.Income_Real2023);
+        document.getElementById('kpi-unemp').textContent = fmtPct(prData.Employment_Unemp2023);
+        
+        // FIX: Education KPI should use the correct average percentage (~30.9%), not the raw count.
+        document.getElementById('kpi-edu').textContent = fmtPct(prData.Education_2023); 
+    }
+    
+    function updateMunicipioList() {
+        const listEl = document.getElementById('municipioList');
+        const searchInput = document.getElementById('muniSearch');
+        const searchTerm = searchInput.value.toLowerCase();
+        
+        listEl.innerHTML = '';
+        
+        // Add Puerto Rico first
+        let prItem = document.createElement('div');
+        prItem.className = `municipio-item ${selectedMunicipio === 'Puerto Rico' ? 'selected-muni' : ''}`;
+        prItem.textContent = 'Puerto Rico (Islandwide)';
+        prItem.dataset.muni = 'Puerto Rico';
+        listEl.appendChild(prItem);
+        
+        masterData
+            .filter(m => m.Municipio !== 'Puerto Rico' && m.Municipio.toLowerCase().includes(searchTerm))
+            .sort((a, b) => a.Municipio.localeCompare(b.Municipio))
+            .forEach(m => {
+                let item = document.createElement('div');
+                item.className = `municipio-item ${selectedMunicipio === m.Municipio ? 'selected-muni' : ''}`;
+                item.textContent = m.Municipio;
+                item.dataset.muni = m.Municipio;
+                listEl.appendChild(item);
+            });
+            
+        listEl.querySelectorAll('.municipio-item').forEach(item => {
+            item.addEventListener('click', () => {
+                selectedMunicipio = item.dataset.muni;
+                updateMunicipioList(); // Re-render to highlight selection
+                drawScatterPlot();
+                drawTrendCharts(selectedMunicipio);
+            });
+        });
+    }
+
+    function handleScatterClick(event) {
+        const points = scatterChart.getElementsAtEventForMode(event, 'nearest', { intersect: true }, true);
+        
+        if (points.length) {
+            const firstPoint = points[0];
+            const index = firstPoint.index;
+            
+            const dataPoint = scatterChart.data.datasets[0].data[index]; 
+            
+            if (dataPoint && dataPoint.name) {
+                selectedMunicipio = dataPoint.name;
+            } else if (dataPoint.name === 'Puerto Rico') {
+                selectedMunicipio = 'Puerto Rico';
+            }
+            
+            updateMunicipioList();
+            drawScatterPlot(); // Re-render to draw the highlight
+            drawTrendCharts(selectedMunicipio);
+        }
+    }
+
+
+    // --- Initialization ---
+
+    async function init() {
+        document.getElementById('muniSearch').addEventListener('input', updateMunicipioList);
+        
+        try {
+            // Show loader before fetch
+            document.getElementById('chart-loader').classList.remove('hidden');
+            document.getElementById('scatter-canvas-wrapper').classList.add('hidden');
+            
+            const rawResults = await fetchAllData();
+            masterData = processData(rawResults);
+
+            if (masterData.length === 0) {
+                console.error("No valid data could be merged.");
+                document.getElementById('chart-loader').innerHTML = '<div class="text-red-400">Error loading data. No valid data found.</div>';
+                return;
+            }
+            
+            // Hide loader and show chart container
+            document.getElementById('chart-loader').classList.add('hidden');
+            document.getElementById('scatter-canvas-wrapper').classList.remove('hidden');
+
+            // Initial render
+            updateKPIs();
+            updateMunicipioList();
+            drawScatterPlot();
+            drawTrendCharts(selectedMunicipio);
+
+            // Wire up axis selection handlers
+            document.getElementById('xAxisSelect').addEventListener('change', drawScatterPlot);
+            document.getElementById('yAxisSelect').addEventListener('change', drawScatterPlot);
+            document.getElementById('colorSelect').addEventListener('change', drawScatterPlot);
+            
+        } catch (error) {
+            console.error("Failed to initialize dashboard:", error);
+            document.getElementById('chart-loader').innerHTML = '<div class="text-red-400">Error loading data. Check console for details.</div>';
+        }
+    }
+
+    // Call wireDropdown immediately for navigation functionality
+    document.addEventListener('DOMContentLoaded', wireDropdown);
+    // Call init after DOM is ready
+    init();
+
+    // Dropdown functionality (copied from other files)
+    function wireDropdown() {
       const root = document.getElementById('metrics-dropdown-root');
+      if (!root) return;
       let hoverTimeout;
+      const menu = document.getElementById('metrics-menu');
 
-      function addHovering() {
-        clearTimeout(hoverTimeout);
-        root.classList.add('hovering');
-      }
-      function removeHovering() {
-        hoverTimeout = setTimeout(() => {
-          root.classList.remove('hovering');
-        }, 300); // grace period (ms)
-      }
+      function addHovering(){ clearTimeout(hoverTimeout); root.classList.add('hovering'); }
+      function removeHovering(){ hoverTimeout = setTimeout(()=>root.classList.remove('hovering'), 300); }
 
       root.addEventListener('mouseenter', addHovering);
       root.addEventListener('mouseleave', removeHovering);
-
-      // Also keep menu "alive" when moving inside the menu box
-      const menu = document.getElementById('metrics-menu');
-      menu.addEventListener('mouseenter', addHovering);
-      menu.addEventListener('mouseleave', removeHovering);
-    })();
+      if (menu) {
+        menu.addEventListener('mouseenter', addHovering);
+        menu.addEventListener('mouseleave', removeDoing);
+      }
+    }
   </script>
 </body>
 </html>
