@@ -57,6 +57,17 @@
         overflow-y: scroll; 
         padding-top: 4px; 
     }
+    /* Webkit Scrollbar Styling (Forces visibility) */
+    #municipioList::-webkit-scrollbar {
+        width: 8px;
+    }
+    #municipioList::-webkit-scrollbar-thumb {
+        background-color: #a7f3d0; /* Light green thumb */
+        border-radius: 4px;
+    }
+    #municipioList::-webkit-scrollbar-track {
+        background: #f0fff0; /* Honeydew background of the list */
+    }
     .municipio-item {
         /* FIX: Reduced text size for narrower column */
         @apply cursor-pointer p-1 rounded-lg text-xs transition-all text-black; 
