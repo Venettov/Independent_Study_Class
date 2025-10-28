@@ -143,6 +143,14 @@
       animation: spin 2s linear infinite;
       margin: 0 auto;
     }
+    
+    /* Scroll Indicator Styles */
+    .scroll-indicator {
+        font-size: 14px;
+        text-align: center;
+        color: #3b82f6;
+        padding: 2px 0;
+    }
   </style>
 </head>
 <body class="bg-gray-50 text-gray-900 font-sans">
@@ -328,7 +336,9 @@
                 <input type="text" id="muniSearch" placeholder="Search" 
                        class="mb-3 block w-full rounded-md border border-gray-400 bg-white py-1.5 px-3 text-base text-black placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500"/>
                 <div id="municipioList" class="space-y-1">
+                    <div class="scroll-indicator">▲</div>
                     <!-- List items loaded here -->
+                    <div class="scroll-indicator">▼</div>
                 </div>
             </div>
         </div>
@@ -361,15 +371,15 @@
 
   <script>
     // --- Configuration & Paths ---
-    // NOTE: Paths are relative to metrics.html (now in the root, so need ../data)
+    // FIX: Changed '../data/' to './data/' for metrics.html being in the root.
     const JSON_FILES = {
-        POP:        '../data/population/prm-est2010_2024.json',
-        HOUSING:    '../data/housing/municipios_acs_housing_2013_2023_wide.json',
-        EMP:        '../data/employment/municipios_acs_s2301_2010_2023_wide.json',
-        EST:        '../data/employment_establishments/municipios_cbp_establishments_2010_2023_wide.json',
-        INCOME:     '../data/household_income/municipios_acs_s1901_median_income_2010_2023_wide.json',
-        EDU:        '../data/education/municipios_acs_education_2013_2023_wide.json',
-        HEALTH:     '../data/health/municipios_acs_health_2013_2023_wide.json',
+        POP:        './data/population/prm-est2010_2024.json',
+        HOUSING:    './data/housing/municipios_acs_housing_2013_2023_wide.json',
+        EMP:        './data/employment/municipios_acs_s2301_2010_2023_wide.json',
+        EST:        './data/employment_establishments/municipios_cbp_establishments_2010_2023_wide.json',
+        INCOME:     './data/household_income/municipios_acs_s1901_median_income_2010_2023_wide.json',
+        EDU:        './data/education/municipios_acs_education_2013_2023_wide.json',
+        HEALTH:     './data/health/municipios_acs_health_2013_2023_wide.json',
     };
 
     const YEARS = {
@@ -900,6 +910,21 @@
                 drawTrendCharts(selectedMunicipio);
             });
         });
+        
+        // Scroll Indicator visibility check (simple text display)
+        const isScrollable = listEl.scrollHeight > listEl.clientHeight;
+        const upIndicator = listEl.previousElementSibling;
+        const downIndicator = listEl.nextElementSibling;
+        
+        // FIX: If the list is not scrollable, hide the indicators.
+        if (isScrollable) {
+            upIndicator.style.display = 'block';
+            downIndicator.style.display = 'block';
+        } else {
+            upIndicator.style.display = 'none';
+            downIndicator.style.display = 'none';
+        }
+
     }
 
     function handleScatterClick(event) {
@@ -909,13 +934,12 @@
             const firstPoint = points[0];
             const index = firstPoint.index;
             
+            // Get the data point object
             const dataPoint = scatterChart.data.datasets[0].data[index]; 
             
             if (dataPoint && dataPoint.name) {
                 selectedMunicipio = dataPoint.name;
-            } else if (dataPoint.name === 'Puerto Rico') {
-                selectedMunicipio = 'Puerto Rico';
-            }
+            } 
             
             updateMunicipioList();
             drawScatterPlot(); // Re-render to draw the highlight
