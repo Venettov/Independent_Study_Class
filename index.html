@@ -43,9 +43,9 @@
         background-color: #f0f8ff; /* AliceBlue */
         @apply p-4 text-black rounded-xl; 
     }
-    /* CHART CONTENT WRAPPER - Increased height to accommodate the narrative text */
+    /* CHART CONTENT WRAPPER - This inner div ensures the canvas maintains height */
     .chart-content-wrapper {
-        height: 480px; 
+        height: 400px; 
     }
     .section-title {
         @apply text-xl font-bold text-gray-800 mb-4 pt-4;
@@ -214,7 +214,7 @@
                     <div class="loader"></div>
                     <div class="mt-4 text-black">Loading and merging data...</div>
                 </div>
-                <!-- FIXED: Wrapper added with fixed height to ensure Chart.js canvas renders correctly -->
+                <!-- Wrapper added with fixed height to ensure Chart.js canvas renders correctly -->
                 <div id="scatter-canvas-wrapper" class="hidden"> 
                     <canvas id="scatterPlot"></canvas>
                 </div>
@@ -245,6 +245,12 @@
                         </select>
                     </div>
                 </div>
+                <!-- Scatter Plot Explanation -->
+                <p id="scatter-narrative" class="text-xs mt-4 text-gray-700">
+                    This scatter plot compares two selected municipal metrics (X and Y axis) against each other. 
+                    Each dot represents one municipality in Puerto Rico. The **color of the dot** represents the value of the third selected metric. 
+                    Clicking on a dot will select that municipality, highlight it in yellow, and update the detailed trend charts below.
+                </p>
             </div>
             
             <!-- MUNICIPALITY SELECTOR (1/4 width) -->
@@ -573,34 +579,6 @@
             housingNarrative = `**Housing Units** have seen moderate growth, up **${fmtPct(housingChange)}** since 2013, contributing to increased vacancy.`;
         } else {
             housingNarrative = `**Housing Units** have declined by **${fmtPct(Math.abs(housingChange))}** since 2013, suggesting housing stock is contracting in line with population loss.`;
-        }
-
-        // --- Employment & Income Narrative (Chart 2) ---
-        const incomeLatest = muniData.Income_Real2023;
-        const unempLatest = muniData.Employment_Unemp2023;
-        
-        const incomeTimeSeries = muniData.Income_TimeSeries.slice(0);
-        const incomeMax = Math.max(...incomeTimeSeries);
-        const incomePeakYear = YEARS.ACS[incomeTimeSeries.indexOf(incomeMax)];
-        
-        let incomeNarrative, unempNarrative;
-        
-        // Income Trend
-        if (incomeLatest > 25000) {
-            incomeNarrative = `**Real Median Income** (amber line) is relatively strong at **${fmtCurr(incomeLatest)}**, though it peaked around ${incomePeakYear}.`;
-        } else if (incomeLatest > 20000) {
-            incomeNarrative = `**Real Median Income** sits at **${fmtCurr(incomeLatest)}**, reflecting moderate real earning power.`;
-        } else {
-            incomeNarrative = `**Real Median Income** is low at **${fmtCurr(incomeLatest)}**, indicating significant economic hardship.`;
-        }
-        
-        // Unemployment Trend
-        if (unempLatest < 8) {
-            unempNarrative = `The **Unemployment Rate** (red line) is low at **${fmtPct(unempLatest)}**, suggesting a tighter local labor market.`;
-        } else if (unempLatest < 12) {
-            unempNarrative = `The **Unemployment Rate** is moderate at **${fmtPct(unempLatest)}**.`;
-        } else {
-            unempNarrative = `The **Unemployment Rate** remains high at **${fmtPct(unempLatest)}**, indicating persistent employment challenges.`;
         }
 
         return {
