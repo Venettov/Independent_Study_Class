@@ -8,6 +8,8 @@
   <script src="https://cdn.tailwindcss.com"></script>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <!-- NEW: Annotation plugin for Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.2.1/dist/chartjs-plugin-annotation.min.js"></script>
 
   <style>
     /* Global Card Style (White Background) */
@@ -512,10 +514,10 @@
                 x: selectedMuni[xKey],
                 y: selectedMuni[yKey],
                 colorValue: selectedMuni[colorKey],
-                r: 10, 
+                r: 12, // Increased size for visibility
                 name: selectedMuni.Municipio,
                 borderColor: '#facc15', // Yellow highlight
-                borderWidth: 3,
+                borderWidth: 4, // Increased border width
             });
         }
         
@@ -551,6 +553,27 @@
                                     `${getAxisLabel(colorKey).split('(')[0].trim()}: ${colorFormatted}`,
                                 ];
                             }
+                        }
+                    },
+                    annotation: {
+                        annotations: {
+                            // Dynamically add text annotation for the selected municipality
+                            selectedMuniLabel: selectedMunicipio !== 'Puerto Rico' ? {
+                                type: 'label',
+                                xValue: selectedMuni[xKey],
+                                yValue: selectedMuni[yKey],
+                                content: selectedMuni.Municipio,
+                                font: {
+                                    size: 14,
+                                    weight: 'bold'
+                                },
+                                backgroundColor: 'rgba(255, 255, 255, 0.7)',
+                                color: '#f59e0b', // Amber text color
+                                xAdjust: 15,
+                                yAdjust: -15,
+                                position: 'right',
+                                display: true
+                            } : { display: false }
                         }
                     }
                 },
