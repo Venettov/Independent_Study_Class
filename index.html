@@ -561,6 +561,11 @@
             },
             options: {
                 maintainAspectRatio: false,
+                layout: {
+                    padding: {
+                        bottom: 20 // FIX: Add bottom padding for labels
+                    }
+                },
                 plugins: { legend: { labels: { color: '#000' } } }, /* Changed to Black */
                 scales: {
                     x: { 
@@ -568,7 +573,7 @@
                             color: '#000', 
                             maxRotation: 0,
                             minRotation: 0,
-                            font: { size: 8 } /* FIX: Decreased font size */
+                            font: { size: 8 } /* Decreased font size */
                         }, 
                         grid: { color: '#bbb' } 
                     }, /* Changed to Black / Light Grid */
@@ -615,6 +620,11 @@
             },
             options: {
                 maintainAspectRatio: false,
+                layout: {
+                    padding: {
+                        bottom: 20 // FIX: Add bottom padding for labels
+                    }
+                },
                 plugins: { legend: { labels: { color: '#000' } } }, /* Changed to Black */
                 scales: {
                     x: { 
@@ -622,7 +632,7 @@
                             color: '#000', 
                             maxRotation: 0, 
                             minRotation: 0,
-                            font: { size: 8 } /* FIX: Decreased font size */
+                            font: { size: 8 } /* Decreased font size */
                         }, 
                         grid: { color: '#bbb' }, 
                         labels: YEARS.ACS 
