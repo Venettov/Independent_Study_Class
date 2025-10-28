@@ -409,6 +409,19 @@
                 }
             });
         });
+        
+        // FIX for Education KPI: Calculate the true average percentage attainment for Puerto Rico
+        const prData = merged['Puerto Rico'];
+        if (prData) {
+            const allEduValues = masterData.filter(m => m.Municipio !== 'Puerto Rico')
+                                            .map(m => m.Education_2023)
+                                            .filter(v => Number.isFinite(v));
+            if (allEduValues.length > 0) {
+                const average = allEduValues.reduce((a, b) => a + b, 0) / allEduValues.length;
+                prData.Education_2023 = average; // Overwrite the incorrect value from the JSON with the true average
+            }
+        }
+
 
         // Filter out any municipios that failed to load essential data
         return Object.values(merged).filter(m => m.Population_2024 != null);
@@ -733,7 +746,9 @@
         document.getElementById('kpi-pop').textContent = fmtInt(prData.Population_2024);
         document.getElementById('kpi-income').textContent = fmtCurr(prData.Income_Real2023);
         document.getElementById('kpi-unemp').textContent = fmtPct(prData.Employment_Unemp2023);
-        document.getElementById('kpi-edu').textContent = fmtPct(prData.Education_2023);
+        
+        // FIX: Education KPI should use the correct average percentage (~30.9%), not the raw count.
+        document.getElementById('kpi-edu').textContent = fmtPct(prData.Education_2023); 
     }
     
     function updateMunicipioList() {
