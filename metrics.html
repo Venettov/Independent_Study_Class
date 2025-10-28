@@ -33,37 +33,7 @@
       padding: 1.5rem;
       box-shadow: 0 4px 6px -1px rgba(0,0,0,.1), 0 2px 4px -2px rgba(0,0,0,.06);
     }
-
-    /* --- NEW/UPDATED CSS FOR STATIC KPI CARDS (Matching the desired screenshot) --- */
-    .kpi-group-heading {
-        /* Populations and People, Business and Economy, etc. */
-        @apply text-xl font-bold text-gray-900 mb-3; 
-    }
-    .stat-card-clean {
-        /* The main white card box */
-        @apply bg-white p-4 rounded-xl shadow-md flex items-start;
-        /* Using a specific box-shadow to match the light, floating effect */
-        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-    }
-    .stat-icon-wrapper {
-        /* Container for the icon (mimics the light gray square in the screenshot) */
-        @apply p-2 mr-3 bg-gray-100 rounded-lg flex-shrink-0;
-    }
-    .stat-icon-wrapper svg {
-        @apply w-6 h-6 text-gray-600;
-    }
-    .stat-body-clean .label {
-        @apply text-base font-medium text-gray-700;
-    }
-    .stat-body-clean .value {
-        @apply text-3xl font-extrabold leading-none mt-1 text-gray-900;
-    }
-    .stat-body-clean a {
-        @apply text-sm text-blue-600 mt-2 block;
-    }
-    /* End of Static KPI Styles */
-
-
+    
     /* CHART BACKGROUND FIX: Light Blue/Cyan Background */
     .chart-container {
         background-color: #f0f8ff; /* AliceBlue */
@@ -226,31 +196,31 @@
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         
         <div class="space-y-4">
-            <h2 class="text-xl font-bold text-gray-900">Populations and People</h2>
+            <h2 class="text-lg font-bold text-gray-900 mb-3">Populations and People</h2>
             
-            <div class="space-y-4">
-                <div class="stat-card-clean">
-                    <div class="stat-icon-wrapper">
+            <div class="space-y-3">
+                <div class="bg-white p-4 rounded-xl shadow-md flex items-start">
+                    <div class="p-2 mr-3 bg-gray-100 rounded-lg flex-shrink-0">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 text-gray-600">
                             <path fill-rule="evenodd" d="M8.25 6.75a2.25 2.25 0 0 1 2.25-2.25h5.25A2.25 2.25 0 0 1 18 6.75v6.75A2.25 2.25 0 0 1 15.75 16.5H10.5a2.25 2.25 0 0 1-2.25-2.25V6.75ZM6 8.25A2.25 2.25 0 0 1 8.25 6h5.25a2.25 2.25 0 0 1 2.25 2.25v5.25A2.25 2.25 0 0 1 13.5 15H8.25a2.25 2.25 0 0 1-2.25-2.25V8.25ZM6 8.25a2.25 2.25 0 0 1 2.25-2.25h5.25a2.25 2.25 0 0 1 2.25 2.25v5.25a2.25 2.25 0 0 1-2.25 2.25H8.25a2.25 2.25 0 0 1-2.25-2.25V8.25ZM10.5 15h5.25a2.25 2.25 0 0 0 2.25-2.25v-5.25A2.25 2.25 0 0 0 15.75 5.25H10.5a2.25 2.25 0 0 0-2.25 2.25v5.25A2.25 2.25 0 0 0 10.5 15Z" clip-rule="evenodd" />
                         </svg>
                     </div>
-                    <div class="stat-body-clean min-w-0">
-                        <div class="label">Total Population</div>
-                        <div class="value">3,285,874</div>
+                    <div class="min-w-0">
+                        <div class="text-base font-medium text-gray-700">Total Population</div>
+                        <div class="text-3xl font-extrabold leading-none mt-1 text-gray-900">3,285,874</div>
                         <a class="text-sm text-blue-600 mt-2 block" target="_blank" rel="noopener" href="https://data.census.gov/table?q=P1&g=040XX00US72">P1 · 2020 Decennial Census (Puerto Rico)</a>
                     </div>
                 </div>
                 
                 <div class="stat-card-clean">
-                    <div class="stat-icon-wrapper">
+                    <div class="p-2 mr-3 bg-gray-100 rounded-lg flex-shrink-0">
                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-gray-600">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.03 60.03 0 0 1 15.79-1.53c.165-.105.334-.21.503-.315l1.01-1.341a.75.75 0 0 0-.276-1.121C16.3 14.39 12.446 14 10.5 14c-2.427 0-4.832.2-7.19.589L2.25 14.25v4.5Zm0-12.75h20.25m-2.25 0H2.25V18.75h18.067c.078 0 .15-.015.22-.036A41.229 41.229 0 0 0 22.5 18.75V6ZM6 12h.008v.008H6V12Zm2.25 0h.008v.008H8.25V12Zm2.25 0h.008v.008h-.008V12Zm-4.5 4.5h.008v.008H6V16.5Zm2.25 0h.008v.008H8.25V16.5Zm2.25 0h.008v.008h-.008V16.5Z" />
                         </svg>
                     </div>
-                    <div class="stat-body-clean min-w-0">
-                        <div class="label">Employment Rate</div>
-                        <div class="value">43.4%</div>
+                    <div class="min-w-0">
+                        <div class="text-base font-medium text-gray-700">Employment Rate</div>
+                        <div class="text-3xl font-extrabold leading-none mt-1 text-gray-900">43.4%</div>
                         <a class="text-sm text-blue-600 mt-2 block" target="_blank" rel="noopener" href="https://data.census.gov/table?q=DP03&g=040XX00US72">DP03 · 2024 ACS 1-Year (Puerto Rico)</a>
                     </div>
                 </div>
@@ -258,31 +228,31 @@
         </div>
 
         <div class="space-y-4">
-            <h2 class="text-xl font-bold text-gray-900">Business and Economy</h2>
+            <h2 class="text-lg font-bold text-gray-900 mb-3">Business and Economy</h2>
             
-            <div class="space-y-4">
+            <div class="space-y-3">
                 <div class="stat-card-clean">
-                    <div class="stat-icon-wrapper">
+                    <div class="p-2 mr-3 bg-gray-100 rounded-lg flex-shrink-0">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-gray-600">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 21v-7.5C13.5 12.124 14.624 11 16.5 11h1.75a2.25 2.25 0 0 1 2.25 2.25v7.5m-15-7.5V21m0 0a2.25 2.25 0 0 0-2.25-2.25H3.75a2.25 2.25 0 0 1-2.25-2.25V6.75A2.25 2.25 0 0 1 3.75 4.5h16.5a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 20.25 21h-7.5m0-16.5H5.25A2.25 2.25 0 0 0 3 6.75v11.55a.75.75 0 0 0 1.15.688l5.25-3.333a2.25 2.25 0 0 1 2.55 0l5.25 3.333a.75.75 0 0 0 1.15-.688V6.75a2.25 2.25 0 0 0-2.25-2.25h-4.5V3.75A2.25 2.25 0 0 0 12 1.5h-1.5A2.25 2.25 0 0 0 8.25 3.75V4.5Z" />
                         </svg>
                     </div>
                     <div class="min-w-0">
-                        <div class="label">Employer Establishments</div>
-                        <div class="value">50,332</div>
+                        <div class="text-base font-medium text-gray-700">Employer Establishments</div>
+                        <div class="text-3xl font-extrabold leading-none mt-1 text-gray-900">50,332</div>
                         <a class="text-sm text-blue-600 mt-2 block" target="_blank" rel="noopener" href="https://www.census.gov/programs-surveys/cbp.html">CBP · County Business Patterns (Program Page)</a>
                     </div>
                 </div>
                 
                 <div class="stat-card-clean">
-                    <div class="stat-icon-wrapper">
+                    <div class="p-2 mr-3 bg-gray-100 rounded-lg flex-shrink-0">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-gray-600">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-2-10h4m-4 0a3.75 3.75 0 1 0 0 7.5h4a3.75 3.75 0 0 0 0-7.5h-4Z" />
                         </svg>
                     </div>
                     <div class="min-w-0">
-                        <div class="label">Median Household Income</div>
-                        <div class="value">$27,213</div>
+                        <div class="text-base font-medium text-gray-700">Median Household Income</div>
+                        <div class="text-3xl font-extrabold leading-none mt-1 text-gray-900">$27,213</div>
                         <a class="text-sm text-blue-600 mt-2 block" target="_blank" rel="noopener" href="https://data.census.gov/table?q=S1901&g=040XX00US72">S1901 · 2024 ACS 1-Year (Puerto Rico)</a>
                     </div>
                 </div>
@@ -290,31 +260,31 @@
         </div>
 
         <div class="space-y-4">
-            <h2 class="text-xl font-bold text-gray-900">Education & Health</h2>
+            <h2 class="text-lg font-bold text-gray-900 mb-3">Education & Health</h2>
             
-            <div class="space-y-4">
+            <div class="space-y-3">
                 <div class="stat-card-clean">
-                    <div class="stat-icon-wrapper">
+                    <div class="p-2 mr-3 bg-gray-100 rounded-lg flex-shrink-0">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-gray-600">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 14.25l-2.25 2.25m4.5 0L14.25 14.25M12 4.5l8.4 4.5V15L12 19.95 3.6 15V9ZM12 4.5L3.6 9m8.4-4.5V19.95M12 4.5v15.45" />
                         </svg>
                     </div>
                     <div class="min-w-0">
-                        <div class="label">Bachelor’s Degree or Higher</div>
-                        <div class="value">29.7%</div>
+                        <div class="text-base font-medium text-gray-700">Bachelor’s Degree or Higher</div>
+                        <div class="text-3xl font-extrabold leading-none mt-1 text-gray-900">29.7%</div>
                         <a class="text-sm text-blue-600 mt-2 block" target="_blank" rel="noopener" href="https://data.census.gov/table?q=S1501&g=040XX00US72">S1501 · 2024 ACS 1-Year (Puerto Rico)</a>
                     </div>
                 </div>
                 
                 <div class="stat-card-clean">
-                    <div class="stat-icon-wrapper">
+                    <div class="p-2 mr-3 bg-gray-100 rounded-lg flex-shrink-0">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-gray-600">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 14.25v-4.5m0 0V5.25a2.25 2.25 0 0 0-2.25-2.25h-6a2.25 2.25 0 0 0-2.25 2.25v5.25m0 0v4.5m0 0a2.25 2.25 0 0 0 2.25 2.25h6a2.25 2.25 0 0 0 2.25-2.25v-4.5m0 0h-4.5m4.5 0a2.25 2.25 0 0 1-2.25-2.25h-6a2.25 2.25 0 0 1-2.25 2.25m4.5 0a2.25 2.25 0 0 1-2.25 2.25h-6a2.25 2.25 0 0 1-2.25-2.25v-4.5m9 0a2.25 2.25 0 0 0-2.25-2.25h-6a2.25 2.25 0 0 0-2.25 2.25v4.5m9 0a2.25 2.25 0 0 0-2.25-2.25h-6a2.25 2.25 0 0 0-2.25 2.25v4.5" />
                         </svg>
                     </div>
                     <div class="min-w-0">
-                        <div class="label">Without Health Coverage</div>
-                        <div class="value">5.6%</div>
+                        <div class="text-base font-medium text-gray-700">Without Health Coverage</div>
+                        <div class="text-3xl font-extrabold leading-none mt-1 text-gray-900">5.6%</div>
                         <a class="text-sm text-blue-600 mt-2 block" target="_blank" rel="noopener" href="https://data.census.gov/table?q=S2701&g=040XX00US72">S2701 · 2024 ACS 1-Year (Puerto Rico)</a>
                     </div>
                 </div>
