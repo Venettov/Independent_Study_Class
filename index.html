@@ -53,7 +53,8 @@
     #municipioList {
         /* Adjusted max-height to better utilize space in the narrower column */
         max-height: 480px; 
-        overflow-y: auto;
+        /* FIX: Forces scrollbar to be always visible */
+        overflow-y: scroll; 
         padding-top: 4px; 
     }
     .municipio-item {
