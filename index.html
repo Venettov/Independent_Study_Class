@@ -51,12 +51,14 @@
         @apply text-xl font-bold text-gray-800 mb-4 pt-4;
     }
     #municipioList {
-        max-height: 400px;
+        /* Adjusted max-height to better utilize space in the narrower column */
+        max-height: 480px; 
         overflow-y: auto;
+        padding-top: 4px; 
     }
     .municipio-item {
-        /* FIX: Black text against light green/white background */
-        @apply cursor-pointer p-2 rounded-lg text-sm transition-all text-black; 
+        /* FIX: Reduced text size for narrower column */
+        @apply cursor-pointer p-1 rounded-lg text-xs transition-all text-black; 
     }
     .municipio-item:hover {
         background-color: #d1fae5; /* Lighter green on hover */
@@ -257,7 +259,7 @@
             <!-- MUNICIPALITY SELECTOR (2/12 width) -->
             <div class="lg:col-span-2 p-4 rounded-xl" style="background-color: #f0fff0;">
                 <h2 class="text-lg font-semibold mb-3 text-black">Municipality Selector</h2>
-                <input type="text" id="muniSearch" placeholder="Search municipality..." 
+                <input type="text" id="muniSearch" placeholder="Search" 
                        class="mb-3 block w-full rounded-md border border-gray-400 bg-white py-1.5 px-3 text-base text-black placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500"/>
                 <div id="municipioList" class="space-y-1">
                     <!-- List items loaded here -->
