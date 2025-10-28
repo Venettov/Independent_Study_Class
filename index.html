@@ -258,14 +258,17 @@
         <div class="section-title col-span-full">Selected Municipality Trends: <span id="trendMuniName" class="text-blue-400">Puerto Rico</span></div>
 
         <div id="trendCharts" class="card grid grid-cols-1 md:grid-cols-2 gap-4 col-span-full p-4">
-            <!-- FIXED: Added h-96 class to chart containers to limit vertical growth -->
+            <!-- Population & Housing Trend -->
             <div class="chart-container h-96"> 
                 <h3 class="text-base font-semibold mb-2 text-black">Population & Housing Trend</h3>
                 <canvas id="trendChart1"></canvas>
+                <p id="chart-narrative-1" class="text-xs mt-2 text-gray-700"></p>
             </div>
+            <!-- Employment & Income Trend -->
             <div class="chart-container h-96"> 
                 <h3 class="text-base font-semibold mb-2 text-black">Employment & Income Trend</h3>
                 <canvas id="trendChart2"></canvas>
+                <p id="chart-narrative-2" class="text-xs mt-2 text-gray-700"></p>
             </div>
         </div>
     </section>
@@ -525,12 +528,87 @@
         });
     }
 
+    // --- Chart Narrative Logic ---
+
+    function generateChartNarrative(muniData) {
+        if (muniData.Municipio === 'Puerto Rico') {
+            return {
+                chart1: "The **Population & Housing Trend** for Puerto Rico shows a **steady population decline** since 2010 (blue line), while the total number of **Housing Units has increased** (green line). This divergence indicates a substantial rise in vacancy rates and housing stock oversupply across the island.",
+                chart2: "The **Employment & Income Trend** shows the island-wide **Real Median Income** (2023$, amber line) fluctuating around the $20,000–$25,000 range, while the **Unemployment Rate** (red line) has shown a long-term decline from the early 2010s peak, reflecting an improving job market but stagnant real earning power."
+            };
+        }
+
+        // --- Population & Housing Narrative (Chart 1) ---
+        const pop2010 = muniData.Population_TimeSeries[YEARS.POP.indexOf(2010)];
+        const pop2024 = muniData.Population_2024;
+        const popChange = muniData.Population_PctChange;
+
+        const housing2013 = muniData.Housing_TimeSeries[0];
+        const housing2023 = muniData.Housing_2023;
+        const housingChange = muniData.Housing_PctChange;
+        
+        let popNarrative, housingNarrative;
+
+        // Population Trend
+        if (popChange < -10) {
+            popNarrative = `The **population** of ${muniData.Municipio} has seen severe decline, dropping by **${fmtPct(Math.abs(popChange))}** since 2010.`;
+        } else if (popChange < 0) {
+            popNarrative = `The **population** has experienced a notable decrease, falling by **${fmtPct(Math.abs(popChange))}** since 2010.`;
+        } else {
+            popNarrative = `The **population** has managed to stabilize or slightly grow, rising by **${fmtPct(popChange)}** since 2010.`;
+        }
+
+        // Housing Trend
+        if (housingChange > 5) {
+             housingNarrative = `Meanwhile, **Housing Units** have grown significantly, increasing by **${fmtPct(housingChange)}** since 2013, indicating new construction despite demographic contraction.`;
+        } else if (housingChange > 0) {
+            housingNarrative = `**Housing Units** have seen moderate growth, up **${fmtPct(housingChange)}** since 2013, contributing to increased vacancy.`;
+        } else {
+            housingNarrative = `**Housing Units** have declined by **${fmtPct(Math.abs(housingChange))}** since 2013, suggesting housing stock is contracting in line with population loss.`;
+        }
+
+        // --- Employment & Income Narrative (Chart 2) ---
+        const incomeLatest = muniData.Income_Real2023;
+        const unempLatest = muniData.Employment_Unemp2023;
+        
+        const incomeTimeSeries = muniData.Income_TimeSeries.slice(0);
+        const incomeMax = Math.max(...incomeTimeSeries);
+        const incomePeakYear = YEARS.ACS[incomeTimeSeries.indexOf(incomeMax)];
+        
+        let incomeNarrative, unempNarrative;
+        
+        // Income Trend
+        if (incomeLatest > 25000) {
+            incomeNarrative = `**Real Median Income** (amber line) is relatively strong at **${fmtCurr(incomeLatest)}**, though it peaked around ${incomePeakYear}.`;
+        } else if (incomeLatest > 20000) {
+            incomeNarrative = `**Real Median Income** sits at **${fmtCurr(incomeLatest)}**, reflecting moderate real earning power.`;
+        } else {
+            incomeNarrative = `**Real Median Income** is low at **${fmtCurr(incomeLatest)}**, indicating significant economic hardship.`;
+        }
+        
+        // Unemployment Trend
+        if (unempLatest < 8) {
+            unempNarrative = `The **Unemployment Rate** (red line) is low at **${fmtPct(unempLatest)}**, suggesting a tighter local labor market.`;
+        } else if (unempLatest < 12) {
+            unempNarrative = `The **Unemployment Rate** is moderate at **${fmtPct(unempLatest)}**.`;
+        } else {
+            unempNarrative = `The **Unemployment Rate** remains high at **${fmtPct(unempLatest)}**, indicating persistent employment challenges.`;
+        }
+
+        return {
+            chart1: `${popNarrative} ${housingNarrative}`,
+            chart2: `${incomeNarrative} ${unempNarrative}`
+        };
+    }
+    
     function drawTrendCharts(muniName) {
         const muniData = getMuniData(muniName);
         if (!muniData) return;
 
         const ctx1 = document.getElementById('trendChart1').getContext('2d');
         const ctx2 = document.getElementById('trendChart2').getContext('2d');
+        
+        const narrative = generateChartNarrative(muniData);
 
         // ------------------ Chart 1: Population & Housing Trends ------------------
         if (trendChart1) trendChart1.destroy();
@@ -654,6 +732,10 @@
         });
         
         document.getElementById('trendMuniName').textContent = muniName;
+        
+        // Update Narrative Text
+        document.getElementById('chart-narrative-1').innerHTML = narrative.chart1;
+        document.getElementById('chart-narrative-2').innerHTML = narrative.chart2;
     }
 
     // --- Interaction Handlers ---
