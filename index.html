@@ -205,11 +205,11 @@
         </div>
         
         <!-- MAIN INTERACTIVE PLOT & FILTER PANEL (Grouped into a white card for separation) -->
+        <!-- Adjusted grid to 12 columns: 10 for Scatter Plot, 2 for Selector -->
         <div id="main-panel" class="card grid grid-cols-1 lg:grid-cols-12 gap-4 mt-6 p-0">
             
-            <!-- SCATTER PLOT (8/12 width) -->
-            <!-- Changed lg:col-span-3 to lg:col-span-8 -->
-            <div class="lg:col-span-8 p-4" id="scatterPlotContainer">
+            <!-- SCATTER PLOT (10/12 width) -->
+            <div class="lg:col-span-10 p-4" id="scatterPlotContainer">
                 <h2 class="text-lg font-semibold mb-3 text-black">Socio-Economic Relationship by Municipality</h2>
                 <div id="chart-loader" class="text-center mt-20 hidden">
                     <div class="loader"></div>
@@ -254,9 +254,8 @@
                 </p>
             </div>
             
-            <!-- MUNICIPALITY SELECTOR (4/12 width) -->
-            <!-- Changed bg-gray-800 to light green. Changed implicit 1/4 to lg:col-span-4 -->
-            <div class="lg:col-span-4 p-4 rounded-xl" style="background-color: #f0fff0;">
+            <!-- MUNICIPALITY SELECTOR (2/12 width) -->
+            <div class="lg:col-span-2 p-4 rounded-xl" style="background-color: #f0fff0;">
                 <h2 class="text-lg font-semibold mb-3 text-black">Municipality Selector</h2>
                 <input type="text" id="muniSearch" placeholder="Search municipality..." 
                        class="mb-3 block w-full rounded-md border border-gray-400 bg-white py-1.5 px-3 text-base text-black placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500"/>
