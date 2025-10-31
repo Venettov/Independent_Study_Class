@@ -55,6 +55,18 @@
     #metrics-dropdown-root.hovering #metrics-chevron {
       transform: rotate(180deg);
     }
+    
+    /* New style for simulating 65% zoom on the main content */
+    #scale-wrapper {
+        /* Apply the scale transformation */
+        transform: scale(0.65); 
+        transform-origin: top center; /* Scale from the top-center */
+        
+        /* Adjustments to compensate for the scaling effect on surrounding content */
+        height: 154%; /* Approx 1 / 0.65 to ensure vertical space is reserved */
+        padding-bottom: 200px;
+        margin-bottom: -35%; /* Pull up content following the wrapper */
+    }
   </style>
 </head>
 <body class="bg-gray-50 text-gray-900 font-sans">
@@ -91,133 +103,135 @@
     </div>
   </nav>
 
-  <main class="max-w-7xl mx-auto px-4 py-8 space-y-8">
-    <header class="card hero p-6 sm:p-8 lg:p-10 relative">
-      <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between">
-        <div>
-          <p class="text-sm font-semibold text-gray-500 uppercase">Graduate Independent Study</p>
-          <h1 class="mt-2 text-4xl sm:text-5xl font-extrabold leading-tight">
-            Population & Economic Dynamics in Puerto Rico
-          </h1>
-          <p class="mt-3 text-lg text-gray-700">
-            A graduate research project examining demographic shifts, out-migration, and sustainable development strategies through linked data analysis and policy synthesis.
-          </p>
-          <div class="mt-5">
-            <span class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-100 text-slate-800">
-              <span class="inline-flex w-5 h-5 items-center justify-center rounded-full bg-slate-800 text-white text-xs">i</span>
-              Hover over the map to see county / municipality details
-            </span>
-          </div>
-        </div>
-      </div>
-    </header>
-
-    <section class="card p-4">
-      <div class="flex items-center justify-between gap-3">
-        <div class="text-sm text-gray-700 font-medium">Map shading by</div>
-        <div class="flex items-center gap-2">
-          <div class="inline-flex rounded-lg border bg-white shadow-sm overflow-hidden">
-            <button id="metricEmp" type="button" class="px-3 py-1.5 text-sm font-medium hover:bg-gray-50">Employment-Pop Ratio</button>
-            <button id="metricUnemp" type="button" class="px-3 py-1.5 text-sm font-medium hover:bg-gray-50">Unemployment Rate</button>
-            <button id="metricLabor" type="button" class="px-3 py-1.5 text-sm font-medium hover:bg-gray-50">Labor Force Part.</button>
-          </div>
-          <button id="clearSel" class="px-3 py-1.5 text-sm rounded-lg border bg-white hover:bg-gray-50">Clear selection</button>
-        </div>
-      </div>
-      <div id="map" class="mt-3"></div>
-    </section>
-
-    <section class="card p-6">
-      <h2 class="text-lg font-semibold mb-4">Employment details</h2>
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div>
-          <div class="text-sm">
-            <div>Municipio: <span id="d-name" class="font-semibold">Puerto Rico</span></div>
-            <div>Centroid: <span id="d-centroid" class="text-gray-600">—</span></div>
-          </div>
-
-          <div class="mt-4 text-sm">
-            <div class="font-semibold text-gray-700">Latest Values (2023):</div>
-            <ul class="mt-1 space-y-1">
-              <li>Employment-population ratio: <span id="d-emppop" class="font-semibold">—</span></li>
-              <li>Unemployment rate: <span id="d-unemp" class="font-semibold">—</span></li>
-              <li>Labor force participation: <span id="d-labor" class="font-semibold">—</span></li>
-            </ul>
-          </div>
-
-          <div class="mt-4 text-sm">
-            <a id="d-census" class="text-blue-600 underline" href="#" target="_blank" rel="noopener">
-              Open on data.census.gov ↗
-            </a>
-          </div>
-        </div>
-
-        <div>
-          <h3 class="font-semibold mb-2">Employment-Pop Ratio Trend (2010–2023)</h3>
-          <div class="mini bg-gray-50 rounded p-3">
-            <canvas id="lineChartEmpPop"></canvas>
-          </div>
-        </div>
-
-        <div>
-          <h3 class="font-semibold mb-2">Labor Force Participation Trend (2010–2023)</h3>
-          <div class="mini bg-gray-50 rounded p-3">
-            <canvas id="lineChartLabor"></canvas>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="card p-6">
-        <h2 class="text-lg font-semibold mb-4">Unemployment Rate Changes</h2>
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div>
-                <h3 class="font-semibold mb-2">Unemployment Rate Trend (2010–2023)</h3>
-                <div class="mini bg-gray-50 rounded p-3">
-                    <canvas id="barChartUnemp"></canvas>
-                </div>
-            </div>
-            <div>
-                <h3 class="font-semibold mb-2">Annual Unemployment Change (2022–2023)</h3>
-                <div class="mini bg-gray-50 rounded p-3">
-                    <canvas id="barChartAnnualChange"></canvas>
-                </div>
-            </div>
-        </div>
-        
-        <div class="mt-6">
-            <h3 class="text-base font-semibold mb-2">Understanding the Unemployment Rate Charts</h3>
-            <p class="text-sm text-gray-700 space-y-3">
-                The **Unemployment Rate Trend (2010–2023)** chart displays the yearly unemployment rate for the selected municipality (or Puerto Rico overall) as a share of the labor force. A lower percentage indicates a healthier labor market over the long term. This metric generally reflects a decade-long improvement in employment across Puerto Rico since peak unemployment rates in the early 2010s.
+  <div id="scale-wrapper">
+    <main class="max-w-7xl mx-auto px-4 py-8 space-y-8">
+      <header class="card hero p-6 sm:p-8 lg:p-10 relative">
+        <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between">
+          <div>
+            <p class="text-sm font-semibold text-gray-500 uppercase">Graduate Independent Study</p>
+            <h1 class="mt-2 text-4xl sm:text-5xl font-extrabold leading-tight">
+              Population & Economic Dynamics in Puerto Rico
+            </h1>
+            <p class="mt-3 text-lg text-gray-700">
+              A graduate research project examining demographic shifts, out-migration, and sustainable development strategies through linked data analysis and policy synthesis.
             </p>
-            <p class="text-sm text-gray-700 mt-2 space-y-3">
-                The **Annual Unemployment Change (2022–2023)** chart ranks all municipalities by the absolute change in their unemployment rate in the most recent year.
-                <span class="font-semibold text-green-600">Green bars</span> represent a **decrease** in the unemployment rate (an improvement in the labor market).
-                <span class="font-semibold text-red-600">Red bars</span> represent an **increase** (a deterioration in the labor market). This chart provides a snapshot of the fastest-changing municipal labor markets in the last year.
-            </p>
+            <div class="mt-5">
+              <span class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-100 text-slate-800">
+                <span class="inline-flex w-5 h-5 items-center justify-center rounded-full bg-slate-800 text-white text-xs">i</span>
+                Hover over the map to see county / municipality details
+              </span>
+            </div>
+          </div>
         </div>
-    </section>
+      </header>
 
-    <section class="card p-6">
-      <h2 class="text-lg font-semibold mb-4">File Sources</h2>
-      <div class="space-y-4">
-        <p>Data for this project was derived from the U.S. Census Bureau’s American Community Survey (ACS S2301):</p>
-        <ul class="list-disc list-inside space-y-1">
-          <li>
-            <a href="https://data.census.gov/table?q=S2301:+EMPLOYMENT+STATUS+Puerto+Rico"
-               target="_blank" rel="noopener" class="text-blue-600 underline">
-              ACS S2301 – Employment Status, Puerto Rico Municipalities
-            </a>
-          </li>
-        </ul>
+      <section class="card p-4">
+        <div class="flex items-center justify-between gap-3">
+          <div class="text-sm text-gray-700 font-medium">Map shading by</div>
+          <div class="flex items-center gap-2">
+            <div class="inline-flex rounded-lg border bg-white shadow-sm overflow-hidden">
+              <button id="metricEmp" type="button" class="px-3 py-1.5 text-sm font-medium hover:bg-gray-50">Employment-Pop Ratio</button>
+              <button id="metricUnemp" type="button" class="px-3 py-1.5 text-sm font-medium hover:bg-gray-50">Unemployment Rate</button>
+              <button id="metricLabor" type="button" class="px-3 py-1.5 text-sm font-medium hover:bg-gray-50">Labor Force Part.</button>
+            </div>
+            <button id="clearSel" class="px-3 py-1.5 text-sm rounded-lg border bg-white hover:bg-gray-50">Clear selection</button>
+          </div>
+        </div>
+        <div id="map" class="mt-3"></div>
+      </section>
 
-        <p>Specific files used:</p>
-        <ul class="list-disc list-inside">
-          <li>municipios_acs_s2301_2010_2023_wide.json (site build)</li>
-        </ul>
-      </div>
-    </section>
-  </main>
+      <section class="card p-6">
+        <h2 class="text-lg font-semibold mb-4">Employment details</h2>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div>
+            <div class="text-sm">
+              <div>Municipio: <span id="d-name" class="font-semibold">Puerto Rico</span></div>
+              <div>Centroid: <span id="d-centroid" class="text-gray-600">—</span></div>
+            </div>
+
+            <div class="mt-4 text-sm">
+              <div class="font-semibold text-gray-700">Latest Values (2023):</div>
+              <ul class="mt-1 space-y-1">
+                <li>Employment-population ratio: <span id="d-emppop" class="font-semibold">—</span></li>
+                <li>Unemployment rate: <span id="d-unemp" class="font-semibold">—</span></li>
+                <li>Labor force participation: <span id="d-labor" class="font-semibold">—</span></li>
+              </ul>
+            </div>
+
+            <div class="mt-4 text-sm">
+              <a id="d-census" class="text-blue-600 underline" href="#" target="_blank" rel="noopener">
+                Open on data.census.gov ↗
+              </a>
+            </div>
+          </div>
+
+          <div>
+            <h3 class="font-semibold mb-2">Employment-Pop Ratio Trend (2010–2023)</h3>
+            <div class="mini bg-gray-50 rounded p-3">
+              <canvas id="lineChartEmpPop"></canvas>
+            </div>
+          </div>
+
+          <div>
+            <h3 class="font-semibold mb-2">Labor Force Participation Trend (2010–2023)</h3>
+            <div class="mini bg-gray-50 rounded p-3">
+              <canvas id="lineChartLabor"></canvas>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card p-6">
+          <h2 class="text-lg font-semibold mb-4">Unemployment Rate Changes</h2>
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div>
+                  <h3 class="font-semibold mb-2">Unemployment Rate Trend (2010–2023)</h3>
+                  <div class="mini bg-gray-50 rounded p-3">
+                      <canvas id="barChartUnemp"></canvas>
+                  </div>
+              </div>
+              <div>
+                  <h3 class="font-semibold mb-2">Annual Unemployment Change (2022–2023)</h3>
+                  <div class="mini bg-gray-50 rounded p-3">
+                      <canvas id="barChartAnnualChange"></canvas>
+                  </div>
+              </div>
+          </div>
+          
+          <div class="mt-6">
+              <h3 class="text-base font-semibold mb-2">Understanding the Unemployment Rate Charts</h3>
+              <p class="text-sm text-gray-700 space-y-3">
+                  The **Unemployment Rate Trend (2010–2023)** chart displays the yearly unemployment rate for the selected municipality (or Puerto Rico overall) as a share of the labor force. A lower percentage indicates a healthier labor market over the long term. This metric generally reflects a decade-long improvement in employment across Puerto Rico since peak unemployment rates in the early 2010s.
+              </p>
+              <p class="text-sm text-gray-700 mt-2 space-y-3">
+                  The **Annual Unemployment Change (2022–2023)** chart ranks all municipalities by the absolute change in their unemployment rate in the most recent year.
+                  <span class="font-semibold text-green-600">Green bars</span> represent a **decrease** in the unemployment rate (an improvement in the labor market).
+                  <span class="font-semibold text-red-600">Red bars</span> represent an **increase** (a deterioration in the labor market). This chart provides a snapshot of the fastest-changing municipal labor markets in the last year.
+              </p>
+          </div>
+      </section>
+
+      <section class="card p-6">
+        <h2 class="text-lg font-semibold mb-4">File Sources</h2>
+        <div class="space-y-4">
+          <p>Data for this project was derived from the U.S. Census Bureau’s American Community Survey (ACS S2301):</p>
+          <ul class="list-disc list-inside space-y-1">
+            <li>
+              <a href="https://data.census.gov/table?q=S2301:+EMPLOYMENT+STATUS+Puerto+Rico"
+                target="_blank" rel="noopener" class="text-blue-600 underline">
+                ACS S2301 – Employment Status, Puerto Rico Municipalities
+              </a>
+            </li>
+          </ul>
+
+          <p>Specific files used:</p>
+          <ul class="list-disc list-inside">
+            <li>municipios_acs_s2301_2010_2023_wide.json (site build)</li>
+          </ul>
+        </div>
+      </section>
+    </main>
+  </div>
 
   <script>
     // ---- Config ----
