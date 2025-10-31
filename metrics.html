@@ -168,12 +168,12 @@
         display: block !important; 
     }
     
-    /* 2. Adjust internal grid (main-panel) within the maximized visuals container */
+    /* 2. Adjust internal layout using Flexbox override for stability */
     #dashboardVisuals.maximized #main-panel {
-        /* CRITICAL FIX: Ensure the grid uses 12 columns for the 10/2 split */
-        display: grid !important;
-        /* Forced grid template: 1fr (scatter) 300px (selector) */
-        grid-template-columns: 1fr 300px !important; 
+        /* CRITICAL FIX: Use flexbox for reliable side-by-side layout */
+        display: flex !important;
+        flex-direction: row !important;
+        
         padding: 1rem !important;
         gap: 1rem !important;
         width: 100%;
@@ -181,26 +181,24 @@
         margin: 0 auto;
     }
 
-    /* 3. CRITICAL FIX: Explicitly set grid column spans within the maximized state */
+    /* 3. CRITICAL FIX: Explicitly set widths for stable 1fr / 300px split */
     #dashboardVisuals.maximized #scatterPlotContainer {
-        /* Takes up the scatter plot area (1fr column) */
-        grid-column: span 1 / span 1; 
+        width: calc(100% - 300px - 1rem) !important; /* 100% - selector width - gap */
+        flex-shrink: 0;
     }
     #dashboardVisuals.maximized .lg\:col-span-2 {
-        /* Takes up the selector area (300px column) */
-        grid-column: span 1 / span 1; 
+        width: 300px !important; /* Selector is a fixed width */
+        flex-shrink: 0;
     }
 
 
     /* 4. Ensure component heights use max space */
     #dashboardVisuals.maximized #scatter-canvas-wrapper {
-        /* ADJUSTED: Reduced scatter height to make room for charts below */
         height: 50vh !important; 
     }
     
     #dashboardVisuals.maximized #municipioList {
-        /* CRITICAL FIX: Make the list container fill vertical space */
-        /* Calculated height: Full viewport minus nav, chart selectors, and padding */
+        /* Calculate height: Full viewport minus (selector header + search input + margin/padding) */
         max-height: calc(100vh - 200px) !important;
         height: auto !important; 
     }
@@ -216,7 +214,6 @@
     }
     
     #dashboardVisuals.maximized #trendCharts .chart-content-wrapper {
-        /* ADJUSTED: Reduced trend chart height to ensure fit */
         height: 35vh !important;
     }
     
