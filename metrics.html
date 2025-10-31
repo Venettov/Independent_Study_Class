@@ -194,14 +194,14 @@
 
     /* 4. Ensure component heights use max space */
     #dashboardVisuals.maximized #scatter-canvas-wrapper {
-        /* Adjusted height for scatter plot */
-        height: 45vh !important; 
+        /* ADJUSTED: Reduced scatter height to 35vh to make room for charts below */
+        height: 35vh !important; 
     }
     
     #dashboardVisuals.maximized #municipioList {
         /* CRITICAL FIX: Make the list container fill vertical space based on new height */
-        /* Calculated height: Full height of the right column (scatter + controls + narration) */
-        max-height: calc(45vh + 175px) !important; 
+        /* Adjusted height: Follow scatter plot height (35vh) + controls (~100px) + narrative */
+        max-height: calc(35vh + 195px) !important; 
         height: auto !important; 
         overflow-y: scroll !important;
     }
@@ -217,8 +217,8 @@
     }
     
     #dashboardVisuals.maximized #trendCharts .chart-content-wrapper {
-        /* Adjusted height for trend charts */
-        height: 30vh !important;
+        /* ADJUSTED: Reduced trend chart height to 25vh to ensure fit */
+        height: 25vh !important;
     }
     
     #dashboardVisuals.maximized .section-title {
