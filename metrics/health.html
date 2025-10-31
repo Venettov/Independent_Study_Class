@@ -66,6 +66,18 @@
     #metrics-dropdown-root.hovering #metrics-chevron {
       transform: rotate(180deg);
     }
+    
+    /* New style for simulating 65% zoom on the main content */
+    #scale-wrapper {
+        /* Apply the scale transformation */
+        transform: scale(0.65); 
+        transform-origin: top center; /* Scale from the top-center */
+        
+        /* Adjustments to compensate for the scaling effect on surrounding content */
+        height: 154%; /* Approx 1 / 0.65 to ensure vertical space is reserved */
+        padding-bottom: 200px;
+        margin-bottom: -35%; /* Pull up content following the wrapper */
+    }
   </style>
 </head>
 <body class="bg-gray-50 text-gray-900 font-sans">
@@ -102,125 +114,127 @@
     </div>
   </nav>
 
-  <main class="max-w-7xl mx-auto px-4 py-8 space-y-8">
+  <div id="scale-wrapper">
+    <main class="max-w-7xl mx-auto px-4 py-8 space-y-8">
 
-    <header class="card hero p-6 sm:p-8 lg:p-10 relative">
-      <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between">
-          <div>
-              <p class="text-sm font-semibold text-gray-500 uppercase">Graduate Independent Study</p>
-              <h1 class="mt-2 text-4xl sm:text-5xl font-extrabold leading-tight">
-                  Population & Economic Dynamics in Puerto Rico
-              </h1>
-              <p class="mt-3 text-lg text-gray-700">
-                  A graduate research project examining demographic shifts, out-migration, and sustainable development
-                  strategies through linked data analysis and policy synthesis.
-              </p>
-              <div class="mt-5">
-                  <span class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-100 text-slate-800">
-                      <span class="inline-flex w-5 h-5 items-center justify-center rounded-full bg-slate-800 text-white text-xs">i</span>
-                      Hover over the map to see county / municipality details
-                  </span>
-              </div>
-          </div>
-      </div>
-    </header>
-
-    <section class="card p-4">
-      <div class="flex items-center justify-between gap-3">
-        <div class="text-sm text-gray-700 font-medium">Map shading by</div>
-        <div class="flex items-center gap-2">
-          <div class="inline-flex rounded-lg border bg-white shadow-sm overflow-hidden">
-            <button id="metricPct" type="button"
-              class="px-3 py-1.5 text-sm font-medium bg-blue-600 text-white">% Change in Coverage Gap</button>
-            <button id="metricAbs" type="button"
-              class="px-3 py-1.5 text-sm font-medium hover:bg-gray-50">Absolute Coverage Gap</button>
-          </div>
-          <button id="clearSel"
-            class="px-3 py-1.5 text-sm rounded-lg border bg-white hover:bg-gray-50">Clear selection</button>
+      <header class="card hero p-6 sm:p-8 lg:p-10 relative">
+        <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between">
+            <div>
+                <p class="text-sm font-semibold text-gray-500 uppercase">Graduate Independent Study</p>
+                <h1 class="mt-2 text-4xl sm:text-5xl font-extrabold leading-tight">
+                    Population & Economic Dynamics in Puerto Rico
+                </h1>
+                <p class="mt-3 text-lg text-gray-700">
+                    A graduate research project examining demographic shifts, out-migration, and sustainable development
+                    strategies through linked data analysis and policy synthesis.
+                </p>
+                <div class="mt-5">
+                    <span class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-100 text-slate-800">
+                        <span class="inline-flex w-5 h-5 items-center justify-center rounded-full bg-slate-800 text-white text-xs">i</span>
+                        Hover over the map to see county / municipality details
+                    </span>
+                </div>
+            </div>
         </div>
-      </div>
-      <div id="map" class="mt-3"></div>
-    </section>
+      </header>
 
-    <section class="card p-6">
-      <h2 class="text-lg font-semibold mb-4">Health Coverage Details</h2>
-      
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div>
-          <div class="text-sm">
-            <div>Municipio: <span id="d-name" class="font-semibold">Puerto Rico</span></div>
-            <div>Centroid: <span id="d-centroid" class="text-gray-600">—</span></div>
-          </div>
-
-          <div class="mt-4 text-sm">
-            <div class="font-semibold text-gray-700">Health Coverage Gap (Percentage Without Coverage):</div>
-            <ul class="mt-1 space-y-1">
-              <li>Latest Year (2023): <span id="d-latest" class="font-semibold">—</span></li>
-              <li>Change since 2013: <span id="d-chg" class="font-semibold">—</span></li>
-              <li>Latest Annual Change: <span id="d-annual-chg" class="font-semibold">—</span></li>
-            </ul>
-          </div>
-
-          <div class="mt-4 text-sm">
-            <a id="d-census" class="text-blue-600 underline" href="https://data.census.gov/table?q=S2701:+HEALTH+INSURANCE+COVERAGE+STATUS+Puerto+Rico" target="_blank" rel="noopener">
-              Open on data.census.gov (S2701) ↗
-            </a>
+      <section class="card p-4">
+        <div class="flex items-center justify-between gap-3">
+          <div class="text-sm text-gray-700 font-medium">Map shading by</div>
+          <div class="flex items-center gap-2">
+            <div class="inline-flex rounded-lg border bg-white shadow-sm overflow-hidden">
+              <button id="metricPct" type="button"
+                class="px-3 py-1.5 text-sm font-medium bg-blue-600 text-white">% Change in Coverage Gap</button>
+              <button id="metricAbs" type="button"
+                class="px-3 py-1.5 text-sm font-medium hover:bg-gray-50">Absolute Coverage Gap</button>
+            </div>
+            <button id="clearSel"
+              class="px-3 py-1.5 text-sm rounded-lg border bg-white hover:bg-gray-50">Clear selection</button>
           </div>
         </div>
-
-        <div>
-          <h3 class="font-semibold mb-2">Percentage Without Coverage Trend (2013–2023)</h3>
-          <div class="mini bg-gray-50 rounded p-3">
-            <canvas id="lineChart"></canvas>
-          </div>
-        </div>
-
-        <div>
-          <h3 class="font-semibold mb-2">Annual Change in Coverage Gap (pp)</h3>
-          <div class="mini bg-gray-50 rounded p-3">
-            <canvas id="barChart"></canvas>
-          </div>
-        </div>
-      </div>
-      
-      <div class="mt-6 pt-6 border-t border-gray-200">
-        <h3 class="font-semibold mb-2">Comparison of Coverage Gap Change by Period (pp)</h3>
-        <div class="w-full h-80 bg-gray-50 rounded p-3">
-            <canvas id="compareChart"></canvas>
-        </div>
-      </div>
-      <div class="mt-10 pt-6 border-t border-gray-200">
-          <h3 class="text-xl font-semibold mb-3">Understanding the Health Coverage Trend</h3>
-          <p class="text-gray-700 text-base">
-              The striking, massive drop in the uninsured rate shown between 2014 and 2015 is not solely a reflection of real-world improvement. It is a combination of two major factors:
-          </p>
-          <ul class="list-disc list-inside space-y-2 text-sm text-gray-700 mt-3 ml-4">
-              <li>
-                  <strong>Policy Effect:</strong> The implementation of the **Affordable Care Act (ACA)** and the corresponding expansion of government-funded healthcare (*Mi Salud*) in Puerto Rico dramatically increased public coverage, moving a large uninsured population into the insured category.
-              </li>
-              <li>
-                  <strong>Data Discontinuity:</strong> The drop was **amplified by a major methodological change** in the U.S. Census Bureau's American Community Survey (ACS) starting in 2015. New, clearer questions were introduced that effectively captured public health insurance enrollment, whereas previous surveys often missed this information, leading to an artificially high "uninsured" rate before 2015.
-              </li>
-          </ul>
-          
-          <h3 class="text-xl font-semibold mt-6 mb-3">Analyzing Post-2015 Volatility</h3>
-          <p class="text-gray-700 text-base">
-              Since 2015, the uninsured rate has stabilized in the low single digits (4%–8%). However, the annual bar chart shows high volatility—small changes in this low rate result in noticeable positive or negative absolute percentage point swings. This suggests that the remaining uninsured population is **highly susceptible to local economic shocks and mobility**:
-          </p>
-          <ul class="list-disc list-inside space-y-2 text-sm text-gray-700 mt-3 ml-4">
-              <li>
-                  <strong>Small Denominator Effect:</strong> Because the rate is so low, minor shifts in the number of uninsured individuals (the numerator) or the population (the denominator) can exaggerate the apparent percentage point change.
-              </li>
-              <li>
-                  <strong>Economic and Migration Shocks:</strong> Post-2017 (Hurricane Maria) and during the COVID-19 pandemic, sudden job losses, business closures, and high migration rates created rapid, temporary shifts in employer-provided and public coverage, causing the year-to-year swings seen in the municipal data.
-              </li>
-              <li>
-                  <strong>Hard-to-Reach Population:</strong> The population remaining uninsured tends to be complex—often young, highly mobile, or self-employed—making their rate difficult to measure precisely and highly sensitive to local economic events.
-              </li>
-          </ul>
-      </div>
+        <div id="map" class="mt-3"></div>
       </section>
-  </main>
+
+      <section class="card p-6">
+        <h2 class="text-lg font-semibold mb-4">Health Coverage Details</h2>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div>
+            <div class="text-sm">
+              <div>Municipio: <span id="d-name" class="font-semibold">Puerto Rico</span></div>
+              <div>Centroid: <span id="d-centroid" class="text-gray-600">—</span></div>
+            </div>
+
+            <div class="mt-4 text-sm">
+              <div class="font-semibold text-gray-700">Health Coverage Gap (Percentage Without Coverage):</div>
+              <ul class="mt-1 space-y-1">
+                <li>Latest Year (2023): <span id="d-latest" class="font-semibold">—</span></li>
+                <li>Change since 2013: <span id="d-chg" class="font-semibold">—</span></li>
+                <li>Latest Annual Change: <span id="d-annual-chg" class="font-semibold">—</span></li>
+              </ul>
+            </div>
+
+            <div class="mt-4 text-sm">
+              <a id="d-census" class="text-blue-600 underline" href="https://data.census.gov/table?q=S2701:+HEALTH+INSURANCE+COVERAGE+STATUS+Puerto+Rico" target="_blank" rel="noopener">
+                Open on data.census.gov (S2701) ↗
+              </a>
+            </div>
+          </div>
+
+          <div>
+            <h3 class="font-semibold mb-2">Percentage Without Coverage Trend (2013–2023)</h3>
+            <div class="mini bg-gray-50 rounded p-3">
+              <canvas id="lineChart"></canvas>
+            </div>
+          </div>
+
+          <div>
+            <h3 class="font-semibold mb-2">Annual Change in Coverage Gap (pp)</h3>
+            <div class="mini bg-gray-50 rounded p-3">
+              <canvas id="barChart"></canvas>
+            </div>
+          </div>
+        </div>
+        
+        <div class="mt-6 pt-6 border-t border-gray-200">
+          <h3 class="font-semibold mb-2">Comparison of Coverage Gap Change by Period (pp)</h3>
+          <div class="w-full h-80 bg-gray-50 rounded p-3">
+              <canvas id="compareChart"></canvas>
+          </div>
+        </div>
+        <div class="mt-10 pt-6 border-t border-gray-200">
+            <h3 class="text-xl font-semibold mb-3">Understanding the Health Coverage Trend</h3>
+            <p class="text-gray-700 text-base">
+                The striking, massive drop in the uninsured rate shown between 2014 and 2015 is not solely a reflection of real-world improvement. It is a combination of two major factors:
+            </p>
+            <ul class="list-disc list-inside space-y-2 text-sm text-gray-700 mt-3 ml-4">
+                <li>
+                    <strong>Policy Effect:</strong> The implementation of the **Affordable Care Act (ACA)** and the corresponding expansion of government-funded healthcare (*Mi Salud*) in Puerto Rico dramatically increased public coverage, moving a large uninsured population into the insured category.
+                </li>
+                <li>
+                    <strong>Data Discontinuity:</strong> The drop was **amplified by a major methodological change** in the U.S. Census Bureau's American Community Survey (ACS) starting in 2015. New, clearer questions were introduced that effectively captured public health insurance enrollment, whereas previous surveys often missed this information, leading to an artificially high "uninsured" rate before 2015.
+                </li>
+            </ul>
+            
+            <h3 class="text-xl font-semibold mt-6 mb-3">Analyzing Post-2015 Volatility</h3>
+            <p class="text-gray-700 text-base">
+                Since 2015, the uninsured rate has stabilized in the low single digits (4%–8%). However, the annual bar chart shows high volatility—small changes in this low rate result in noticeable positive or negative absolute percentage point swings. This suggests that the remaining uninsured population is **highly susceptible to local economic shocks and mobility**:
+            </p>
+            <ul class="list-disc list-inside space-y-2 text-sm text-gray-700 mt-3 ml-4">
+                <li>
+                    <strong>Small Denominator Effect:</strong> Because the rate is so low, minor shifts in the number of uninsured individuals (the numerator) or the population (the denominator) can exaggerate the apparent percentage point change.
+                </li>
+                <li>
+                    <strong>Economic and Migration Shocks:</strong> Post-2017 (Hurricane Maria) and during the COVID-19 pandemic, sudden job losses, business closures, and high migration rates created rapid, temporary shifts in employer-provided and public coverage, causing the year-to-year swings seen in the municipal data.
+                </li>
+                <li>
+                    <strong>Hard-to-Reach Population:</strong> The population remaining uninsured tends to be complex—often young, highly mobile, or self-employed—making their rate difficult to measure precisely and highly sensitive to local economic events.
+                </li>
+            </ul>
+        </div>
+        </section>
+    </main>
+  </div>
 
   <script>
     // ---------------------- Data paths ----------------------
@@ -236,9 +250,7 @@
 
     // ---------------------- Choropleth colors ----------------------
     // Note: Health Coverage Gap (Uninsured Rate) is LOWER is BETTER.
-    // CHORO_COLORS are defined Red(0) -> Deep Red(5).
-    // The legend is currently coded to use CHORO_COLORS[0] for <= breaks[0]
-    // Since Lower is Better, we reverse the color assignment logic in colorFor (Green -> Red)
+    // CHORO_COLORS are defined (Green -> Red) to reflect that lower values get better colors.
     const CHORO_COLORS = ['#15803d', '#22c55e', '#bbf7d0', '#f97316', '#b91c1c', '#7f1d1d']; 
     const PCT_BREAKS = [2.5, 4.0, 6.0, 8.0, 10.0]; // Latest Value Breaks (%)
     let ABS_BREAKS = [-4.0, -2.0, 0.0, 1.0, 2.0]; // Cumulative Change Breaks (pp)
