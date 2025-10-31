@@ -158,6 +158,35 @@
         height: 154%; /* Set height to approx 1/0.65 to fit content without scroll */
         padding-bottom: 200px; /* Add extra padding for safety */
         margin-bottom: -35%; /* Compensate for the scale to pull up following elements */
+        transition: all 0.3s ease; /* Smooth transition for maximizing */
+    }
+    
+    /* NEW: Maximized state for the wrapper */
+    #scale-wrapper.maximized {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: 1000;
+        background: #f3f4f6;
+        transform: none !important; /* Disable scale */
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow-y: auto; /* Allow scrolling if content is too large */
+    }
+    
+    /* NEW: Adjust main content within the wrapper when maximized */
+    #scale-wrapper.maximized > main {
+        max-width: none !important;
+        padding: 1rem !important;
+        margin: 0 !important;
+        min-height: 100vh;
+    }
+    
+    /* NEW: Adjust chart height when maximized */
+    #scale-wrapper.maximized .chart-content-wrapper {
+        height: 70vh; /* Make charts taller in fullscreen mode */
     }
   </style>
 </head>
@@ -313,7 +342,17 @@
           <div id="main-panel" class="card grid grid-cols-1 lg:grid-cols-12 gap-4 mt-6 p-0">
               
               <div class="lg:col-span-10 p-4" id="scatterPlotContainer">
-                  <h2 class="text-lg font-semibold mb-3 text-black">Socio-Economic Relationship by Municipality</h2>
+                  <div class="flex items-center justify-between">
+                      <h2 class="text-lg font-semibold mb-3 text-black">Socio-Economic Relationship by Municipality</h2>
+                      <button id="maximizeButton" onclick="toggleMaximize()" class="text-gray-500 hover:text-blue-600 transition p-1 rounded-md">
+                          <svg id="maximizeIcon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9m1.25 10.25l-4.5-4.5m4.5 4.5v-4.5m0 4.5h-4.5m4.5 0L15 15m4.5-4.5v-4.5m0 4.5h-4.5m4.5 0l-4.5-4.5m4.5 4.5L15 15m-4.5 4.5v-4.5m0 4.5h-4.5m4.5 0L9 9m1.25 10.25l-4.5-4.5m4.5 4.5v-4.5m0 4.5h-4.5m4.5 0L15 15"/>
+                          </svg>
+                          <svg id="minimizeIcon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6 hidden">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 9l-4.5 4.5m0 0l4.5 4.5m-4.5-4.5h4.5m4.5-4.5l4.5 4.5m0 0l-4.5 4.5m4.5-4.5h-4.5M9 9l4.5-4.5m-4.5 4.5v-4.5m0 4.5h-4.5m4.5 0l-4.5-4.5m4.5 4.5L15 15m4.5-4.5v-4.5m0 4.5h-4.5m4.5 0l-4.5-4.5"/>
+                          </svg>
+                      </button>
+                  </div>
                   <div id="chart-loader" class="text-center mt-20 hidden">
                       <div class="loader"></div>
                       <div class="mt-4 text-black">Loading and merging data...</div>
@@ -507,7 +546,7 @@
         // FIX for Education KPI: Calculate the true average percentage attainment for Puerto Rico
         const prData = merged['Puerto Rico'];
         if (prData) {
-            const allEduValues = masterData.filter(m => m.Municipio !== 'Puerto Rico')
+            const allEduValues = Object.values(merged).filter(m => m.Municipio !== 'Puerto Rico')
                                             .map(m => m.Education_2023)
                                             .filter(v => Number.isFinite(v));
             if (allEduValues.length > 0) {
@@ -945,6 +984,27 @@
             drawTrendCharts(selectedMunicipio);
         }
     }
+    
+    // NEW: Maximize/Minimize Toggle Function
+    function toggleMaximize() {
+        const wrapper = document.getElementById('scale-wrapper');
+        const maximizeIcon = document.getElementById('maximizeIcon');
+        const minimizeIcon = document.getElementById('minimizeIcon');
+        
+        const isMaximized = wrapper.classList.toggle('maximized');
+        
+        // Toggle icons visibility
+        maximizeIcon.classList.toggle('hidden', isMaximized);
+        minimizeIcon.classList.toggle('hidden', !isMaximized);
+        
+        // Redraw charts to adjust to new container size
+        // Use a slight delay to ensure the container finishes resizing before redrawing
+        setTimeout(() => {
+            if (scatterChart) scatterChart.resize();
+            if (trendChart1) trendChart1.resize();
+            if (trendChart2) trendChart2.resize();
+        }, 100);
+    }
 
 
     // --- Initialization ---
@@ -981,6 +1041,9 @@
             document.getElementById('yAxisSelect').addEventListener('change', drawScatterPlot);
             document.getElementById('colorSelect').addEventListener('change', drawScatterPlot);
             
+            // Expose the function globally for the HTML button's onclick attribute
+            window.toggleMaximize = toggleMaximize;
+            
         } catch (error) {
             console.error("Failed to initialize dashboard:", error);
             document.getElementById('chart-loader').innerHTML = '<div class="text-red-400">Error loading data. Check console for details.</div>';
@@ -1006,7 +1069,7 @@
       root.addEventListener('mouseleave', removeHovering);
       if (menu) {
         menu.addEventListener('mouseenter', addHovering);
-        menu.addEventListener('mouseleave', removeDoing);
+        menu.addEventListener('mouseleave', removeHovering); // Corrected function name
       }
     }
   </script>
