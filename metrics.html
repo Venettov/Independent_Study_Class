@@ -158,33 +158,48 @@
         padding: 0 !important;
         overflow-y: auto; 
         
-        /* Overrides flex property from dashboard-block padding */
         display: block !important; 
     }
     
     /* Adjust internal elements when the visuals container is maximized */
     #dashboardVisuals.maximized #main-panel {
-        /* Allow scatterplot to take more space when maximized */
-        grid-template-columns: 1fr 280px !important; 
+        /* Distribute space to scatter plot and selector */
+        grid-template-columns: 1fr 300px !important; 
         padding: 1rem !important;
         gap: 1rem !important;
     }
     
+    /* Ensure all chart wrappers get proper height in maximized view */
     #dashboardVisuals.maximized #scatter-canvas-wrapper {
-        height: 80vh !important; /* Make scatter plot fill most of the screen */
+        height: 60vh !important; /* Make scatter plot fill most of the screen */
     }
     
-    /* Hide trend charts when maximized to focus on the scatter plot */
-    #dashboardVisuals.maximized #trendCharts,
-    #dashboardVisuals.maximized #trendMuniName {
-        display: none !important;
+    /* Make the trend charts visible and give them adequate vertical space */
+    #dashboardVisuals.maximized #trendCharts {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        width: 100%;
+        padding: 1rem 0 2rem 0;
+    }
+    
+    /* Trend chart content wrappers need an explicit height */
+    #dashboardVisuals.maximized #trendCharts .chart-content-wrapper {
+        height: 40vh !important;
+    }
+    
+    /* Show the municipality name title, but adjust font size */
+    #dashboardVisuals.maximized .section-title {
+        font-size: 1.5rem;
+        padding-top: 1rem;
     }
 
-    /* Adjust placement of the maximized button within the container */
+
+    /* Maximize button placement */
     #maximizeButtonContainer {
         position: absolute;
-        top: 1.5rem; /* Adjusted top spacing */
-        right: 1.5rem; /* Adjusted right spacing */
+        top: 1.5rem; /* Space from the top edge of dashboardVisuals */
+        right: 1.5rem; /* Space from the right edge of dashboardVisuals */
         z-index: 1010;
     }
   </style>
