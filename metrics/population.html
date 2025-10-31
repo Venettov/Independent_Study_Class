@@ -55,6 +55,18 @@
     #metrics-dropdown-root.hovering #metrics-chevron {
       transform: rotate(180deg);
     }
+    
+    /* New style for simulating 65% zoom on the main content */
+    #scale-wrapper {
+        /* Apply the scale transformation */
+        transform: scale(0.65); 
+        transform-origin: top center; /* Scale from the top-center */
+        
+        /* Adjustments to compensate for the scaling effect on surrounding content */
+        height: 154%; /* Approx 1 / 0.65 to ensure vertical space is reserved */
+        padding-bottom: 200px;
+        margin-bottom: -35%; /* Pull up content following the wrapper */
+    }
   </style>
 </head>
 <body class="bg-gray-50 text-gray-900 font-sans">
@@ -91,162 +103,164 @@
     </div>
   </nav>
 
-  <main class="max-w-7xl mx-auto px-4 py-8 space-y-8">
-    <header class="card hero p-6 sm:p-8 lg:p-10 relative">
-      <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between">
-        <div>
-          <p class="text-sm font-semibold text-gray-500 uppercase">Graduate Independent Study</p>
-          <h1 class="mt-2 text-4xl sm:text-5xl font-extrabold leading-tight">
-            Population & Economic Dynamics in Puerto Rico
-          </h1>
-          <p class="mt-3 text-lg text-gray-700">
-            A graduate research project examining demographic shifts, out-migration, and sustainable development
-            strategies through linked data analysis and policy synthesis.
+  <div id="scale-wrapper">
+    <main class="max-w-7xl mx-auto px-4 py-8 space-y-8">
+      <header class="card hero p-6 sm:p-8 lg:p-10 relative">
+        <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between">
+          <div>
+            <p class="text-sm font-semibold text-gray-500 uppercase">Graduate Independent Study</p>
+            <h1 class="mt-2 text-4xl sm:text-5xl font-extrabold leading-tight">
+              Population & Economic Dynamics in Puerto Rico
+            </h1>
+            <p class="mt-3 text-lg text-gray-700">
+              A graduate research project examining demographic shifts, out-migration, and sustainable development
+              strategies through linked data analysis and policy synthesis.
+            </p>
+            <div class="mt-5">
+              <span class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-100 text-slate-800">
+                <span class="inline-flex w-5 h-5 items-center justify-center rounded-full bg-slate-800 text-white text-xs">i</span>
+                Hover over the map to see county / municipality details
+              </span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <section class="card p-4">
+        <div class="flex items-center justify-between gap-3">
+          <div class="text-sm text-gray-700 font-medium">Map shading by</div>
+          <div class="flex items-center gap-2">
+            <div class="inline-flex rounded-lg border bg-white shadow-sm overflow-hidden" id="metric-toggles">
+              <button id="metricPct" type="button" class="px-3 py-1.5 text-sm font-medium bg-blue-600 text-white">% change</button>
+              <button id="metricAbs" type="button" class="px-3 py-1.5 text-sm font-medium hover:bg-gray-50">abs change</button>
+              <button id="metricDensity" type="button" class="px-3 py-1.5 text-sm font-medium hover:bg-gray-50">Density</button>
+            </div>
+            <button id="clearSel" class="px-3 py-1.5 text-sm rounded-lg border bg-white hover:bg-gray-50">Clear selection</button>
+          </div>
+        </div>
+        <div id="map" class="mt-3"></div>
+      </section>
+
+      <section class="card p-6">
+        <h2 class="text-lg font-semibold mb-4">Population details</h2>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div>
+            <div class="text-sm">
+              <div>Municipio: <span id="d-name" class="font-semibold">Puerto Rico</span></div>
+              <div>Centroid: <span id="d-centroid" class="text-gray-600">—</span></div>
+            </div>
+
+            <div class="mt-4 text-sm">
+              <div class="font-semibold text-gray-700">Population (Vintage 2024):</div>
+              <ul class="mt-1 space-y-1">
+                <li>2024: <span id="d-2024" class="font-semibold">—</span></li>
+                <li>Change since 2010: <span id="d-chg" class="font-semibold">—</span></li>
+                <li>2023→2024: <span id="d-2324" class="font-semibold">—</span></li>
+                <li>2024 Density (per sq mi): <span id="d-density" class="font-semibold">—</span></li>
+                </ul>
+            </div>
+
+            <div class="mt-4 text-sm">
+              <a id="d-census" class="text-blue-600 underline" href="#" target="_blank" rel="noopener">
+                Open on data.census.gov ↗
+              </a>
+            </div>
+          </div>
+
+          <div>
+            <h3 class="font-semibold mb-2">Population trend (2010–2024)</h3>
+            <div class="mini bg-gray-50 rounded p-3">
+              <canvas id="lineChart"></canvas>
+            </div>
+          </div>
+
+          <div>
+            <h3 class="font-semibold mb-2">Annual % Change</h3>
+            <div class="mini bg-gray-50 rounded p-3">
+              <canvas id="barChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      <hr class="border-gray-300">
+
+      <section class="card p-6 space-y-6">
+        <h2 class="text-lg font-semibold">Analysis of Population Dynamics (2010–2024)</h2>
+
+        <div class="space-y-4">
+          <h3 class="text-base font-semibold text-gray-700">The Overall Trend: Population Decline</h3>
+          <p>
+            The <strong>Population Trend (2010–2024) line chart</strong>clearly shows a significant, sustained decline in the resident population of Puerto Rico since 2010. This decline is not a recent phenomenon but an acceleration of a trend spanning over a decade, driven primarily by <strong>negative net migration</strong>.
           </p>
-          <div class="mt-5">
-            <span class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-100 text-slate-800">
-              <span class="inline-flex w-5 h-5 items-center justify-center rounded-full bg-slate-800 text-white text-xs">i</span>
-              Hover over the map to see county / municipality details
-            </span>
-          </div>
-        </div>
-      </div>
-    </header>
-
-    <section class="card p-4">
-      <div class="flex items-center justify-between gap-3">
-        <div class="text-sm text-gray-700 font-medium">Map shading by</div>
-        <div class="flex items-center gap-2">
-          <div class="inline-flex rounded-lg border bg-white shadow-sm overflow-hidden" id="metric-toggles">
-            <button id="metricPct" type="button" class="px-3 py-1.5 text-sm font-medium bg-blue-600 text-white">% change</button>
-            <button id="metricAbs" type="button" class="px-3 py-1.5 text-sm font-medium hover:bg-gray-50">abs change</button>
-            <button id="metricDensity" type="button" class="px-3 py-1.5 text-sm font-medium hover:bg-gray-50">Density</button>
-          </div>
-          <button id="clearSel" class="px-3 py-1.5 text-sm rounded-lg border bg-white hover:bg-gray-50">Clear selection</button>
-        </div>
-      </div>
-      <div id="map" class="mt-3"></div>
-    </section>
-
-    <section class="card p-6">
-      <h2 class="text-lg font-semibold mb-4">Population details</h2>
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div>
-          <div class="text-sm">
-            <div>Municipio: <span id="d-name" class="font-semibold">Puerto Rico</span></div>
-            <div>Centroid: <span id="d-centroid" class="text-gray-600">—</span></div>
-          </div>
-
-          <div class="mt-4 text-sm">
-            <div class="font-semibold text-gray-700">Population (Vintage 2024):</div>
-            <ul class="mt-1 space-y-1">
-              <li>2024: <span id="d-2024" class="font-semibold">—</span></li>
-              <li>Change since 2010: <span id="d-chg" class="font-semibold">—</span></li>
-              <li>2023→2024: <span id="d-2324" class="font-semibold">—</span></li>
-              <li>2024 Density (per sq mi): <span id="d-density" class="font-semibold">—</span></li>
-              </ul>
-          </div>
-
-          <div class="mt-4 text-sm">
-            <a id="d-census" class="text-blue-600 underline" href="#" target="_blank" rel="noopener">
-              Open on data.census.gov ↗
-            </a>
-          </div>
+          <p>
+            The <strong>Annual % Change bar chart</strong> illustrates the severity of this loss, with nearly every year showing a negative percentage change, often exceeding $-1.00\%$ per year, especially following the major hurricanes (Maria and Irma in 2017) and the ongoing fiscal crisis. Periods of negative economic growth and lack of opportunity fuel this out-migration, particularly among the working-age population.
+          </p>
         </div>
 
-        <div>
-          <h3 class="font-semibold mb-2">Population trend (2010–2024)</h3>
-          <div class="mini bg-gray-50 rounded p-3">
-            <canvas id="lineChart"></canvas>
-          </div>
+        <div class="space-y-4">
+          <h3 class="text-base font-semibold text-gray-700">Geographic Disparities and Density</h3>
+          <p>
+            The <strong>Map Shading</strong> (when set to `% change` or `abs change`) reveals that population loss is widespread, impacting both urban and rural municipalities, though highly populated areas like the San Juan metropolitan area have lost the largest <strong>absolute number of people</strong>.
+          </p>
+          <p>
+            When switching the map to <strong>Density</strong> mode, one can visualize the distribution of the remaining population. High-density areas (urban centers, visible in reds/oranges) are vital economic hubs, but the simultaneous population loss in these areas represents a high concentration of demographic stress. Conversely, lower-density, often more mountainous or peripheral municipalities (visible in greens) face distinct challenges related to providing basic services and infrastructure to a highly dispersed and aging population.
+          </p>
         </div>
 
-        <div>
-          <h3 class="font-semibold mb-2">Annual % Change</h3>
-          <div class="mini bg-gray-50 rounded p-3">
-            <canvas id="barChart"></canvas>
-          </div>
+        <div class="space-y-4">
+          <h3 class="text-base font-semibold text-gray-700">Supporting Resources and Data</h3>
+          <p>
+            The primary source for these detailed annual population estimates is the <strong>U.S. Census Bureau’s Population Estimates Program</strong>, which provides vintages for Puerto Rico's municipalities.
+          </p>
+          <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
+            <li>
+              <a href="https://www.census.gov/data/datasets/time-series/demo/popest/2020s-total-puerto-rico-municipios.html"
+                target="_blank" rel="noopener" class="text-blue-600 underline">
+                U.S. Census Bureau: 2020s Census Estimates – Puerto Rico Municipalities
+              </a> (for post-2020 data).
+            </li>
+            <li>
+              <a href="https://www.census.gov/data/tables/time-series/demo/popest/intercensal-2010-2020-puerto-rico-municipios.html"
+                target="_blank" rel="noopener" class="text-blue-600 underline">
+                U.S. Census Bureau: Intercensal Estimates 2010–2020 – Puerto Rico Municipalities
+              </a> (for historical data).
+            </li>
+            <li><strong>Economic Research Institutions:</strong> Further analysis of the drivers of migration (economic stagnation, debt crisis, and natural disasters) is routinely published by the Federal Reserve Bank of New York and various Puerto Rican and U.S. think tanks.</li>
+          </ul>
         </div>
-      </div>
-    </section>
-    
-    <hr class="border-gray-300">
+      </section>
+      <section class="card p-6">
+        <h2 class="text-lg font-semibold mb-4">File Sources</h2>
+        <div class="space-y-4">
+          <p>Data for this project was derived from the U.S. Census Bureau:</p>
+          <ul class="list-disc list-inside space-y-1">
+            <li>
+              <a href="https://www.census.gov/data/datasets/time-series/demo/popest/2020s-total-puerto-rico-municipios.html"
+                target="_blank" rel="noopener" class="text-blue-600 underline">
+                2020s Census Estimates – Puerto Rico Municipalities
+              </a>
+            </li>
+            <li>
+              <a href="https://www.census.gov/data/tables/time-series/demo/popest/intercensal-2010-2020-puerto-rico-municipios.html"
+                target="_blank" rel="noopener" class="text-blue-600 underline">
+                Intercensal Estimates 2010–2020 – Puerto Rico Municipalities
+              </a>
+              <span class="text-gray-600"> (download: <em>prm-est2020int-pop-72.xlsx</em>)</span>
+            </li>
+          </ul>
 
-    <section class="card p-6 space-y-6">
-      <h2 class="text-lg font-semibold">Analysis of Population Dynamics (2010–2024)</h2>
-
-      <div class="space-y-4">
-        <h3 class="text-base font-semibold text-gray-700">The Overall Trend: Population Decline</h3>
-        <p>
-          The <strong>Population Trend (2010–2024) line chart</strong>clearly shows a significant, sustained decline in the resident population of Puerto Rico since 2010. This decline is not a recent phenomenon but an acceleration of a trend spanning over a decade, driven primarily by <strong>negative net migration</strong>.
-        </p>
-        <p>
-          The <strong>Annual % Change bar chart</strong> illustrates the severity of this loss, with nearly every year showing a negative percentage change, often exceeding $-1.00\%$ per year, especially following the major hurricanes (Maria and Irma in 2017) and the ongoing fiscal crisis. Periods of negative economic growth and lack of opportunity fuel this out-migration, particularly among the working-age population.
-        </p>
-      </div>
-
-      <div class="space-y-4">
-        <h3 class="text-base font-semibold text-gray-700">Geographic Disparities and Density</h3>
-        <p>
-          The <strong>Map Shading</strong> (when set to `% change` or `abs change`) reveals that population loss is widespread, impacting both urban and rural municipalities, though highly populated areas like the San Juan metropolitan area have lost the largest <strong>absolute number of people</strong>.
-        </p>
-        <p>
-          When switching the map to <strong>Density</strong> mode, one can visualize the distribution of the remaining population. High-density areas (urban centers, visible in reds/oranges) are vital economic hubs, but the simultaneous population loss in these areas represents a high concentration of demographic stress. Conversely, lower-density, often more mountainous or peripheral municipalities (visible in greens) face distinct challenges related to providing basic services and infrastructure to a highly dispersed and aging population.
-        </p>
-      </div>
-
-      <div class="space-y-4">
-        <h3 class="text-base font-semibold text-gray-700">Supporting Resources and Data</h3>
-        <p>
-          The primary source for these detailed annual population estimates is the <strong>U.S. Census Bureau’s Population Estimates Program</strong>, which provides vintages for Puerto Rico's municipalities.
-        </p>
-        <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
-          <li>
-            <a href="https://www.census.gov/data/datasets/time-series/demo/popest/2020s-total-puerto-rico-municipios.html"
-               target="_blank" rel="noopener" class="text-blue-600 underline">
-              U.S. Census Bureau: 2020s Census Estimates – Puerto Rico Municipalities
-            </a> (for post-2020 data).
-          </li>
-          <li>
-            <a href="https://www.census.gov/data/tables/time-series/demo/popest/intercensal-2010-2020-puerto-rico-municipios.html"
-               target="_blank" rel="noopener" class="text-blue-600 underline">
-              U.S. Census Bureau: Intercensal Estimates 2010–2020 – Puerto Rico Municipalities
-            </a> (for historical data).
-          </li>
-          <li><strong>Economic Research Institutions:</strong> Further analysis of the drivers of migration (economic stagnation, debt crisis, and natural disasters) is routinely published by the Federal Reserve Bank of New York and various Puerto Rican and U.S. think tanks.</li>
-        </ul>
-      </div>
-    </section>
-    <section class="card p-6">
-      <h2 class="text-lg font-semibold mb-4">File Sources</h2>
-      <div class="space-y-4">
-        <p>Data for this project was derived from the U.S. Census Bureau:</p>
-        <ul class="list-disc list-inside space-y-1">
-          <li>
-            <a href="https://www.census.gov/data/datasets/time-series/demo/popest/2020s-total-puerto-rico-municipios.html"
-               target="_blank" rel="noopener" class="text-blue-600 underline">
-              2020s Census Estimates – Puerto Rico Municipalities
-            </a>
-          </li>
-          <li>
-            <a href="https://www.census.gov/data/tables/time-series/demo/popest/intercensal-2010-2020-puerto-rico-municipios.html"
-               target="_blank" rel="noopener" class="text-blue-600 underline">
-              Intercensal Estimates 2010–2020 – Puerto Rico Municipalities
-            </a>
-            <span class="text-gray-600"> (download: <em>prm-est2020int-pop-72.xlsx</em>)</span>
-          </li>
-        </ul>
-
-        <p>Specific files used:</p>
-        <ul class="list-disc list-inside">
-          <li>prm-est2010_2024.json (site build)</li>
-          <li>prm-est2010_2024.csv (analysis)</li>
-          <li>prm-est2020int-pop-72.xlsx (2010–2020 intercensal)</li>
-        </ul>
-      </div>
-    </section>
-  </main>
-
+          <p>Specific files used:</p>
+          <ul class="list-disc list-inside">
+            <li>prm-est2010_2024.json (site build)</li>
+            <li>prm-est2010_2024.csv (analysis)</li>
+            <li>prm-est2020int-pop-72.xlsx (2010–2020 intercensal)</li>
+          </ul>
+        </div>
+      </section>
+    </main>
+  </div>
+  
   <script>
     const GEOJSON_URL = '../data/tl_2022_72_cousub/pr_municipalities.geojson';
     const POP_JSON    = '../data/population/prm-est2010_2024.json';
