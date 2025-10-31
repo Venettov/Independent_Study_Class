@@ -153,34 +153,37 @@
         width: 100vw;
         height: 100vh;
         z-index: 1000;
-        background: #f3f4f6; /* Match main background */
+        background: #f3f4f6; 
         margin: 0 !important;
         padding: 0 !important;
         overflow-y: auto; 
-        
         display: block !important; 
     }
     
     /* Adjust internal elements when the visuals container is maximized */
     #dashboardVisuals.maximized #main-panel {
-        /* Distribute space to scatter plot and selector */
+        /* Revert to 10/2 split for scatter plot and selector but fill width */
         grid-template-columns: 1fr 300px !important; 
         padding: 1rem !important;
         gap: 1rem !important;
+        width: 100%;
+        max-width: 100%;
+        margin: 0 auto;
     }
     
     /* Ensure all chart wrappers get proper height in maximized view */
     #dashboardVisuals.maximized #scatter-canvas-wrapper {
-        height: 60vh !important; /* Make scatter plot fill most of the screen */
+        height: 60vh !important; /* Make scatter plot taller, but leave room for trend charts */
     }
     
-    /* Make the trend charts visible and give them adequate vertical space */
+    /* Make the trend charts visible and fill the width */
     #dashboardVisuals.maximized #trendCharts {
         display: grid !important;
         grid-template-columns: 1fr 1fr;
         gap: 1rem;
         width: 100%;
-        padding: 1rem 0 2rem 0;
+        max-width: 98vw; /* Allow it to span nearly full screen */
+        margin: 0 auto 2rem auto;
     }
     
     /* Trend chart content wrappers need an explicit height */
@@ -191,7 +194,7 @@
     /* Show the municipality name title, but adjust font size */
     #dashboardVisuals.maximized .section-title {
         font-size: 1.5rem;
-        padding-top: 1rem;
+        padding: 1rem 1rem 0 1rem; /* Adjust padding for maximized context */
     }
 
 
