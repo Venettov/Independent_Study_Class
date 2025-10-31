@@ -55,6 +55,18 @@
     #metrics-dropdown-root.hovering #metrics-chevron {
       transform: rotate(180deg);
     }
+
+    /* New style for simulating 65% zoom on the main content */
+    #scale-wrapper {
+        /* Apply the scale transformation */
+        transform: scale(0.65); 
+        transform-origin: top center; /* Scale from the top-center */
+        
+        /* Adjustments to compensate for the scaling effect on surrounding content */
+        height: 154%; /* Approx 1 / 0.65 to ensure vertical space is reserved */
+        padding-bottom: 200px;
+        margin-bottom: -35%; /* Pull up content following the wrapper */
+    }
   </style>
 </head>
 <body class="bg-gray-50 text-gray-900 font-sans">
@@ -91,137 +103,139 @@
     </div>
   </nav>
 
-  <main class="max-w-7xl mx-auto px-4 py-8 space-y-8">
-    <header class="card hero p-6 sm:p-8 lg:p-10 relative">
-      <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between">
-        <div>
-          <p class="text-sm font-semibold text-gray-500 uppercase">Graduate Independent Study</p>
-          <h1 class="mt-2 text-4xl sm:text-5xl font-extrabold leading-tight">
-            Population & Economic Dynamics in Puerto Rico
-          </h1>
-          <p class="mt-3 text-lg text-gray-700">
-            A graduate research project examining demographic shifts, out-migration, and sustainable development
-            strategies through linked data analysis and policy synthesis.
-          </p>
-          <div class="mt-5">
-            <span class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-100 text-slate-800">
-              <span class="inline-flex w-5 h-5 items-center justify-center rounded-full bg-slate-800 text-white text-xs">i</span>
-              Hover over the map to see county / municipality details
-            </span>
-          </div>
-        </div>
-      </div>
-    </header>
-
-    <section class="card p-4">
-      <div class="flex items-center justify-between gap-3">
-        <div class="text-sm text-gray-700 font-medium">Map shading by</div>
-        <div class="flex items-center gap-2">
-          <div class="inline-flex rounded-lg border bg-white shadow-sm overflow-hidden">
-            <button id="metricPct" type="button" class="px-3 py-1.5 text-sm font-medium bg-blue-600 text-white">Cumulative % Change</button>
-            <button id="metricLatest" type="button" class="px-3 py-1.5 text-sm font-medium hover:bg-gray-50">Latest Attainment (%)</button>
-          </div>
-          <button id="clearSel" class="px-3 py-1.5 text-sm rounded-lg border bg-white hover:bg-gray-50">Clear selection</button>
-        </div>
-      </div>
-      <div id="map" class="mt-3"></div>
-    </section>
-
-    <section class="card p-6">
-      <h2 class="text-lg font-semibold mb-4">Educational Attainment Details</h2>
-      <div class="grid grid-cols-1 lg:grid-cols-4 gap-6"> <div class="lg:col-span-1">
-          <div class="text-sm">
-            <div>Municipio: <span id="d-name" class="font-semibold">Puerto Rico</span></div>
-            <div>Centroid: <span id="d-centroid" class="text-gray-600">—</span></div>
-          </div>
-
-          <div class="mt-4 text-sm">
-            <div class="font-semibold text-gray-700">Bachelor's Degree or Higher (Population 25+):</div>
-            <ul class="mt-1 space-y-1">
-              <li>Latest Year (2023): <span id="d-latest" class="font-semibold">—</span></li>
-              <li>Change in PP since 2013: <span id="d-chg-pp" class="font-semibold">—</span></li>
-              <li>Latest Annual Change: <span id="d-annual-chg" class="font-semibold">—</span></li>
-            </ul>
-          </div>
-
-          <div class="mt-4 text-sm">
-            <a id="d-census" class="text-blue-600 underline" href="https://data.census.gov/table?q=S1501:+EDUCATIONAL+ATTAINMENT+Puerto+Rico" target="_blank" rel="noopener">
-              Open on data.census.gov (S1501) ↗
-            </a>
-          </div>
-        </div>
-
-        <div>
-          <h3 class="font-semibold mb-2">Attainment Trend (2013–2023)</h3>
-          <div class="mini bg-gray-50 rounded p-3">
-            <canvas id="lineChart"></canvas>
-          </div>
-        </div>
-
-        <div>
-          <h3 class="font-semibold mb-2">Annual Change in Percentage Points (pp)</h3>
-          <div class="mini bg-gray-50 rounded p-3">
-            <canvas id="barChart"></canvas>
-          </div>
-        </div>
-
-        <div>
-          <h3 class="font-semibold mb-2">Cumulative Percentage Change (%)</h3>
-          <div id="pctChangeMetricCard" class="mini bg-gray-50 rounded p-6 flex flex-col items-center justify-center">
-            <div class="text-sm font-medium text-gray-600">Total Change (2013–2023)</div>
-            <div id="pct-change-val" class="mt-2 text-5xl font-extrabold text-gray-800">
-              —
-            </div>
-            <div id="pct-change-icon" class="mt-3 text-lg font-semibold">
-              <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold" style="min-width: 90px; justify-content: center;">
-                &nbsp;
+  <div id="scale-wrapper">
+    <main class="max-w-7xl mx-auto px-4 py-8 space-y-8">
+      <header class="card hero p-6 sm:p-8 lg:p-10 relative">
+        <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between">
+          <div>
+            <p class="text-sm font-semibold text-gray-500 uppercase">Graduate Independent Study</p>
+            <h1 class="mt-2 text-4xl sm:text-5xl font-extrabold leading-tight">
+              Population & Economic Dynamics in Puerto Rico
+            </h1>
+            <p class="mt-3 text-lg text-gray-700">
+              A graduate research project examining demographic shifts, out-migration, and sustainable development
+              strategies through linked data analysis and policy synthesis.
+            </p>
+            <div class="mt-5">
+              <span class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-100 text-slate-800">
+                <span class="inline-flex w-5 h-5 items-center justify-center rounded-full bg-slate-800 text-white text-xs">i</span>
+                Hover over the map to see county / municipality details
               </span>
             </div>
           </div>
         </div>
+      </header>
+
+      <section class="card p-4">
+        <div class="flex items-center justify-between gap-3">
+          <div class="text-sm text-gray-700 font-medium">Map shading by</div>
+          <div class="flex items-center gap-2">
+            <div class="inline-flex rounded-lg border bg-white shadow-sm overflow-hidden">
+              <button id="metricPct" type="button" class="px-3 py-1.5 text-sm font-medium bg-blue-600 text-white">Cumulative % Change</button>
+              <button id="metricLatest" type="button" class="px-3 py-1.5 text-sm font-medium hover:bg-gray-50">Latest Attainment (%)</button>
+            </div>
+            <button id="clearSel" class="px-3 py-1.5 text-sm rounded-lg border bg-white hover:bg-gray-50">Clear selection</button>
+          </div>
         </div>
-    </section>
+        <div id="map" class="mt-3"></div>
+      </section>
 
-    <hr class="border-gray-300">
+      <section class="card p-6">
+        <h2 class="text-lg font-semibold mb-4">Educational Attainment Details</h2>
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6"> <div class="lg:col-span-1">
+            <div class="text-sm">
+              <div>Municipio: <span id="d-name" class="font-semibold">Puerto Rico</span></div>
+              <div>Centroid: <span id="d-centroid" class="text-gray-600">—</span></div>
+            </div>
 
-    <section class="card p-6 space-y-6">
-      <h2 class="text-lg font-semibold">Analysis and Supporting Resources</h2>
+            <div class="mt-4 text-sm">
+              <div class="font-semibold text-gray-700">Bachelor's Degree or Higher (Population 25+):</div>
+              <ul class="mt-1 space-y-1">
+                <li>Latest Year (2023): <span id="d-latest" class="font-semibold">—</span></li>
+                <li>Change in PP since 2013: <span id="d-chg-pp" class="font-semibold">—</span></li>
+                <li>Latest Annual Change: <span id="d-annual-chg" class="font-semibold">—</span></li>
+              </ul>
+            </div>
 
-      <div class="space-y-4">
-        <h3 class="text-base font-semibold text-gray-700">Educational Attainment Trend (2013–2023)</h3>
-        <p>
-          The **Attainment Trend** line chart displays the overall percentage of the population aged 25 and over with a Bachelor's degree or higher. For Puerto Rico as a whole, this trend shows an initial decline followed by a rebound, often reflecting the turbulent economic and demographic period after the 2008 financial crisis, the debt crisis, and natural disasters. The general trend for the entire island suggests a **net decrease in the percentage of highly educated residents** since 2013, despite a recent uptick.
-        </p>
-        <p>
-          This net decrease, or slow growth, is often attributed to two major factors:
-          <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
-            <li>**Out-migration (Brain Drain):** Economic conditions and natural disasters (like Hurricane Maria in 2017) have driven significant out-migration, which is often **negatively selective on educational attainment**—meaning the loss is primarily of workers with college degrees or higher, or at least a significant portion of them. This selective migration decreases the overall human capital on the island.</li>
-            <li>**Economic Demand:** A weak local economy may not generate sufficient **high-skill jobs** to retain the new graduates from local universities, leading them to seek opportunities on the mainland.</li>
-          </ul>
-        </p>
-      </div>
+            <div class="mt-4 text-sm">
+              <a id="d-census" class="text-blue-600 underline" href="https://data.census.gov/table?q=S1501:+EDUCATIONAL+ATTAINMENT+Puerto+Rico" target="_blank" rel="noopener">
+                Open on data.census.gov (S1501) ↗
+              </a>
+            </div>
+          </div>
 
-      <div class="space-y-4">
-        <h3 class="text-base font-semibold text-gray-700">Municipal Differences (Map and Local Data)</h3>
-        <p>
-          The **Annual Change** chart and the **Cumulative Percentage Change** metric card (and the **Choropleth Map** when set to Cumulative % Change) highlight the geographic disparities. Areas that show a significant **red-to-orange** (negative or low-gain) coloring on the map typically align with municipalities experiencing the most pronounced out-migration and/or economic decline. Conversely, areas in **green** (positive change) might indicate regions that have retained or attracted a higher proportion of college-educated residents, potentially due to local economic hubs or residential preferences.
-        </p>
-      </div>
+          <div>
+            <h3 class="font-semibold mb-2">Attainment Trend (2013–2023)</h3>
+            <div class="mini bg-gray-50 rounded p-3">
+              <canvas id="lineChart"></canvas>
+            </div>
+          </div>
 
-      <div class="space-y-4">
-        <h3 class="text-base font-semibold text-gray-700">Supporting Resources and Data</h3>
-        <p>
-          For more in-depth data and analysis, you can refer to the following:
-          <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
-            <li>**US Census Bureau, American Community Survey (ACS) Table S1501:** The source of this educational attainment data. The link is provided in the details panel.</li>
-            <li>**Federal Reserve Bank of New York:** Analysis on human capital, education quality, and migration from Puerto Rico.</li>
-            <li>**Bureau of Labor Statistics (BLS):** Reports detailing population loss and out-migration patterns across various educational attainment groups.</li>
-            <li>**NAEP (The Nation's Report Card):** Provides data on the academic performance of K-12 students in Puerto Rico, which provides context for the future workforce's educational foundation.</li>
-          </ul>
-        </p>
-      </div>
-    </section>
-    </main>
+          <div>
+            <h3 class="font-semibold mb-2">Annual Change in Percentage Points (pp)</h3>
+            <div class="mini bg-gray-50 rounded p-3">
+              <canvas id="barChart"></canvas>
+            </div>
+          </div>
+
+          <div>
+            <h3 class="font-semibold mb-2">Cumulative Percentage Change (%)</h3>
+            <div id="pctChangeMetricCard" class="mini bg-gray-50 rounded p-6 flex flex-col items-center justify-center">
+              <div class="text-sm font-medium text-gray-600">Total Change (2013–2023)</div>
+              <div id="pct-change-val" class="mt-2 text-5xl font-extrabold text-gray-800">
+                —
+              </div>
+              <div id="pct-change-icon" class="mt-3 text-lg font-semibold">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold" style="min-width: 90px; justify-content: center;">
+                  &nbsp;
+                </span>
+              </div>
+            </div>
+          </div>
+          </div>
+      </section>
+
+      <hr class="border-gray-300">
+
+      <section class="card p-6 space-y-6">
+        <h2 class="text-lg font-semibold">Analysis and Supporting Resources</h2>
+
+        <div class="space-y-4">
+          <h3 class="text-base font-semibold text-gray-700">Educational Attainment Trend (2013–2023)</h3>
+          <p>
+            The **Attainment Trend** line chart displays the overall percentage of the population aged 25 and over with a Bachelor's degree or higher. For Puerto Rico as a whole, this trend shows an initial decline followed by a rebound, often reflecting the turbulent economic and demographic period after the 2008 financial crisis, the debt crisis, and natural disasters. The general trend for the entire island suggests a **net decrease in the percentage of highly educated residents** since 2013, despite a recent uptick.
+          </p>
+          <p>
+            This net decrease, or slow growth, is often attributed to two major factors:
+            <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
+              <li>**Out-migration (Brain Drain):** Economic conditions and natural disasters (like Hurricane Maria in 2017) have driven significant out-migration, which is often **negatively selective on educational attainment**—meaning the loss is primarily of workers with college degrees or higher, or at least a significant portion of them. This selective migration decreases the overall human capital on the island.</li>
+              <li>**Economic Demand:** A weak local economy may not generate sufficient **high-skill jobs** to retain the new graduates from local universities, leading them to seek opportunities on the mainland.</li>
+            </ul>
+          </p>
+        </div>
+
+        <div class="space-y-4">
+          <h3 class="text-base font-semibold text-gray-700">Municipal Differences (Map and Local Data)</h3>
+          <p>
+            The **Annual Change** chart and the **Cumulative Percentage Change** metric card (and the **Choropleth Map** when set to Cumulative % Change) highlight the geographic disparities. Areas that show a significant **red-to-orange** (negative or low-gain) coloring on the map typically align with municipalities experiencing the most pronounced out-migration and/or economic decline. Conversely, areas in **green** (positive change) might indicate regions that have retained or attracted a higher proportion of college-educated residents, potentially due to local economic hubs or residential preferences.
+          </p>
+        </div>
+
+        <div class="space-y-4">
+          <h3 class="text-base font-semibold text-gray-700">Supporting Resources and Data</h3>
+          <p>
+            For more in-depth data and analysis, you can refer to the following:
+            <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
+              <li>**US Census Bureau, American Community Survey (ACS) Table S1501:** The source of this educational attainment data. The link is provided in the details panel.</li>
+              <li>**Federal Reserve Bank of New York:** Analysis on human capital, education quality, and migration from Puerto Rico.</li>
+              <li>**Bureau of Labor Statistics (BLS):** Reports detailing population loss and out-migration patterns across various educational attainment groups.</li>
+              <li>**NAEP (The Nation's Report Card):** Provides data on the academic performance of K-12 students in Puerto Rico, which provides context for the future workforce's educational foundation.</li>
+            </ul>
+          </p>
+        </div>
+      </section>
+      </main>
+  </div>
 
   <script>
     // ---------------------- Data paths ----------------------
@@ -668,6 +682,20 @@
       // >>> END: Custom logic to highlight only the single min and max values (Thicker Yellow Line) <<<
 
       return style;
+    }
+
+    // Utility: color for a value given breaks
+    function colorFor(value, breaks, isLatest) {
+      if (!Number.isFinite(value)) return '#93c5fd';
+      
+      // For Attainment (Latest Value) and Cumulative Change, Higher is Better (Green=High)
+      // The CHORO_COLORS array is defined Red->Green, so we use it directly.
+      if (value <= breaks[0]) return CHORO_COLORS[0];
+      if (value <= breaks[1]) return CHORO_COLORS[1];
+      if (value <= breaks[2]) return CHORO_COLORS[2];
+      if (value <= breaks[3]) return CHORO_COLORS[3];
+      if (value <= breaks[4]) return CHORO_COLORS[4];
+      return CHORO_COLORS[5];
     }
 
     // Legend render (updates title + ranges)
