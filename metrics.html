@@ -66,7 +66,6 @@
         @apply text-xl font-bold text-gray-800 mb-4 pt-4;
     }
     #municipioList {
-        /* Adjusted max-height to ensure space for trend charts */
         max-height: 480px; 
         overflow-y: scroll; 
         padding-top: 4px; 
@@ -171,7 +170,8 @@
     
     /* Adjust internal elements when the visuals container is maximized */
     #dashboardVisuals.maximized #main-panel {
-        /* **CRITICAL FIX:** Ensure the grid uses 12 columns for the 10/2 split */
+        /* CRITICAL FIX: Ensure the grid uses 12 columns for the 10/2 split */
+        display: grid !important;
         grid-template-columns: 1fr 300px !important; 
         padding: 1rem !important;
         gap: 1rem !important;
@@ -180,9 +180,10 @@
         margin: 0 auto;
     }
 
-    /* CRITICAL FIX: Set a specific, large height for the municipality list when maximized */
+    /* CRITICAL FIX: Set a large height for the municipality list when maximized */
     #dashboardVisuals.maximized #municipioList {
-        max-height: 85vh; 
+        /* Calculate height based on 100vh minus header/search bar height */
+        max-height: calc(100vh - 200px) !important;
     }
     
     /* Ensure all chart wrappers get proper height in maximized view */
@@ -1028,6 +1029,7 @@
         const isMaximized = visuals.classList.toggle('maximized');
         
         // CRITICAL FIX: Toggle the class on the scale-wrapper to disable the scaling effect
+        // This ensures the maximized content is not itself scaled down by 65%
         wrapper.classList.toggle('disable-scale', isMaximized);
         
         // Toggle icons visibility
