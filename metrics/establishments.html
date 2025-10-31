@@ -55,6 +55,18 @@
     #metrics-dropdown-root.hovering #metrics-chevron {
       transform: rotate(180deg);
     }
+    
+    /* New style for simulating 65% zoom on the main content */
+    #scale-wrapper {
+        /* Apply the scale transformation */
+        transform: scale(0.65); 
+        transform-origin: top center; /* Scale from the top-center */
+        
+        /* Adjustments to compensate for the scaling effect on surrounding content */
+        height: 154%; /* Approx 1 / 0.65 to ensure vertical space is reserved */
+        padding-bottom: 200px;
+        margin-bottom: -35%; /* Pull up content following the wrapper */
+    }
   </style>
 </head>
 <body class="bg-gray-50 text-gray-900 font-sans">
@@ -91,153 +103,155 @@
     </div>
   </nav>
 
-  <main class="max-w-7xl mx-auto px-4 py-8 space-y-8">
-    <header class="card hero p-6 sm:p-8 lg:p-10 relative">
-      <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between">
-        <div>
-          <p class="text-sm font-semibold text-gray-500 uppercase">Graduate Independent Study</p>
-          <h1 class="mt-2 text-4xl sm:text-5xl font-extrabold leading-tight">
-            Population & Economic Dynamics in Puerto Rico
-          </h1>
-          <p class="mt-3 text-lg text-gray-700">
-            A graduate research project examining demographic shifts, out-migration, and sustainable development strategies through linked data analysis and policy synthesis.
-          </p>
-          <div class="mt-5">
-            <span class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-100 text-slate-800">
-              <span class="inline-flex w-5 h-5 items-center justify-center rounded-full bg-slate-800 text-white text-xs">i</span>
-              Hover over the map to see county / municipality details
-            </span>
-          </div>
-          </div>
-      </div>
-    </header>
-
-    <section class="card p-4">
-      <div class="flex items-center justify-between gap-3">
-        <div class="text-sm text-gray-700 font-medium">Map shading by</div>
-        <div class="flex items-center gap-2">
-          <div class="inline-flex rounded-lg border bg-white shadow-sm overflow-hidden">
-            <button id="metricNominalPct" type="button" class="px-3 py-1.5 text-sm font-medium hover:bg-gray-50">Change in Count (%)</button>
-            <button id="metricNominalAbs" type="button" class="px-3 py-1.5 text-sm font-medium hover:bg-gray-50">Change in Count (Abs.)</button>
-            <button id="metricRealPct" type="button" class="px-3 py-1.5 text-sm font-medium bg-blue-600 text-white">Percent Change (%)</button>
-          </div>
-          <button id="clearSel" class="px-3 py-1.5 text-sm rounded-lg border bg-white hover:bg-gray-50">Clear selection</button>
+  <div id="scale-wrapper">
+    <main class="max-w-7xl mx-auto px-4 py-8 space-y-8">
+      <header class="card hero p-6 sm:p-8 lg:p-10 relative">
+        <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between">
+          <div>
+            <p class="text-sm font-semibold text-gray-500 uppercase">Graduate Independent Study</p>
+            <h1 class="mt-2 text-4xl sm:text-5xl font-extrabold leading-tight">
+              Population & Economic Dynamics in Puerto Rico
+            </h1>
+            <p class="mt-3 text-lg text-gray-700">
+              A graduate research project examining demographic shifts, out-migration, and sustainable development strategies through linked data analysis and policy synthesis.
+            </p>
+            <div class="mt-5">
+              <span class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-100 text-slate-800">
+                <span class="inline-flex w-5 h-5 items-center justify-center rounded-full bg-slate-800 text-white text-xs">i</span>
+                Hover over the map to see county / municipality details
+              </span>
+            </div>
+            </div>
         </div>
-      </div>
-      <div id="map" class="mt-3"></div>
-    </section>
+      </header>
 
-    <section class="card p-6">
-      <h2 class="text-lg font-semibold mb-4">Employer Establishment details</h2>
-      <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        
-        <div>
-          <div class="text-sm">
-            <div>Municipio: <span id="d-name" class="font-semibold">Puerto Rico</span></div>
-            <div>Centroid: <span id="d-centroid" class="text-gray-600">—</span></div>
-          </div>
-
-          <div class="mt-4 text-sm">
-            <div class="font-semibold text-gray-700">Total Employer Establishments (Vintage 2023):</div>
-            <ul class="mt-1 space-y-1">
-              <li>2023 Count: <span id="d-2023" class="font-semibold">—</span></li>
-              <li>2023 Placeholder: <span id="d-2023-real" class="font-semibold">—</span></li>
-              <li>Change since 2012 (Absolute): <span id="d-chg" class="font-semibold">—</span></li>
-              <li>Change since 2012 (Placeholder): <span id="d-chg-real" class="font-semibold">—</span></li>
-            </ul>
-          </div>
-
-          <div class="mt-4 text-sm">
-            <a id="d-census" class="text-blue-600 underline" href="#" target="_blank" rel="noopener">
-              Open on Census CBP Data ↗
-            </a>
+      <section class="card p-4">
+        <div class="flex items-center justify-between gap-3">
+          <div class="text-sm text-gray-700 font-medium">Map shading by</div>
+          <div class="flex items-center gap-2">
+            <div class="inline-flex rounded-lg border bg-white shadow-sm overflow-hidden">
+              <button id="metricNominalPct" type="button" class="px-3 py-1.5 text-sm font-medium hover:bg-gray-50">Change in Count (%)</button>
+              <button id="metricNominalAbs" type="button" class="px-3 py-1.5 text-sm font-medium hover:bg-gray-50">Change in Count (Abs.)</button>
+              <button id="metricRealPct" type="button" class="px-3 py-1.5 text-sm font-medium bg-blue-600 text-white">Percent Change (%)</button>
+            </div>
+            <button id="clearSel" class="px-3 py-1.5 text-sm rounded-lg border bg-white hover:bg-gray-50">Clear selection</button>
           </div>
         </div>
-
-        <div>
-          <h3 class="font-semibold mb-2">Establishment Count Trend (2012–2023)</h3>
-          <div class="mini bg-gray-50 rounded p-3">
-            <canvas id="lineChartNominal"></canvas>
-          </div>
-        </div>
-
-        <div>
-          <h3 class="font-semibold mb-2">Annual % Change in Establishments</h3>
-          <div class="mini bg-gray-50 rounded p-3">
-            <canvas id="barChartNominal"></canvas>
-          </div>
-        </div>
-        
-        <div>
-          <h3 class="font-semibold mb-2">Annual % Change (Nominal, Placeholder)</h3>
-          <div class="mini bg-gray-50 rounded p-3">
-            <canvas id="barChartReal"></canvas>
-          </div>
-        </div>
-      </div>
-      
-      <h2 class="text-lg font-semibold mb-4 pt-8 border-t border-gray-200 mt-8">Understanding the Establishment Metrics</h2>
-      <div class="space-y-4 text-gray-700">
-        <p>
-          The charts above illustrate the change in the number of Employer Establishments (businesses with paid employees) from 2012 to 2023. This metric reflects the dynamics of business formation and contraction at the local level.
-        </p>
-        
-        <h3 class="font-semibold text-gray-800 pt-2">Nominal Count Trend (2012–2023)</h3>
-        <p>
-          The primary focus here is the total number of establishments (businesses) operating annually. The trend line shows the raw yearly count.
-        </p>
-        
-        <ul class="list-disc list-inside space-y-2 ml-4">
-          <li>
-            <strong class="text-blue-600">Establishment Count Trend</strong> is the raw number of establishments, as reported by the Census Bureau's County Business Patterns (CBP) data.
-          </li>
-          <li>
-            **Note on Placeholder Fields:** The "Real" income columns in the original data structure are retained here as placeholders (`null`) to ensure the JavaScript code runs without error. The visualization logic is therefore adjusted to focus entirely on Nominal (raw) counts.
-          </li>
-        </ul>
-
-        <h3 class="font-semibold text-gray-800 pt-2">Annual Percentage Change</h3>
-        <p>
-          The bar chart below shows the year-over-year percentage change in the number of establishments.
-        </p>
-
-        <ul class="list-disc list-inside space-y-2 ml-4">
-          <li>
-            <strong class="text-blue-600">Annual % Change:</strong> A positive bar indicates a net growth in the number of operating businesses compared to the previous year, suggesting economic expansion or recovery.
-          </li>
-          <li>
-            **Negative bars** indicate a net contraction or decline in the number of establishments, often pointing to economic headwinds or post-disaster business closure.
-          </li>
-        </ul>
-      </div>
+        <div id="map" class="mt-3"></div>
       </section>
 
-    <section class="card p-6">
-      <h2 class="text-lg font-semibold mb-4">File Sources</h2>
-      <div class="space-y-4">
-        <p>Data for this metric was derived from the U.S. Census Bureau:</p>
-        <ul class="list-disc list-inside space-y-1">
-          <li>
-            <a href="https://data.census.gov/cedsci/table?g=0400000US72&tid=CB2300CBP.CB2300CBP"
-               target="_blank" rel="noopener" class="text-blue-600 underline">
-              2023 County Business Patterns (CBP) - Employer Establishments (NAICS 00)
-            </a>
-          </li>
-          <li>
-            <a href="https://wwwcensus.gov/data/tables/time-series/demo/popest/intercensal-2010-2020-puerto-rico-municipios.html"
-               target="_blank" rel="noopener" class="text-gray-600">
-              (Original file source for municipal boundaries/GeoJSON remains valid)
-            </a>
-          </li>
-        </ul>
+      <section class="card p-6">
+        <h2 class="text-lg font-semibold mb-4">Employer Establishment details</h2>
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          
+          <div>
+            <div class="text-sm">
+              <div>Municipio: <span id="d-name" class="font-semibold">Puerto Rico</span></div>
+              <div>Centroid: <span id="d-centroid" class="text-gray-600">—</span></div>
+            </div>
 
-        <p>Specific files used:</p>
-        <ul class="list-disc list-inside">
-          <li>municipios_cbp_establishments_2010_2023_wide.json (site build)</li>
-        </ul>
-      </div>
-    </section>
-  </main>
+            <div class="mt-4 text-sm">
+              <div class="font-semibold text-gray-700">Total Employer Establishments (Vintage 2023):</div>
+              <ul class="mt-1 space-y-1">
+                <li>2023 Count: <span id="d-2023" class="font-semibold">—</span></li>
+                <li>2023 Placeholder: <span id="d-2023-real" class="font-semibold">—</span></li>
+                <li>Change since 2012 (Absolute): <span id="d-chg" class="font-semibold">—</span></li>
+                <li>Change since 2012 (Placeholder): <span id="d-chg-real" class="font-semibold">—</span></li>
+              </ul>
+            </div>
+
+            <div class="mt-4 text-sm">
+              <a id="d-census" class="text-blue-600 underline" href="#" target="_blank" rel="noopener">
+                Open on Census CBP Data ↗
+              </a>
+            </div>
+          </div>
+
+          <div>
+            <h3 class="font-semibold mb-2">Establishment Count Trend (2012–2023)</h3>
+            <div class="mini bg-gray-50 rounded p-3">
+              <canvas id="lineChartNominal"></canvas>
+            </div>
+          </div>
+
+          <div>
+            <h3 class="font-semibold mb-2">Annual % Change in Establishments</h3>
+            <div class="mini bg-gray-50 rounded p-3">
+              <canvas id="barChartNominal"></canvas>
+            </div>
+          </div>
+          
+          <div>
+            <h3 class="font-semibold mb-2">Annual % Change (Nominal, Placeholder)</h3>
+            <div class="mini bg-gray-50 rounded p-3">
+              <canvas id="barChartReal"></canvas>
+            </div>
+          </div>
+        </div>
+        
+        <h2 class="text-lg font-semibold mb-4 pt-8 border-t border-gray-200 mt-8">Understanding the Establishment Metrics</h2>
+        <div class="space-y-4 text-gray-700">
+          <p>
+            The charts above illustrate the change in the number of Employer Establishments (businesses with paid employees) from 2012 to 2023. This metric reflects the dynamics of business formation and contraction at the local level.
+          </p>
+          
+          <h3 class="font-semibold text-gray-800 pt-2">Nominal Count Trend (2012–2023)</h3>
+          <p>
+            The primary focus here is the total number of establishments (businesses) operating annually. The trend line shows the raw yearly count.
+          </p>
+          
+          <ul class="list-disc list-inside space-y-2 ml-4">
+            <li>
+              <strong class="text-blue-600">Establishment Count Trend</strong> is the raw number of establishments, as reported by the Census Bureau's County Business Patterns (CBP) data.
+            </li>
+            <li>
+              **Note on Placeholder Fields:** The "Real" income columns in the original data structure are retained here as placeholders (`null`) to ensure the JavaScript code runs without error. The visualization logic is therefore adjusted to focus entirely on Nominal (raw) counts.
+            </li>
+          </ul>
+
+          <h3 class="font-semibold text-gray-800 pt-2">Annual Percentage Change</h3>
+          <p>
+            The bar chart below shows the year-over-year percentage change in the number of establishments.
+          </p>
+
+          <ul class="list-disc list-inside space-y-2 ml-4">
+            <li>
+              <strong class="text-blue-600">Annual % Change:</strong> A positive bar indicates a net growth in the number of operating businesses compared to the previous year, suggesting economic expansion or recovery.
+            </li>
+            <li>
+              **Negative bars** indicate a net contraction or decline in the number of establishments, often pointing to economic headwinds or post-disaster business closure.
+            </li>
+          </ul>
+        </div>
+        </section>
+
+      <section class="card p-6">
+        <h2 class="text-lg font-semibold mb-4">File Sources</h2>
+        <div class="space-y-4">
+          <p>Data for this metric was derived from the U.S. Census Bureau:</p>
+          <ul class="list-disc list-inside space-y-1">
+            <li>
+              <a href="https://data.census.gov/cedsci/table?g=0400000US72&tid=CB2300CBP.CB2300CBP"
+                target="_blank" rel="noopener" class="text-blue-600 underline">
+                2023 County Business Patterns (CBP) - Employer Establishments (NAICS 00)
+              </a>
+            </li>
+            <li>
+              <a href="https://wwwcensus.gov/data/tables/time-series/demo/popest/intercensal-2010-2020-puerto-rico-municipios.html"
+                target="_blank" rel="noopener" class="text-gray-600">
+                (Original file source for municipal boundaries/GeoJSON remains valid)
+              </a>
+            </li>
+          </ul>
+
+          <p>Specific files used:</p>
+          <ul class="list-disc list-inside">
+            <li>municipios_cbp_establishments_2010_2023_wide.json (site build)</li>
+          </ul>
+        </div>
+      </section>
+    </main>
+  </div>
 
   <script>
     const GEOJSON_URL = '../data/tl_2022_72_cousub/pr_municipalities.geojson';
