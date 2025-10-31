@@ -39,15 +39,25 @@
     #metrics-dropdown-root.hovering #metrics-chevron {
       transform: rotate(180deg);
     }
+
+    /* New style for simulating 65% zoom on the main content */
+    #scale-wrapper {
+        /* Apply the scale transformation */
+        transform: scale(0.65); 
+        transform-origin: top center; /* Scale from the top-center */
+        
+        /* Adjustments to compensate for the scaling effect on surrounding content */
+        height: 154%; /* Approx 1 / 0.65 to ensure vertical space is reserved */
+        padding-bottom: 200px;
+        margin-bottom: -35%; /* Pull up content following the wrapper */
+    }
   </style>
 </head>
 <body class="bg-gray-50 text-gray-900 font-sans">
-  <!-- Top Nav -->
   <nav class="bg-white shadow sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-center gap-6 text-sm sm:text-base">
       <a href="index.html"  class="nav-link border-b-2 border-transparent">Home</a>
 
-      <!-- Metrics dropdown (parent is a link) -->
       <div class="relative" id="metrics-dropdown-root">
         <a href="metrics.html" class="nav-link border-b-2 border-transparent inline-flex items-center gap-1 cursor-pointer select-none">
           Metrics
@@ -58,7 +68,6 @@
 
         <div id="metrics-menu" class="absolute right-0 mt-2 w-64 rounded-xl border border-gray-200 bg-white shadow-lg ring-1 ring-black/5 z-50">
           <div class="py-2">
-            <!-- Optional: quick link to the overview page from within the menu -->
             <a href="metrics.html"               class="block px-4 py-2 hover:bg-gray-50 font-semibold">All Metrics Overview</a>
             <div class="my-1 border-t border-gray-100"></div>
             <a href="metrics/population.html"     class="block px-4 py-2 hover:bg-gray-50">Population</a>
@@ -78,139 +87,133 @@
     </div>
   </nav>
 
-  <!-- unified container width/spacing -->
-  <main class="max-w-7xl mx-auto px-4 py-6 space-y-6">
-    <!-- HERO (standardized) -->
-    <header class="card hero p-6 sm:p-8 lg:p-10">
-      <div>
-        <p class="uppercase tracking-wide text-sm font-semibold text-gray-600">Graduate Independent Study</p>
-        <h1 class="mt-2 text-4xl sm:text-5xl font-extrabold leading-tight">
-          Population & Economic Dynamics in Puerto Rico
-        </h1>
-        <p class="mt-3 text-lg text-gray-700">
-          A graduate research project examining demographic shifts, out-migration, and sustainable development
-          strategies through linked data analysis and policy synthesis.
-        </p>
-      </div>
-      <div class="mt-3">&nbsp;</div>
-    </header>
-
-    <!-- ACADEMIC & PROJECT INFO -->
-    <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <!-- Left: University & Program -->
-      <div class="card p-6 space-y-5">
+  <div id="scale-wrapper">
+    <main class="max-w-7xl mx-auto px-4 py-6 space-y-6">
+      <header class="card hero p-6 sm:p-8 lg:p-10">
         <div>
-          <div class="label">University</div>
-          <div class="value">Rutgers, The State University of New Jersey — Camden</div>
-          <div class="muted text-sm">Camden, NJ</div>
+          <p class="uppercase tracking-wide text-sm font-semibold text-gray-600">Graduate Independent Study</p>
+          <h1 class="mt-2 text-4xl sm:text-5xl font-extrabold leading-tight">
+            Population & Economic Dynamics in Puerto Rico
+          </h1>
+          <p class="mt-3 text-lg text-gray-700">
+            A graduate research project examining demographic shifts, out-migration, and sustainable development
+            strategies through linked data analysis and policy synthesis.
+          </p>
+        </div>
+        <div class="mt-3">&nbsp;</div>
+      </header>
+
+      <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="card p-6 space-y-5">
+          <div>
+            <div class="label">University</div>
+            <div class="value">Rutgers, The State University of New Jersey — Camden</div>
+            <div class="muted text-sm">Camden, NJ</div>
+          </div>
+
+          <div>
+            <div class="label">Graduate Program</div>
+            <div class="value">Data Science (M.S.), Rutgers University–Camden</div>
+            <ul class="mt-1 text-sm text-blue-600 space-y-1">
+              <li><a class="underline" href="https://datascience.camden.rutgers.edu/" target="_blank" rel="noopener">Program site</a></li>
+              <li><a class="underline" href="https://graduateschool.camden.rutgers.edu/data-science-m-s/" target="_blank" rel="noopener">Graduate School overview</a></li>
+            </ul>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div class="p-4 rounded-xl bg-gray-50">
+              <div class="label">Course</div>
+              <div class="value">Independent Study</div>
+            </div>
+            <div class="p-4 rounded-xl bg-gray-50">
+              <div class="label">Term / Year</div>
+              <div class="value" id="termYear">—</div>
+            </div>
+          </div>
         </div>
 
-        <div>
-          <div class="label">Graduate Program</div>
-          <div class="value">Data Science (M.S.), Rutgers University–Camden</div>
-          <ul class="mt-1 text-sm text-blue-600 space-y-1">
-            <li><a class="underline" href="https://datascience.camden.rutgers.edu/" target="_blank" rel="noopener">Program site</a></li>
-            <li><a class="underline" href="https://graduateschool.camden.rutgers.edu/data-science-m-s/" target="_blank" rel="noopener">Graduate School overview</a></li>
+        <div class="card p-6 space-y-5">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="p-4 rounded-xl bg-gray-50">
+              <div class="label">Student</div>
+              <div class="value">Jose Andres Riveraruiz</div>
+            </div>
+            <div class="p-4 rounded-xl bg-gray-50">
+              <div class="label">Instructor</div>
+              <div class="value">Dr. Adam Okulicz-Kozaryn</div>
+              <div class="muted text-sm">Faculty Advisor</div>
+            </div>
+          </div>
+
+          <div class="p-4 rounded-xl bg-gray-50">
+            <div class="label">Project Type</div>
+            <div class="value">Graduate Research Project</div>
+            <p class="muted text-sm mt-1">Submitted in partial fulfillment of Independent Study requirements.</p>
+          </div>
+        </div>
+
+        <aside class="card p-6">
+          <h3 class="text-lg font-semibold">Project Links</h3>
+          <div class="mt-3 grid grid-cols-1 gap-3">
+            <a class="p-4 rounded-xl bg-indigo-50 hover:bg-indigo-100 transition block" href="charts.html">
+              📊 <span class="font-semibold">Charts & Trends</span>
+            </a>
+            <a class="p-4 rounded-xl bg-sky-50 hover:bg-sky-100 transition block" href="maps.html">
+              🗺️ <span class="font-semibold">Interactive Maps</span>
+            </a>
+            <a class="p-4 rounded-xl bg-emerald-50 hover:bg-emerald-100 transition block" href="metrics.html">
+              📋 <span class="font-semibold">Key Indicators</span>
+            </a>
+            <a class="p-4 rounded-xl bg-rose-50 hover:bg-rose-100 transition block" href="strategy.html">
+              🧭 <span class="font-semibold">Synthesis & Solutions</span>
+            </a>
+          </div>
+        </aside>
+      </section>
+
+      <section class="card p-6">
+        <h2 class="text-2xl font-bold">Project Timeline</h2>
+        <div class="relative timeline mt-5">
+          <ul class="space-y-6">
+            <li class="relative pl-10">
+              <span class="absolute left-2 top-1.5 w-4 h-4 bg-blue-600 rounded-full ring-4 ring-blue-100"></span>
+              <div class="font-semibold">Kickoff & Scoping</div>
+              <div class="muted text-sm">Topic selection, research questions, and dataset inventory.</div>
+            </li>
+            <li class="relative pl-10">
+              <span class="absolute left-2 top-1.5 w-4 h-4 bg-indigo-600 rounded-full ring-4 ring-indigo-100"></span>
+              <div class="font-semibold">Data Wrangling & EDA</div>
+              <div class="muted text-sm">Cleaning, merging, and exploratory analysis of population/economic data.</div>
+            </li>
+            <li class="relative pl-10">
+              <span class="absolute left-2 top-1.5 w-4 h-4 bg-emerald-600 rounded-full ring-4 ring-emerald-100"></span>
+              <div class="font-semibold">Modeling & Insight Generation</div>
+              <div class="muted text-sm">Trend modeling, migration/poverty mapping, and scenario testing.</div>
+            </li>
+            <li class="relative pl-10">
+              <span class="absolute left-2 top-1.5 w-4 h-4 bg-rose-600 rounded-full ring-4 ring-rose-100"></span>
+              <div class="font-semibold">Write-Up & Presentation</div>
+              <div class="muted text-sm">Synthesis, policy recommendations, and final deliverables.</div>
+            </li>
           </ul>
         </div>
+      </section>
 
-        <div class="grid grid-cols-2 gap-4">
-          <div class="p-4 rounded-xl bg-gray-50">
-            <div class="label">Course</div>
-            <div class="value">Independent Study</div>
-          </div>
-          <div class="p-4 rounded-xl bg-gray-50">
-            <div class="label">Term / Year</div>
-            <div class="value" id="termYear">—</div>
-          </div>
+      <section class="card p-6">
+        <h2 class="text-2xl font-bold">Customer</h2>
+        <div class="mt-4 space-y-3">
+          <p><span class="font-semibold">Puerto Rico Planning Board (Junta de Planificación)</span></p>
+          <p class="text-gray-700">
+            The Planning Board oversees long-term economic development, demographic analysis, and land-use
+            planning for Puerto Rico. This project’s interactive maps, municipal-level dashboards, and
+            population change analyses provide actionable insights that could directly support their policy
+            models and strategic decision-making.
+          </p>
+          <p class="text-sm">🔗 <a href="https://jp.pr.gov" target="_blank" rel="noopener" class="text-blue-600 underline">Visit Puerto Rico Planning Board Website</a></p>
         </div>
-      </div>
-
-      <!-- Middle: Student / Instructor -->
-      <div class="card p-6 space-y-5">
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div class="p-4 rounded-xl bg-gray-50">
-            <div class="label">Student</div>
-            <div class="value">Jose Andres Riveraruiz</div>
-          </div>
-          <div class="p-4 rounded-xl bg-gray-50">
-            <div class="label">Instructor</div>
-            <div class="value">Dr. Adam Okulicz-Kozaryn</div>
-            <div class="muted text-sm">Faculty Advisor</div>
-          </div>
-        </div>
-
-        <div class="p-4 rounded-xl bg-gray-50">
-          <div class="label">Project Type</div>
-          <div class="value">Graduate Research Project</div>
-          <p class="muted text-sm mt-1">Submitted in partial fulfillment of Independent Study requirements.</p>
-        </div>
-      </div>
-
-      <!-- Right: Quick Links -->
-      <aside class="card p-6">
-        <h3 class="text-lg font-semibold">Project Links</h3>
-        <div class="mt-3 grid grid-cols-1 gap-3">
-          <a class="p-4 rounded-xl bg-indigo-50 hover:bg-indigo-100 transition block" href="charts.html">
-            📊 <span class="font-semibold">Charts & Trends</span>
-          </a>
-          <a class="p-4 rounded-xl bg-sky-50 hover:bg-sky-100 transition block" href="maps.html">
-            🗺️ <span class="font-semibold">Interactive Maps</span>
-          </a>
-          <a class="p-4 rounded-xl bg-emerald-50 hover:bg-emerald-100 transition block" href="metrics.html">
-            📋 <span class="font-semibold">Key Indicators</span>
-          </a>
-          <a class="p-4 rounded-xl bg-rose-50 hover:bg-rose-100 transition block" href="strategy.html">
-            🧭 <span class="font-semibold">Synthesis & Solutions</span>
-          </a>
-        </div>
-      </aside>
-    </section>
-
-    <!-- TIMELINE -->
-    <section class="card p-6">
-      <h2 class="text-2xl font-bold">Project Timeline</h2>
-      <div class="relative timeline mt-5">
-        <ul class="space-y-6">
-          <li class="relative pl-10">
-            <span class="absolute left-2 top-1.5 w-4 h-4 bg-blue-600 rounded-full ring-4 ring-blue-100"></span>
-            <div class="font-semibold">Kickoff & Scoping</div>
-            <div class="muted text-sm">Topic selection, research questions, and dataset inventory.</div>
-          </li>
-          <li class="relative pl-10">
-            <span class="absolute left-2 top-1.5 w-4 h-4 bg-indigo-600 rounded-full ring-4 ring-indigo-100"></span>
-            <div class="font-semibold">Data Wrangling & EDA</div>
-            <div class="muted text-sm">Cleaning, merging, and exploratory analysis of population/economic data.</div>
-          </li>
-          <li class="relative pl-10">
-            <span class="absolute left-2 top-1.5 w-4 h-4 bg-emerald-600 rounded-full ring-4 ring-emerald-100"></span>
-            <div class="font-semibold">Modeling & Insight Generation</div>
-            <div class="muted text-sm">Trend modeling, migration/poverty mapping, and scenario testing.</div>
-          </li>
-          <li class="relative pl-10">
-            <span class="absolute left-2 top-1.5 w-4 h-4 bg-rose-600 rounded-full ring-4 ring-rose-100"></span>
-            <div class="font-semibold">Write-Up & Presentation</div>
-            <div class="muted text-sm">Synthesis, policy recommendations, and final deliverables.</div>
-          </li>
-        </ul>
-      </div>
-    </section>
-
-    <!-- CUSTOMER -->
-    <section class="card p-6">
-      <h2 class="text-2xl font-bold">Customer</h2>
-      <div class="mt-4 space-y-3">
-        <p><span class="font-semibold">Puerto Rico Planning Board (Junta de Planificación)</span></p>
-        <p class="text-gray-700">
-          The Planning Board oversees long-term economic development, demographic analysis, and land-use
-          planning for Puerto Rico. This project’s interactive maps, municipal-level dashboards, and
-          population change analyses provide actionable insights that could directly support their policy
-          models and strategic decision-making.
-        </p>
-        <p class="text-sm">🔗 <a href="https://jp.pr.gov" target="_blank" rel="noopener" class="text-blue-600 underline">Visit Puerto Rico Planning Board Website</a></p>
-      </div>
-    </section>
-  </main>
+      </section>
+    </main>
+  </div>
 
   <script>
     // Highlight active nav
