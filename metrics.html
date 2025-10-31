@@ -138,6 +138,13 @@
         transition: all 0.3s ease; 
     }
     
+    /* NEW: Class applied to #scale-wrapper when maximization is active */
+    #scale-wrapper.disable-scale {
+        transform: none !important; 
+        height: auto !important;
+        margin-bottom: 0 !important;
+    }
+    
     /* NEW MAXIMIZE TARGET STYLES */
     /* Target for maximization: The section containing scatter plot and selectors */
     #dashboardVisuals {
@@ -167,7 +174,7 @@
         padding: 1rem !important;
         gap: 1rem !important;
         width: 100%;
-        max-width: 100%;
+        max-width: 98vw; /* Use max-width for internal margin effect */
         margin: 0 auto;
     }
     
@@ -182,7 +189,7 @@
         grid-template-columns: 1fr 1fr;
         gap: 1rem;
         width: 100%;
-        max-width: 98vw; /* Allow it to span nearly full screen */
+        max-width: 98vw;
         margin: 0 auto 2rem auto;
     }
     
@@ -1006,18 +1013,21 @@
     
     // NEW: Maximize/Minimize Toggle Function
     function toggleMaximize() {
+        const wrapper = document.getElementById('scale-wrapper');
         const visuals = document.getElementById('dashboardVisuals');
         const maximizeIcon = document.getElementById('maximizeIcon');
         const minimizeIcon = document.getElementById('minimizeIcon');
         
         const isMaximized = visuals.classList.toggle('maximized');
         
+        // NEW: Toggle the class on the scale-wrapper to disable the scaling effect
+        wrapper.classList.toggle('disable-scale', isMaximized);
+        
         // Toggle icons visibility
         maximizeIcon.classList.toggle('hidden', isMaximized);
         minimizeIcon.classList.toggle('hidden', !isMaximized);
         
         // Redraw charts to adjust to new container size
-        // Use a slight delay to ensure the container finishes resizing before redrawing
         setTimeout(() => {
             if (scatterChart) scatterChart.resize();
             if (trendChart1) trendChart1.resize();
