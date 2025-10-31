@@ -66,10 +66,12 @@
         @apply text-xl font-bold text-gray-800 mb-4 pt-4;
     }
     #municipioList {
+        /* Adjusted max-height to ensure space for trend charts */
         max-height: 480px; 
         overflow-y: scroll; 
         padding-top: 4px; 
     }
+    /* Webkit Scrollbar Styling (Forces visibility) */
     #municipioList::-webkit-scrollbar {
         width: 8px;
     }
@@ -169,18 +171,23 @@
     
     /* Adjust internal elements when the visuals container is maximized */
     #dashboardVisuals.maximized #main-panel {
-        /* Revert to 10/2 split for scatter plot and selector but fill width */
+        /* **CRITICAL FIX:** Ensure the grid uses 12 columns for the 10/2 split */
         grid-template-columns: 1fr 300px !important; 
         padding: 1rem !important;
         gap: 1rem !important;
         width: 100%;
-        max-width: 98vw; /* Use max-width for internal margin effect */
+        max-width: 98vw; 
         margin: 0 auto;
+    }
+
+    /* CRITICAL FIX: Set a specific, large height for the municipality list when maximized */
+    #dashboardVisuals.maximized #municipioList {
+        max-height: 85vh; 
     }
     
     /* Ensure all chart wrappers get proper height in maximized view */
     #dashboardVisuals.maximized #scatter-canvas-wrapper {
-        height: 60vh !important; /* Make scatter plot taller, but leave room for trend charts */
+        height: 60vh !important; 
     }
     
     /* Make the trend charts visible and fill the width */
@@ -201,15 +208,15 @@
     /* Show the municipality name title, but adjust font size */
     #dashboardVisuals.maximized .section-title {
         font-size: 1.5rem;
-        padding: 1rem 1rem 0 1rem; /* Adjust padding for maximized context */
+        padding: 1rem 1rem 0 1rem; 
     }
 
 
     /* Maximize button placement */
     #maximizeButtonContainer {
         position: absolute;
-        top: 1.5rem; /* Space from the top edge of dashboardVisuals */
-        right: 1.5rem; /* Space from the right edge of dashboardVisuals */
+        top: 1.5rem; 
+        right: 1.5rem; 
         z-index: 1010;
     }
   </style>
@@ -1020,7 +1027,7 @@
         
         const isMaximized = visuals.classList.toggle('maximized');
         
-        // NEW: Toggle the class on the scale-wrapper to disable the scaling effect
+        // CRITICAL FIX: Toggle the class on the scale-wrapper to disable the scaling effect
         wrapper.classList.toggle('disable-scale', isMaximized);
         
         // Toggle icons visibility
