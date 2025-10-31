@@ -184,6 +184,8 @@
     #dashboardVisuals.maximized #municipioList {
         /* Calculate height based on 100vh minus header/search bar height */
         max-height: calc(100vh - 200px) !important;
+        /* Ensure the selector box itself is tall enough */
+        height: auto !important; 
     }
     
     /* Ensure all chart wrappers get proper height in maximized view */
@@ -1029,7 +1031,6 @@
         const isMaximized = visuals.classList.toggle('maximized');
         
         // CRITICAL FIX: Toggle the class on the scale-wrapper to disable the scaling effect
-        // This ensures the maximized content is not itself scaled down by 65%
         wrapper.classList.toggle('disable-scale', isMaximized);
         
         // Toggle icons visibility
