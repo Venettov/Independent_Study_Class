@@ -43,15 +43,25 @@
     #metrics-dropdown-root.hovering #metrics-chevron {
       transform: rotate(180deg);
     }
+
+    /* New style for simulating 65% zoom on the main content */
+    #scale-wrapper {
+        /* Apply the scale transformation */
+        transform: scale(0.65); 
+        transform-origin: top center; /* Scale from the top-center */
+        
+        /* Adjustments to compensate for the scaling effect on surrounding content */
+        height: 154%; /* Approx 1 / 0.65 to ensure vertical space is reserved */
+        padding-bottom: 200px;
+        margin-bottom: -35%; /* Pull up content following the wrapper */
+    }
   </style>
 </head>
 <body class="bg-gray-50 text-gray-900 font-sans">
-  <!-- Top Nav -->
   <nav class="bg-white shadow sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-center gap-6 text-sm sm:text-base">
       <a href="index.html"   class="nav-link border-b-2 border-transparent">Home</a>
 
-      <!-- Metrics dropdown (parent is a link, hover + persistence) -->
       <div class="relative" id="metrics-dropdown-root">
         <a href="metrics.html" class="nav-link border-b-2 border-transparent inline-flex items-center gap-1 cursor-pointer select-none">
           Metrics
@@ -80,174 +90,174 @@
     </div>
   </nav>
 
-  <main class="max-w-7xl mx-auto px-4 py-6 space-y-6">
-    <!-- HERO (Standardized Header) -->
-    <header class="card hero p-6 sm:p-8 lg:p-10">
-      <p class="text-sm font-semibold text-gray-500 uppercase">Graduate Independent Study</p>
-      <h1 class="mt-2 text-4xl sm:text-5xl font-extrabold leading-tight">
-        Population & Economic Dynamics in Puerto Rico
-      </h1>
-      <p class="mt-3 text-lg text-gray-700">
-        A graduate research project examining demographic shifts, out-migration, and sustainable development strategies through linked data analysis and policy synthesis.
-      </p>
-
-      <!-- Strategy-specific introduction (Original content) -->
-      <p class="mt-4 text-sm text-gray-700">
-        <strong>Synthesis & Strategic Solutions: </strong> Puerto Rico’s demographic and economic challenges reinforce one another. The goal here is to connect the data to
-        concrete, locally focused actions that can stabilize population trends, expand opportunity, and rebuild resilience.
-      </p>
-
-      <!-- Original Spacer -->
-      <div class="mt-3">&nbsp;</div>
-    </header>
-
-    <!-- SECTION V: Synthesis & Recommendations -->
-    <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <!-- Left column: Narrative -->
-      <article class="card p-6 lg:col-span-2">
-        <h2 class="text-2xl font-bold">Synthesis and Recommendations</h2>
-        <p class="mt-3">
-          <strong>Interconnectedness of the crisis.</strong> Structural economic vulnerabilities and policy legacies made it hard
-          for the economy to sustain its population, amplifying <em>out-migration</em> and aging and feeding a cycle of
-          contraction and fiscal stress<sup><a class="link" href="#ref-3">3</a>, <a class="link" href="#ref-5">5</a></sup>.
-        </p>
-        <p class="mt-3">
-          <strong>Strategic outlook.</strong> The emphasis should shift from externally dependent industries toward a resilient,
-          <em>local</em> economic base. Reversing youth out-migration requires better jobs and targeted investments in social
-          services (education, childcare, health) that raise attachment to place and expand opportunity<sup><a class="link" href="#ref-1">1</a>, <a class="link" href="#ref-9">9</a></sup>.
+  <div id="scale-wrapper">
+    <main class="max-w-7xl mx-auto px-4 py-6 space-y-6">
+      <header class="card hero p-6 sm:p-8 lg:p-10">
+        <p class="text-sm font-semibold text-gray-500 uppercase">Graduate Independent Study</p>
+        <h1 class="mt-2 text-4xl sm:text-5xl font-extrabold leading-tight">
+          Population & Economic Dynamics in Puerto Rico
+        </h1>
+        <p class="mt-3 text-lg text-gray-700">
+          A graduate research project examining demographic shifts, out-migration, and sustainable development strategies through linked data analysis and policy synthesis.
         </p>
 
-        <div class="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div class="p-5 rounded-xl bg-indigo-50">
-            <h3 class="font-semibold">Priority 1: Grow local industry</h3>
+        <p class="mt-4 text-sm text-gray-700">
+          <strong>Synthesis & Strategic Solutions: </strong> Puerto Rico’s demographic and economic challenges reinforce one another. The goal here is to connect the data to
+          concrete, locally focused actions that can stabilize population trends, expand opportunity, and rebuild resilience.
+        </p>
+
+        <div class="mt-3">&nbsp;</div>
+      </header>
+
+      <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <article class="card p-6 lg:col-span-2">
+          <h2 class="text-2xl font-bold">Synthesis and Recommendations</h2>
+          <p class="mt-3">
+            <strong>Interconnectedness of the crisis.</strong> Structural economic vulnerabilities and policy legacies made it hard
+            for the economy to sustain its population, amplifying <em>out-migration</em> and aging and feeding a cycle of
+            contraction and fiscal stress<sup><a class="link" href="#ref-3">3</a>, <a class="link" href="#ref-5">5</a></sup>.
+          </p>
+          <p class="mt-3">
+            <strong>Strategic outlook.</strong> The emphasis should shift from externally dependent industries toward a resilient,
+            <em>local</em> economic base. Reversing youth out-migration requires better jobs and targeted investments in social
+            services (education, childcare, health) that raise attachment to place and expand opportunity<sup><a class="link" href="#ref-1">1</a>, <a class="link" href="#ref-9">9</a></sup>.
+          </p>
+
+          <div class="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="p-5 rounded-xl bg-indigo-50">
+              <h3 class="font-semibold">Priority 1: Grow local industry</h3>
+              <ul class="mt-2 list-disc list-inside text-sm text-gray-700 space-y-1">
+                <li>Support SMEs in tradable services, agro-tech, and cultural/tourism clusters.</li>
+                <li>Procurement pipelines that preference Puerto Rico-based suppliers.</li>
+                <li>Targeted export assistance and logistics upgrades.</li>
+              </ul>
+            </div>
+            <div class="p-5 rounded-xl bg-emerald-50">
+              <h3 class="font-semibold">Priority 2: Retain & attract talent</h3>
+              <ul class="mt-2 list-disc list-inside text-sm text-gray-700 space-y-1">
+                <li>Early-career fellowships tied to local employers and municipalities.</li>
+                <li>Stackable credentials aligned with in-demand skills.</li>
+                <li>Childcare/transport subsidies to raise labor-force participation.</li>
+              </ul>
+            </div>
+            <div class="p-5 rounded-xl bg-amber-50">
+              <h3 class="font-semibold">Priority 3: Social infrastructure</h3>
+              <ul class="mt-2 list-disc list-inside text-sm text-gray-700 space-y-1">
+                <li>School & health anchors as neighborhood hubs.</li>
+                <li>Invest in hazard-resilient housing and public works.</li>
+              </ul>
+            </div>
+            <div class="p-5 rounded-xl bg-rose-50">
+              <h3 class="font-semibold">Priority 4: Make migration a choice</h3>
+              <ul class="mt-2 list-disc list-inside text-sm text-gray-700 space-y-1">
+                <li>Career ladders and wages that compete with mainland options.</li>
+                <li>“Return to PR” pathways for mid-career Puerto Ricans abroad.</li>
+              </ul>
+            </div>
+          </div>
+        </article>
+
+        <aside class="card p-6 space-y-4">
+          <h3 class="text-lg font-semibold">Context at a Glance</h3>
+          <div class="kpi">
+            <div class="icon">📉</div>
+            <div>
+              <div class="val">Population decline</div>
+              <div class="text-xs text-gray-500">Linked to low fertility, aging, and out-migration<sup><a class="link" href="#ref-1">1</a>, <a class="link" href="#ref-2">2</a></sup></div>
+            </div>
+          </div>
+          <div class="kpi">
+            <div class="icon">🏭</div>
+            <div>
+              <div class="val">Legacy of §936</div>
+              <div class="text-xs text-gray-500">Tax-credit phase-out weakened employment base<sup><a class="link" href="#ref-3">3</a>, <a class="link" href="#ref-4">4</a></sup></div>
+            </div>
+          </div>
+          <div class="kpi">
+            <div class="icon">💸</div>
+            <div>
+              <div class="val">High poverty</div>
+              <div class="text-xs text-gray-500">Poverty rate & inequality among highest in U.S.<sup><a class="link" href="#ref-17">17</a></sup></div>
+            </div>
+          </div>
+        </aside>
+      </section>
+
+      <section class="card p-6">
+        <h2 class="text-2xl font-bold">Linking Data Analysis to Strategic Solutions</h2>
+        <p class="mt-3">
+          The historic dependence on outside industries—including the §936 era—left Puerto Rico trailing the mainland and
+          vulnerable to shocks<sup><a class="link" href="#ref-3">3</a>, <a class="link" href="#ref-4">4</a></sup>. The resulting cycle of demographic decline and economic contraction
+          persists as young workers continue to exit<sup><a class="link" href="#ref-5">5</a>, <a class="link" href="#ref-9">9</a>, <a class="link" href="#ref-10">10</a>, <a class="link" href="#ref-11">11</a></sup>. A durable solution focuses on strengthening a locally
+          rooted economy and the social supports that keep families in Puerto Rico<sup><a class="link" href="#ref-1">1</a></sup>.
+        </p>
+
+        <div class="mt-5 grid grid-cols-1 md:grid-cols-3 gap-5">
+          <div class="p-5 rounded-xl bg-sky-50">
+            <h3 class="font-semibold">What analysis can do</h3>
             <ul class="mt-2 list-disc list-inside text-sm text-gray-700 space-y-1">
-              <li>Support SMEs in tradable services, agro-tech, and cultural/tourism clusters.</li>
-              <li>Procurement pipelines that preference Puerto Rico-based suppliers.</li>
-              <li>Targeted export assistance and logistics upgrades.</li>
+              <li>Model workforce & tax-base impacts from youth out-migration<sup><a class="link" href="#ref-10">10</a>, <a class="link" href="#ref-11">11</a>, <a class="link" href="#ref-5">5</a></sup>.</li>
+              <li>Map poverty & inequality to target investments<sup><a class="link" href="#ref-17">17</a></sup>.</li>
+              <li>Trace sectoral impacts of §936 phase-out to guide new cluster strategy<sup><a class="link" href="#ref-3">3</a>, <a class="link" href="#ref-4">4</a></sup>.</li>
+              <li>Quantify social costs (e.g., school closures) of depopulation<sup><a class="link" href="#ref-9">9</a></sup>.</li>
             </ul>
           </div>
-          <div class="p-5 rounded-xl bg-emerald-50">
-            <h3 class="font-semibold">Priority 2: Retain & attract talent</h3>
+
+          <div class="p-5 rounded-xl bg-lime-50">
+            <h3 class="font-semibold">Policy levers</h3>
             <ul class="mt-2 list-disc list-inside text-sm text-gray-700 space-y-1">
-              <li>Early-career fellowships tied to local employers and municipalities.</li>
-              <li>Stackable credentials aligned with in-demand skills.</li>
-              <li>Childcare/transport subsidies to raise labor-force participation.</li>
+              <li>Local procurement + export promotion for PR-based firms.</li>
+              <li>Apprenticeships & return-migration incentives.</li>
+              <li>Childcare/health/transport programs to lift participation.</li>
             </ul>
           </div>
-          <div class="p-5 rounded-xl bg-amber-50">
-            <h3 class="font-semibold">Priority 3: Social infrastructure</h3>
+
+          <div class="p-5 rounded-xl bg-fuchsia-50">
+            <h3 class="font-semibold">Resilience lens</h3>
             <ul class="mt-2 list-disc list-inside text-sm text-gray-700 space-y-1">
-              <li>School & health anchors as neighborhood hubs.</li>
-              <li>Invest in hazard-resilient housing and public works.</li>
-            </ul>
-          </div>
-          <div class="p-5 rounded-xl bg-rose-50">
-            <h3 class="font-semibold">Priority 4: Make migration a choice</h3>
-            <ul class="mt-2 list-disc list-inside text-sm text-gray-700 space-y-1">
-              <li>Career ladders and wages that compete with mainland options.</li>
-              <li>“Return to PR” pathways for mid-career Puerto Ricans abroad.</li>
+              <li>Invest where poverty and hazard risk overlap<sup><a class="link" href="#ref-17">17</a>, <a class="link" href="#ref-18">18</a></sup>.</li>
+              <li>Design housing & infrastructure for hazard exposure.</li>
             </ul>
           </div>
         </div>
-      </article>
+      </section>
 
-      <!-- Right column: KPIs / quick context -->
-      <aside class="card p-6 space-y-4">
-        <h3 class="text-lg font-semibold">Context at a Glance</h3>
-        <div class="kpi">
-          <div class="icon">📉</div>
-          <div>
-            <div class="val">Population decline</div>
-            <div class="text-xs text-gray-500">Linked to low fertility, aging, and out-migration<sup><a class="link" href="#ref-1">1</a>, <a class="link" href="#ref-2">2</a></sup></div>
-          </div>
-        </div>
-        <div class="kpi">
-          <div class="icon">🏭</div>
-          <div>
-            <div class="val">Legacy of §936</div>
-            <div class="text-xs text-gray-500">Tax-credit phase-out weakened employment base<sup><a class="link" href="#ref-3">3</a>, <a class="link" href="#ref-4">4</a></sup></div>
-          </div>
-        </div>
-        <div class="kpi">
-          <div class="icon">💸</div>
-          <div>
-            <div class="val">High poverty</div>
-            <div class="text-xs text-gray-500">Poverty rate & inequality among highest in U.S.<sup><a class="link" href="#ref-17">17</a></sup></div>
-          </div>
-        </div>
-      </aside>
-    </section>
-
-    <!-- SECTION VI: Linking Data to Solutions -->
-    <section class="card p-6">
-      <h2 class="text-2xl font-bold">Linking Data Analysis to Strategic Solutions</h2>
-      <p class="mt-3">
-        The historic dependence on outside industries—including the §936 era—left Puerto Rico trailing the mainland and
-        vulnerable to shocks<sup><a class="link" href="#ref-3">3</a>, <a class="link" href="#ref-4">4</a></sup>. The resulting cycle of demographic decline and economic contraction
-        persists as young workers continue to exit<sup><a class="link" href="#ref-5">5</a>, <a class="link" href="#ref-9">9</a>, <a class="link" href="#ref-10">10</a>, <a class="link" href="#ref-11">11</a></sup>. A durable solution focuses on strengthening a locally
-        rooted economy and the social supports that keep families in Puerto Rico<sup><a class="link" href="#ref-1">1</a></sup>.
-      </p>
-
-      <div class="mt-5 grid grid-cols-1 md:grid-cols-3 gap-5">
-        <div class="p-5 rounded-xl bg-sky-50">
-          <h3 class="font-semibold">What analysis can do</h3>
-          <ul class="mt-2 list-disc list-inside text-sm text-gray-700 space-y-1">
-            <li>Model workforce & tax-base impacts from youth out-migration<sup><a class="link" href="#ref-10">10</a>, <a class="link" href="#ref-11">11</a>, <a class="link" href="#ref-5">5</a></sup>.</li>
-            <li>Map poverty & inequality to target investments<sup><a class="link" href="#ref-17">17</a></sup>.</li>
-            <li>Trace sectoral impacts of §936 phase-out to guide new cluster strategy<sup><a class="link" href="#ref-3">3</a>, <a class="link" href="#ref-4">4</a></sup>.</li>
-            <li>Quantify social costs (e.g., school closures) of depopulation<sup><a class="link" href="#ref-9">9</a></sup>.</li>
-          </ul>
-        </div>
-
-        <div class="p-5 rounded-xl bg-lime-50">
-          <h3 class="font-semibold">Policy levers</h3>
-          <ul class="mt-2 list-disc list-inside text-sm text-gray-700 space-y-1">
-            <li>Local procurement + export promotion for PR-based firms.</li>
-            <li>Apprenticeships & return-migration incentives.</li>
-            <li>Childcare/health/transport programs to lift participation.</li>
-          </ul>
-        </div>
-
-        <div class="p-5 rounded-xl bg-fuchsia-50">
-          <h3 class="font-semibold">Resilience lens</h3>
-          <ul class="mt-2 list-disc list-inside text-sm text-gray-700 space-y-1">
-            <li>Invest where poverty and hazard risk overlap<sup><a class="link" href="#ref-17">17</a>, <a class="link" href="#ref-18">18</a></sup>.</li>
-            <li>Design housing & infrastructure for hazard exposure.</li>
-          </ul>
-        </div>
-      </div>
-    </section>
-
-    <!-- RESOURCES / WORKS CITED -->
-    <section class="card p-6">
-      <h2 class="text-2xl font-bold">Resources & Further Reading</h2>
-      <p class="mt-2 text-sm text-gray-600">Click a source to open it in a new tab.</p>
-      <ol class="mt-4 space-y-2 text-sm leading-6">
-        <li id="ref-1"><a class="link" target="_blank" rel="noopener" href="https://www.estadisticas.pr/files/ArticulosCientificos/Migration-is-the-driving-force-of-rapid-aging.pdf">1. Migration is the driving force of rapid aging in Puerto Rico</a></li>
-        <li id="ref-2"><a class="link" target="_blank" rel="noopener" href="https://www.bls.gov/opub/mlr/2015/beyond-bls/puerto-rico-a-study-of-population-loss-amid-economic-decline.htm">2. BLS: Population loss amid economic decline</a></li>
-        <li id="ref-3"><a class="link" target="_blank" rel="noopener" href="https://www.gao.gov/assets/ggd-93-109.pdf">3. GAO: Puerto Rico & Section 936 Tax Credit</a></li>
-        <li id="ref-4"><a class="link" target="_blank" rel="noopener" href="https://www.finance.senate.gov/download/arthur-macewan-and-j-tomas-hexner-6">4. Senate Finance: The Effect of §936</a></li>
-        <li id="ref-5"><a class="link" target="_blank" rel="noopener" href="https://www.bea.gov/news/2019/prototype-economic-statistics-puerto-rico-2012-2017">5. BEA: Prototype economic statistics for PR, 2012–2017</a></li>
-        <li id="ref-6"><a class="link" target="_blank" rel="noopener" href="https://fred.stlouisfed.org/series/LAUST720000000000003A">6. FRED: Unemployment Rate in Puerto Rico</a></li>
-        <li id="ref-7"><a class="link" target="_blank" rel="noopener" href="https://www.bls.gov/news.release/pdf/laus.pdf">7. BLS: LAUS – July 2025</a></li>
-        <li id="ref-8"><a class="link" target="_blank" rel="noopener" href="https://www.bls.gov/regions/northeast/news-release/countyemploymentandwages_puertorico.htm">8. BLS: QCEW – PR & U.S., Q4 2024</a></li>
-        <li id="ref-9"><a class="link" target="_blank" rel="noopener" href="https://bvirtualogp.pr.gov/ogp/Bvirtual/reogGubernamental/PDF/Informes%20y%20Estudios/RB2019-01.pdf">9. Population decline & school closures in PR</a></li>
-        <li id="ref-10"><a class="link" target="_blank" rel="noopener" href="https://www.pnas.org/doi/10.1073/pnas.2001671117">10. PNAS: Migration dynamics after Hurricane Maria</a></li>
-        <li id="ref-11"><a class="link" target="_blank" rel="noopener" href="https://centropr.hunter.cuny.edu/app/uploads/2023/03/RB2017-01-POST-MARIA-EXODUS_V3.pdf">11. Centro: Post-Maria Exodus estimates</a></li>
-        <li id="ref-12"><a class="link" target="_blank" rel="noopener" href="https://datausa.io/profile/geo/puerto-rico/">12. DataUSA: Puerto Rico profile</a></li>
-        <li id="ref-13"><a class="link" target="_blank" rel="noopener" href="https://arxiv.org/pdf/2504.01148">13. arXiv: Bayesian APC model for fertility in PR</a></li>
-        <li id="ref-14"><a class="link" target="_blank" rel="noopener" href="https://data.census.gov/profile/Puerto_Rico?g=040XX00US72">14. Census: PR profile</a></li>
-        <li id="ref-15"><a class="link" target="_blank" rel="noopener" href="https://pmc.ncbi.nlm.nih.gov/articles/PMC12337888/">15. Puerto Rico exodus & long-term economic headwinds</a></li>
-        <li id="ref-16"><a class="link" target="_blank" rel="noopener" href="https://data.census.gov/profile/Puerto_Rico?g=%20040XX00US72">16. Census: PR profile (alt link)</a></li>
-        <li id="ref-17"><a class="link" target="_blank" rel="noopener" href="https://academicworks.cuny.edu/cgi/viewcontent.cgi?article=1014&context=cpr_pubs">17. Center for Puerto Rican Studies: Pervasive Poverty in PR (2023)</a></li>
-        <li id="ref-18"><a class="link" target="_blank" rel="noopener" href="https://hazards.colorado.edu/public-health-disaster-research/steep-risks">18. NHC/Colorado: Steep Risks—Landslide vulnerability in rural PR</a></li>
-      </ol>
-    </section>
-  </main>
+      <section class="card p-6">
+        <h2 class="text-2xl font-bold">Resources & Further Reading</h2>
+        <p class="mt-2 text-sm text-gray-600">Click a source to open it in a new tab.</p>
+        <ol class="mt-4 space-y-2 text-sm leading-6">
+          <li id="ref-1"><a class="link" target="_blank" rel="noopener" href="https://www.estadisticas.pr/files/ArticulosCientificos/Migration-is-the-driving-force-of-rapid-aging.pdf">1. Migration is the driving force of rapid aging in Puerto Rico</a></li>
+          <li id="ref-2"><a class="link" target="_blank" rel="noopener" href="https://www.bls.gov/opub/mlr/2015/beyond-bls/puerto-rico-a-study-of-population-loss-amid-economic-decline.htm">2. BLS: Population loss amid economic decline</a></li>
+          <li id="ref-3"><a class="link" target="_blank" rel="noopener" href="https://www.gao.gov/assets/ggd-93-109.pdf">3. GAO: Puerto Rico & Section 936 Tax Credit</a></li>
+          <li id="ref-4"><a class="link" target="_blank" rel="noopener" href="https://www.finance.senate.gov/download/arthur-macewan-and-j-tomas-hexner-6">4. Senate Finance: The Effect of §936</a></li>
+          <li id="ref-5"><a class="link" target="_blank" rel="noopener" href="https://www.bea.gov/news/2019/prototype-economic-statistics-puerto-rico-2012-2017">5. BEA: Prototype economic statistics for PR, 2012–2017</a></li>
+          <li id="ref-6"><a class="link" target="_blank" rel="noopener" href="https://fred.stlouisfed.org/series/LAUST720000000000003A">6. FRED: Unemployment Rate in Puerto Rico</a></li>
+          <li id="ref-7"><a class="link" target="_blank" rel="noopener" href="https://www.bls.gov/news.release/pdf/laus.pdf">7. BLS: LAUS – July 2025</a></li>
+          <li id="ref-8"><a class="link" target="_blank" rel="noopener" href="https://www.bls.gov/regions/northeast/news-release/countyemploymentandwages_puertorico.htm">8. BLS: QCEW – PR & U.S., Q4 2024</a></li>
+          <li id="ref-9"><a class="link" target="_blank" rel="noopener" href="https://bvirtualogp.pr.gov/ogp/Bvirtual/reogGubernamental/PDF/Informes%20y%20Estudios/RB2019-01.pdf">9. Population decline & school closures in PR</a></li>
+          <li id="ref-10"><a class="link" target="_blank" rel="noopener" href="https://www.pnas.org/doi/10.1073/pnas.2001671117">10. PNAS: Migration dynamics after Hurricane Maria</a></li>
+          <li id="ref-11"><a class="link" target="_blank" rel="noopener" href="https://centropr.hunter.cuny.edu/app/uploads/2023/03/RB2017-01-POST-MARIA-EXODUS_V3.pdf">11. Centro: Post-Maria Exodus estimates</a></li>
+          <li id="ref-12"><a class="link" target="_blank" rel="noopener" href="https://datausa.io/profile/geo/puerto-rico/">12. DataUSA: Puerto Rico profile</a></li>
+          <li id="ref-13"><a class="link" target="_blank" rel="noopener" href="https://arxiv.org/pdf/2504.01148">13. arXiv: Bayesian APC model for fertility in PR</a></li>
+          <li id="ref-14"><a class="link" target="_blank" rel="noopener" href="https://data.census.gov/profile/Puerto_Rico?g=040XX00US72">14. Census: PR profile</a></li>
+          <li id="ref-15"><a class="link" target="_blank" rel="noopener" href="https://pmc.ncbi.nlm.nih.gov/articles/PMC12337888/">15. Puerto Rico exodus & long-term economic headwinds</a></li>
+          <li id="ref-16"><a class="link" target="_blank" rel="noopener" href="https://data.census.gov/profile/Puerto_Rico?g=%20040XX00US72">16. Census: PR profile (alt link)</a></li>
+          <li id="ref-17"><a class="link" target="_blank" rel="noopener" href="https://academicworks.cuny.edu/cgi/viewcontent.cgi?article=1014&context=cpr_pubs">17. Center for Puerto Rican Studies: Pervasive Poverty in PR (2023)</a></li>
+          <li id="ref-18"><a class="link" target="_blank" rel="noopener" href="https://hazards.colorado.edu/public-health-disaster-research/steep-risks">18. NHC/Colorado: Steep Risks—Landslide vulnerability in rural PR</a></li>
+        </ol>
+      </section>
+    </main>
+  </div>
 
   <script>
     // Highlight active nav
-    document.querySelectorAll('.nav-link').forEach(a=>{\n      if (location.pathname.endsWith(a.getAttribute('href')) ||\n          (location.pathname === '/' && a.getAttribute('href') === 'strategy.html')) {\n        a.classList.add('text-blue-600','font-semibold','border-blue-600');\n        a.setAttribute('aria-current','page');\n      }\n    });
+    document.querySelectorAll('.nav-link').forEach(a=>{
+      if (location.pathname.endsWith(a.getAttribute('href')) ||
+          (location.pathname === '/' && a.getAttribute('href') === 'strategy.html')) {
+        a.classList.add('text-blue-600','font-semibold','border-blue-600');
+        a.setAttribute('aria-current','page');
+      }
+    });
 
     // Safer hover persistence for Metrics dropdown
     (function() {
