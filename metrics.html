@@ -178,24 +178,15 @@
         gap: 1rem !important;
         width: 100%;
         
-        /* NEW FIX: Constrain max width and center the content when maximized */
-        max-width: 1300px; /* Adjust this value for the final desired width */
+        /* FINAL FIX: Constrain max width and center the content when maximized */
+        max-width: 1050px; 
         margin: 0 auto;
-    }
-    
-    /* Trends and titles below the main panel should also be width-constrained */
-    #dashboardVisuals.maximized #trendCharts,
-    #dashboardVisuals.maximized .section-title {
-        max-width: 1300px;
-        margin-left: auto !important;
-        margin-right: auto !important;
     }
 
     /* 3. CRITICAL FIX: Explicitly set widths for stable 1fr / 300px split */
     #dashboardVisuals.maximized #scatterPlotContainer {
-        /* Scatter plot takes up the remaining flexible width */
-        width: 100% !important; 
-        flex-shrink: 1; 
+        width: calc(100% - 300px - 1rem) !important; /* 100% - selector width - gap */
+        flex-shrink: 0;
     }
     #dashboardVisuals.maximized .lg\:col-span-2 {
         width: 300px !important; /* Selector is a fixed width */
@@ -223,10 +214,8 @@
         grid-template-columns: 1fr 1fr;
         gap: 1rem;
         width: 100%;
-        
-        /* Set explicit auto margins to center constrained content */
-        margin-left: auto !important;
-        margin-right: auto !important;
+        max-width: 1050px; /* Constrain trend charts to the same width */
+        margin: 0 auto 2rem auto;
     }
     
     #dashboardVisuals.maximized #trendCharts .chart-content-wrapper {
@@ -237,6 +226,8 @@
     #dashboardVisuals.maximized .section-title {
         font-size: 1.5rem;
         padding: 1rem 1rem 0 1rem; 
+        max-width: 1050px; /* Constrain title to the same width */
+        margin: 0 auto;
     }
 
 
