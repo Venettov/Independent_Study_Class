@@ -26,22 +26,14 @@
     }
 
     /* --- DASHBOARD SPECIFIC STYLES (High Contrast Light Theme) --- */
-    /* Container for the entire dashboard section (light gray background, rounded corners) */
     .dashboard-block {
       background: #f3f4f6; /* light gray background color for the overall section */
       border-radius: 1rem;
       padding: 1.5rem;
       box-shadow: 0 4px 6px -1px rgba(0,0,0,.1), 0 2px 4px -2px rgba(0,0,0,.06);
     }
-
-    /* --- CUSTOM STYLES FOR STATIC KPI CARDS (Restored to match screenshot) --- */
     .kpi-group-heading {
         @apply text-xl font-bold text-gray-900 mb-3; 
-    }
-    /* Base Card Style matching the "Total Population" element in the screenshot */
-    .stat-card-clean {
-        @apply bg-white p-4 rounded-xl shadow-md flex items-start;
-        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
     }
     .stat-card {
       display:flex; gap:.75rem; align-items:flex-start;
@@ -49,7 +41,6 @@
       box-shadow: 0 4px 10px rgba(0,0,0,.06);
     }
     .stat-icon {
-        /* Generic styling for the placeholder icon/symbol */
         @apply text-2xl text-gray-600 flex-shrink-0 pt-0.5;
     }
     .stat-label {
@@ -61,15 +52,13 @@
     .stat-link {
         @apply text-sm text-blue-600 mt-2 block;
     }
-    /* --- END CUSTOM STYLES --- */
 
 
-    /* CHART BACKGROUND FIX: Light Blue/Cyan Background */
+    /* CHART BACKGROUND FIXES */
     .chart-container {
         background-color: #f0f8ff; /* AliceBlue */
         @apply p-4 text-black rounded-xl; 
     }
-    /* CHART CONTENT WRAPPER - This inner div ensures the canvas maintains height */
     .chart-content-wrapper {
         height: 400px; 
     }
@@ -77,52 +66,45 @@
         @apply text-xl font-bold text-gray-800 mb-4 pt-4;
     }
     #municipioList {
-        /* Adjusted max-height to better utilize space in the narrower column */
         max-height: 480px; 
-        /* FIX: Forces scrollbar to be always visible */
         overflow-y: scroll; 
         padding-top: 4px; 
     }
-    /* Webkit Scrollbar Styling (Forces visibility) */
     #municipioList::-webkit-scrollbar {
         width: 8px;
     }
     #municipioList::-webkit-scrollbar-thumb {
-        background-color: #a7f3d0; /* Light green thumb */
+        background-color: #a7f3d0; 
         border-radius: 4px;
     }
     #municipioList::-webkit-scrollbar-track {
-        background: #f0fff0; /* Honeydew background of the list */
+        background: #f0fff0; 
     }
     .municipio-item {
-        /* FIX: Reduced text size for narrower column */
         @apply cursor-pointer p-1 rounded-lg text-xs transition-all text-black; 
     }
     .municipio-item:hover {
-        background-color: #d1fae5; /* Lighter green on hover */
+        background-color: #d1fae5; 
     }
     .selected-muni {
         @apply bg-blue-600 text-white font-semibold;
     }
-    /* SCATTER PLOT BACKGROUND FIX: Light Blue/Cyan Background */
     #scatterPlotContainer {
         background-color: #f0f8ff; /* AliceBlue */
         @apply rounded-xl p-4;
     }
-    /* MUNICIPALITY SELECTOR BACKGROUND FIX: Light Green Background */
     #main-panel .p-4.bg-gray-800 {
         background-color: #f0fff0; /* Honeydew */
-        @apply rounded-xl text-black; /* Default text color for the panel */
+        @apply rounded-xl text-black; 
     }
     
-    /* Input and internal text within the light green selector */
     #main-panel .p-4.bg-gray-800 h2,
     #main-panel .p-4.bg-gray-800 input,
     #main-panel .p-4.bg-gray-800 .municipio-item {
         color: #000 !important;
     }
     #main-panel .p-4.bg-gray-800 input {
-        background-color: #e5f5e5; /* Slightly darker green input background */
+        background-color: #e5f5e5; 
         border-color: #10b981;
     }
     
@@ -130,7 +112,7 @@
         height: 450px; 
     }
     .loader {
-      border: 4px solid rgba(0, 0, 0, 0.3); /* Darker loader for light background */
+      border: 4px solid rgba(0, 0, 0, 0.3); 
       border-radius: 50%;
       border-top: 4px solid #3b82f6;
       width: 40px;
@@ -140,53 +122,70 @@
       margin: 0 auto;
     }
     
-    /* --- END DASHBOARD SPECIFIC STYLES --- */
-    
     /* Standard project styles */
     .mini { min-height: 260px; }
     #metrics-menu { opacity: 0; visibility: hidden; transform: translateY(4px); pointer-events: none; transition: opacity .15s ease, transform .15s ease, visibility .15s ease; }
     #metrics-dropdown-root:hover #metrics-menu, #metrics-dropdown-root.hovering #metrics-menu { opacity: 1; visibility: visible; transform: translateY(0); pointer-events: auto; }
     #metrics-dropdown-root:hover #metrics-chevron, #metrics-dropdown-root.hovering #metrics-chevron { transform: rotate(180deg); }
 
-    /* New style for simulating 65% zoom on the main content */
+    /* Scale Wrapper for overall view */
     #scale-wrapper {
-        /* Apply the scale transformation */
         transform: scale(0.65); 
-        transform-origin: top center; /* Scale from the top-center */
-        
-        /* Adjust the height to accommodate the scaled content */
-        height: 154%; /* Set height to approx 1/0.65 to fit content without scroll */
-        padding-bottom: 200px; /* Add extra padding for safety */
-        margin-bottom: -35%; /* Compensate for the scale to pull up following elements */
-        transition: all 0.3s ease; /* Smooth transition for maximizing */
+        transform-origin: top center; 
+        height: 154%; 
+        padding-bottom: 200px; 
+        margin-bottom: -35%; 
+        transition: all 0.3s ease; 
     }
     
-    /* NEW: Maximized state for the wrapper */
-    #scale-wrapper.maximized {
+    /* NEW MAXIMIZE TARGET STYLES */
+    /* Target for maximization: The section containing scatter plot and selectors */
+    #dashboardVisuals {
+        position: relative;
+        transition: all 0.3s ease;
+    }
+
+    /* Maximized state for the visual dashboard area */
+    #dashboardVisuals.maximized {
         position: fixed;
         top: 0;
         left: 0;
         width: 100vw;
         height: 100vh;
         z-index: 1000;
-        background: #f3f4f6;
-        transform: none !important; /* Disable scale */
+        background: #f3f4f6; /* Match main background */
         margin: 0 !important;
         padding: 0 !important;
-        overflow-y: auto; /* Allow scrolling if content is too large */
+        overflow-y: auto; 
+        
+        /* Overrides flex property from dashboard-block padding */
+        display: block !important; 
     }
     
-    /* NEW: Adjust main content within the wrapper when maximized */
-    #scale-wrapper.maximized > main {
-        max-width: none !important;
+    /* Adjust internal elements when the visuals container is maximized */
+    #dashboardVisuals.maximized #main-panel {
+        /* Allow scatterplot to take more space when maximized */
+        grid-template-columns: 1fr 280px !important; 
         padding: 1rem !important;
-        margin: 0 !important;
-        min-height: 100vh;
+        gap: 1rem !important;
     }
     
-    /* NEW: Adjust chart height when maximized */
-    #scale-wrapper.maximized .chart-content-wrapper {
-        height: 70vh; /* Make charts taller in fullscreen mode */
+    #dashboardVisuals.maximized #scatter-canvas-wrapper {
+        height: 80vh !important; /* Make scatter plot fill most of the screen */
+    }
+    
+    /* Hide trend charts when maximized to focus on the scatter plot */
+    #dashboardVisuals.maximized #trendCharts,
+    #dashboardVisuals.maximized #trendMuniName {
+        display: none !important;
+    }
+
+    /* Adjust placement of the maximized button within the container */
+    #maximizeButtonContainer {
+        position: absolute;
+        top: 1.5rem; /* Adjusted top spacing */
+        right: 1.5rem; /* Adjusted right spacing */
+        z-index: 1010;
     }
   </style>
 </head>
@@ -337,22 +336,24 @@
               </div>
           </div>
       </div>
-      <section class="dashboard-block">
+      
+      <section id="dashboardVisuals" class="dashboard-block">
+        
+        <div id="maximizeButtonContainer">
+            <button id="maximizeButton" onclick="toggleMaximize()" class="text-gray-500 hover:text-blue-600 transition p-1 rounded-md bg-white shadow-md">
+                <svg id="maximizeIcon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9m1.25 10.25l-4.5-4.5m4.5 4.5v-4.5m0 4.5h-4.5m4.5 0L15 15m4.5-4.5v-4.5m0 4.5h-4.5m4.5 0l-4.5-4.5m4.5 4.5L15 15m-4.5 4.5v-4.5m0 4.5h-4.5m4.5 0L9 9m1.25 10.25l-4.5-4.5m4.5 4.5v-4.5m0 4.5h-4.5m4.5 0L15 15"/>
+                </svg>
+                <svg id="minimizeIcon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6 hidden">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 9l-4.5 4.5m0 0l4.5 4.5m-4.5-4.5h4.5m4.5-4.5l4.5 4.5m0 0l-4.5 4.5m4.5-4.5h-4.5M9 9l4.5-4.5m-4.5 4.5v-4.5m0 4.5h-4.5m4.5 0l-4.5-4.5m4.5 4.5L15 15m4.5-4.5v-4.5m0 4.5h-4.5m4.5 0l-4.5-4.5"/>
+                </svg>
+            </button>
+        </div>
           
-          <div id="main-panel" class="card grid grid-cols-1 lg:grid-cols-12 gap-4 mt-6 p-0">
+          <div id="main-panel" class="card grid grid-cols-1 lg:grid-cols-12 gap-4 p-0">
               
               <div class="lg:col-span-10 p-4" id="scatterPlotContainer">
-                  <div class="flex items-center justify-between">
-                      <h2 class="text-lg font-semibold mb-3 text-black">Socio-Economic Relationship by Municipality</h2>
-                      <button id="maximizeButton" onclick="toggleMaximize()" class="text-gray-500 hover:text-blue-600 transition p-1 rounded-md">
-                          <svg id="maximizeIcon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9m1.25 10.25l-4.5-4.5m4.5 4.5v-4.5m0 4.5h-4.5m4.5 0L15 15m4.5-4.5v-4.5m0 4.5h-4.5m4.5 0l-4.5-4.5m4.5 4.5L15 15m-4.5 4.5v-4.5m0 4.5h-4.5m4.5 0L9 9m1.25 10.25l-4.5-4.5m4.5 4.5v-4.5m0 4.5h-4.5m4.5 0L15 15"/>
-                          </svg>
-                          <svg id="minimizeIcon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6 hidden">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 9l-4.5 4.5m0 0l4.5 4.5m-4.5-4.5h4.5m4.5-4.5l4.5 4.5m0 0l-4.5 4.5m4.5-4.5h-4.5M9 9l4.5-4.5m-4.5 4.5v-4.5m0 4.5h-4.5m4.5 0l-4.5-4.5m4.5 4.5L15 15m4.5-4.5v-4.5m0 4.5h-4.5m4.5 0l-4.5-4.5"/>
-                          </svg>
-                      </button>
-                  </div>
+                  <h2 class="text-lg font-semibold mb-3 text-black">Socio-Economic Relationship by Municipality</h2>
                   <div id="chart-loader" class="text-center mt-20 hidden">
                       <div class="loader"></div>
                       <div class="mt-4 text-black">Loading and merging data...</div>
@@ -987,11 +988,11 @@
     
     // NEW: Maximize/Minimize Toggle Function
     function toggleMaximize() {
-        const wrapper = document.getElementById('scale-wrapper');
+        const visuals = document.getElementById('dashboardVisuals');
         const maximizeIcon = document.getElementById('maximizeIcon');
         const minimizeIcon = document.getElementById('minimizeIcon');
         
-        const isMaximized = wrapper.classList.toggle('maximized');
+        const isMaximized = visuals.classList.toggle('maximized');
         
         // Toggle icons visibility
         maximizeIcon.classList.toggle('hidden', isMaximized);
@@ -1069,7 +1070,7 @@
       root.addEventListener('mouseleave', removeHovering);
       if (menu) {
         menu.addEventListener('mouseenter', addHovering);
-        menu.addEventListener('mouseleave', removeHovering); // Corrected function name
+        menu.addEventListener('mouseleave', removeHovering); 
       }
     }
   </script>
