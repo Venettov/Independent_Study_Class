@@ -183,22 +183,24 @@
 
     /* 3. CRITICAL FIX: Explicitly set grid column spans within the maximized state */
     #dashboardVisuals.maximized #scatterPlotContainer {
-        /* Takes up 10 columns (now 1fr in the template) */
-        grid-column: span 1 / span 1; /* This is the 1fr column */
+        /* Takes up the scatter plot area (1fr column) */
+        grid-column: span 1 / span 1; 
     }
     #dashboardVisuals.maximized .lg\:col-span-2 {
-        /* Takes up 2 columns (now 300px in the template) */
-        grid-column: span 1 / span 1; /* This is the 300px column */
+        /* Takes up the selector area (300px column) */
+        grid-column: span 1 / span 1; 
     }
 
 
     /* 4. Ensure component heights use max space */
     #dashboardVisuals.maximized #scatter-canvas-wrapper {
-        height: 60vh !important; 
+        /* ADJUSTED: Reduced scatter height to make room for charts below */
+        height: 50vh !important; 
     }
     
     #dashboardVisuals.maximized #municipioList {
         /* CRITICAL FIX: Make the list container fill vertical space */
+        /* Calculated height: Full viewport minus nav, chart selectors, and padding */
         max-height: calc(100vh - 200px) !important;
         height: auto !important; 
     }
@@ -214,7 +216,8 @@
     }
     
     #dashboardVisuals.maximized #trendCharts .chart-content-wrapper {
-        height: 40vh !important;
+        /* ADJUSTED: Reduced trend chart height to ensure fit */
+        height: 35vh !important;
     }
     
     #dashboardVisuals.maximized .section-title {
