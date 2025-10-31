@@ -177,14 +177,25 @@
         padding: 1rem !important;
         gap: 1rem !important;
         width: 100%;
-        max-width: 98vw; 
+        
+        /* NEW FIX: Constrain max width and center the content when maximized */
+        max-width: 1300px; /* Adjust this value for the final desired width */
         margin: 0 auto;
+    }
+    
+    /* Trends and titles below the main panel should also be width-constrained */
+    #dashboardVisuals.maximized #trendCharts,
+    #dashboardVisuals.maximized .section-title {
+        max-width: 1300px;
+        margin-left: auto !important;
+        margin-right: auto !important;
     }
 
     /* 3. CRITICAL FIX: Explicitly set widths for stable 1fr / 300px split */
     #dashboardVisuals.maximized #scatterPlotContainer {
-        width: calc(100% - 300px - 1rem) !important; /* 100% - selector width - gap */
-        flex-shrink: 0;
+        /* Scatter plot takes up the remaining flexible width */
+        width: 100% !important; 
+        flex-shrink: 1; 
     }
     #dashboardVisuals.maximized .lg\:col-span-2 {
         width: 300px !important; /* Selector is a fixed width */
@@ -194,14 +205,14 @@
 
     /* 4. Ensure component heights use max space */
     #dashboardVisuals.maximized #scatter-canvas-wrapper {
-        /* Adjusted height for scatter plot to 22vh */
-        height: 22vh !important; 
+        /* Adjusted height for scatter plot to 27vh */
+        height: 27vh !important; 
     }
     
     #dashboardVisuals.maximized #municipioList {
         /* CRITICAL FIX: Make the list container fill vertical space based on new height */
-        /* Calculated height: Follow scatter plot height (22vh) + controls (~100px) + narrative */
-        max-height: calc(22vh + 195px) !important; 
+        /* Calculated height: Follow scatter plot height (27vh) + controls (~100px) + narrative */
+        max-height: calc(27vh + 195px) !important; 
         height: auto !important; 
         overflow-y: scroll !important;
     }
@@ -212,13 +223,15 @@
         grid-template-columns: 1fr 1fr;
         gap: 1rem;
         width: 100%;
-        max-width: 98vw;
-        margin: 0 auto 2rem auto;
+        
+        /* Set explicit auto margins to center constrained content */
+        margin-left: auto !important;
+        margin-right: auto !important;
     }
     
     #dashboardVisuals.maximized #trendCharts .chart-content-wrapper {
-        /* Adjusted height for trend charts to 18vh */
-        height: 18vh !important;
+        /* Adjusted height for trend charts to 22vh */
+        height: 22vh !important;
     }
     
     #dashboardVisuals.maximized .section-title {
