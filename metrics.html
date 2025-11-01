@@ -1053,8 +1053,9 @@
         minimizeIcon.classList.toggle('hidden', !isMaximized);
         
         // Redraw charts to adjust to new container size
+        // This short delay allows the browser to re-layout the screen before calculating chart size.
         setTimeout(() => {
-            if (scatterChart) scatterChart.resize();
+            if (scatterChart) scatterChart.resize(); 
             if (trendChart1) trendChart1.resize();
             if (trendChart2) trendChart2.resize();
         }, 100);
@@ -1085,12 +1086,12 @@
             document.getElementById('scatter-canvas-wrapper').classList.remove('hidden');
 
             // Initial render
-            updateKPIs(); // This is just for background data processing now
+            updateKPIs(); 
             updateMunicipioList();
             drawScatterPlot();
             
-            // FIX ADDED HERE: Force chart to resize after initial draw
-            if (scatterChart) scatterChart.resize(); 
+            // REMOVED: Immediate scatterChart.resize() call here, relying on 
+            // resizing via user interaction or the delayed call in toggleMaximize() for layout stability.
             
             drawTrendCharts(selectedMunicipio);
 
