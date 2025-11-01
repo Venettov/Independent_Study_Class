@@ -219,8 +219,8 @@
     }
     
     #dashboardVisuals.maximized #trendCharts .chart-content-wrapper {
-        /* Adjusted height for trend charts to 22vh */
-        height: 22vh !important;
+        /* Adjusted height for trend charts to 30vh */
+        height: 30vh !important;
     }
     
     #dashboardVisuals.maximized .section-title {
@@ -671,7 +671,7 @@
             x: m[xKey],
             y: m[yKey],
             colorValue: m[colorKey],
-            r: 5,
+            r: 12,
             name: m.Municipio
         })).filter(p => p.x !== undefined && p.y !== undefined && Number.isFinite(p.x) && Number.isFinite(p.y));
         
