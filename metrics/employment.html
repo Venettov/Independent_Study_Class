@@ -41,7 +41,7 @@
 
     .mini { min-height: 260px; }
 
-    /* Dropdown show-on-hover */
+    /* --- Dropdown base state & transitions (Main Nav) --- */
     #metrics-menu {
       opacity: 0; visibility: hidden; transform: translateY(4px);
       pointer-events: none;
@@ -66,6 +66,56 @@
         height: 154%; /* Approx 1 / 0.65 to ensure vertical space is reserved */
         padding-bottom: 200px;
         margin-bottom: -35%; /* Pull up content following the wrapper */
+    }
+
+    /* --- LEAFLET CONTROL STYLES (Map Dropdown) --- */
+    .leaflet-control-map-dropdown {
+      padding: 0; 
+      margin-left: 45px; /* Pushes the control right to clear the zoom buttons */
+      margin-top: 5px; 
+    }
+    .leaflet-control-map-dropdown .dropdown-root {
+      background: #fff;
+      box-shadow: 0 1px 5px rgba(0,0,0,.65);
+      border-radius: 4px;
+      position: relative; 
+    }
+    .leaflet-control-map-dropdown .nav-link {
+        padding: 6px 10px;
+        color: #333;
+        font-weight: 500;
+        font-size: 13px;
+        line-height: 1.2;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        cursor: pointer;
+    }
+    
+    .leaflet-control-map-dropdown .dropdown-menu {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        margin-top: 5px; 
+        z-index: 1000;
+        
+        /* Hiding logic */
+        opacity: 0; visibility: hidden; transform: translateY(4px);
+        pointer-events: none;
+        transition: opacity .15s ease, transform .15s ease, visibility .15s ease;
+    }
+    
+    .leaflet-control-map-dropdown .dropdown-root.hovering .dropdown-menu {
+        opacity: 1; visibility: visible; transform: translateY(0); pointer-events: auto;
+    }
+    .leaflet-control-map-dropdown .dropdown-root.hovering #map-selection-chevron {
+        transform: rotate(180deg);
+    }
+    
+    .leaflet-control-map-dropdown .dropdown-menu a {
+        text-decoration: none;
+        padding: 6px 12px;
+        font-size: 13px;
     }
   </style>
 </head>
@@ -137,7 +187,36 @@
             <button id="clearSel" class="px-3 py-1.5 text-sm rounded-lg border bg-white hover:bg-gray-50">Clear selection</button>
           </div>
         </div>
-        <div id="map" class="mt-3"></div>
+        <div id="map" class="mt-3">
+          <!-- NEW: Map Selection Dropdown Container -->
+          <div class="leaflet-control-container" id="map-dropdown-container">
+            <div class="leaflet-top leaflet-left">
+              <div class="leaflet-control leaflet-control-map-dropdown">
+                <div class="relative dropdown-root" id="map-selection-dropdown-root">
+                  <div class="nav-link inline-flex items-center gap-1 cursor-pointer select-none">
+                    Map Selection
+                    <svg id="map-selection-chevron" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 transition-transform" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                      <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.24 4.5a.75.75 0 01-1.08 0l-4.24-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/>
+                    </svg>
+                  </div>
+                  <div id="map-selection-menu" class="dropdown-menu w-64 rounded-xl border border-gray-200 bg-white shadow-lg ring-1 ring-black/5">
+                    <div class="py-2">
+                      <!-- METRIC LINKS (Removed All Metrics Overview) -->
+                      <a href="population.html"     class="block px-4 py-2 hover:bg-gray-50">Population</a>
+                      <a href="employment.html"     class="block px-4 py-2 bg-gray-100 font-semibold">Employment Rate</a>
+                      <a href="establishments.html" class="block px-4 py-2 hover:bg-gray-50">Employer Establishments</a>
+                      <a href="income.html"         class="block px-4 py-2 hover:bg-gray-50">Household Income</a>
+                      <a href="housing.html"        class="block px-4 py-2 hover:bg-gray-50">Housing Units</a>
+                      <a href="education.html"      class="block px-4 py-2 hover:bg-gray-50">Education</a>
+                      <a href="health.html"         class="block px-4 py-2 hover:bg-gray-50">Health</a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- END NEW: Map Selection Dropdown Container -->
+        </div>
       </section>
 
       <section class="card p-6">
@@ -624,6 +703,32 @@
       }
     }
 
+    function wireMapDropdown() {
+        // Wires the new map selection dropdown (top left of map)
+        const root = document.getElementById('map-selection-dropdown-root');
+        if (!root) return;
+        let hoverTimeout;
+        const menu = document.getElementById('map-selection-menu');
+
+        function addHovering(){ 
+            clearTimeout(hoverTimeout); 
+            root.classList.add('hovering'); 
+        }
+        function removeHovering(){ 
+            hoverTimeout = setTimeout(()=>{
+                root.classList.remove('hovering');
+            }, 300); 
+        }
+
+        root.addEventListener('mouseenter', addHovering);
+        root.addEventListener('mouseleave', removeHovering);
+        if (menu) {
+            menu.addEventListener('mouseenter', addHovering);
+            menu.addEventListener('mouseleave', removeHovering);
+        }
+    }
+
+
     // ---- Init ----
     (async function init(){
       const res = await fetch(EMP_JSON, { cache:'no-store' });
@@ -631,12 +736,27 @@
 
       const prBounds = L.latLngBounds([[17.85, -67.45],[18.55, -65.25]]);
       prBoundsGlobal = prBounds;
-      map = L.map('map', { zoomSnap:.25 }).fitBounds(prBounds);
+      map = L.map('map', { zoomControl: false, zoomSnap:.25 }).fitBounds(prBounds); // Hide default zoom
+      
+      // Add zoom controls back as a separate control
+      L.control.zoom({ position: 'topleft' }).addTo(map);
 
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap contributors',
         minZoom: 7, maxZoom: 19
       }).addTo(map);
+
+      // Initialize the map dropdown control
+      L.Control.MapDropdown = L.Control.extend({
+          onAdd: function(map) {
+              const container = L.DomUtil.get('map-dropdown-container');
+              L.DomEvent.disableClickPropagation(container);
+              L.DomEvent.disableScrollPropagation(container);
+              return container.querySelector('.leaflet-control-map-dropdown');
+          },
+          onRemove: function(map) {}
+      });
+      new L.Control.MapDropdown({ position: 'topleft' }).addTo(map);
 
       const gjRes = await fetch(GEOJSON_URL + (GEOJSON_URL.includes('?')?'&':'?') + 'cb=' + Date.now());
       fc = await gjRes.json();
@@ -711,7 +831,8 @@
 
       wireMetricToggle();
       wireClearSelection();
-      wireDropdown();
+      wireDropdown(); // Main nav dropdown
+      wireMapDropdown(); // NEW map dropdown
 
       // highlight active link in dropdown based on URL
       document.addEventListener('DOMContentLoaded', () => {
