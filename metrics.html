@@ -1088,6 +1088,10 @@
             updateKPIs(); // This is just for background data processing now
             updateMunicipioList();
             drawScatterPlot();
+            
+            // FIX ADDED HERE: Force chart to resize after initial draw
+            if (scatterChart) scatterChart.resize(); 
+            
             drawTrendCharts(selectedMunicipio);
 
             // Wire up axis selection handlers
