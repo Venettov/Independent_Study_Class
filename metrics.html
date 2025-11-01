@@ -393,10 +393,10 @@
         <div id="maximizeButtonContainer">
             <button id="maximizeButton" onclick="toggleMaximize()" class="text-gray-500 hover:text-blue-600 transition p-1 rounded-md bg-white shadow-md">
                 <svg id="maximizeIcon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12a7.5 7.5 0 0 1 7.5-7.5V4.5M19.5 12a7.5 7.5 0 0 1-7.5 7.5V19.5M4.5 12h-3m3 0v-3m15 0h-3m3 0v-3m-15 15h-3m3 0v-3m15 0h-3m3 0v-3"/>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12a7.5 7.5 0 0 1 7.5-7.5V4.5M19.5 12a7.5 7.5 0 0 1-7.5 7.5V19.5M4.5 12h-3m3 0v-3m15 0h-3m3 0v-3m-15 15h-3m3 0v-3m15 0h-3m3 0v-3"/>
                 </svg>
                 <svg id="minimizeIcon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6 hidden">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12a7.5 7.5 0 0 1 7.5-7.5V4.5M19.5 12a7.5 7.5 0 0 1-7.5 7.5V19.5M4.5 12h-3m3 0v-3m15 0h-3m3 0v-3m-15 15h-3m3 0v-3m15 0h-3m3 0v-3"/>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12a7.5 7.5 0 0 1 7.5-7.5V4.5M19.5 12a7.5 7.5 0 0 1-7.5 7.5V19.5M4.5 12h-3m3 0v-3m15 0h-3m3 0v-3m-15 15h-3m3 0v-3m15 0h-3m3 0v-3"/>
                 </svg>
             </button>
         </div>
@@ -439,7 +439,7 @@
                           </select>
                       </div>
                   </div>
-                  <p id="scatter-narrative" class="text-sm mt-4 text-gray-700">
+                  <p id="scatter-narrative" class="text-xs mt-4 text-gray-700">
                       This scatter plot compares two selected municipal metrics (X and Y axis) against each other. 
                       Each dot represents one municipality in Puerto Rico. The <strong>color of the dot</strong> represents the value of the third selected metric. 
                       Clicking on a dot will select that municipality, highlight it in yellow, and update the detailed trend charts below.
@@ -463,14 +463,14 @@
                   <div class="chart-content-wrapper">
                       <canvas id="trendChart1"></canvas>
                   </div>
-                  <p id="chart-narrative-1" class="text-sm mt-2 text-gray-700"></p>
+                  <p id="chart-narrative-1" class="text-xs mt-2 text-gray-700"></p>
               </div>
               <div class="chart-container"> 
                   <h3 class="text-base font-semibold mb-2 text-black">Employment & Income Trend</h3>
                   <div class="chart-content-wrapper">
                       <canvas id="trendChart2"></canvas>
                   </div>
-                  <p id="chart-narrative-2" class="text-sm mt-2 text-gray-700"></p>
+                  <p id="chart-narrative-2" class="text-xs mt-2 text-gray-700"></p>
               </div>
           </div>
       </section>
@@ -671,7 +671,7 @@
             x: m[xKey],
             y: m[yKey],
             colorValue: m[colorKey],
-            r: 12, // MODIFIED: Increased default radius from 5 to 8
+            r: 12,
             name: m.Municipio
         })).filter(p => p.x !== undefined && p.y !== undefined && Number.isFinite(p.x) && Number.isFinite(p.y));
         
@@ -682,7 +682,7 @@
                 x: selectedMuni[xKey],
                 y: selectedMuni[yKey],
                 colorValue: selectedMuni[colorKey],
-                r: 16, // MODIFIED: Increased highlight radius from 12 to 16
+                r: 12, // Increased size for visibility
                 name: selectedMuni.Municipio,
                 borderColor: '#facc15', // Yellow highlight
                 borderWidth: 4, // Increased border width
