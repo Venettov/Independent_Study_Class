@@ -68,17 +68,20 @@
         margin-bottom: -35%; /* Pull up content following the wrapper */
     }
 
-    /* --- NEW LEAFLET CONTROL STYLES --- */
+    /* --- LEAFLET CONTROL STYLES (UPDATED) --- */
     .leaflet-control-map-dropdown {
       /* Base container for the control */
       padding: 0; 
-      margin-bottom: 5px; /* Space between the dropdown and the zoom controls */
+      /* FIX 1: Move control to the right of the zoom button area */
+      margin-left: 45px; /* Pushes the control right to clear the zoom buttons */
+      margin-top: 5px; /* Move slightly down to align with zoom */
     }
     .leaflet-control-map-dropdown .dropdown-root {
       /* Mimic the style of the default leaflet controls */
       background: #fff;
       box-shadow: 0 1px 5px rgba(0,0,0,.65);
       border-radius: 4px;
+      position: relative; /* Ensure menu positions correctly relative to this root */
     }
     .leaflet-control-map-dropdown .nav-link {
         /* Style for the button */
@@ -92,6 +95,8 @@
         gap: 4px;
         cursor: pointer;
     }
+    
+    /* FIX 2: Hide the menu by default and use existing logic to show on hover */
     .leaflet-control-map-dropdown .dropdown-menu {
         /* Positioning the menu */
         position: absolute;
@@ -99,7 +104,20 @@
         left: 0;
         margin-top: 5px; 
         z-index: 1000;
+        
+        /* Hiding logic */
+        opacity: 0; visibility: hidden; transform: translateY(4px);
+        pointer-events: none;
+        transition: opacity .15s ease, transform .15s ease, visibility .15s ease;
     }
+    
+    .leaflet-control-map-dropdown .dropdown-root.hovering .dropdown-menu {
+        opacity: 1; visibility: visible; transform: translateY(0); pointer-events: auto;
+    }
+    .leaflet-control-map-dropdown .dropdown-root.hovering #map-selection-chevron {
+        transform: rotate(180deg);
+    }
+    
     .leaflet-control-map-dropdown .dropdown-menu a {
         /* Styling the menu items */
         text-decoration: none;
@@ -193,8 +211,7 @@
                   </div>
                   <div id="map-selection-menu" class="dropdown-menu w-64 rounded-xl border border-gray-200 bg-white shadow-lg ring-1 ring-black/5">
                     <div class="py-2">
-                      <a href="../metrics.html" class="block px-4 py-2 hover:bg-gray-50 font-semibold">All Metrics Overview</a>
-                      <div class="my-1 border-t border-gray-100"></div>
+                      <!-- Removed "All Metrics Overview" per user request -->
                       <!-- METRIC LINKS -->
                       <a href="population.html"     class="block px-4 py-2 bg-gray-100 font-semibold">Population</a>
                       <a href="employment.html"     class="block px-4 py-2 hover:bg-gray-50">Employment Rate</a>
@@ -580,12 +597,28 @@
 
       const prBounds = L.latLngBounds([[17.85, -67.45],[18.55, -65.25]]);
       prBoundsGlobal = prBounds;
-      map = L.map('map', { zoomSnap:.25 }).fitBounds(prBounds);
+      map = L.map('map', { zoomControl: false, zoomSnap:.25 }).fitBounds(prBounds); // Hide default zoom control
+
+      // Add zoom controls back as a separate control so we can position the dropdown relative to it
+      L.control.zoom({ position: 'topleft' }).addTo(map);
 
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap contributors',
         minZoom: 7, maxZoom: 19
       }).addTo(map);
+      
+      // Initialize the map dropdown control
+      L.Control.MapDropdown = L.Control.extend({
+          onAdd: function(map) {
+              const container = L.DomUtil.get('map-dropdown-container');
+              L.DomEvent.disableClickPropagation(container);
+              L.DomEvent.disableScrollPropagation(container);
+              return container.querySelector('.leaflet-control-map-dropdown');
+          },
+          onRemove: function(map) {}
+      });
+      new L.Control.MapDropdown({ position: 'topleft' }).addTo(map);
+      
 
       const gjRes = await fetch(GEOJSON_URL + (GEOJSON_URL.includes('?')?'&':'?') + 'cb=' + Date.now());
       fc = await gjRes.json();
@@ -892,14 +925,10 @@
         function addHovering(){ 
             clearTimeout(hoverTimeout); 
             root.classList.add('hovering'); 
-            // Also add the hover class to the main nav dropdown root to ensure the chevron rotates
-            document.getElementById('metrics-dropdown-root')?.classList.add('hovering');
         }
         function removeHovering(){ 
             hoverTimeout = setTimeout(()=>{
                 root.classList.remove('hovering');
-                // Remove the hover class from the main nav dropdown root
-                document.getElementById('metrics-dropdown-root')?.classList.remove('hovering');
             }, 300); 
         }
 
