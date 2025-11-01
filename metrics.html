@@ -110,7 +110,7 @@
     }
     
     #scatter-canvas-wrapper {
-        height: 450px; 
+        height: 450px; /* REVERTED to default height (was 600px) */
     }
     .loader {
       border: 4px solid rgba(0, 0, 0, 0.3); 
@@ -196,14 +196,14 @@
 
     /* 4. Ensure component heights use max space */
     #dashboardVisuals.maximized #scatter-canvas-wrapper {
-        /* Adjusted height for scatter plot to 27vh */
-        height: 27vh !important; 
+        /* Adjusted height for scatter plot to 50vh (was 27vh) */
+        height: 50vh !important; /* MODIFIED */
     }
     
     #dashboardVisuals.maximized #municipioList {
-        /* CRITICAL FIX: Make the list container fill vertical space based on new height */
-        /* Calculated height: Follow scatter plot height (27vh) + controls (~100px) + narrative */
-        max-height: calc(27vh + 195px) !important; 
+        /* CRITICAL FIX: Make the list container fill vertical space based on new height (now 50vh) */
+        /* Calculated height: Follow scatter plot height (50vh) + controls (~100px) + narrative */
+        max-height: calc(50vh + 195px) !important; /* MODIFIED */
         height: auto !important; 
         overflow-y: scroll !important;
     }
@@ -219,8 +219,8 @@
     }
     
     #dashboardVisuals.maximized #trendCharts .chart-content-wrapper {
-        /* Adjusted height for trend charts to 30vh */
-        height: 30vh !important;
+        /* Trend chart height remains 35vh */
+        height: 35vh !important; 
     }
     
     #dashboardVisuals.maximized .section-title {
@@ -393,17 +393,17 @@
         <div id="maximizeButtonContainer">
             <button id="maximizeButton" onclick="toggleMaximize()" class="text-gray-500 hover:text-blue-600 transition p-1 rounded-md bg-white shadow-md">
                 <svg id="maximizeIcon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9m1.25 10.25l-4.5-4.5m4.5 4.5v-4.5m0 4.5h-4.5m4.5 0L15 15m4.5-4.5v-4.5m0 4.5h-4.5m4.5 0l-4.5-4.5m4.5 4.5L15 15m-4.5 4.5v-4.5m0 4.5h-4.5m4.5 0L9 9m1.25 10.25l-4.5-4.5m4.5 4.5v-4.5m0 4.5h-4.5m4.5 0L15 15"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0l6 6m7.5 7.5v-4.5m0 4.5h-4.5m4.5 0l-6-6m-3-9h-4.5m4.5 0v4.5m0-4.5l-6 6m7.5 7.5h4.5m-4.5 0v-4.5m0 4.5l6-6"/>
                 </svg>
                 <svg id="minimizeIcon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6 hidden">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 9l-4.5 4.5m0 0l4.5 4.5m-4.5-4.5h4.5m4.5-4.5l4.5 4.5m0 0l-4.5 4.5m4.5-4.5h-4.5M9 9l4.5-4.5m-4.5 4.5v-4.5m0 4.5h-4.5m4.5 0l-4.5-4.5m4.5 4.5L15 15m4.5-4.5v-4.5m0 4.5h-4.5m4.5 0l-4.5-4.5"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0l6 6m7.5 7.5v-4.5m0 4.5h-4.5m4.5 0l-6-6m-3-9h-4.5m4.5 0v4.5m0-4.5l-6 6m7.5 7.5h4.5m-4.5 0v-4.5m0 4.5l6-6"/>
                 </svg>
             </button>
         </div>
           
           <div id="main-panel" class="card grid grid-cols-1 lg:grid-cols-12 gap-4 p-0">
               
-              <div class="lg:col-span-10 p-4" id="scatterPlotContainer">
+              <div class="lg:col-span-10 p-4" id="scatterPlotContainer"> 
                   <h2 class="text-lg font-semibold mb-3 text-black">Socio-Economic Relationship by Municipality</h2>
                   <div id="chart-loader" class="text-center mt-20 hidden">
                       <div class="loader"></div>
@@ -439,7 +439,7 @@
                           </select>
                       </div>
                   </div>
-                  <p id="scatter-narrative" class="text-xs mt-4 text-gray-700">
+                  <p id="scatter-narrative" class="text-sm mt-4 text-gray-700">
                       This scatter plot compares two selected municipal metrics (X and Y axis) against each other. 
                       Each dot represents one municipality in Puerto Rico. The <strong>color of the dot</strong> represents the value of the third selected metric. 
                       Clicking on a dot will select that municipality, highlight it in yellow, and update the detailed trend charts below.
@@ -463,14 +463,14 @@
                   <div class="chart-content-wrapper">
                       <canvas id="trendChart1"></canvas>
                   </div>
-                  <p id="chart-narrative-1" class="text-xs mt-2 text-gray-700"></p>
+                  <p id="chart-narrative-1" class="text-sm mt-2 text-gray-700"></p>
               </div>
               <div class="chart-container"> 
                   <h3 class="text-base font-semibold mb-2 text-black">Employment & Income Trend</h3>
                   <div class="chart-content-wrapper">
                       <canvas id="trendChart2"></canvas>
                   </div>
-                  <p id="chart-narrative-2" class="text-xs mt-2 text-gray-700"></p>
+                  <p id="chart-narrative-2" class="text-sm mt-2 text-gray-700"></p>
               </div>
           </div>
       </section>
@@ -671,7 +671,7 @@
             x: m[xKey],
             y: m[yKey],
             colorValue: m[colorKey],
-            r: 12,
+            r: 8, // MODIFIED: Increased default radius from 5 to 8
             name: m.Municipio
         })).filter(p => p.x !== undefined && p.y !== undefined && Number.isFinite(p.x) && Number.isFinite(p.y));
         
@@ -682,7 +682,7 @@
                 x: selectedMuni[xKey],
                 y: selectedMuni[yKey],
                 colorValue: selectedMuni[colorKey],
-                r: 12, // Increased size for visibility
+                r: 16, // MODIFIED: Increased highlight radius from 12 to 16
                 name: selectedMuni.Municipio,
                 borderColor: '#facc15', // Yellow highlight
                 borderWidth: 4, // Increased border width
