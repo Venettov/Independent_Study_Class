@@ -45,7 +45,7 @@
     #metrics-menu {
       opacity: 0; visibility: hidden; transform: translateY(4px);
       pointer-events: none;
-      transition: opacity .15s ease, transform .15s ease, visibility .15s ease.
+      transition: opacity .15s ease, transform .15s ease, visibility .15s ease;
     }
     #metrics-dropdown-root:hover #metrics-menu,
     #metrics-dropdown-root.hovering #metrics-menu {
@@ -67,6 +67,45 @@
         padding-bottom: 200px;
         margin-bottom: -35%; /* Pull up content following the wrapper */
     }
+
+    /* --- NEW LEAFLET CONTROL STYLES --- */
+    .leaflet-control-map-dropdown {
+      /* Base container for the control */
+      padding: 0; 
+      margin-bottom: 5px; /* Space between the dropdown and the zoom controls */
+    }
+    .leaflet-control-map-dropdown .dropdown-root {
+      /* Mimic the style of the default leaflet controls */
+      background: #fff;
+      box-shadow: 0 1px 5px rgba(0,0,0,.65);
+      border-radius: 4px;
+    }
+    .leaflet-control-map-dropdown .nav-link {
+        /* Style for the button */
+        padding: 6px 10px;
+        color: #333;
+        font-weight: 500;
+        font-size: 13px;
+        line-height: 1.2;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        cursor: pointer;
+    }
+    .leaflet-control-map-dropdown .dropdown-menu {
+        /* Positioning the menu */
+        position: absolute;
+        top: 100%;
+        left: 0;
+        margin-top: 5px; 
+        z-index: 1000;
+    }
+    .leaflet-control-map-dropdown .dropdown-menu a {
+        /* Styling the menu items */
+        text-decoration: none;
+        padding: 6px 12px;
+        font-size: 13px;
+    }
   </style>
 </head>
 <body class="bg-gray-50 text-gray-900 font-sans">
@@ -75,6 +114,7 @@
     <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-center gap-6 text-sm sm:text-base">
       <a href="../index.html" class="nav-link border-b-2 border-transparent">Home</a>
 
+      <!-- EXISTING METRICS DROPDOWN (kept for consistency with other pages) -->
       <div class="relative" id="metrics-dropdown-root">
         <a href="../metrics.html" class="nav-link border-b-2 border-blue-600 text-blue-600 font-semibold inline-flex items-center gap-1 cursor-pointer select-none" aria-current="page">
           Metrics
@@ -86,6 +126,7 @@
           <div class="py-2">
             <a href="../metrics.html" class="block px-4 py-2 hover:bg-gray-50 font-semibold">All Metrics Overview</a>
             <div class="my-1 border-t border-gray-100"></div>
+            <!-- LIST OF METRICS -->
             <a href="population.html"     class="block px-4 py-2 bg-gray-100 font-semibold">Population</a>
             <a href="employment.html"     class="block px-4 py-2 hover:bg-gray-50">Employment Rate</a>
             <a href="establishments.html" class="block px-4 py-2 hover:bg-gray-50">Employer Establishments</a>
@@ -138,7 +179,38 @@
             <button id="clearSel" class="px-3 py-1.5 text-sm rounded-lg border bg-white hover:bg-gray-50">Clear selection</button>
           </div>
         </div>
-        <div id="map" class="mt-3"></div>
+        <div id="map" class="mt-3">
+          <!-- NEW: Map Selection Dropdown Container -->
+          <div class="leaflet-control-container" id="map-dropdown-container">
+            <div class="leaflet-top leaflet-left">
+              <div class="leaflet-control leaflet-control-map-dropdown">
+                <div class="relative dropdown-root" id="map-selection-dropdown-root">
+                  <div class="nav-link inline-flex items-center gap-1 cursor-pointer select-none">
+                    Map Selection
+                    <svg id="map-selection-chevron" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 transition-transform" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                      <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.24 4.5a.75.75 0 01-1.08 0l-4.24-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/>
+                    </svg>
+                  </div>
+                  <div id="map-selection-menu" class="dropdown-menu w-64 rounded-xl border border-gray-200 bg-white shadow-lg ring-1 ring-black/5">
+                    <div class="py-2">
+                      <a href="../metrics.html" class="block px-4 py-2 hover:bg-gray-50 font-semibold">All Metrics Overview</a>
+                      <div class="my-1 border-t border-gray-100"></div>
+                      <!-- METRIC LINKS -->
+                      <a href="population.html"     class="block px-4 py-2 bg-gray-100 font-semibold">Population</a>
+                      <a href="employment.html"     class="block px-4 py-2 hover:bg-gray-50">Employment Rate</a>
+                      <a href="establishments.html" class="block px-4 py-2 hover:bg-gray-50">Employer Establishments</a>
+                      <a href="income.html"         class="block px-4 py-2 hover:bg-gray-50">Household Income</a>
+                      <a href="housing.html"        class="block px-4 py-2 hover:bg-gray-50">Housing Units</a>
+                      <a href="education.html"      class="block px-4 py-2 hover:bg-gray-50">Education</a>
+                      <a href="health.html"         class="block px-4 py-2 hover:bg-gray-50">Health</a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- END NEW: Map Selection Dropdown Container -->
+        </div>
       </section>
 
       <section class="card p-6">
@@ -599,7 +671,8 @@
 
       wireMetricToggle();
       wireClearSelection();
-      wireDropdown();
+      wireDropdown(); // Main nav dropdown
+      wireMapDropdown(); // NEW map dropdown
     })();
 
     function wireMetricToggle(){
@@ -791,7 +864,10 @@
       ABS_BREAKS = [n1, n2, n3, 0, p1];
     }
 
+    // --- Dropdown Wiring Functions ---
+
     function wireDropdown() {
+      // Wires the main navigation dropdown (top of page)
       const root = document.getElementById('metrics-dropdown-root');
       if (!root) return;
       let hoverTimeout;
@@ -805,6 +881,36 @@
         menu.addEventListener('mouseleave', removeHovering);
       }
     }
+
+    function wireMapDropdown() {
+        // Wires the new map selection dropdown (top left of map)
+        const root = document.getElementById('map-selection-dropdown-root');
+        if (!root) return;
+        let hoverTimeout;
+        const menu = document.getElementById('map-selection-menu');
+
+        function addHovering(){ 
+            clearTimeout(hoverTimeout); 
+            root.classList.add('hovering'); 
+            // Also add the hover class to the main nav dropdown root to ensure the chevron rotates
+            document.getElementById('metrics-dropdown-root')?.classList.add('hovering');
+        }
+        function removeHovering(){ 
+            hoverTimeout = setTimeout(()=>{
+                root.classList.remove('hovering');
+                // Remove the hover class from the main nav dropdown root
+                document.getElementById('metrics-dropdown-root')?.classList.remove('hovering');
+            }, 300); 
+        }
+
+        root.addEventListener('mouseenter', addHovering);
+        root.addEventListener('mouseleave', removeHovering);
+        if (menu) {
+            menu.addEventListener('mouseenter', addHovering);
+            menu.addEventListener('mouseleave', removeHovering);
+        }
+    }
+
 
     document.addEventListener('DOMContentLoaded', () => {
       const currentPathname = window.location.pathname.split('/').pop();
