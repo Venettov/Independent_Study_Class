@@ -11,6 +11,7 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1"></script>
 
   <style>
     .card {
@@ -316,11 +317,22 @@
   <script>
     // ---------------------- Data paths ----------------------
     const GEOJSON_URL = '../data/tl_2022_72_cousub/pr_municipalities.geojson';
-    // --- UPDATED PATH ---
+    // --- TEMPORARILY RESTORED PATH for primary data functionality ---
     const EDU_JSON    = '../data/education/municipios_acs_education_2013_2023_wide.json';
+    // --- UPDATED PATH for disaster data ---
+    const DISASTER_JSON = '../data/natural_disasters/puerto_rico_earthquakes.json'; // NEW
     
     // --- UPDATED YEARS ---
     const YEARS = [2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023];
+
+    // --- NEW: Disaster Event Configuration ---
+    const DISASTER_COLORS = {
+        'Hurricane': 'rgba(234, 88, 12, 0.6)', // Orange for Hurricanes
+        'Earthquake': 'rgba(185, 28, 28, 0.6)', // Red for Earthquakes
+        'Other': 'rgba(75, 85, 99, 0.6)' // Gray for others
+    };
+    let _disasterEvents = []; // To store loaded disaster data
+    let earthquakeLayerGroup = null; // New global for earthquake markers
 
     // ---------------------- Formatters ----------------------
     // Percent format with one decimal place
@@ -485,6 +497,44 @@
       const ctxB = document.getElementById('barChart').getContext('2d');
 
       // --- 1. Line Chart (Attainment Trend) ---
+      
+      // Prepare annotations for disaster events
+      const annotations = _disasterEvents
+        .filter(event => event.type !== 'Earthquake') // Only annotate Hurricanes and others on the line chart
+        .map(event => {
+        // Find the index of the year (x-value) for the event
+        const yearMatch = YEARS.find(y => String(y) === String(event.year));
+        
+        // Only annotate if the year is within the chart's range
+        if (!yearMatch) return null;
+
+        // Use the event's name as the label
+        const labelText = event.name.replace('Hurricane ','H.').replace('Earthquake','Eq.');
+
+        return {
+          type: 'line',
+          mode: 'vertical',
+          scaleID: 'x',
+          value: String(yearMatch), // Use the string year as the categorical value
+          borderColor: DISASTER_COLORS[event.type] || DISASTER_COLORS['Other'],
+          borderWidth: 2,
+          borderDash: [6, 6],
+          label: {
+            content: labelText,
+            enabled: true,
+            position: 'top',
+            rotation: 0,
+            backgroundColor: DISASTER_COLORS[event.type].replace('0.6','0.8') || DISASTER_COLORS['Other'].replace('0.6','0.8'),
+            font: { size: 10, weight: 'bold' }
+          },
+          tooltip: {
+            callbacks: {
+              label: () => `${event.name} (${event.type}) - Year ${event.year}`
+            }
+          }
+        };
+      }).filter(a => a !== null); // Filter out events outside the year range
+
       if (lineChart) lineChart.destroy();
       lineChart = new Chart(ctxL, {
         type: 'line',
@@ -501,9 +551,17 @@
         options: {
           plugins:{ 
             legend:{ display:false }, 
-            tooltip:{ callbacks:{ label:(c)=>fmtPct(c.parsed.y) } } 
+            tooltip:{ callbacks:{ label:(c)=>fmtPct(c.parsed.y) } },
+            // Add annotations plugin configuration
+            annotation: {
+                annotations: annotations
+            }
           },
           scales:{ 
+            x: {
+              type: 'category', // Treat X-axis as categories (years)
+              labels: YEARS
+            },
             y:{ 
               ticks:{ callback:v=>fmtPct(v) },
               title: { display: true, text: '% Attainment' }
@@ -546,6 +604,54 @@
       updatePctChangeMetricCard(st);
     }
 
+    // ---------------------- NEW: Earthquake Plotting ----------------------
+    function plotEarthquakes(data, mapInstance){
+        if (!data || data.length === 0) return;
+
+        // Clear existing markers if the layer group was previously created
+        if (earthquakeLayerGroup) {
+            earthquakeLayerGroup.clearLayers();
+        } else {
+            earthquakeLayerGroup = L.layerGroup().addTo(mapInstance);
+        }
+
+        const MIN_MAG_THRESHOLD = 3.5; // Only plot earthquakes with magnitude 3.5 or higher for map clarity
+
+        data.forEach(event => {
+            const lat = event.latitude;
+            const lng = event.longitude;
+            const mag = event.mag;
+            const date = event.date;
+            const place = event.place || 'Unknown Location';
+            const depth = event.depth_km;
+
+            if (mag < MIN_MAG_THRESHOLD) return; // Skip small quakes
+
+            // Calculate the radius in pixels for L.circleMarker
+            // Scaling factor: mag * 3 is a good starting point for L.circleMarker radius in pixels
+            const radius = mag * 3; 
+
+            const circle = L.circleMarker([lat, lng], {
+                radius: radius,
+                fillColor: '#b91c1c', // Red (from DISASTER_COLORS)
+                color: '#7f1d1d', // Darker Red border
+                weight: 1,
+                opacity: 1,
+                fillOpacity: 0.6
+            }).addTo(earthquakeLayerGroup);
+
+            // Bind popup for details
+            circle.bindPopup(`
+                <strong>Magnitude ${mag.toFixed(1)} Earthquake</strong>
+                <br>Place: ${place}
+                <br>Date: ${new Date(date).toLocaleString()}
+                <br>Depth: ${depth.toFixed(1)} km
+            `);
+
+        });
+    }
+
+
     // ---------------------- DOM targets ----------------------
     const dName = document.getElementById('d-name');
     const dCent = document.getElementById('d-centroid');
@@ -577,6 +683,15 @@
     let prBoundsGlobal = null;
 
     (async function init(){
+      // NEW: Load disaster data
+      try {
+        const disRes = await fetch(DISASTER_JSON);
+        _disasterEvents = await disRes.json();
+      } catch (error) {
+        console.error("Error loading disaster data:", error);
+      }
+      
+      // Load main education data
       const res = await fetch(EDU_JSON, { cache:'no-store' });
       const rawData = await res.json();
       // Filter out metadata and ensure we get only data rows
@@ -691,6 +806,9 @@
       }
       map.on('resize', moveLegend);
       moveLegend();
+
+      // NEW: Plot the earthquakes after the map is initialized
+      plotEarthquakes(_disasterEvents, map);
 
       const initName = 'Puerto Rico';
       updateDetails(initName, statsForMunicipio(initName), null);
