@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Earthquake Plotting in Puerto Rico</title>
+  <title>Educational Attainment Dynamics in Puerto Rico</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
 
@@ -26,8 +26,10 @@
         radial-gradient(1200px 600px at 80% -10%, rgba(37,99,235,.10), transparent 60%),
         linear-gradient(180deg, #fafafa 0%, #f3f4f6 100%);
     }
-    #map { height: 75vh; width: 100%; border-radius: .75rem; }
-    
+    #map { height: 48vh; width: 100%; border-radius: .75rem; }
+    @media (min-width: 1280px) { #map { height: 46vh; } }
+    @media (max-width: 640px)  { #map { height: 54vh; } }
+
     .leaflet-tooltip {
       background: rgba(255,255,255,.95);
       border-color:#333;
@@ -38,13 +40,83 @@
       padding:5px 10px;
     }
 
-    /* Simplified scale wrapper for focusing on the map */
+    .mini { min-height: 260px; }
+
+    /* --- Dropdown base state & transitions (Main Nav) --- */
+    #metrics-menu {
+      opacity: 0; visibility: hidden; transform: translateY(4px);
+      pointer-events: none;
+      transition: opacity .15s ease, transform .15s ease, visibility .15s ease;
+    }
+    #metrics-dropdown-root:hover #metrics-menu,
+    #metrics-dropdown-root.hovering #metrics-menu {
+      opacity: 1; visibility: visible; transform: translateY(0); pointer-events: auto;
+    }
+    #metrics-dropdown-root:hover #metrics-chevron,
+    #metrics-dropdown-root.hovering #metrics-chevron {
+      transform: rotate(180deg);
+    }
+
+    /* New style for simulating 65% zoom on the main content */
     #scale-wrapper {
-        transform: scale(1); 
-        transform-origin: top center;
-        height: auto; 
-        padding-bottom: 0;
-        margin-bottom: 0; 
+        /* Apply the scale transformation */
+        transform: scale(0.65); 
+        transform-origin: top center; /* Scale from the top-center */
+        
+        /* Adjustments to compensate for the scaling effect on surrounding content */
+        height: 154%; /* Approx 1 / 0.65 to ensure vertical space is reserved */
+        padding-bottom: 200px;
+        margin-bottom: -35%; /* Pull up content following the wrapper */
+    }
+
+    /* --- NEW LEAFLET CONTROL STYLES (Map Dropdown) --- */
+    .leaflet-control-map-dropdown {
+      padding: 0; 
+      margin-left: 45px; /* Pushes the control right to clear the zoom buttons */
+      margin-top: 5px; 
+    }
+    .leaflet-control-map-dropdown .dropdown-root {
+      background: #fff;
+      box-shadow: 0 1px 5px rgba(0,0,0,.65);
+      border-radius: 4px;
+      position: relative; 
+    }
+    .leaflet-control-map-dropdown .nav-link {
+        padding: 6px 10px;
+        color: #333;
+        font-weight: 500;
+        font-size: 13px;
+        line-height: 1.2;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        cursor: pointer;
+    }
+    
+    .leaflet-control-map-dropdown .dropdown-menu {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        margin-top: 5px; 
+        z-index: 1000;
+        
+        /* Hiding logic */
+        opacity: 0; visibility: hidden; transform: translateY(4px);
+        pointer-events: none;
+        transition: opacity .15s ease, transform .15s ease, visibility .15s ease;
+    }
+    
+    .leaflet-control-map-dropdown .dropdown-root.hovering .dropdown-menu {
+        opacity: 1; visibility: visible; transform: translateY(0); pointer-events: auto;
+    }
+    .leaflet-control-map-dropdown .dropdown-root.hovering #map-selection-chevron {
+        transform: rotate(180deg);
+    }
+    
+    .leaflet-control-map-dropdown .dropdown-menu a {
+        text-decoration: none;
+        padding: 6px 12px;
+        font-size: 13px;
     }
   </style>
 </head>
@@ -53,7 +125,29 @@
   <nav class="bg-white shadow sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-center gap-6 text-sm sm:text-base">
       <a href="../index.html" class="nav-link border-b-2 border-transparent">Home</a>
-      <a href="../metrics.html" class="nav-link border-b-2 border-blue-600 text-blue-600 font-semibold">Earthquake Map</a>
+
+      <div class="relative" id="metrics-dropdown-root">
+        <a href="../metrics.html" class="nav-link border-b-2 border-blue-600 text-blue-600 font-semibold inline-flex items-center gap-1 cursor-pointer select-none" aria-current="page">
+          Metrics
+          <svg id="metrics-chevron" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 transition-transform" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.24 4.5a.75.75 0 01-1.08 0l-4.24-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/>
+          </svg>
+        </a>
+        <div id="metrics-menu" class="absolute right-0 mt-2 w-64 rounded-xl border border-gray-200 bg-white shadow-lg ring-1 ring-black/5 z-50">
+          <div class="py-2">
+            <a href="../metrics.html" class="block px-4 py-2 hover:bg-gray-50 font-semibold">All Metrics Overview</a>
+            <div class="my-1 border-t border-gray-100"></div>
+            <a href="population.html"     class="block px-4 py-2 hover:bg-gray-50">Population</a>
+            <a href="employment.html"     class="block px-4 py-2 hover:bg-gray-50">Employment Rate</a>
+            <a href="establishments.html" class="block px-4 py-2 hover:bg-gray-50">Employer Establishments</a>
+            <a href="income.html"         class="block px-4 py-2 hover:bg-gray-50">Household Income</a>
+            <a href="housing.html"        class="block px-4 py-2 hover:bg-gray-50">Housing Units</a>
+            <a href="education.html"      class="block px-4 py-2 bg-gray-100 font-semibold">Education</a>
+            <a href="health.html"         class="block px-4 py-2 hover:bg-gray-50">Health</a>
+          </div>
+        </div>
+      </div>
+
       <a href="../literature.html" class="nav-link border-b-2 border-transparent">Literature</a>
       <a href="../strategy.html"   class="nav-link border-b-2 border-transparent">Strategy</a>
       <a href="../about.html"      class="nav-link border-b-2 border-transparent">About</a>
@@ -65,17 +159,18 @@
       <header class="card hero p-6 sm:p-8 lg:p-10 relative">
         <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between">
           <div>
-            <p class="text-sm font-semibold text-gray-500 uppercase">Natural Disaster Visualization</p>
+            <p class="text-sm font-semibold text-gray-500 uppercase">Graduate Independent Study</p>
             <h1 class="mt-2 text-4xl sm:text-5xl font-extrabold leading-tight">
-              Earthquake Activity in Puerto Rico
+              Population & Economic Dynamics in Puerto Rico
             </h1>
             <p class="mt-3 text-lg text-gray-700">
-              An interactive map showing earthquake locations and magnitudes near Puerto Rico.
+              A graduate research project examining demographic shifts, out-migration, and sustainable development
+              strategies through linked data analysis and policy synthesis.
             </p>
             <div class="mt-5">
-              <span class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-red-100 text-red-800">
-                <span class="inline-flex w-5 h-5 items-center justify-center rounded-full bg-red-800 text-white text-xs">!</span>
-                Circle size indicates magnitude: Larger circle = Larger magnitude (Filtered to magnitude 3.5+)
+              <span class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-100 text-slate-800">
+                <span class="inline-flex w-5 h-5 items-center justify-center rounded-full bg-slate-800 text-white text-xs">i</span>
+                Hover over the map to see county / municipality details
               </span>
             </div>
           </div>
@@ -83,23 +178,135 @@
       </header>
 
       <section class="card p-4">
-        <div id="map" class="mt-3">
-          <div class="leaflet-control-container" id="map-dropdown-container"></div>
+        <div class="flex items-center justify-between gap-3">
+          <div class="text-sm text-gray-700 font-medium">Map shading by</div>
+          <div class="flex items-center gap-2">
+            <div class="inline-flex rounded-lg border bg-white shadow-sm overflow-hidden">
+              <button id="metricPct" type="button" class="px-3 py-1.5 text-sm font-medium bg-blue-600 text-white">Cumulative % Change</button>
+              <button id="metricLatest" type="button" class="px-3 py-1.5 text-sm font-medium hover:bg-gray-50">Latest Attainment (%)</button>
+            </div>
+            <button id="clearSel" class="px-3 py-1.5 text-sm rounded-lg border bg-white hover:bg-gray-50">Clear selection</button>
+          </div>
         </div>
+        <div id="map" class="mt-3">
+          <div class="leaflet-control-container" id="map-dropdown-container">
+            <div class="leaflet-top leaflet-left">
+              <div class="leaflet-control leaflet-control-map-dropdown">
+                <div class="relative dropdown-root" id="map-selection-dropdown-root">
+                  <div class="nav-link inline-flex items-center gap-1 cursor-pointer select-none">
+                    Metric Selection
+                    <svg id="map-selection-chevron" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 transition-transform" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                      <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.24 4.5a.75.75 0 01-1.08 0l-4.24-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/>
+                    </svg>
+                  </div>
+                  <div id="map-selection-menu" class="dropdown-menu w-64 rounded-xl border border-gray-200 bg-white shadow-lg ring-1 ring-black/5">
+                    <div class="py-2">
+                      <a href="population.html"     class="block px-4 py-2 hover:bg-gray-50">Population</a>
+                      <a href="employment.html"     class="block px-4 py-2 hover:bg-gray-50">Employment Rate</a>
+                      <a href="establishments.html" class="block px-4 py-2 hover:bg-gray-50">Employer Establishments</a>
+                      <a href="income.html"         class="block px-4 py-2 hover:bg-gray-50">Household Income</a>
+                      <a href="housing.html"        class="block px-4 py-2 hover:bg-gray-50">Housing Units</a>
+                      <a href="education.html"      class="block px-4 py-2 bg-gray-100 font-semibold">Education</a>
+                      <a href="health.html"         class="block px-4 py-2 hover:bg-gray-50">Health</a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          </div>
+      </section>
+
+      <section class="card p-6">
+        <h2 class="text-lg font-semibold mb-4">Educational Attainment Details</h2>
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6"> <div class="lg:col-span-1">
+            <div class="text-sm">
+              <div>Municipio: <span id="d-name" class="font-semibold">Puerto Rico</span></div>
+              <div>Centroid: <span id="d-centroid" class="text-gray-600">—</span></div>
+            </div>
+
+            <div class="mt-4 text-sm">
+              <div class="font-semibold text-gray-700">Bachelor's Degree or Higher (Population 25+):</div>
+              <ul class="mt-1 space-y-1">
+                <li>Latest Year (2023): <span id="d-latest" class="font-semibold">—</span></li>
+                <li>Change in PP since 2013: <span id="d-chg-pp" class="font-semibold">—</span></li>
+                <li>Latest Annual Change: <span id="d-annual-chg" class="font-semibold">—</span></li>
+              </ul>
+            </div>
+
+            <div class="mt-4 text-sm">
+              <a id="d-census" class="text-blue-600 underline" href="https://data.census.gov/table?q=S1501:+EDUCATIONAL+ATTAINMENT+Puerto+Rico" target="_blank" rel="noopener">
+                Open on data.census.gov (S1501) ↗
+              </a>
+            </div>
+          </div>
+
+          <div>
+            <h3 class="font-semibold mb-2">Attainment Trend (2013–2023)</h3>
+            <div class="mini bg-gray-50 rounded p-3">
+              <canvas id="lineChart"></canvas>
+            </div>
+          </div>
+
+          <div>
+            <h3 class="font-semibold mb-2">Annual Change in Percentage Points (pp)</h3>
+            <div class="mini bg-gray-50 rounded p-3">
+              <canvas id="barChart"></canvas>
+            </div>
+          </div>
+
+          <div>
+            <h3 class="font-semibold mb-2">Cumulative Percentage Change (%)</h3>
+            <div id="pctChangeMetricCard" class="mini bg-gray-50 rounded p-6 flex flex-col items-center justify-center">
+              <div class="text-sm font-medium text-gray-600">Total Change (2013–2023)</div>
+              <div id="pct-change-val" class="mt-2 text-5xl font-extrabold text-gray-800">
+                —
+              </div>
+              <div id="pct-change-icon" class="mt-3 text-lg font-semibold">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold" style="min-width: 90px; justify-content: center;">
+                  &nbsp;
+                </span>
+              </div>
+            </div>
+          </div>
+          </div>
       </section>
 
       <hr class="border-gray-300">
 
       <section class="card p-6 space-y-6">
-        <h2 class="text-lg font-semibold">Visualization Details</h2>
+        <h2 class="text-lg font-semibold">Analysis and Supporting Resources</h2>
+
         <div class="space-y-4">
-          <h3 class="text-base font-semibold text-gray-700">Earthquake Data Source and Plotting</h3>
+          <h3 class="text-base font-semibold text-gray-700">Educational Attainment Trend (2013–2023)</h3>
           <p>
-            The data is sourced from historical earthquake catalogs (expected to be USGS/PRSN data). Each red circle marker represents an earthquake, plotted at its hypocenter location.
+            The <strong>Attainment Trend</strong> line chart displays the overall percentage of the population aged 25 and over with a Bachelor's degree or higher. For Puerto Rico as a whole, this trend shows an initial decline followed by a rebound, often reflecting the turbulent economic and demographic period after the 2008 financial crisis, the debt crisis, and natural disasters. The general trend for the entire island suggests a <strong>net decrease in the percentage of highly educated residents</strong> since 2013, despite a recent uptick.
+          </p>
+          <p>
+            This net decrease, or slow growth, is often attributed to two major factors:
             <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
-              <li><strong>Magnitude Visualization:</strong> The radius of the circle is directly scaled by the magnitude, providing a quick visual representation of the energy released.</li>
-              <li><strong>Filtering:</strong> Only events with a **magnitude of 3.5 or greater** are plotted to avoid map clutter from numerous minor tremors.</li>
-              <li><strong>Interactivity:</strong> Click on any circle marker to view the exact magnitude, date, time, depth, and location description.</li>
+              <li><strong>Out-migration (Brain Drain):</strong> Economic conditions and natural disasters (like Hurricane Maria in 2017) have driven significant out-migration, which is often <strong>negatively selective on educational attainment</strong>—meaning the loss is primarily of workers with college degrees or higher, or at least a significant portion of them. This selective migration decreases the overall human capital on the island.</li>
+              <li><strong>Economic Demand:</strong> A weak local economy may not generate sufficient <strong>high-skill jobs</strong> to retain the new graduates from local universities, leading them to seek opportunities on the mainland.</li>
+            </ul>
+          </p>
+        </div>
+
+        <div class="space-y-4">
+          <h3 class="text-base font-semibold text-gray-700">Municipal Differences (Map and Local Data)</h3>
+          <p>
+            The <strong>Annual Change</strong> chart and the <strong>Cumulative Percentage Change</strong> metric card (and the <strong>Choropleth Map</strong> when set to Cumulative % Change) highlight the geographic disparities. Areas that show a significant <strong>red-to-orange</strong> (negative or low-gain) coloring on the map typically align with municipalities experiencing the most pronounced out-migration and/or economic decline. Conversely, areas in <strong>green</strong> (positive change) might indicate regions that have retained or attracted a higher proportion of college-educated residents, potentially due to local economic hubs or residential preferences.
+          </p>
+        </div>
+
+        <div class="space-y-4">
+          <h3 class="text-base font-semibold text-gray-700">Supporting Resources and Data</h3>
+          <p>
+            For more in-depth data and analysis, you can refer to the following:
+            <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
+              <li><strong>US Census Bureau, American Community Survey (ACS) Table S1501:</strong> The source of this educational attainment data. The link is provided in the details panel.</li>
+              <li><strong>Federal Reserve Bank of New York:</strong> Analysis on human capital, education quality, and migration from Puerto Rico.</li>
+              <li><strong>Bureau of Labor Statistics (BLS):</strong> Reports detailing population loss and out-migration patterns across various educational attainment groups.</li>
+              <li><strong>NAEP (The Nation's Report Card):</strong> Provides data on the academic performance of K-12 students in Puerto Rico, which provides context for the future workforce's educational foundation.</li>
             </ul>
           </p>
         </div>
@@ -109,26 +316,306 @@
 
   <script>
     // ---------------------- Data paths ----------------------
-    // Removed GEOJSON_URL as municipal boundaries are no longer needed
-    // Removed EDU_JSON link
-    const DISASTER_JSON = '../data/natural_disasters/puerto_rico_earthquakes.json'; 
+    const GEOJSON_URL = '../data/tl_2022_72_cousub/pr_municipalities.geojson';
+    // --- TEMPORARILY RESTORED PATH for primary data functionality ---
+    const EDU_JSON    = '../data/education/municipios_acs_education_2013_2023_wide.json';
+    // --- UPDATED PATH for disaster data ---
+    const DISASTER_JSON = '../data/natural_disasters/puerto_rico_earthquakes.json'; // NEW
     
+    // --- UPDATED YEARS ---
+    const YEARS = [2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023];
+
+    // --- NEW: Disaster Event Configuration ---
+    const DISASTER_COLORS = {
+        'Hurricane': 'rgba(234, 88, 12, 0.6)', // Orange for Hurricanes
+        'Earthquake': 'rgba(185, 28, 28, 0.6)', // Red for Earthquakes
+        'Other': 'rgba(75, 85, 99, 0.6)' // Gray for others
+    };
     let _disasterEvents = []; // To store loaded disaster data
-    let earthquakeLayerGroup = null; // Global for earthquake markers
-    let map = null;
-    let prBoundsGlobal = null;
+    let earthquakeLayerGroup = null; // New global for earthquake markers
+
+    // ---------------------- Formatters ----------------------
+    // Percent format with one decimal place
+    const fmtPct = (v) => `${(Number(v)||0).toFixed(1)}%`;
+    // Percentage Point Change format
+    const ppFmt = (v) => `${(Number(v)||0).toFixed(2)} pp`;
+    // Signed percentage point change (for cumulative change)
+    const signedPP = (n) => (n > 0 ? '+' : '') + ppFmt(n);
+    // Signed percentage format
+    const signedPct = (n) => (n > 0 ? '+' : '') + fmtPct(n);
+
+    // ---------------------- Choropleth colors ----------------------
+    // Standard scale: Red (Low) to Green (High)
+    const CHORO_COLORS = ['#7f1d1d', '#b91c1c', '#f97316', '#bbf7d0', '#22c55e', '#15803d']; 
+    
+    // Breaks for Latest Attainment Percentage (Higher is better)
+    // Based on typical PR attainment data: e.g., 20% to 50%
+    const PCT_BREAKS = [20.0, 25.0, 30.0, 35.0, 40.0]; 
+    
+    // Breaks for Cumulative Change in Percentage Points (Higher is better)
+    let ABS_BREAKS = [0.0, 2.0, 4.0, 6.0, 8.0]; // Change in PP (Positive is better)
+
+    // Stores the global min and max values for the current map mode
+    let _extremeValues = { min: Infinity, max: -Infinity };
+
+
+    // Utility: color for a value given breaks
+    function colorFor(value, breaks, isLatest) {
+      if (!Number.isFinite(value)) return '#93c5fd';
+      
+      // For Attainment (Latest Value) and Cumulative Change, Higher is Better (Green=High)
+      // The CHORO_COLORS array is defined Red->Green, so we use it directly.
+      if (value <= breaks[0]) return CHORO_COLORS[0];
+      if (value <= breaks[1]) return CHORO_COLORS[1];
+      if (value <= breaks[2]) return CHORO_COLORS[2];
+      if (value <= breaks[3]) return CHORO_COLORS[3];
+      if (value <= breaks[4]) return CHORO_COLORS[4];
+      return CHORO_COLORS[5];
+    }
+
+    // ---------------------- Helpers ----------------------
+    function sanitizeName(s){ 
+      return String(s||'').replace(/^\s*[.\-•]\s*/, '').replace(/\s*Municipio$/,'').trim(); 
+    }
+
+    function valFromRow(row, y){
+      // For education data, the data file uses raw percentages under the year key
+      const v = row?.[String(y)];
+      const n = Number(v);
+      return Number.isFinite(n) ? n : NaN;
+    }
+    
+    function statsForMunicipio(name){
+      name = sanitizeName(name);
+      // Filter out metadata and ensure we get the right row
+      const row = _rows.find(r => sanitizeName(r.Municipio) === name && !r.metadata);
+      if (!row) return null;
+
+      // Extract raw percentage values
+      const vals = YEARS.map(y => valFromRow(row, y));
+      
+      const firstYear = YEARS[0];
+      const lastYear = YEARS[YEARS.length - 1];
+      
+      // Calculate change metrics
+      const changeAbs = row[`Cum_Change_${firstYear}_${lastYear}`]; // Cumulative Change in PP
+      const changePct = row[`Cum_Pct_Change_${firstYear}_${lastYear}`]; // Cumulative Percentage Change
+      const annualChange = row[`Change_${YEARS[YEARS.length-2]}_${lastYear}`];
+      
+      if (vals.some(v => !Number.isFinite(v))) return null;
+      
+      // Calculate annual percentage point change (Year-to-Year Delta)
+      const ppChangeYear = [];
+      for (let i = 1; i < YEARS.length; i++) {
+        ppChangeYear.push(vals[i] - vals[i - 1]);
+      }
+      
+      const latestVal = vals[vals.length - 1];
+      
+      return { 
+        vals, 
+        abs: Number(changeAbs), 
+        pctTot: Number(changePct), 
+        ppChangeYear, 
+        latestVal, 
+        annualChange: Number(annualChange)
+      };
+    }
+    
+    // NEW: Function to pre-calculate global min/max for the current metric
+    function calculateExtremeValues() {
+        _extremeValues = { min: Infinity, max: -Infinity };
+        let valueKey;
+        const firstYear = YEARS[0];
+        const lastYear = YEARS[YEARS.length - 1];
+
+        if (currentMode === 'pct') valueKey = `Cum_Change_${firstYear}_${lastYear}`;
+        else if (currentMode === 'latest') valueKey = `${lastYear}`;
+        else return;
+
+        // Iterate through all municipalities to find the global min and max value
+        const municipioRows = _rows.filter(r => r.Municipio !== 'Puerto Rico' && !r.metadata);
+        
+        municipioRows.forEach(row => {
+            // Note: For latest value, we read the column directly using the year as the key
+            const value = (currentMode === 'latest') ? Number(row[valueKey]) : Number(row[valueKey]);
+
+            if (Number.isFinite(value)) {
+                _extremeValues.min = Math.min(_extremeValues.min, value);
+                _extremeValues.max = Math.max(_extremeValues.max, value);
+            }
+        });
+        
+        // Handle floating point precision for comparison
+        _extremeValues.min = parseFloat(_extremeValues.min.toFixed(2));
+        _extremeValues.max = parseFloat(_extremeValues.max.toFixed(2));
+    }
+
+
+    function censusLink(name){
+      return `https://data.census.gov/table?q=S1501:+EDUCATIONAL+ATTAINMENT+Puerto+Rico`;
+    }
+
+    // ---------------------- Charts ----------------------
+    let lineChart = null, barChart = null; 
+
+    // NEW FUNCTION for Metric Card
+    function updatePctChangeMetricCard(st){
+      const valEl = document.getElementById('pct-change-val');
+      const iconEl = document.getElementById('pct-change-icon').querySelector('span');
+      
+      if (!st || !Number.isFinite(st.pctTot)){
+        valEl.textContent = '—';
+        iconEl.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold';
+        iconEl.innerHTML = '&nbsp;';
+        return;
+      }
+
+      const val = st.pctTot;
+      const fmtVal = signedPct(val);
+      
+      let arrow, colorClass;
+      if (val > 0) {
+        arrow = '&#9650;'; // Up arrow
+        colorClass = 'bg-green-100 text-green-800';
+      } else if (val < 0) {
+        arrow = '&#9660;'; // Down arrow
+        colorClass = 'bg-red-100 text-red-800';
+      } else {
+        arrow = '—';
+        colorClass = 'bg-gray-100 text-gray-800';
+      }
+      
+      valEl.textContent = fmtVal;
+      iconEl.className = `inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${colorClass}`;
+      iconEl.innerHTML = `${arrow} ${fmtVal}`;
+    }
+    
+    function drawCharts(name, st){
+      if (!st) return;
+      const ctxL = document.getElementById('lineChart').getContext('2d');
+      const ctxB = document.getElementById('barChart').getContext('2d');
+
+      // --- 1. Line Chart (Attainment Trend) ---
+      
+      // Prepare annotations for disaster events
+      const annotations = _disasterEvents
+        .filter(event => event.type !== 'Earthquake') // Only annotate Hurricanes and others on the line chart
+        .map(event => {
+        // Find the index of the year (x-value) for the event
+        const yearMatch = YEARS.find(y => String(y) === String(event.year));
+        
+        // Only annotate if the year is within the chart's range
+        if (!yearMatch) return null;
+
+        // Use the event's name as the label
+        const labelText = event.name.replace('Hurricane ','H.').replace('Earthquake','Eq.');
+
+        return {
+          type: 'line',
+          mode: 'vertical',
+          scaleID: 'x',
+          value: String(yearMatch), // Use the string year as the categorical value
+          borderColor: DISASTER_COLORS[event.type] || DISASTER_COLORS['Other'],
+          borderWidth: 2,
+          borderDash: [6, 6],
+          label: {
+            content: labelText,
+            enabled: true,
+            position: 'top',
+            rotation: 0,
+            backgroundColor: DISASTER_COLORS[event.type].replace('0.6','0.8') || DISASTER_COLORS['Other'].replace('0.6','0.8'),
+            font: { size: 10, weight: 'bold' }
+          },
+          tooltip: {
+            callbacks: {
+              label: () => `${event.name} (${event.type}) - Year ${event.year}`
+            }
+          }
+        };
+      }).filter(a => a !== null); // Filter out events outside the year range
+
+      if (lineChart) lineChart.destroy();
+      lineChart = new Chart(ctxL, {
+        type: 'line',
+        data: { 
+          labels: YEARS, 
+          datasets:[{ 
+            label:'Bachelor\'s Degree or Higher (%)', 
+            data: st.vals, 
+            tension:.2, 
+            pointRadius:4,
+            borderColor: '#2563eb' // Blue for attainment (Higher is Good)
+          }] 
+        },
+        options: {
+          plugins:{ 
+            legend:{ display:false }, 
+            tooltip:{ callbacks:{ label:(c)=>fmtPct(c.parsed.y) } },
+            // Add annotations plugin configuration
+            annotation: {
+                annotations: annotations
+            }
+          },
+          scales:{ 
+            x: {
+              type: 'category', // Treat X-axis as categories (years)
+              labels: YEARS
+            },
+            y:{ 
+              ticks:{ callback:v=>fmtPct(v) },
+              title: { display: true, text: '% Attainment' }
+            } 
+          },
+          maintainAspectRatio: false
+        }
+      });
+
+      // --- 2. Bar Chart (Annual Change) ---
+      const labels = YEARS.slice(1).map((y,i)=> `${YEARS[i]}–${y}`);
+      if (barChart) barChart.destroy();
+      barChart = new Chart(ctxB, {
+        type: 'bar',
+        data: { 
+          labels, 
+          datasets:[{ 
+            label:'Annual Change in Percentage Points (pp)', 
+            data: st.ppChangeYear.map(v=>+v.toFixed(2)),
+            // Higher is better (Green=Positive Change)
+            backgroundColor: st.ppChangeYear.map(v => v > 0 ? '#15803d' : '#b91c1c') 
+          }] 
+        },
+        options: {
+          plugins:{ 
+            legend:{ display:false }, 
+            tooltip:{ callbacks:{ label:(c)=>signedPP(c.parsed.y) } } 
+          },
+          scales:{ 
+            y:{ 
+              ticks:{ callback:v=>ppFmt(v) },
+              title: { display: true, text: 'Change in PP' }
+            } 
+          },
+          maintainAspectRatio: false
+        }
+      });
+
+      // --- 3. Cumulative Percentage Change Metric Card ---
+      updatePctChangeMetricCard(st);
+    }
 
     // ---------------------- NEW: Earthquake Plotting ----------------------
     function plotEarthquakes(data, mapInstance){
         if (!data || data.length === 0) return;
 
+        // Clear existing markers if the layer group was previously created
         if (earthquakeLayerGroup) {
             earthquakeLayerGroup.clearLayers();
         } else {
             earthquakeLayerGroup = L.layerGroup().addTo(mapInstance);
         }
 
-        const MIN_MAG_THRESHOLD = 3.5; 
+        const MIN_MAG_THRESHOLD = 3.5; // Only plot earthquakes with magnitude 3.5 or higher for map clarity
 
         data.forEach(event => {
             const lat = event.latitude;
@@ -138,16 +625,16 @@
             const place = event.place || 'Unknown Location';
             const depth = event.depth_km;
 
-            // Ensure magnitude is a number for the filter and scaling
-            if (Number(mag) < MIN_MAG_THRESHOLD) return; 
+            if (mag < MIN_MAG_THRESHOLD) return; // Skip small quakes
 
-            // Calculate the radius in pixels for L.circleMarker (Magnitude * 3)
-            const radius = Number(mag) * 3; 
+            // Calculate the radius in pixels for L.circleMarker
+            // Scaling factor: mag * 3 is a good starting point for L.circleMarker radius in pixels
+            const radius = mag * 3; 
 
             const circle = L.circleMarker([lat, lng], {
                 radius: radius,
-                fillColor: '#b91c1c', 
-                color: '#7f1d1d', 
+                fillColor: '#b91c1c', // Red (from DISASTER_COLORS)
+                color: '#7f1d1d', // Darker Red border
                 weight: 1,
                 opacity: 1,
                 fillOpacity: 0.6
@@ -155,18 +642,48 @@
 
             // Bind popup for details
             circle.bindPopup(`
-                <strong>Magnitude ${Number(mag).toFixed(1)} Earthquake</strong>
+                <strong>Magnitude ${mag.toFixed(1)} Earthquake</strong>
                 <br>Place: ${place}
                 <br>Date: ${new Date(date).toLocaleString()}
-                <br>Depth: ${Number(depth).toFixed(1)} km
+                <br>Depth: ${depth.toFixed(1)} km
             `);
 
         });
     }
 
+
+    // ---------------------- DOM targets ----------------------
+    const dName = document.getElementById('d-name');
+    const dCent = document.getElementById('d-centroid');
+    const dLatest = document.getElementById('d-latest');
+    const dChgPP  = document.getElementById('d-chg-pp');
+    const dAnnualChg = document.getElementById('d-annual-chg');
+    const dCenL = document.getElementById('d-census');
+
+    function updateDetails(name, st, centroid){
+      dName.textContent = name.replace(/\s*Municipio$/,'');
+      dCent.textContent = centroid ? `${centroid.lat.toFixed(4)}, ${centroid.lng.toFixed(4)}` : '—';
+      
+      dLatest.textContent = Number.isFinite(st?.latestVal) ? fmtPct(st.latestVal) : '—';
+      dChgPP.textContent  = st ? signedPP(st.abs) : '—';
+      dAnnualChg.textContent = st ? signedPP(st.annualChange) : '—';
+      
+      dCenL.href = censusLink(name);
+      drawCharts(name, st);
+    }
+
     // ---------------------- Load data + map ----------------------
+    let _rows = [];
+    let map, layer, fc, legend;
+    let currentMode = 'pct'; // 'pct' (Cumulative Change) | 'latest' (Latest Value)
+
+    let lockedName = null;
+    let selectedLayer = null;
+    const selectedOutline = { weight: 4, color: '#111827', dashArray: '3', fillOpacity: 0.85 };
+    let prBoundsGlobal = null;
+
     (async function init(){
-      // Load disaster data
+      // NEW: Load disaster data
       try {
         const disRes = await fetch(DISASTER_JSON);
         _disasterEvents = await disRes.json();
@@ -174,11 +691,21 @@
         console.error("Error loading disaster data:", error);
       }
       
-      // Initialize Map Centered on Puerto Rico
+      // Load main education data
+      const res = await fetch(EDU_JSON, { cache:'no-store' });
+      const rawData = await res.json();
+      // Filter out metadata and ensure we get only data rows
+      _rows = rawData.filter(row => !row.metadata);
+      
+      // Calculate initial extremes
+      calculateExtremeValues();
+
+
       const prBounds = L.latLngBounds([[17.85, -67.45],[18.55, -65.25]]);
       prBoundsGlobal = prBounds;
-      map = L.map('map', { zoomControl: false, zoomSnap: .25 }).fitBounds(prBounds);
+      map = L.map('map', { zoomControl: false, zoomSnap: .25 }).fitBounds(prBounds); // Hide default zoom
 
+      // Add zoom controls back as a separate control
       L.control.zoom({ position: 'topleft' }).addTo(map);
 
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -186,11 +713,312 @@
         minZoom: 7, maxZoom: 19
       }).addTo(map);
 
-      // Plot the earthquakes 
+      // Initialize the map dropdown control
+      L.Control.MapDropdown = L.Control.extend({
+          onAdd: function(map) {
+              const container = L.DomUtil.get('map-dropdown-container');
+              L.DomEvent.disableClickPropagation(container);
+              L.DomEvent.disableScrollPropagation(container);
+              return container.querySelector('.leaflet-control-map-dropdown');
+          },
+          onRemove: function(map) {}
+      });
+      new L.Control.MapDropdown({ position: 'topleft' }).addTo(map);
+
+      const gjRes = await fetch(GEOJSON_URL + (GEOJSON_URL.includes('?')?'&':'?') + 'cb=' + Date.now());
+      fc = await gjRes.json();
+
+      const hiStyle = { weight:3, color:'#111827', fillOpacity:0.9 };
+
+      layer = L.geoJSON(fc, {
+        style: (feature) => styleForFeature(feature),
+        onEachFeature: (f, lyr) => {
+          const p = f.properties || {};
+          const name = p.NAME || p.NAMELSAD || p.name || 'Unknown';
+          const geoid = p.GEOID || p.geoid || '';
+          const statsName = sanitizeName(name);
+          const st = statsForMunicipio(statsName);
+          
+          let changeLine = '';
+          if (st) {
+            const latest = fmtPct(st.latestVal);
+            const change = signedPP(st.abs);
+            changeLine = `<br><small>Attainment (2023): ${latest}<br>Change since ${YEARS[0]}: ${change}</small>`;
+          }
+          
+          lyr.bindTooltip(name, { direction:'center', className:'leaflet-tooltip' });
+          lyr.bindPopup(`<strong>${name}</strong>${geoid?`<br><small>GEOID: ${geoid}</small>`:''}${changeLine}`);
+
+          lyr.on({
+            mouseover: e => {
+              if (lockedName) return; 
+              e.target.setStyle(hiStyle);
+              e.target.bringToFront?.();
+              const c = e.target.getBounds().getCenter();
+              updateDetails(statsName, statsForMunicipio(statsName), c);
+            },
+            mouseout: e => {
+              if (lockedName) return; 
+              layer.resetStyle(e.target);
+            },
+            click: e => {
+              const l = e.target;
+              const clickedName = sanitizeName(name);
+
+              if (selectedLayer) layer.resetStyle(selectedLayer);
+              selectedLayer = l;
+              lockedName = clickedName;
+              l.setStyle(selectedOutline);
+
+              map.fitBounds(l.getBounds(), { padding:[20,20] });
+
+              const c = l.getBounds().getCenter();
+              updateDetails(lockedName, statsForMunicipio(lockedName), c);
+            }
+          });
+        }
+      }).addTo(map);
+
+      const b = layer.getBounds();
+      if (b.isValid()) map.fitBounds(b, { padding:[15,15] });
+
+      computeBreaks();
+
+      legend = L.control({ position:'bottomright' });
+      legend.onAdd = function(){
+        const div = L.DomUtil.create('div', 'info legend');
+        div.style.background = 'white';
+        div.style.padding = '8px 10px';
+        div.style.borderRadius = '8px';
+        div.style.boxShadow = '0 2px 8px rgba(0,0,0,.15)';
+        div.style.font = '12px/1.3 system-ui,-apple-system,Segoe UI,Roboto,sans-serif';
+        legend._div = div;
+        renderLegend();
+        return div;
+      };
+      legend.addTo(map);
+
+      function moveLegend() {
+        const el = legend._div;
+        if (!el) return;
+        el.style.marginBottom = Math.round(map.getSize().y * 0.25) + 'px'; 
+        el.style.marginRight  = '8px';
+      }
+      map.on('resize', moveLegend);
+      moveLegend();
+
+      // NEW: Plot the earthquakes after the map is initialized
       plotEarthquakes(_disasterEvents, map);
 
+      const initName = 'Puerto Rico';
+      updateDetails(initName, statsForMunicipio(initName), null);
+
+      wireMetricToggle();
+      wireClearSelection();
+      wireDropdown(); // Main nav dropdown
+      wireMapDropdown(); // NEW map dropdown
     })();
-    
+
+    // ---------- Metric toggle ----------
+    function wireMetricToggle(){
+      const btnPct = document.getElementById('metricPct');
+      const btnLatest = document.getElementById('metricLatest');
+
+      function setActive(mode){
+        currentMode = mode;
+        
+        btnPct.classList.toggle('bg-blue-600', mode==='pct');
+        btnPct.classList.toggle('text-white', mode==='pct');
+        btnPct.classList.toggle('hover:bg-gray-50', mode!=='pct');
+        btnLatest.classList.toggle('bg-blue-600', mode==='latest');
+        btnLatest.classList.toggle('text-white', mode==='latest');
+        btnLatest.classList.toggle('hover:bg-gray-50', mode!=='latest');
+        
+        // Re-calculate extremes before restyling
+        calculateExtremeValues();
+
+        layer.eachLayer(l => l.setStyle(styleForFeature(l.feature)));
+        if (selectedLayer) selectedLayer.setStyle(selectedOutline);
+
+        renderLegend();
+      }
+
+      btnPct.addEventListener('click', () => setActive('pct'));
+      btnLatest.addEventListener('click', () => setActive('latest'));
+      setActive(currentMode);
+    }
+
+    // Clear selection wiring (also zoom back to original bounds)
+    function wireClearSelection(){
+      function clearSelection(){
+        lockedName = null;
+        if (selectedLayer) { layer.resetStyle(selectedLayer); selectedLayer = null; }
+        if (prBoundsGlobal) map.fitBounds(prBoundsGlobal, { padding:[15,15] });
+        updateDetails('Puerto Rico', statsForMunicipio('Puerto Rico'), null);
+      }
+      document.getElementById('clearSel').addEventListener('click', clearSelection);
+      document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape') clearSelection(); });
+    }
+
+    // Style function based on current mode
+    function styleForFeature(feature){
+      const p = feature.properties || {};
+      const name = p.NAME || p.NAMELSAD || p.name || 'Unknown';
+      const statsName = sanitizeName(name);
+      const st = statsForMunicipio(statsName);
+      
+      const value = !st ? NaN : (currentMode === 'pct' ? st.abs : st.latestVal);
+      const breaks = (currentMode === 'pct') ? ABS_BREAKS : PCT_BREAKS;
+      
+      const col = colorFor(value, breaks, currentMode === 'latest');
+      
+      // Default style
+      let style = { fillColor: col, weight: 1.2, color:'#111827', fillOpacity:.75 };
+      
+      // >>> START: Custom logic to highlight only the single min and max values (Thicker Yellow Line) <<<
+      if (Number.isFinite(value) && _extremeValues.min !== Infinity) {
+          // Compare value to the globally calculated min and max, accounting for floating point
+          const valRounded = parseFloat(value.toFixed(2));
+          const isExtreme = valRounded === _extremeValues.min || valRounded === _extremeValues.max;
+          
+          // Only highlight if min is not equal to max (i.e., not all values are the same)
+          if (isExtreme && _extremeValues.min !== _extremeValues.max) { 
+              style.weight = 5;            // Thicker border
+              style.color = '#facc15';     // Yellow border (tailwind yellow-400)
+              style.dashArray = '';        // Solid line
+              style.fillOpacity = 0.95;    // Max fill opacity to make the interior color stand out
+          }
+      }
+      // >>> END: Custom logic to highlight only the single min and max values (Thicker Yellow Line) <<<
+
+      return style;
+    }
+
+    // Utility: color for a value given breaks
+    function colorFor(value, breaks, isLatest) {
+      if (!Number.isFinite(value)) return '#93c5fd';
+      
+      // For Attainment (Latest Value) and Cumulative Change, Higher is Better (Green=High)
+      // The CHORO_COLORS array is defined Red->Green, so we use it directly.
+      if (value <= breaks[0]) return CHORO_COLORS[0];
+      if (value <= breaks[1]) return CHORO_COLORS[1];
+      if (value <= breaks[2]) return CHORO_COLORS[2];
+      if (value <= breaks[3]) return CHORO_COLORS[3];
+      if (value <= breaks[4]) return CHORO_COLORS[4];
+      return CHORO_COLORS[5];
+    }
+
+    // Legend render (updates title + ranges)
+    function renderLegend(){
+      if (!legend || !legend._div) return;
+      
+      const isLatestValue = currentMode === 'latest';
+      const breaks = isLatestValue ? PCT_BREAKS : ABS_BREAKS;
+      
+      const title  = isLatestValue 
+        ? `Bachelor's Degree or Higher (2023) — %` 
+        : `Change in Attainment (${YEARS[0]}–${YEARS[YEARS.length-1]}) — pp`;
+
+      const labels = [];
+      function row(color, label) {
+        return `<div style="display:flex;align-items:center;gap:.5rem;margin:.2rem 0;">
+                  <span style="display:inline-block;width:14px;height:14px;border-radius:3px;background:${color};
+                               border:1px solid rgba(0,0,0,.15)"></span>
+                  <span>${label}</span>
+                </div>`;
+      }
+      
+      const fmtRange = (a,b) => isLatestValue 
+          ? `${fmtPct(a)} to ${fmtPct(b)}` 
+          : `${signedPP(a)} to ${signedPP(b)}`;
+      const fmtValue = (v) => isLatestValue ? fmtPct(v) : signedPP(v);
+
+      labels.push(`<div style="font-weight:600;margin-bottom:.25rem">${title}</div>`);
+      
+      labels.push(row(CHORO_COLORS[0], `≤ ${fmtValue(breaks[0])}`));
+      labels.push(row(CHORO_COLORS[1], fmtRange(breaks[0], breaks[1])));
+      labels.push(row(CHORO_COLORS[2], fmtRange(breaks[1], breaks[2])));
+      labels.push(row(CHORO_COLORS[3], fmtRange(breaks[2], breaks[3])));
+      labels.push(row(CHORO_COLORS[4], fmtRange(breaks[3], breaks[4])));
+      labels.push(row(CHORO_COLORS[5], `> ${fmtValue(breaks[4])}`));
+
+      legend._div.innerHTML = labels.join('');
+    }
+
+    // Compute ABS breaks from current data (quantile-ish, robust)
+    function computeBreaks(){
+      // ABS_BREAKS are hardcoded since the logic in the provided file seemed intentionally fixed
+      // for percentage point changes. (Positive is generally good)
+      ABS_BREAKS = [-0.5, 0.0, 1.0, 2.0, 3.0];
+      
+      // PCT_BREAKS (Latest Attainment) remain fixed since they are raw percentages
+    }
+
+    // --- Dropdown Wiring Functions ---
+
+    function wireDropdown() {
+      const root = document.getElementById('metrics-dropdown-root');
+      if (!root) return;
+      let hoverTimeout;
+      const menu = document.getElementById('metrics-menu');
+      function addHovering(){ clearTimeout(hoverTimeout); root.classList.add('hovering'); }
+      function removeHovering(){ hoverTimeout = setTimeout(()=>root.classList.remove('hovering'), 300); }
+      root.addEventListener('mouseenter', addHovering);
+      root.addEventListener('mouseleave', removeHovering);
+      if (menu) {
+        menu.addEventListener('mouseenter', addHovering);
+        menu.addEventListener('mouseleave', removeHovering);
+      }
+    }
+
+    function wireMapDropdown() {
+        // Wires the new map selection dropdown (top left of map)
+        const root = document.getElementById('map-selection-dropdown-root');
+        if (!root) return;
+        let hoverTimeout;
+        const menu = document.getElementById('map-selection-menu');
+
+        function addHovering(){ 
+            clearTimeout(hoverTimeout); 
+            root.classList.add('hovering'); 
+        }
+        function removeHovering(){ 
+            hoverTimeout = setTimeout(()=>{
+                root.classList.remove('hovering');
+            }, 300); 
+        }
+
+        root.addEventListener('mouseenter', addHovering);
+        root.addEventListener('mouseleave', removeHovering);
+        if (menu) {
+            menu.addEventListener('mouseenter', addHovering);
+            menu.addEventListener('mouseleave', removeHovering);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const metricsLink = document.querySelector('#metrics-dropdown-root > a');
+      const isMetricsSubPage = window.location.pathname.includes('/metrics/');
+
+      if (isMetricsSubPage) {
+        metricsLink.classList.add('border-b-2', 'border-blue-600', 'text-blue-600', 'font-semibold');
+        metricsLink.setAttribute('aria-current', 'page');
+        
+        const currentPathname = window.location.pathname.split('/').pop();
+        const subPageLink = document.querySelector(`#metrics-menu a[href="${currentPathname}"]`);
+        if (subPageLink) {
+          subPageLink.classList.add('bg-gray-100', 'font-semibold');
+        }
+      } else {
+        document.querySelectorAll('.nav-link[href]').forEach(a => {
+          if (a.href.endsWith(window.location.pathname)) {
+            a.classList.add('border-b-2', 'border-blue-600', 'text-blue-600', 'font-semibold');
+            a.setAttribute('aria-current', 'page');
+          }
+        });
+      }
+      wireMapDropdown(); // Ensure the map dropdown is also wired up on DOMContentLoaded
+    });
   </script>
 </body>
 </html>
