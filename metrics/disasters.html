@@ -13,7 +13,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
   <style>
-    /* ... (CSS Styles from original file remain mostly unchanged) ... */
+    /* ... (CSS Styles remain unchanged) ... */
     .card {
       background:#fff;
       border-radius:1rem;
@@ -45,14 +45,14 @@
     /* Custom style for the new Earthquake Legend */
     .leaflet-control-eq-legend {
         position: absolute;
-        bottom: 10px; /* Position it above the existing bottom-right legend */
+        bottom: 10px; 
         right: 10px;
         background: white;
         padding: 8px 10px;
         border-radius: 8px;
         box-shadow: 0 2px 8px rgba(0,0,0,.15);
         font: 12px/1.3 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
-        z-index: 1000; /* Ensure it is above the map tiles */
+        z-index: 1000; 
         width: 150px;
     }
     
@@ -85,8 +85,6 @@
         </a>
         <div id="metrics-menu" class="absolute right-0 mt-2 w-64 rounded-xl border border-gray-200 bg-white shadow-lg ring-1 ring-black/5 z-50">
           <div class="py-2">
-            <a href="../metrics.html" class="block px-4 py-2 hover:bg-gray-50 font-semibold">All Metrics Overview</a>
-            <div class="my-1 border-t border-gray-100"></div>
             <a href="population.html"     class="block px-4 py-2 hover:bg-gray-50">Population</a>
             <a href="employment.html"     class="block px-4 py-2 hover:bg-gray-50">Employment Rate</a>
             <a href="establishments.html" class="block px-4 py-2 hover:bg-gray-50">Employer Establishments</a>
@@ -245,18 +243,9 @@
   </div>
 
   <script>
-    // --- EMBEDDED EARTHQUAKE DATA ---
-    // NOTE: This array MUST be replaced with the contents of your "puerto_rico_earthquakes.json" file.
-    const EARTHQUAKE_DATA = [
-      {"date":"2020-01-07 08:24:26","place":"13 km S of Indios, Puerto Rico","mag":6.4,"latitude":17.913,"longitude":-66.862,"depth_km":10.0,"url":""},
-      {"date":"2020-01-11 08:54:55","place":"11 km S of Indios, Puerto Rico","mag":5.9,"latitude":17.939,"longitude":-66.877,"depth_km":10.0,"url":""},
-      {"date":"2020-01-06 10:32:18","place":"10 km S of Indios, Puerto Rico","mag":5.8,"latitude":17.93,"longitude":-66.824,"depth_km":17.0,"url":""},
-      {"date":"2020-01-07 10:35:28","place":"13 km S of Indios, Puerto Rico","mag":4.8,"latitude":17.925,"longitude":-66.843,"depth_km":12.0,"url":""},
-      {"date":"2024-05-15 15:00:00","place":"Offshore Puerto Rico","mag":4.0,"latitude":18.5,"longitude":-66.5,"depth_km":5.0,"url":""},
-      {"date":"2024-05-16 16:00:00","place":"Far Offshore","mag":7.8,"latitude":17.0,"longitude":-65.0,"depth_km":25.0,"url":""},
-      {"date":"2024-05-17 17:00:00","place":"Tiny tremor","mag":2.0,"latitude":18.2,"longitude":-67.0,"depth_km":5.0,"url":""},
-    ];
-
+    // ---------------------- Earthquake Data Path ----------------------
+    // NOTE: This must match the path to your actual earthquake JSON file
+    const EQ_JSON = '../data/natural_disasters/puerto_rico_earthquakes.json'; 
     let earthquakeLayerGroup = null; 
 
     // ---------------------- Earthquake Color & Size Scaling ----------------------
@@ -287,7 +276,10 @@
     }
 
     function plotEarthquakes(data, mapInstance){
-        if (!data || data.length === 0) return;
+        if (!data || data.length === 0) {
+            console.error("Earthquake data is empty or failed to load.");
+            return;
+        }
 
         if (earthquakeLayerGroup) {
             earthquakeLayerGroup.clearLayers();
@@ -330,7 +322,6 @@
             `);
         });
         
-        // Ensure the circles are on top of the municipality choropleth
         earthquakeLayerGroup.bringToFront();
     }
     
@@ -373,10 +364,12 @@
     // ---------------------- End Earthquake Logic ----------------------
 
 
-    // ---------------------- Original Education Logic (Unchanged for brevity) ----------------------
+    // ---------------------- Original Education Logic (Modified init) ----------------------
     const GEOJSON_URL = '../data/tl_2022_72_cousub/pr_municipalities.geojson';
     const EDU_JSON    = '../data/education/municipios_acs_education_2013_2023_wide.json';
     const YEARS = [2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023];
+
+    // ... (Original helper functions and chart logic remain unchanged) ...
     const fmtPct = (v) => `${(Number(v)||0).toFixed(1)}%`;
     const ppFmt = (v) => `${(Number(v)||0).toFixed(2)} pp`;
     const signedPP = (n) => (n > 0 ? '+' : '') + ppFmt(n);
@@ -604,8 +597,19 @@
       map.on('resize', moveLegend);
       moveLegend();
 
-      // NEW: Plot earthquakes and render their legend
-      plotEarthquakes(EARTHQUAKE_DATA, map);
+      // --- FULL EARTHQUAKE DATA LOADING ---
+      let fullEarthquakeData = [];
+      try {
+          const eqRes = await fetch(EQ_JSON);
+          fullEarthquakeData = await eqRes.json();
+          // Ensure the data structure is as expected (an array of objects with mag, lat, lng)
+      } catch (e) {
+          console.error("Error loading full earthquake data from path:", EQ_JSON, e);
+          alert(`Failed to load full earthquake data. Please check the path: ${EQ_JSON}`);
+      }
+
+      // NEW: Plot all loaded earthquakes and render their dedicated legend
+      plotEarthquakes(fullEarthquakeData, map);
       renderEarthquakeLegend();
 
 
