@@ -78,6 +78,60 @@
         padding-bottom: 200px;
         margin-bottom: -35%; /* Pull up content following the wrapper */
     }
+
+    /* --- LEAFLET CONTROL STYLES (NEW) --- */
+    .leaflet-control-map-dropdown {
+      /* Base container for the control */
+      padding: 0; 
+      /* Pushes the control right to clear the zoom buttons (which are top-left) */
+      margin-left: 45px; 
+      margin-top: 5px; 
+    }
+    .leaflet-control-map-dropdown .dropdown-root {
+      /* Mimic the style of the default leaflet controls */
+      background: #fff;
+      box-shadow: 0 1px 5px rgba(0,0,0,.65);
+      border-radius: 4px;
+      position: relative;
+    }
+    .leaflet-control-map-dropdown .nav-link {
+        /* Style for the button */
+        padding: 6px 10px;
+        color: #333;
+        font-weight: 500;
+        font-size: 13px;
+        line-height: 1.2;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        cursor: pointer;
+    }
+    
+    /* Hiding logic for the menu */
+    .leaflet-control-map-dropdown .dropdown-menu {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        margin-top: 5px; 
+        z-index: 1000;
+        opacity: 0; visibility: hidden; transform: translateY(4px);
+        pointer-events: none;
+        transition: opacity .15s ease, transform .15s ease, visibility .15s ease;
+    }
+    
+    .leaflet-control-map-dropdown .dropdown-root.hovering .dropdown-menu {
+        opacity: 1; visibility: visible; transform: translateY(0); pointer-events: auto;
+    }
+    .leaflet-control-map-dropdown .dropdown-root.hovering #map-selection-chevron {
+        transform: rotate(180deg);
+    }
+    
+    .leaflet-control-map-dropdown .dropdown-menu a {
+        /* Styling the menu items */
+        text-decoration: none;
+        padding: 6px 12px;
+        font-size: 13px;
+    }
   </style>
 </head>
 <body class="bg-gray-50 text-gray-900 font-sans">
@@ -174,7 +228,33 @@
               class="px-3 py-1.5 text-sm rounded-lg border bg-white hover:bg-gray-50">Clear selection</button>
           </div>
         </div>
-        <div id="map" class="mt-3"></div>
+        <div id="map" class="mt-3">
+          <div class="leaflet-control-container" id="map-dropdown-container">
+            <div class="leaflet-top leaflet-left">
+              <div class="leaflet-control leaflet-control-map-dropdown">
+                <div class="relative dropdown-root" id="map-selection-dropdown-root">
+                  <div class="nav-link inline-flex items-center gap-1 cursor-pointer select-none">
+                    Map Selection
+                    <svg id="map-selection-chevron" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 transition-transform" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                      <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.24 4.5a.75.75 0 01-1.08 0l-4.24-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/>
+                    </svg>
+                  </div>
+                  <div id="map-selection-menu" class="dropdown-menu w-64 rounded-xl border border-gray-200 bg-white shadow-lg ring-1 ring-black/5">
+                    <div class="py-2">
+                      <a href="metrics/population.html"     class="block px-4 py-2 hover:bg-gray-50">Population</a>
+                      <a href="metrics/employment.html"     class="block px-4 py-2 hover:bg-gray-50">Employment Rate</a>
+                      <a href="metrics/establishments.html" class="block px-4 py-2 hover:bg-gray-50">Employer Establishments</a>
+                      <a href="metrics/income.html"         class="block px-4 py-2 hover:bg-gray-50">Household Income</a>
+                      <a href="metrics/housing.html"        class="block px-4 py-2 hover:bg-gray-50">Housing Units</a>
+                      <a href="metrics/education.html"      class="block px-4 py-2 hover:bg-gray-50">Education</a>
+                      <a href="metrics/health.html"         class="block px-4 py-2 hover:bg-gray-50">Health</a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          </div>
       </section>
 
       <section class="card p-6">
@@ -352,6 +432,18 @@
         minZoom: 7, maxZoom: 19
       }).addTo(map);
 
+      // Initialize the map dropdown control
+      L.Control.MapDropdown = L.Control.extend({
+          onAdd: function(map) {
+              const container = L.DomUtil.get('map-dropdown-container');
+              L.DomEvent.disableClickPropagation(container);
+              L.DomEvent.disableScrollPropagation(container);
+              return container.querySelector('.leaflet-control-map-dropdown');
+          },
+          onRemove: function(map) {}
+      });
+      new L.Control.MapDropdown({ position: 'topleft' }).addTo(map);
+
       const gjRes = await fetch(GEOJSON_URL + (GEOJSON_URL.includes('?')?'&':'?') + 'cb=' + Date.now());
       fc = await gjRes.json();
 
@@ -435,6 +527,7 @@
       wireMetricToggle();
       wireClearSelection();
       wireDropdown();
+      wireMapDropdown(); // NEW: Call the new function
     })();
 
     // ---------- Metric toggle ----------
@@ -550,6 +643,7 @@
 
     // Dropdown functionality
     function wireDropdown() {
+      // Wires the main navigation dropdown (top of page)
       const root = document.getElementById('metrics-dropdown-root');
       if (!root) return;
       let hoverTimeout;
@@ -564,6 +658,31 @@
         menu.addEventListener('mouseenter', addHovering);
         menu.addEventListener('mouseleave', removeHovering);
       }
+    }
+
+    // --- NEW FUNCTION: Wires the map dropdown (top-left of map) ---
+    function wireMapDropdown() {
+        const root = document.getElementById('map-selection-dropdown-root');
+        if (!root) return;
+        let hoverTimeout;
+        const menu = document.getElementById('map-selection-menu');
+
+        function addHovering(){ 
+            clearTimeout(hoverTimeout); 
+            root.classList.add('hovering'); 
+        }
+        function removeHovering(){ 
+            hoverTimeout = setTimeout(()=>{
+                root.classList.remove('hovering');
+            }, 300); 
+        }
+
+        root.addEventListener('mouseenter', addHovering);
+        root.addEventListener('mouseleave', removeHovering);
+        if (menu) {
+            menu.addEventListener('mouseenter', addHovering);
+            menu.addEventListener('mouseleave', removeHovering);
+        }
     }
   </script>
 </body>
