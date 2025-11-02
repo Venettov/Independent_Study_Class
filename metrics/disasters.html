@@ -13,7 +13,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
   <style>
-    /* ... (CSS Styles remain unchanged) ... */
+    /* ... (CSS Styles remain largely unchanged) ... */
     .card {
       background:#fff;
       border-radius:1rem;
@@ -40,7 +40,7 @@
       padding:5px 10px;
     }
 
-    .mini { min-height: 260px; }
+    .mini { min-height: 300px; } /* Increased min-height for bigger graphs */
 
     /* CUSTOM: Earthquake Legend positioned bottom-left */
     .leaflet-control-eq-legend {
@@ -165,45 +165,23 @@
       </section>
 
       <section class="card p-6">
-        <h2 class="text-lg font-semibold mb-4">Data Details</h2>
+        <h2 class="text-lg font-semibold mb-4">Seismic and Educational Data Visualization</h2>
         <div class="grid grid-cols-1 lg:grid-cols-4 gap-6"> 
-            <div class="lg:col-span-1">
-                <div class="text-sm">
-                  <div>Municipio: <span id="d-name" class="font-semibold">Puerto Rico</span></div>
-                  <div>Centroid: <span id="d-centroid" class="text-gray-600">—</span></div>
-                </div>
-
-                <div class="mt-4 text-sm">
-                  <div class="font-semibold text-gray-700">Educational Attainment (Map Shading):</div>
-                  <ul class="mt-1 space-y-1">
-                    <li>Latest Year (2023): <span id="d-latest" class="font-semibold">—</span></li>
-                    <li>Change in PP since 2013: <span id="d-chg-pp" class="font-semibold">—</span></li>
-                    <li>Latest Annual Change: <span id="d-annual-chg" class="font-semibold">—</span></li>
-                  </ul>
-                </div>
-
-                <div class="mt-4 text-sm">
-                  <a id="d-census" class="text-blue-600 underline" href="https://data.census.gov/table?q=S1501:+EDUCATIONAL+ATTAINMENT+Puerto+Rico" target="_blank" rel="noopener">
-                    Open Census Data (S1501) ↗
-                  </a>
-                </div>
-            </div>
-
-            <div>
-                <h3 class="font-semibold mb-2">Earthquake Time Series (Count/Year)</h3>
+            <div class="lg:col-span-2">
+                <h3 class="font-semibold mb-2">Earthquake Time Series (Count M 3.5+ / Year)</h3>
                 <div class="mini bg-gray-50 rounded p-3">
                     <canvas id="lineChart"></canvas>
                 </div>
             </div>
 
-            <div>
-                <h3 class="font-semibold mb-2">Earthquake Magnitude Distribution</h3>
+            <div class="lg:col-span-1">
+                <h3 class="font-semibold mb-2">Magnitude Distribution</h3>
                 <div class="mini bg-gray-50 rounded p-3">
                     <canvas id="barChart"></canvas>
                 </div>
             </div>
 
-            <div>
+            <div class="lg:col-span-1">
                 <h3 class="font-semibold mb-2">Total Earthquakes (M 3.5+)</h3>
                 <div id="totalEqMetricCard" class="mini bg-gray-50 rounded p-6 flex flex-col items-center justify-center">
                     <div class="text-sm font-medium text-gray-600">Total Recorded Earthquakes</div>
@@ -222,13 +200,36 @@
 
       <section class="card p-6 space-y-6">
         <h2 class="text-lg font-semibold">Analysis and Supporting Resources</h2>
+
         <div class="space-y-4">
-            <h3 class="text-base font-semibold text-gray-700">Educational Attainment vs. Seismic Activity</h3>
+            <h3 class="text-base font-semibold text-gray-700">Geology and Impact of Earthquakes in Puerto Rico 🇵🇷</h3>
             <p>
-                The map displays Educational Attainment (shading) overlaid with Earthquake Magnitude (circles). The charts below provide a time-series and distribution analysis of the earthquake data for comparison.
+                Puerto Rico is located on a **highly active tectonic boundary** between the **North American Plate** and the **Caribbean Plate**. The high frequency of seismic activity is primarily driven by the complex interaction of these plates at two major offshore zones:
+                <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
+                    <li>**Puerto Rico Trench (North):** Where the North American Plate is being subducted beneath the Caribbean Plate, forming the deepest point in the Atlantic Ocean.</li>
+                    <li>**Muertos Trough (South):** An incipient subduction zone where the Caribbean Plate is being thrust southward, creating complex faulting, particularly along the southern and western coasts.</li>
+                </ul>
             </p>
+            <p>
+                This ongoing tectonic stress results in numerous earthquakes, though most are microquakes (M &lt; 2.0). However, the region has a history of damaging events, most recently the **2019-2020 earthquake swarm**, which included a **Magnitude 6.4** shock on January 7, 2020.
+            </p>
+            <h4 class="text-sm font-semibold text-gray-600 mt-4">Socio-Economic Impact of Recent Quakes:</h4>
+            <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
+                <li>**Infrastructure Damage:** The 2020 quakes caused widespread power outages, affecting nearly a million people, and severely damaged key infrastructure like the **Costa Sur power plant**.</li>
+                <li>**Displacement:** Thousands of residents, particularly in the southern municipalities (Guánica, Yauco, Ponce), were displaced, with initial damage estimates reaching **\$3.1 billion**.</li>
+                <li>**Cascading Effects:** Recovery efforts were complicated by existing damage from Hurricane Maria and subsequent mental health, housing, and economic instability.</li>
+            </ul>
         </div>
-        </section>
+        
+        <div class="space-y-2 text-sm text-gray-600">
+            <h4 class="font-semibold">Data Source & Research References:</h4>
+            <ul class="list-disc list-inside ml-4 space-y-1">
+                <li>**Earthquake Data Source:** The raw earthquake data plotted on the map is assumed to be sourced from the **U.S. Geological Survey (USGS)** or the **Puerto Rico Seismic Network (PRSN)**, typically available through a JSON API. (Link: `../data/natural_disasters/puerto_rico_earthquakes.json`)</li>
+                <li>**Geology and Impact Research:** <a href="https://pubs.usgs.gov/fs/fs141-00/fs141-00.pdf" target="_blank" class="text-blue-600 underline">USGS: Earthquakes and Tsunamis in Puerto Rico and the U.S. Virgin Islands</a></li>
+                <li>**2020 Quake Impact:** <a href="https://recovery.pr.gov/en/earthquakes-response" target="_blank" class="text-blue-600 underline">Puerto Rico Disaster Recovery Transparency Portal (COR3)</a></li>
+            </ul>
+        </div>
+      </section>
       </main>
   </div>
 
@@ -236,7 +237,6 @@
     // ---------------------- Earthquake Data Path ----------------------
     const EQ_JSON = '../data/natural_disasters/puerto_rico_earthquakes.json'; 
     let earthquakeLayerGroup = null; 
-    let _earthquakes = []; // Storage for fetched earthquake data
 
     // ---------------------- Earthquake Color & Size Scaling ----------------------
     const MAGNITUDE_BREAKS = [3.5, 4.5, 5.5, 6.5, 7.5];
@@ -260,7 +260,10 @@
     }
 
     function plotEarthquakes(data, mapInstance){
-        if (!data || data.length === 0) return;
+        if (!data || data.length === 0) {
+            console.error("Earthquake data is empty or failed to load.");
+            return;
+        }
 
         if (earthquakeLayerGroup) {
             earthquakeLayerGroup.clearLayers();
@@ -293,6 +296,7 @@
 
             circle.bindPopup(`
                 <strong>Magnitude ${mag.toFixed(1)} Earthquake</strong>
+                <br>Size/Color: Scaled by Magnitude
                 <br>Place: ${place}
                 <br>Date: ${new Date(date).toLocaleString()}
                 <br>Depth: ${depth.toFixed(1)} km
@@ -344,9 +348,9 @@
 
     // ---------------------- Earthquake Chart Logic (NEW) ----------------------
     function aggregateEarthquakeData(data) {
-        if (!data || data.length === 0) return { timeSeries: {}, magnitudeBins: {} };
+        if (!data || data.length === 0) return { timeSeries: {}, magnitudeBins: {}, totalCount: 0 };
 
-        const timeSeries = {}; // { year: count }
+        const timeSeries = {}; 
         const magnitudeBins = {
             '3.5-4.5': 0, '4.5-5.5': 0, '5.5-6.5': 0, '6.5-7.5': 0, '7.5+': 0
         };
@@ -415,7 +419,6 @@
         const magLabels = Object.keys(aggregatedData.magnitudeBins);
         const magCounts = Object.values(aggregatedData.magnitudeBins);
 
-        // Color bars based on the defined magnitude colors
         const backgroundColors = magLabels.map((label, i) => {
             if (label === '3.5-4.5') return MAGNITUDE_COLORS[0];
             if (label === '4.5-5.5') return MAGNITUDE_COLORS[1];
@@ -526,9 +529,8 @@
     const dChgPP  = document.getElementById('d-chg-pp');
     const dAnnualChg = document.getElementById('d-annual-chg');
     const dCenL = document.getElementById('d-census');
-    // Removed old chart vars
+    let lineChart = null, barChart = null; 
     function updatePctChangeMetricCard(st){
-        // Retaining the original Education Metric Card logic for Education data only
         const valEl = document.getElementById('pct-change-val');
         const iconEl = document.getElementById('pct-change-icon').querySelector('span');
         if (!st || !Number.isFinite(st.pctTot)){
@@ -537,9 +539,13 @@
         if (val > 0) { arrow = '&#9650;'; colorClass = 'bg-green-100 text-green-800';} else if (val < 0) { arrow = '&#9660;'; colorClass = 'bg-red-100 text-red-800';} else { arrow = '—'; colorClass = 'bg-gray-100 text-gray-800';}
         valEl.textContent = fmtVal; iconEl.className = `inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${colorClass}`; iconEl.innerHTML = `${arrow} ${fmtVal}`;
     }
-    // Updated drawCharts to only handle the Education Metric Card, NOT charts
     function drawCharts(name, st){
-        updatePctChangeMetricCard(st); // Use this space for the remaining Education metric card
+        // Removed original drawCharts functionality entirely
+    }
+    function updateDetails(name, st, centroid){
+      dName.textContent = name.replace(/\s*Municipio$/,''); dCent.textContent = centroid ? `${centroid.lat.toFixed(4)}, ${centroid.lng.toFixed(4)}` : '—';
+      // Retain the ability to update the metric card for Puerto Rico (Total) metrics
+      drawCharts(name, st); 
     }
 
     let _rows = []; 
@@ -650,7 +656,6 @@
           aggregatedData = aggregateEarthquakeData(fullEarthquakeData);
       } catch (e) {
           console.error("Error loading or processing earthquake data:", EQ_JSON, e);
-          // Optional: Add a visual alert here if needed
       }
 
       // 1. Draw Earthquake Charts
@@ -737,7 +742,7 @@
     function wireMapDropdown() {
         const root = document.getElementById('map-selection-dropdown-root'); if (!root) return; let hoverTimeout; const menu = document.getElementById('map-selection-menu');
         function addHovering(){ clearTimeout(hoverTimeout); root.classList.add('hovering'); } function removeHovering(){ hoverTimeout = setTimeout(()=>{ root.classList.remove('hovering'); }, 300); }
-        root.addEventListener('mouseenter', addHovering); root.addEventListener('mouseleave', removeHovering); if (menu) { menu.addEventListener('mouseenter', addHovering); menu.addEventListener('mouseleave', removeHovering); }
+        root.addEventListener('mouseenter', addHovering); root.addEventListener('mouseleave', removeHovering); if (menu) { menu.addEventListener('mouseenter', addHovering); menu.addEventListener('mouseleave', removeRendering); }
     }
     document.addEventListener('DOMContentLoaded', () => {
         const metricsLink = document.querySelector('#metrics-dropdown-root > a'); const isMetricsSubPage = window.location.pathname.includes('/metrics/');
