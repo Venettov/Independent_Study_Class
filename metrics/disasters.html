@@ -40,27 +40,13 @@
       padding:5px 10px;
     }
 
-    .mini { min-height: 300px; } 
+    .mini { min-height: 300px; } /* Increased min-height for bigger graphs */
 
     /* CUSTOM: Earthquake Legend positioned bottom-left */
     .leaflet-control-eq-legend {
         position: absolute;
         bottom: 10px; 
-        left: 10px;  
-        background: white;
-        padding: 8px 10px;
-        border-radius: 8px;
-        box-shadow: 0 2px 8px rgba(0,0,0,.15);
-        font: 12px/1.3 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
-        z-index: 1000; 
-        width: 150px;
-    }
-
-    /* CUSTOM: Hurricane Legend positioned bottom-right */
-    .leaflet-control-hurr-legend {
-        position: absolute;
-        bottom: 10px;
-        right: 10px; 
+        left: 10px;  /* Position set to LEFT */
         background: white;
         padding: 8px 10px;
         border-radius: 8px;
@@ -181,7 +167,6 @@
       <section class="card p-6">
         <h2 class="text-lg font-semibold mb-4">Seismic and Educational Data Visualization</h2>
         <div class="grid grid-cols-1 lg:grid-cols-4 gap-6"> 
-            <!-- COLUMN 1: Earthquake Time Series (Expanded to span-2) -->
             <div class="lg:col-span-2">
                 <h3 class="font-semibold mb-2">Earthquake Time Series (Count M 3.5+ / Year)</h3>
                 <div class="mini bg-gray-50 rounded p-3">
@@ -189,7 +174,6 @@
                 </div>
             </div>
 
-            <!-- COLUMN 2: Magnitude Distribution (span-1) -->
             <div class="lg:col-span-1">
                 <h3 class="font-semibold mb-2">Magnitude Distribution</h3>
                 <div class="mini bg-gray-50 rounded p-3">
@@ -197,7 +181,6 @@
                 </div>
             </div>
 
-            <!-- COLUMN 3: Total Earthquakes Metric Card (span-1) -->
             <div class="lg:col-span-1">
                 <h3 class="font-semibold mb-2">Total Earthquakes (M 3.5+)</h3>
                 <div id="totalEqMetricCard" class="mini bg-gray-50 rounded p-6 flex flex-col items-center justify-center">
@@ -242,7 +225,6 @@
             <h4 class="font-semibold">Data Source & Research References:</h4>
             <ul class="list-disc list-inside ml-4 space-y-1">
                 <li><strong>Earthquake Data Source:</strong> The raw earthquake data plotted on the map is assumed to be sourced from the <strong>U.S. Geological Survey (USGS)</strong> or the <strong>Puerto Rico Seismic Network (PRSN)</strong>, typically available through a JSON API. (Link: <code>../data/natural_disasters/puerto_rico_earthquakes.json</code>)</li>
-                <li><strong>Hurricane Data Source:</strong> The track data plotted on the map is sourced from historical data, potentially NOAA/NHC data. (Link: <code>../data/natural_disasters/caribbean_hurricane_tracks_2015_2025.json</code>)</li>
                 <li><strong>Geology and Impact Research:</strong> <a href="https://pubs.usgs.gov/fs/fs141-00/fs141-00.pdf" target="_blank" class="text-blue-600 underline">USGS: Earthquakes and Tsunamis in Puerto Rico and the U.S. Virgin Islands</a></li>
                 <li><strong>2020 Quake Impact:</strong> <a href="https://recovery.pr.gov/en/earthquakes-response" target="_blank" class="text-blue-600 underline">Puerto Rico Disaster Recovery Transparency Portal (COR3)</a></li>
             </ul>
@@ -252,13 +234,9 @@
   </div>
 
   <script>
-    // ---------------------- Data Paths ----------------------
+    // ---------------------- Earthquake Data Path ----------------------
     const EQ_JSON = '../data/natural_disasters/puerto_rico_earthquakes.json'; 
-    const HURRICANE_JSON = '../data/natural_disasters/caribbean_hurricane_tracks_2015_2025.json'; 
-    const HURRICANE_COLOR = '#f97316'; // Orange for tracks
-    
     let earthquakeLayerGroup = null; 
-    let hurricaneLayerGroup = null;
 
     // ---------------------- Earthquake Color & Size Scaling ----------------------
     const MAGNITUDE_BREAKS = [3.5, 4.5, 5.5, 6.5, 7.5];
@@ -317,11 +295,11 @@
             }).addTo(earthquakeLayerGroup);
 
             circle.bindPopup(`
-                <strong>Magnitude ${{mag.toFixed(1)}} Earthquake</strong>
+                <strong>Magnitude ${mag.toFixed(1)} Earthquake</strong>
                 <br>Size/Color: Scaled by Magnitude
-                <br>Place: ${{place}}
-                <br>Date: ${{new Date(date).toLocaleString()}}
-                <br>Depth: ${{depth.toFixed(1)}} km
+                <br>Place: ${place}
+                <br>Date: ${new Date(date).toLocaleString()}
+                <br>Depth: ${depth.toFixed(1)} km
             `);
         });
         
@@ -333,7 +311,7 @@
         div.className = 'leaflet-control-eq-legend'; 
         
         const title = 'Earthquake Magnitude (M 3.5+)';
-        let html = `<div style="font-weight:600;margin-bottom:5px; border-bottom: 1px solid #ccc;">${{title}}</div>`;
+        let html = `<div style="font-weight:600;margin-bottom:5px; border-bottom: 1px solid #ccc;">${title}</div>`;
 
         MAGNITUDE_BREAKS.forEach((mag, i) => {
             const color = MAGNITUDE_COLORS[i];
@@ -341,19 +319,19 @@
             
             let label;
             if (i === 0) {
-                label = `M $\\le$ ${{mag.toFixed(1)}} (Small)`;
+                label = `M $\\le$ ${mag.toFixed(1)} (Small)`;
             } else if (i < MAGNITUDE_BREAKS.length - 1) {
-                label = `M ${{MAGNITUDE_BREAKS[i-1].toFixed(1)}} - ${{mag.toFixed(1)}}`;
+                label = `M ${MAGNITUDE_BREAKS[i-1].toFixed(1)} - ${mag.toFixed(1)}`;
             } else {
-                 label = `M $\\ge$ ${{MAGNITUDE_BREAKS[i-1].toFixed(1)}} (Large)`;
+                 label = `M $\\ge$ ${MAGNITUDE_BREAKS[i-1].toFixed(1)} (Large)`;
             }
 
             html += `
                 <div style="display:flex;align-items:center;gap:8px;margin:4px 0;">
                     <svg width="25" height="25" style="overflow: visible;">
-                        <circle cx="12.5" cy="12.5" r="${{size / 2}}" fill="${{color}}" stroke="#333" stroke-width="0.5" />
+                        <circle cx="12.5" cy="12.5" r="${size / 2}" fill="${color}" stroke="#333" stroke-width="0.5" />
                     </svg>
-                    <span>${{label}}</span>
+                    <span>${label}</span>
                 </div>
             `;
         });
@@ -367,80 +345,8 @@
     }
     // ---------------------- End Earthquake Plotting Logic ----------------------
 
-    // ---------------------- Hurricane Plotting Logic ----------------------
-    function plotHurricanes(data, mapInstance) {
-        if (!data || data.length === 0) {
-            console.warn("Hurricane data is empty or failed to load.");
-            return;
-        }
 
-        if (hurricaneLayerGroup) {
-            hurricaneLayerGroup.clearLayers();
-        } else {
-            hurricaneLayerGroup = L.layerGroup().addTo(mapInstance);
-        }
-
-        data.forEach(storm => {
-            // ASSUMPTION: storm.path is an array of {lat, lon} objects
-            if (!storm.path || storm.path.length < 2) return;
-
-            // Convert [{lat, lon}] to Leaflet format [[lat, lng]]
-            const latLngs = storm.path.map(p => [p.lat, p.lon]);
-
-            const polyline = L.polyline(latLngs, {
-                color: HURRICANE_COLOR,
-                weight: 3,
-                opacity: 0.7,
-                lineJoin: 'round'
-            }).addTo(hurricaneLayerGroup);
-
-            // Add a marker/popup at the storm name
-            const centerPoint = latLngs[Math.floor(latLngs.length / 2)];
-
-            L.marker(centerPoint, { 
-                icon: L.divIcon({
-                    className: 'hurricane-label',
-                    html: `<div class="text-xs font-bold text-orange-600" style="text-shadow: 0 0 2px #fff;">${{storm.name}}</div>`,
-                    iconSize: [60, 20],
-                    iconAnchor: [30, 0]
-                }) 
-            })
-             .bindPopup(`Storm: <strong>${{storm.name}}</strong> (${{storm.year || 'Unknown'}})`)
-             .addTo(hurricaneLayerGroup);
-             
-            polyline.bindPopup(`Hurricane Track: <strong>${{storm.name}}</strong> (${{storm.year || 'Unknown'}})`);
-        });
-        
-        hurricaneLayerGroup.bringToBack();
-    }
-    
-    function renderHurricaneLegend(map) {
-        const div = document.createElement('div');
-        div.className = 'leaflet-control-hurr-legend';
-        
-        const title = 'Hurricane Tracks';
-        let html = `<div style="font-weight:600;margin-bottom:5px; border-bottom: 1px solid #ccc;">${{title}}</div>`;
-
-        html += `
-            <div style="display:flex;align-items:center;gap:8px;margin:4px 0;">
-                <svg width="25" height="15">
-                    <line x1="0" y1="7.5" x2="25" y2="7.5" style="stroke:${{HURRICANE_COLOR}};stroke-width:3" />
-                </svg>
-                <span>Storm Track (2015-2025)</span>
-            </div>
-        `;
-        
-        const customControl = L.control({position: 'bottomright'});
-        customControl.onAdd = function() {
-            div.style.position = 'relative';
-            return div;
-        };
-        customControl.addTo(map);
-    }
-    // ---------------------- End Hurricane Plotting Logic ----------------------
-
-
-    // ---------------------- Earthquake Chart Logic ----------------------
+    // ---------------------- Earthquake Chart Logic (NEW) ----------------------
     function aggregateEarthquakeData(data) {
         if (!data || data.length === 0) return { timeSeries: {}, magnitudeBins: {}, totalCount: 0 };
 
@@ -457,9 +363,11 @@
             if (mag >= MIN_MAG_THRESHOLD) {
                 totalCount++;
 
+                // 1. Time Series (by year)
                 const year = date.getFullYear();
                 timeSeries[year] = (timeSeries[year] || 0) + 1;
 
+                // 2. Magnitude Distribution
                 if (mag >= 7.5) magnitudeBins['7.5+']++;
                 else if (mag >= 6.5) magnitudeBins['6.5-7.5']++;
                 else if (mag >= 5.5) magnitudeBins['5.5-6.5']++;
@@ -491,7 +399,7 @@
                 datasets: [{
                     label: 'Earthquake Count',
                     data: counts,
-                    borderColor: '#dc2626', 
+                    borderColor: '#dc2626', // Red line
                     tension: 0.2,
                     pointRadius: 4,
                     fill: false
@@ -516,7 +424,7 @@
             if (label === '4.5-5.5') return MAGNITUDE_COLORS[1];
             if (label === '5.5-6.5') return MAGNITUDE_COLORS[2];
             if (label === '6.5-7.5') return MAGNITUDE_COLORS[3];
-            return MAGNITUDE_COLORS[4]; 
+            return MAGNITUDE_COLORS[4]; // For 7.5+
         });
 
         if (window.earthquakeBarChart) window.earthquakeBarChart.destroy();
@@ -583,8 +491,8 @@
       const vals = YEARS.map(y => valFromRow(row, y));
       const firstYear = YEARS[0];
       const lastYear = YEARS.length - 1;
-      const changeAbs = row[`Cum_Change_${YEARS[0]}_${YEARS[lastYear]}`]; 
-      const changePct = row[`Cum_Pct_Change_${YEARS[0]}_${YEARS[lastYear]}`]; 
+      const changeAbs = row[`Cum_Change_${firstYear}_${YEARS[lastYear]}`]; 
+      const changePct = row[`Cum_Pct_Change_${firstYear}_${YEARS[lastYear]}`]; 
       const annualChange = row[`Change_${YEARS[lastYear-1]}_${YEARS[lastYear]}`];
       if (vals.some(v => !Number.isFinite(v))) return null;
       const ppChangeYear = [];
@@ -617,6 +525,7 @@
     }
     const dName = document.getElementById('d-name');
     const dCent = document.getElementById('d-centroid');
+    // Removed old detail DOM targets
     let lineChart = null, barChart = null; 
     function updatePctChangeMetricCard(st){
         const valEl = document.getElementById('pct-change-val');
@@ -628,10 +537,12 @@
         valEl.textContent = fmtVal; iconEl.className = `inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${colorClass}`; iconEl.innerHTML = `${arrow} ${fmtVal}`;
     }
     function drawCharts(name, st){
+        // Retain the ability to update the metric card for Education data
         updatePctChangeMetricCard(st); 
     }
     function updateDetails(name, st, centroid){
       dName.textContent = name.replace(/\s*Municipio$/,''); dCent.textContent = centroid ? `${centroid.lat.toFixed(4)}, ${centroid.lng.toFixed(4)}` : '—';
+      // No longer updating specific education fields in the details panel
       drawCharts(name, st); 
     }
 
@@ -652,17 +563,9 @@
       
       calculateExtremeValues();
 
-      // DEFINING THE FIXED BOUNDARY for Puerto Rico and surrounding seas
-      // Approximate bounds: [SW Corner, NE Corner]
-      const prFocusBounds = L.latLngBounds([[16.5, -68.5], [19.5, -64.0]]);
-      prBoundsGlobal = prFocusBounds;
-
-      map = L.map('map', { 
-          zoomControl: false, 
-          zoomSnap: .25,
-          maxBounds: prFocusBounds, // Set hard boundary limits
-          minZoom: 8 // Prevent zooming too far out
-      }).fitBounds(prFocusBounds); // Fit the map to the defined bounds initially
+      const prBounds = L.latLngBounds([[17.85, -67.45],[18.55, -65.25]]);
+      prBoundsGlobal = prBounds;
+      map = L.map('map', { zoomControl: false, zoomSnap: .25 }).fitBounds(prBounds);
 
       L.control.zoom({ position: 'topleft' }).addTo(map);
 
@@ -737,11 +640,14 @@
         }
       }).addTo(map);
 
-      // --- DISASTER DATA LOADING AND CHARTING ---
+      const b = layer.getBounds();
+      if (b.isValid()) map.fitBounds(b, { padding:[15,15] });
+
+      computeBreaks();
+
+      // --- FULL EARTHQUAKE DATA LOADING AND CHARTING ---
       let fullEarthquakeData = [];
       let aggregatedData = { timeSeries: {}, magnitudeBins: {}, totalCount: 0 };
-      let fullHurricaneData = [];
-      
       try {
           const eqRes = await fetch(EQ_JSON);
           fullEarthquakeData = await eqRes.json();
@@ -749,14 +655,6 @@
       } catch (e) {
           console.error("Error loading or processing earthquake data:", EQ_JSON, e);
       }
-      
-      try {
-          const hRes = await fetch(HURRICANE_JSON);
-          fullHurricaneData = await hRes.json();
-      } catch (e) {
-          console.error("Error loading hurricane data from path:", HURRICANE_JSON, e);
-      }
-
 
       // 1. Draw Earthquake Charts
       drawEarthquakeCharts(aggregatedData);
@@ -764,10 +662,8 @@
       // 2. Plot Earthquakes on Map
       plotEarthquakes(fullEarthquakeData, map);
       
-      // 3. Render Legends
+      // 3. Render Earthquake Legend
       renderEarthquakeLegend(map);
-      plotHurricanes(fullHurricaneData, map);
-      renderHurricaneLegend(map);
 
 
       const initName = 'Puerto Rico';
@@ -830,8 +726,7 @@
         function clearSelection(){
             lockedName = null;
             if (selectedLayer) { layer.resetStyle(selectedLayer); selectedLayer = null; }
-            // Revert to fixed bounds, maintaining zoom consistency
-            if (prBoundsGlobal) map.fitBounds(prBoundsGlobal); 
+            if (prBoundsGlobal) map.fitBounds(prBoundsGlobal, { padding:[15,15] });
             updateDetails('Puerto Rico', statsForMunicipio('Puerto Rico'), null);
         }
         document.getElementById('clearSel').addEventListener('click', clearSelection);
@@ -857,77 +752,6 @@
         }
         wireMapDropdown(); 
     });
-    
-    // ---------------------- Hurricane Plotting Logic ----------------------
-    function plotHurricanes(data, mapInstance) {
-        if (!data || data.length === 0) {
-            console.warn("Hurricane data is empty or failed to load.");
-            return;
-        }
-
-        if (hurricaneLayerGroup) {
-            hurricaneLayerGroup.clearLayers();
-        } else {
-            hurricaneLayerGroup = L.layerGroup().addTo(mapInstance);
-        }
-
-        data.forEach(storm => {
-            if (!storm.path || storm.path.length < 2) return;
-
-            const latLngs = storm.path.map(p => [p.lat, p.lon]);
-
-            const polyline = L.polyline(latLngs, {
-                color: HURRICANE_COLOR,
-                weight: 3,
-                opacity: 0.7,
-                lineJoin: 'round'
-            }).addTo(hurricaneLayerGroup);
-
-            // Add a marker/popup at the storm name
-            const midIndex = Math.floor(latLngs.length / 2);
-            const centerPoint = latLngs[midIndex];
-
-            L.marker(centerPoint, { 
-                icon: L.divIcon({
-                    className: 'hurricane-label',
-                    html: `<div class="text-xs font-bold text-orange-600" style="text-shadow: 0 0 2px #fff;">${storm.name}</div>`,
-                    iconSize: [60, 20],
-                    iconAnchor: [30, 0]
-                }) 
-            })
-             .bindPopup(`Storm: <strong>${storm.name}</strong> (${storm.year || 'Unknown'})`)
-             .addTo(hurricaneLayerGroup);
-             
-            polyline.bindPopup(`Hurricane Track: <strong>${storm.name}</strong> (${storm.year || 'Unknown'})`);
-        });
-        
-        hurricaneLayerGroup.bringToBack();
-    }
-    
-    function renderHurricaneLegend(map) {
-        const div = document.createElement('div');
-        div.className = 'leaflet-control-hurr-legend';
-        
-        const title = 'Hurricane Tracks';
-        let html = `<div style="font-weight:600;margin-bottom:5px; border-bottom: 1px solid #ccc;">${title}</div>`;
-
-        html += `
-            <div style="display:flex;align-items:center;gap:8px;margin:4px 0;">
-                <svg width="25" height="15">
-                    <line x1="0" y1="7.5" x2="25" y2="7.5" style="stroke:${HURRICANE_COLOR};stroke-width:3" />
-                </svg>
-                <span>Storm Track (2015-2025)</span>
-            </div>
-        `;
-        
-        const customControl = L.control({position: 'bottomright'});
-        customControl.onAdd = function() {
-            div.style.position = 'relative';
-            return div;
-        };
-        customControl.addTo(map);
-    }
-    // ---------------------- End Hurricane Plotting Logic ----------------------
   </script>
 </body>
 </html>
