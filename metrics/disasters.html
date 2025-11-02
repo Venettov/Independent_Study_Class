@@ -322,7 +322,8 @@
     
     function renderEarthquakeLegend(){
         const div = document.createElement('div');
-        div.className = 'leaflet-control-eq-legend';
+        // IMPORTANT: The className links to the CSS style defined in <style>
+        div.className = 'leaflet-control-eq-legend'; 
         
         const title = 'Earthquake Magnitude (M 3.5+)';
         let html = `<div style="font-weight:600;margin-bottom:5px; border-bottom: 1px solid #ccc;">${title}</div>`;
@@ -340,6 +341,7 @@
                  label = `M $\\ge$ ${MAGNITUDE_BREAKS[i-1].toFixed(1)} (Large)`;
             }
 
+            // Draw a circle for the legend entry
             html += `
                 <div style="display:flex;align-items:center;gap:8px;margin:4px 0;">
                     <svg width="25" height="25" style="overflow: visible;">
@@ -350,13 +352,18 @@
             `;
         });
         
-        div.innerHTML = html;
-        document.getElementById('map').appendChild(div);
+        // Use L.control to place the legend container
+        const customControl = L.control({position: 'bottomleft'});
+        customControl.onAdd = function(map) {
+            div.style.position = 'relative'; // Reset position for control container
+            return div;
+        };
+        customControl.addTo(map);
     }
     // ---------------------- End Earthquake Logic ----------------------
 
 
-    // ---------------------- Original Education Logic (Modified init) ----------------------
+    // ---------------------- Original Education Logic ----------------------
     const GEOJSON_URL = '../data/tl_2022_72_cousub/pr_municipalities.geojson';
     const EDU_JSON    = '../data/education/municipios_acs_education_2013_2023_wide.json';
     const YEARS = [2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023];
@@ -465,7 +472,7 @@
     }
 
     let _rows = []; 
-    let map, layer, fc; // Removed 'legend' here
+    let map, layer, fc; 
     let currentMode = 'pct'; 
     let lockedName = null;
     let selectedLayer = null;
@@ -563,13 +570,6 @@
 
       computeBreaks();
 
-      // REMOVED: Education Legend Logic
-      // The function calls below were previously for the Education Legend:
-      // legend = L.control({ position:'bottomright' });
-      // legend.onAdd = function(){ ... };
-      // legend.addTo(map);
-      // function moveLegend() { ... } 
-
       // --- FULL EARTHQUAKE DATA LOADING ---
       let fullEarthquakeData = [];
       try {
@@ -624,8 +624,6 @@
       return style;
     }
 
-    // REMOVED: renderLegend() function
-
     // Compute ABS breaks from current data 
     function computeBreaks(){
       ABS_BREAKS = [0.0, 2.0, 4.0, 6.0, 8.0];
@@ -640,7 +638,6 @@
             btnPct.classList.toggle('bg-blue-600', mode==='pct'); btnPct.classList.toggle('text-white', mode==='pct'); btnPct.classList.toggle('hover:bg-gray-50', mode!=='pct');
             btnLatest.classList.toggle('bg-blue-600', mode==='latest'); btnLatest.classList.toggle('text-white', mode==='latest'); btnLatest.classList.toggle('hover:bg-gray-50', mode!=='latest');
             calculateExtremeValues(); layer.eachLayer(l => l.setStyle(styleForFeature(l.feature))); if (selectedLayer) selectedLayer.setStyle(selectedOutline); 
-            // NOTE: Removed call to renderLegend()
         }
         btnPct.addEventListener('click', () => setActive('pct')); btnLatest.addEventListener('click', () => setActive('latest')); setActive(currentMode);
     }
