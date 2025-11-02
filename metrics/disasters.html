@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Education Dynamics and Magnitude-Scaled Earthquakes in Puerto Rico</title>
+  <title>Earthquake Magnitude Focus Map in Puerto Rico</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
 
@@ -13,7 +13,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
   <style>
-    /* ... (CSS Styles remain unchanged) ... */
+    /* ... (CSS Styles remain largely unchanged) ... */
     .card {
       background:#fff;
       border-radius:1rem;
@@ -42,11 +42,11 @@
 
     .mini { min-height: 260px; }
 
-    /* Custom style for the new Earthquake Legend */
+    /* CUSTOM: Earthquake Legend positioned bottom-left */
     .leaflet-control-eq-legend {
         position: absolute;
         bottom: 10px; 
-        right: 10px;
+        left: 10px;  /* Position set to LEFT */
         background: white;
         padding: 8px 10px;
         border-radius: 8px;
@@ -244,13 +244,11 @@
 
   <script>
     // ---------------------- Earthquake Data Path ----------------------
-    // NOTE: This must match the path to your actual earthquake JSON file
     const EQ_JSON = '../data/natural_disasters/puerto_rico_earthquakes.json'; 
     let earthquakeLayerGroup = null; 
 
     // ---------------------- Earthquake Color & Size Scaling ----------------------
     const MAGNITUDE_BREAKS = [3.5, 4.5, 5.5, 6.5, 7.5];
-    // Color gradient from light yellow (low mag) to dark red (high mag)
     const MAGNITUDE_COLORS = ['#ffffe5', '#fee391', '#fec44f', '#fe9929', '#d95f0e', '#993404'];
 
     function getColorForMagnitude(mag) {
@@ -263,16 +261,14 @@
     }
     
     function getRadiusForMagnitude(mag) {
-        // Scaling factor: larger magnitudes get geometrically larger sizes.
         const min_mag = 3.5;
         const max_mag = 7.5;
-        const min_size = 4; // pixels
-        const max_size = 18; // pixels
+        const min_size = 4;
+        const max_size = 18;
         
-        // Use a simple power/linear scale relative to a threshold
         const size = Math.max(min_size, (mag - min_mag) * 4.5 + min_size); 
 
-        return Math.min(size, max_size); // Clamp size to prevent excessively large circles
+        return Math.min(size, max_size);
     }
 
     function plotEarthquakes(data, mapInstance){
@@ -292,7 +288,6 @@
         data.forEach(event => {
             const mag = Number(event.mag);
             
-            // Only plot significant earthquakes (M 3.5+)
             if (mag < MIN_MAG_THRESHOLD) return; 
 
             const lat = event.latitude;
@@ -307,7 +302,7 @@
             const circle = L.circleMarker([lat, lng], {
                 radius: radius,
                 fillColor: color, 
-                color: '#333', // Dark border
+                color: '#333', 
                 weight: 0.5,
                 opacity: 0.8,
                 fillOpacity: 0.8
@@ -332,7 +327,6 @@
         const title = 'Earthquake Magnitude (M 3.5+)';
         let html = `<div style="font-weight:600;margin-bottom:5px; border-bottom: 1px solid #ccc;">${title}</div>`;
 
-        // Iterate through breaks for color and size representation
         MAGNITUDE_BREAKS.forEach((mag, i) => {
             const color = MAGNITUDE_COLORS[i];
             const size = getRadiusForMagnitude(mag);
@@ -346,8 +340,6 @@
                  label = `M $\\ge$ ${MAGNITUDE_BREAKS[i-1].toFixed(1)} (Large)`;
             }
 
-
-            // Draw a circle for the legend entry
             html += `
                 <div style="display:flex;align-items:center;gap:8px;margin:4px 0;">
                     <svg width="25" height="25" style="overflow: visible;">
@@ -473,7 +465,7 @@
     }
 
     let _rows = []; 
-    let map, layer, fc, legend; 
+    let map, layer, fc; // Removed 'legend' here
     let currentMode = 'pct'; 
     let lockedName = null;
     let selectedLayer = null;
@@ -571,41 +563,21 @@
 
       computeBreaks();
 
-      legend = L.control({ position:'bottomright' });
-      legend.onAdd = function(){
-        const div = L.DomUtil.create('div', 'info legend');
-        div.style.background = 'white';
-        div.style.padding = '8px 10px';
-        div.style.borderRadius = '8px';
-        div.style.boxShadow = '0 2px 8px rgba(0,0,0,.15)';
-        div.style.font = '12px/1.3 system-ui,-apple-system,Segoe UI,Roboto,sans-serif';
-        legend._div = div;
-        renderLegend();
-        return div;
-      };
-      legend.addTo(map);
-
-      function moveLegend() {
-        const el = legend._div;
-        if (!el) return;
-        el.style.marginBottom = Math.round(map.getSize().y * 0.25) + 'px'; 
-        el.style.marginRight  = '8px';
-        
-        // Adjust the position of the Education legend to avoid the Earthquake legend
-        el.style.bottom = '200px'; 
-      }
-      map.on('resize', moveLegend);
-      moveLegend();
+      // REMOVED: Education Legend Logic
+      // The function calls below were previously for the Education Legend:
+      // legend = L.control({ position:'bottomright' });
+      // legend.onAdd = function(){ ... };
+      // legend.addTo(map);
+      // function moveLegend() { ... } 
 
       // --- FULL EARTHQUAKE DATA LOADING ---
       let fullEarthquakeData = [];
       try {
           const eqRes = await fetch(EQ_JSON);
           fullEarthquakeData = await eqRes.json();
-          // Ensure the data structure is as expected (an array of objects with mag, lat, lng)
       } catch (e) {
           console.error("Error loading full earthquake data from path:", EQ_JSON, e);
-          alert(`Failed to load full earthquake data. Please check the path: ${EQ_JSON}`);
+          // Optional: Add a visual alert here if needed
       }
 
       // NEW: Plot all loaded earthquakes and render their dedicated legend
@@ -652,42 +624,7 @@
       return style;
     }
 
-    // Legend render (Education)
-    function renderLegend(){
-      if (!legend || !legend._div) return;
-      
-      const isLatestValue = currentMode === 'latest';
-      const breaks = isLatestValue ? PCT_BREAKS : ABS_BREAKS;
-      
-      const title  = isLatestValue 
-        ? `Bachelor's Degree or Higher (2023) — %` 
-        : `Change in Attainment (${YEARS[0]}–${YEARS[YEARS.length-1]}) — pp`;
-
-      const labels = [];
-      function row(color, label) {
-        return `<div style="display:flex;align-items:center;gap:.5rem;margin:.2rem 0;">
-                  <span style="display:inline-block;width:14px;height:14px;border-radius:3px;background:${color};
-                               border:1px solid rgba(0,0,0,.15)"></span>
-                  <span>${label}</span>
-                </div>`;
-      }
-      
-      const fmtRange = (a,b) => isLatestValue 
-          ? `${fmtPct(a)} to ${fmtPct(b)}` 
-          : `${signedPP(a)} to ${signedPP(b)}`;
-      const fmtValue = (v) => isLatestValue ? fmtPct(v) : signedPP(v);
-
-      labels.push(`<div style="font-weight:600;margin-bottom:.25rem">${title}</div>`);
-      
-      labels.push(row(CHORO_COLORS[0], `≤ ${fmtValue(breaks[0])}`));
-      labels.push(row(CHORO_COLORS[1], fmtRange(breaks[0], breaks[1])));
-      labels.push(row(CHORO_COLORS[2], fmtRange(breaks[1], breaks[2])));
-      labels.push(row(CHORO_COLORS[3], fmtRange(breaks[2], breaks[3])));
-      labels.push(row(CHORO_COLORS[4], fmtRange(breaks[3], breaks[4])));
-      labels.push(row(CHORO_COLORS[5], `> ${fmtValue(breaks[4])}`));
-
-      legend._div.innerHTML = labels.join('');
-    }
+    // REMOVED: renderLegend() function
 
     // Compute ABS breaks from current data 
     function computeBreaks(){
@@ -702,7 +639,8 @@
             currentMode = mode;
             btnPct.classList.toggle('bg-blue-600', mode==='pct'); btnPct.classList.toggle('text-white', mode==='pct'); btnPct.classList.toggle('hover:bg-gray-50', mode!=='pct');
             btnLatest.classList.toggle('bg-blue-600', mode==='latest'); btnLatest.classList.toggle('text-white', mode==='latest'); btnLatest.classList.toggle('hover:bg-gray-50', mode!=='latest');
-            calculateExtremeValues(); layer.eachLayer(l => l.setStyle(styleForFeature(l.feature))); if (selectedLayer) selectedLayer.setStyle(selectedOutline); renderLegend();
+            calculateExtremeValues(); layer.eachLayer(l => l.setStyle(styleForFeature(l.feature))); if (selectedLayer) selectedLayer.setStyle(selectedOutline); 
+            // NOTE: Removed call to renderLegend()
         }
         btnPct.addEventListener('click', () => setActive('pct')); btnLatest.addEventListener('click', () => setActive('latest')); setActive(currentMode);
     }
