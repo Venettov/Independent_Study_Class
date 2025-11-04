@@ -257,7 +257,7 @@
     const EQ_JSON = '../data/natural_disasters/puerto_rico_earthquakes.json'; 
     let earthquakeLayerGroup = null; 
     
-    // NEW PATH for hurricane data, although no plotting logic is included here
+    // PATH for hurricane data
     const HU_JSON = '../data/natural_disasters/caribbean_hurricane_tracks_2015_2025.json'; 
     let hurricaneMapInstance = null; // Reference to the new map
 
@@ -481,8 +481,6 @@
 
     // ---------------------- NEW Hurricane Map Initialization ----------------------
     function initHurricaneMap() {
-        // Approximate bounds for the Eastern Caribbean/Puerto Rico for the Hurricane map
-        // This provides a broader context for hurricane tracks.
         const huBounds = L.latLngBounds([[10.0, -70.0], [25.0, -55.0]]);
         
         hurricaneMapInstance = L.map('hurricane-map', { 
@@ -498,7 +496,9 @@
             maxZoom: 19
         }).addTo(hurricaneMapInstance);
         
-        // At this point, the map container is initialized and visible.
+        // This is the CRUCIAL line needed to force Leaflet to render correctly
+        // when the map is initialized in a hidden or dynamically sized container.
+        hurricaneMapInstance.invalidateSize(); 
     }
     // ---------------------- End Hurricane Map Initialization ----------------------
 
