@@ -735,19 +735,19 @@
         document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape') clearSelection(); });
     }
     
-    // FIX APPLIED: Increased setTimeout delay from 300 to 500ms
+    // FIX APPLIED: Increased setTimeout delay from 300ms to 500ms
     function wireDropdown() {
         const root = document.getElementById('metrics-dropdown-root'); if (!root) return; let hoverTimeout; const menu = document.getElementById('metrics-menu');
         function addHovering(){ clearTimeout(hoverTimeout); root.classList.add('hovering'); } 
-        function removeHovering(){ hoverTimeout = setTimeout(()=>root.classList.remove('hovering'), 500); } 
+        function removeHovering(){ hoverTimeout = setTimeout(()=>root.classList.remove('hovering'), 500); }
         root.addEventListener('mouseenter', addHovering); root.addEventListener('mouseleave', removeHovering); if (menu) { menu.addEventListener('mouseenter', addHovering); menu.addEventListener('mouseleave', removeHovering); }
     }
     
-    // FIX APPLIED: Increased setTimeout delay from 300 to 500ms
+    // FIX APPLIED: Increased setTimeout delay from 300ms to 500ms
     function wireMapDropdown() {
         const root = document.getElementById('map-selection-dropdown-root'); if (!root) return; let hoverTimeout; const menu = document.getElementById('map-selection-menu');
         function addHovering(){ clearTimeout(hoverTimeout); root.classList.add('hovering'); } 
-        function removeHovering(){ hoverTimeout = setTimeout(()=>{ root.classList.remove('hovering'); }, 500); } 
+        function removeHovering(){ hoverTimeout = setTimeout(()=>{ root.classList.remove('hovering'); }, 500); }
         root.addEventListener('mouseenter', addHovering); root.addEventListener('mouseleave', removeHovering); if (menu) { menu.addEventListener('mouseenter', addHovering); menu.addEventListener('mouseleave', removeHovering); }
     }
     
