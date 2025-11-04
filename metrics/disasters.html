@@ -257,7 +257,7 @@
     const EQ_JSON = '../data/natural_disasters/puerto_rico_earthquakes.json'; 
     let earthquakeLayerGroup = null; 
     
-    // NEW PATH for hurricane data, although no plotting logic is included yet
+    // NEW PATH for hurricane data, although no plotting logic is included here
     const HU_JSON = '../data/natural_disasters/caribbean_hurricane_tracks_2015_2025.json'; 
     let hurricaneMapInstance = null; // Reference to the new map
 
@@ -482,6 +482,7 @@
     // ---------------------- NEW Hurricane Map Initialization ----------------------
     function initHurricaneMap() {
         // Approximate bounds for the Eastern Caribbean/Puerto Rico for the Hurricane map
+        // This provides a broader context for hurricane tracks.
         const huBounds = L.latLngBounds([[10.0, -70.0], [25.0, -55.0]]);
         
         hurricaneMapInstance = L.map('hurricane-map', { 
@@ -497,9 +498,7 @@
             maxZoom: 19
         }).addTo(hurricaneMapInstance);
         
-        // Note: No hurricane plotting logic is included here per your request to revert it.
-        // If you decide to add hurricane tracks later, the code for fetching HU_JSON and
-        // plotting polylines would go here.
+        // At this point, the map container is initialized and visible.
     }
     // ---------------------- End Hurricane Map Initialization ----------------------
 
@@ -716,7 +715,7 @@
       // 3. Render Earthquake Legend
       renderEarthquakeLegend(map);
       
-      // 4. Initialize the new Hurricane Map (NEW CALL)
+      // 4. Initialize the new Hurricane Map (ADDED CALL)
       initHurricaneMap();
 
 
