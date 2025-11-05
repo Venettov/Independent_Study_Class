@@ -27,15 +27,8 @@
         linear-gradient(180deg, #fafafa 0%, #f3f4f6 100%);
     }
     #map { height: 48vh; width: 100%; border-radius: .75rem; }
-    #municipio-map { height: 48vh; width: 100%; border-radius: .75rem; } /* NEW MAP STYLE */
-    @media (min-width: 1280px) { 
-        #map { height: 46vh; } 
-        #municipio-map { height: 46vh; }
-    }
-    @media (max-width: 640px)  { 
-        #map { height: 54vh; } 
-        #municipio-map { height: 54vh; }
-    }
+    @media (min-width: 1280px) { #map { height: 46vh; } }
+    @media (max-width: 640px)  { #map { height: 54vh; } }
 
     .leaflet-tooltip {
       background: rgba(255,255,255,.95);
@@ -154,7 +147,7 @@
                       <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.24 4.5a.75.75 0 01-1.08 0l-4.24-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/>
                     </svg>
                   </div>
-                  <div id="map-selection-menu" class="dropdown-menu w-64 rounded-xl border border-gray-200 bg-white shadow-lg ring-1 ring-black/5 z-50">
+                  <div id="map-selection-menu" class="dropdown-menu w-64 rounded-xl border border-gray-200 bg-white shadow-lg ring-1 ring-black/5">
                     <div class="py-2">
                       <a href="population.html"     class="block px-4 py-2 hover:bg-gray-50">Population</a>
                       <a href="employment.html"     class="block px-4 py-2 hover:bg-gray-50">Employment Rate</a>
@@ -239,27 +232,13 @@
             </ul>
         </div>
       </section>
-
-      <hr class="border-gray-300"> 
-      
-      <section class="card p-6 space-y-4">
-        <h2 class="text-lg font-semibold">Puerto Rico Municipality Boundaries (Reference Map)</h2>
-        <p>
-            This map displays only the geographical boundaries of Puerto Rico's municipalities, providing a clean reference for the region.
-        </p>
-        <div id="municipio-map" class="mt-3"></div>
-      </section>
       </main>
   </div>
 
   <script>
-    // ---------------------- Data Paths ----------------------
+    // ---------------------- Earthquake Data Path ----------------------
     const EQ_JSON = '../data/natural_disasters/puerto_rico_earthquakes.json'; 
     let earthquakeLayerGroup = null; 
-    
-    // GeoJSON for municipality boundaries (USED by both maps)
-    const GEOJSON_URL = '../data/tl_2022_72_cousub/pr_municipalities.geojson';
-    let municipioMapInstance = null; // Reference to the new map instance
 
     // ---------------------- Earthquake Color & Size Scaling ----------------------
     const MAGNITUDE_BREAKS = [3.5, 4.5, 5.5, 6.5, 7.5];
@@ -369,7 +348,7 @@
     // ---------------------- End Earthquake Plotting Logic ----------------------
 
 
-    // ---------------------- Earthquake Chart Logic (EXISTING) ----------------------
+    // ---------------------- Earthquake Chart Logic (NEW) ----------------------
     function aggregateEarthquakeData(data) {
         if (!data || data.length === 0) return { timeSeries: {}, magnitudeBins: {}, totalCount: 0 };
 
@@ -476,58 +455,12 @@
     // ---------------------- End Earthquake Chart Logic ----------------------
 
 
-    // ---------------------- Municipio Boundary Map Initialization (FINAL FIX) ----------------------
-    function initMunicipioMap(geojsonData, bounds) {
-        
-        // This is the core fix: Delaying map initialization using a 300ms setTimeout
-        // to allow the parent CSS transforms to finish calculating.
-        setTimeout(() => {
-            try {
-                // 1. Initialize map instance in the new container
-                municipioMapInstance = L.map('municipio-map', { 
-                    zoomControl: false, 
-                    zoomSnap: .25 
-                }).fitBounds(bounds);
-
-                L.control.zoom({ position: 'topleft' }).addTo(municipioMapInstance);
-
-                // 2. Add tile layer
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '&copy; OpenStreetMap contributors',
-                    minZoom: 7, 
-                    maxZoom: 19
-                }).addTo(municipioMapInstance);
-                
-                // 3. Function to style the GeoJSON for simple boundaries (White/Light gray fill)
-                function boundaryStyle(feature) {
-                    return {
-                        fillColor: '#f7f7f7', // Light gray/off-white fill
-                        weight: 1.5,
-                        opacity: 1,
-                        color: '#333', // Dark border
-                        fillOpacity: 0.8
-                    };
-                }
-                
-                // 4. Add the GeoJSON layer to the new map
-                L.geoJSON(geojsonData, {
-                    style: boundaryStyle
-                }).addTo(municipioMapInstance);
-
-                // 5. Crucial: Invalidate size to force Leaflet to render correctly
-                municipioMapInstance.invalidateSize(); 
-
-            } catch (e) {
-                console.error("Error initializing Municipio Map:", e);
-            }
-        }, 300); // Increased delay to 300ms for robust rendering
-    }
-    // ---------------------- End Municipio Boundary Map Initialization ----------------------
-
-    
     // ---------------------- Original Education Logic ----------------------
+    const GEOJSON_URL = '../data/tl_2022_72_cousub/pr_municipalities.geojson';
     const EDU_JSON    = '../data/education/municipios_acs_education_2013_2023_wide.json';
     const YEARS = [2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023];
+
+    // ... (Original helper functions and choropleth logic remain unchanged for brevity) ...
     const fmtPct = (v) => `${(Number(v)||0).toFixed(1)}%`;
     const ppFmt = (v) => `${(Number(v)||0).toFixed(2)} pp`;
     const signedPP = (n) => (n > 0 ? '+' : '') + ppFmt(n);
@@ -594,12 +527,155 @@
     }
     const dName = document.getElementById('d-name');
     const dCent = document.getElementById('d-centroid');
-    let _rows = [];
-    
+    // Removed old detail DOM targets
+    let lineChart = null, barChart = null; 
+    function updatePctChangeMetricCard(st){
+        const valEl = document.getElementById('pct-change-val');
+        const iconEl = document.getElementById('pct-change-icon').querySelector('span');
+        if (!st || !Number.isFinite(st.pctTot)){
+            valEl.textContent = '—'; iconEl.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold'; iconEl.innerHTML = '&nbsp;'; return;}
+        const val = st.pctTot; const fmtVal = signedPct(val); let arrow, colorClass;
+        if (val > 0) { arrow = '&#9650;'; colorClass = 'bg-green-100 text-green-800';} else if (val < 0) { arrow = '&#9660;'; colorClass = 'bg-red-100 text-red-800';} else { arrow = '—'; colorClass = 'bg-gray-100 text-gray-800';}
+        valEl.textContent = fmtVal; iconEl.className = `inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${colorClass}`; iconEl.innerHTML = `${arrow} ${fmtVal}`;
+    }
+    function drawCharts(name, st){
+        // Retain the ability to update the metric card for Education data
+        updatePctChangeMetricCard(st); 
+    }
     function updateDetails(name, st, centroid){
       dName.textContent = name.replace(/\s*Municipio$/,''); dCent.textContent = centroid ? `${centroid.lat.toFixed(4)}, ${centroid.lng.toFixed(4)}` : '—';
+      // No longer updating specific education fields in the details panel
       drawCharts(name, st); 
     }
+
+    let _rows = []; 
+    let map, layer, fc; 
+    let currentMode = 'pct'; 
+    let lockedName = null;
+    let selectedLayer = null;
+    const selectedOutline = { weight: 4, color: '#111827', dashArray: '3', fillOpacity: 0.85 };
+    let prBoundsGlobal = null;
+
+    (async function init(){
+      
+      // Load main education data 
+      const res = await fetch(EDU_JSON, { cache:'no-store' });
+      const rawData = await res.json();
+      _rows = rawData.filter(row => !row.metadata);
+      
+      calculateExtremeValues();
+
+      const prBounds = L.latLngBounds([[17.85, -67.45],[18.55, -65.25]]);
+      prBoundsGlobal = prBounds;
+      map = L.map('map', { zoomControl: false, zoomSnap: .25 }).fitBounds(prBounds);
+
+      L.control.zoom({ position: 'topleft' }).addTo(map);
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors',
+        minZoom: 7, maxZoom: 19
+      }).addTo(map);
+
+      // Initialize the map dropdown control
+      L.Control.MapDropdown = L.Control.extend({
+          onAdd: function(map) {
+              const container = L.DomUtil.get('map-dropdown-container');
+              L.DomEvent.disableClickPropagation(container);
+              L.DomEvent.disableScrollPropagation(container);
+              return container.querySelector('.leaflet-control-map-dropdown');
+          },
+          onRemove: function(map) {}
+      });
+      new L.Control.MapDropdown({ position: 'topleft' }).addTo(map);
+
+      const gjRes = await fetch(GEOJSON_URL + (GEOJSON_URL.includes('?')?'&':'?') + 'cb=' + Date.now());
+      fc = await gjRes.json();
+
+      const hiStyle = { weight:3, color:'#111827', fillOpacity:0.9 };
+
+      layer = L.geoJSON(fc, {
+        style: (feature) => styleForFeature(feature),
+        onEachFeature: (f, lyr) => {
+          const p = f.properties || {};
+          const name = p.NAME || p.NAMELSAD || p.name || 'Unknown';
+          const geoid = p.GEOID || p.geoid || '';
+          const statsName = sanitizeName(name);
+          const st = statsForMunicipio(statsName);
+          
+          let changeLine = '';
+          if (st) {
+            const latest = fmtPct(st.latestVal);
+            const change = signedPP(st.abs);
+            changeLine = `<br><small>Attainment (2023): ${latest}<br>Change since ${YEARS[0]}: ${change}</small>`;
+          }
+          
+          lyr.bindTooltip(name, { direction:'center', className:'leaflet-tooltip' });
+          lyr.bindPopup(`<strong>${name}</strong>${geoid?`<br><small>GEOID: ${geoid}</small>`:''}${changeLine}`);
+
+          lyr.on({
+            mouseover: e => {
+              if (lockedName) return; 
+              e.target.setStyle(hiStyle);
+              e.target.bringToFront?.();
+              const c = e.target.getBounds().getCenter();
+              updateDetails(statsName, statsForMunicipio(statsName), c);
+            },
+            mouseout: e => {
+              if (lockedName) return; 
+              layer.resetStyle(e.target);
+            },
+            click: e => {
+              const l = e.target;
+              const clickedName = sanitizeName(name);
+
+              if (selectedLayer) layer.resetStyle(selectedLayer);
+              selectedLayer = l;
+              lockedName = clickedName;
+              l.setStyle(selectedOutline);
+
+              map.fitBounds(l.getBounds(), { padding:[20,20] });
+
+              const c = l.getBounds().getCenter();
+              updateDetails(lockedName, statsForMunicipio(lockedName), c);
+            }
+          });
+        }
+      }).addTo(map);
+
+      const b = layer.getBounds();
+      if (b.isValid()) map.fitBounds(b, { padding:[15,15] });
+
+      computeBreaks();
+
+      // --- FULL EARTHQUAKE DATA LOADING AND CHARTING ---
+      let fullEarthquakeData = [];
+      let aggregatedData = { timeSeries: {}, magnitudeBins: {}, totalCount: 0 };
+      try {
+          const eqRes = await fetch(EQ_JSON);
+          fullEarthquakeData = await eqRes.json();
+          aggregatedData = aggregateEarthquakeData(fullEarthquakeData);
+      } catch (e) {
+          console.error("Error loading or processing earthquake data:", EQ_JSON, e);
+      }
+
+      // 1. Draw Earthquake Charts
+      drawEarthquakeCharts(aggregatedData);
+      
+      // 2. Plot Earthquakes on Map
+      plotEarthquakes(fullEarthquakeData, map);
+      
+      // 3. Render Earthquake Legend
+      renderEarthquakeLegend(map);
+
+
+      const initName = 'Puerto Rico';
+      updateDetails(initName, statsForMunicipio(initName), null);
+
+      wireMetricToggle();
+      wireClearSelection();
+      wireDropdown(); 
+      wireMapDropdown(); 
+    })();
 
     // Style function based on current mode (Education Choropleth)
     function styleForFeature(feature){
@@ -675,136 +751,6 @@
         root.addEventListener('mouseenter', addHovering); root.addEventListener('mouseleave', removeHovering); if (menu) { menu.addEventListener('mouseenter', addHovering); menu.addEventListener('mouseleave', removeHovering); }
     }
     
-    let prBoundsGlobal = null;
-    let map, layer, fc; 
-    let currentMode = 'pct'; 
-    let lockedName = null;
-    let selectedLayer = null;
-    const selectedOutline = { weight: 4, color: '#111827', dashArray: '3', fillOpacity: 0.85 };
-
-    (async function init(){
-      
-      // Load primary data (Education and GeoJSON)
-      const res = await fetch(EDU_JSON, { cache:'no-store' });
-      const rawData = await res.json();
-      _rows = rawData.filter(row => !row.metadata);
-      
-      const gjRes = await fetch(GEOJSON_URL + '?' + Date.now());
-      const geojsonData = await gjRes.json(); // Load GeoJSON once
-
-      calculateExtremeValues();
-
-      const prBounds = L.latLngBounds([[17.85, -67.45],[18.55, -65.25]]);
-      prBoundsGlobal = prBounds;
-      
-      // --- Primary Map (Earthquake/Choropleth) Init ---
-      map = L.map('map', { zoomControl: false, zoomSnap: .25 }).fitBounds(prBounds);
-
-      L.control.zoom({ position: 'topleft' }).addTo(map);
-
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors',
-        minZoom: 7, maxZoom: 19
-      }).addTo(map);
-
-      // Initialize the map dropdown control
-      L.Control.MapDropdown = L.Control.extend({
-          onAdd: function(map) {
-              const container = L.DomUtil.get('map-dropdown-container');
-              L.DomEvent.disableClickPropagation(container);
-              L.DomEvent.disableScrollPropagation(container);
-              return container.querySelector('.leaflet-control-map-dropdown');
-          },
-          onRemove: function(map) {}
-      });
-      new L.Control.MapDropdown({ position: 'topleft' }).addTo(map);
-
-      fc = geojsonData; // Use the loaded GeoJSON data
-
-      const hiStyle = { weight:3, color:'#111827', fillOpacity:0.9 };
-
-      layer = L.geoJSON(fc, {
-        style: (feature) => styleForFeature(feature),
-        onEachFeature: (f, lyr) => {
-          const p = f.properties || {};
-          const name = p.NAME || p.NAMELSAD || p.name || 'Unknown';
-          const statsName = sanitizeName(name);
-          const st = statsForMunicipio(statsName);
-          
-          let changeLine = '';
-          if (st) {
-            const latest = fmtPct(st.latestVal);
-            const change = signedPP(st.abs);
-            changeLine = `<br><small>Attainment (2023): ${latest}<br>Change since ${YEARS[0]}: ${change}</small>`;
-          }
-          
-          lyr.bindTooltip(name, { direction:'center', className:'leaflet-tooltip' });
-          lyr.bindPopup(`<strong>${name}</strong>${changeLine}`);
-
-          lyr.on({
-            mouseover: e => {
-              if (lockedName) return; 
-              e.target.setStyle(hiStyle);
-              e.target.bringToFront?.();
-              const c = e.target.getBounds().getCenter();
-              updateDetails(statsName, statsForMunicipio(statsName), c);
-            },
-            mouseout: e => {
-              if (lockedName) return; 
-              layer.resetStyle(e.target);
-            },
-            click: e => {
-              const l = e.target;
-              const clickedName = sanitizeName(name);
-
-              if (selectedLayer) layer.resetStyle(selectedLayer);
-              selectedLayer = l;
-              lockedName = clickedName;
-              l.setStyle(selectedOutline);
-
-              map.fitBounds(l.getBounds(), { padding:[20,20] });
-
-              const c = l.getBounds().getCenter();
-              updateDetails(lockedName, statsForMunicipio(lockedName), c);
-            }
-          });
-        }
-      }).addTo(map);
-
-      const b = layer.getBounds();
-      if (b.isValid()) map.fitBounds(b, { padding:[15,15] });
-
-      computeBreaks();
-
-      // --- Earthquake Data and Charting ---
-      let fullEarthquakeData = [];
-      let aggregatedData = { timeSeries: {}, magnitudeBins: {}, totalCount: 0 };
-      try {
-          const eqRes = await fetch(EQ_JSON);
-          fullEarthquakeData = await eqRes.json();
-          aggregatedData = aggregateEarthquakeData(fullEarthquakeData);
-      } catch (e) {
-          console.error("Error loading or processing earthquake data:", EQ_JSON, e);
-      }
-
-      drawEarthquakeCharts(aggregatedData);
-      plotEarthquakes(fullEarthquakeData, map);
-      renderEarthquakeLegend(map);
-      
-      // --- SECOND MAP INITIALIZATION (Municipio Map - FINAL FIX) ---
-      // Pass the already loaded GeoJSON data and bounds
-      initMunicipioMap(geojsonData, prBounds); 
-
-
-      const initName = 'Puerto Rico';
-      updateDetails(initName, statsForMunicipio(initName), null);
-
-      wireMetricToggle();
-      wireClearSelection();
-      wireDropdown(); 
-      wireMapDropdown(); 
-    })();
-
     document.addEventListener('DOMContentLoaded', () => {
         const metricsLink = document.querySelector('#metrics-dropdown-root > a'); const isMetricsSubPage = window.location.pathname.includes('/metrics/');
         if (isMetricsSubPage) { metricsLink.classList.add('border-b-2', 'border-blue-600', 'text-blue-600', 'font-semibold'); metricsLink.setAttribute('aria-current', 'page');
