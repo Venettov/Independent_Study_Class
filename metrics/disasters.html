@@ -130,9 +130,7 @@
           <div class="text-sm text-gray-700 font-medium">Map shading by</div>
           <div class="flex items-center gap-2">
             <div class="inline-flex rounded-lg border bg-white shadow-sm overflow-hidden">
-              <button id="metricPct" type="button" class="px-3 py-1.5 text-sm font-medium bg-blue-600 text-white">Cumulative % Change</button>
-              <button id="metricLatest" type="button" class="px-3 py-1.5 text-sm font-medium hover:bg-gray-50">Latest Attainment (%)</button>
-            </div>
+              </div>
             <button id="clearSel" class="px-3 py-1.5 text-sm rounded-lg border bg-white hover:bg-gray-50">Clear selection</button>
           </div>
         </div>
@@ -147,7 +145,7 @@
                       <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.24 4.5a.75.75 0 01-1.08 0l-4.24-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/>
                     </svg>
                   </div>
-                  <div id="map-selection-menu" class="dropdown-menu w-64 rounded-xl border border-gray-200 bg-white shadow-lg ring-1 ring-black/5">
+                  <div id="map-selection-menu" class="dropdown-menu w-64 rounded-xl border border-gray-200 bg-white shadow-lg ring-1 ring-black/5 z-50">
                     <div class="py-2">
                       <a href="population.html"     class="block px-4 py-2 hover:bg-gray-50">Population</a>
                       <a href="employment.html"     class="block px-4 py-2 hover:bg-gray-50">Employment Rate</a>
@@ -232,6 +230,7 @@
             </ul>
         </div>
       </section>
+
       </main>
   </div>
 
@@ -348,7 +347,7 @@
     // ---------------------- End Earthquake Plotting Logic ----------------------
 
 
-    // ---------------------- Earthquake Chart Logic (NEW) ----------------------
+    // ---------------------- Earthquake Chart Logic (EXISTING) ----------------------
     function aggregateEarthquakeData(data) {
         if (!data || data.length === 0) return { timeSeries: {}, magnitudeBins: {}, totalCount: 0 };
 
@@ -460,7 +459,6 @@
     const EDU_JSON    = '../data/education/municipios_acs_education_2013_2023_wide.json';
     const YEARS = [2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023];
 
-    // ... (Original helper functions and choropleth logic remain unchanged for brevity) ...
     const fmtPct = (v) => `${(Number(v)||0).toFixed(1)}%`;
     const ppFmt = (v) => `${(Number(v)||0).toFixed(2)} pp`;
     const signedPP = (n) => (n > 0 ? '+' : '') + ppFmt(n);
@@ -508,6 +506,10 @@
         _extremeValues = { min: Infinity, max: -Infinity };
         let valueKey;
         const lastYear = YEARS.length - 1;
+        // The original logic checks currentMode, but since the buttons are removed, 
+        // we can simplify the default view or ensure it only calculates for one state.
+        // Keeping original structure to be safe, though this function is no longer called 
+        // by the toggle buttons.
         if (currentMode === 'pct') valueKey = `Cum_Change_${YEARS[0]}_${YEARS[lastYear]}`;
         else if (currentMode === 'latest') valueKey = `${YEARS[lastYear]}`;
         else return;
@@ -527,46 +529,106 @@
     }
     const dName = document.getElementById('d-name');
     const dCent = document.getElementById('d-centroid');
-    // Removed old detail DOM targets
-    let lineChart = null, barChart = null; 
-    function updatePctChangeMetricCard(st){
-        const valEl = document.getElementById('pct-change-val');
-        const iconEl = document.getElementById('pct-change-icon').querySelector('span');
-        if (!st || !Number.isFinite(st.pctTot)){
-            valEl.textContent = '—'; iconEl.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold'; iconEl.innerHTML = '&nbsp;'; return;}
-        const val = st.pctTot; const fmtVal = signedPct(val); let arrow, colorClass;
-        if (val > 0) { arrow = '&#9650;'; colorClass = 'bg-green-100 text-green-800';} else if (val < 0) { arrow = '&#9660;'; colorClass = 'bg-red-100 text-red-800';} else { arrow = '—'; colorClass = 'bg-gray-100 text-gray-800';}
-        valEl.textContent = fmtVal; iconEl.className = `inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${colorClass}`; iconEl.innerHTML = `${arrow} ${fmtVal}`;
-    }
-    function drawCharts(name, st){
-        // Retain the ability to update the metric card for Education data
-        updatePctChangeMetricCard(st); 
-    }
+    let _rows = [];
+    
     function updateDetails(name, st, centroid){
       dName.textContent = name.replace(/\s*Municipio$/,''); dCent.textContent = centroid ? `${centroid.lat.toFixed(4)}, ${centroid.lng.toFixed(4)}` : '—';
-      // No longer updating specific education fields in the details panel
       drawCharts(name, st); 
     }
 
-    let _rows = []; 
+    // REMOVED LOGIC: Removed checks for extreme values (yellow border)
+    function styleForFeature(feature){
+      const p = feature.properties || {};
+      const name = p.NAME || p.NAMELSAD || p.name || 'Unknown';
+      const statsName = sanitizeName(name);
+      const st = statsForMunicipio(statsName);
+      
+      const value = !st ? NaN : (currentMode === 'pct' ? st.abs : st.latestVal);
+      const breaks = (currentMode === 'pct') ? ABS_BREAKS : PCT_BREAKS;
+      
+      const col = colorFor(value, breaks, currentMode === 'latest');
+      
+      let style = { fillColor: col, weight: 1.2, color:'#111827', fillOpacity:.75 };
+      
+      // REMOVED: Custom logic to highlight the single min and max values (yellow border)
+      /* if (Number.isFinite(value) && _extremeValues.min !== Infinity) {
+          const valRounded = parseFloat(value.toFixed(2));
+          const isExtreme = valRounded === _extremeValues.min || valRounded === _extremeValues.max;
+          
+          if (isExtreme && _extremeValues.min !== _extremeValues.max) { 
+              style.weight = 5;            
+              style.color = '#facc15';     
+              style.dashArray = '';        
+              style.fillOpacity = 0.95;    
+          }
+      }
+      */
+
+      return style;
+    }
+
+    // Compute ABS breaks from current data 
+    function computeBreaks(){
+      // Ensuring default mode is 'pct' since the toggle is removed
+      currentMode = 'pct';
+      ABS_BREAKS = [0.0, 2.0, 4.0, 6.0, 8.0];
+    }
+    
+    // REMOVED LOGIC: Removed the metric toggle function body
+    function wireMetricToggle(){
+        /* The buttons are removed from the HTML, so this function is now empty. */
+        currentMode = 'pct'; // Ensure default state is set
+    }
+    
+    function wireClearSelection(){
+        function clearSelection(){
+            lockedName = null;
+            if (selectedLayer) { layer.resetStyle(selectedLayer); selectedLayer = null; }
+            if (prBoundsGlobal) map.fitBounds(prBoundsGlobal, { padding:[15,15] });
+            updateDetails('Puerto Rico', statsForMunicipio('Puerto Rico'), null);
+        }
+        document.getElementById('clearSel').addEventListener('click', clearSelection);
+        document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape') clearSelection(); });
+    }
+    
+    // Dropdown fix implementations (kept at 500ms)
+    function wireDropdown() {
+        const root = document.getElementById('metrics-dropdown-root'); if (!root) return; let hoverTimeout; const menu = document.getElementById('metrics-menu');
+        function addHovering(){ clearTimeout(hoverTimeout); root.classList.add('hovering'); } 
+        function removeHovering(){ hoverTimeout = setTimeout(()=>root.classList.remove('hovering'), 500); }
+        root.addEventListener('mouseenter', addHovering); root.addEventListener('mouseleave', removeHovering); if (menu) { menu.addEventListener('mouseenter', addHovering); menu.addEventListener('mouseleave', removeHovering); }
+    }
+    
+    function wireMapDropdown() {
+        const root = document.getElementById('map-selection-dropdown-root'); if (!root) return; let hoverTimeout; const menu = document.getElementById('map-selection-menu');
+        function addHovering(){ clearTimeout(hoverTimeout); root.classList.add('hovering'); } 
+        function removeHovering(){ hoverTimeout = setTimeout(()=>{ root.classList.remove('hovering'); }, 500); }
+        root.addEventListener('mouseenter', addHovering); root.addEventListener('mouseleave', removeHovering); if (menu) { menu.addEventListener('mouseenter', addHovering); menu.addEventListener('mouseleave', removeHovering); }
+    }
+    
+    let prBoundsGlobal = null;
     let map, layer, fc; 
     let currentMode = 'pct'; 
     let lockedName = null;
     let selectedLayer = null;
     const selectedOutline = { weight: 4, color: '#111827', dashArray: '3', fillOpacity: 0.85 };
-    let prBoundsGlobal = null;
 
     (async function init(){
       
-      // Load main education data 
+      // Load primary data (Education and GeoJSON)
       const res = await fetch(EDU_JSON, { cache:'no-store' });
       const rawData = await res.json();
       _rows = rawData.filter(row => !row.metadata);
       
+      const gjRes = await fetch(GEOJSON_URL + '?' + Date.now());
+      const geojsonData = await gjRes.json(); // Load GeoJSON once
+
       calculateExtremeValues();
 
       const prBounds = L.latLngBounds([[17.85, -67.45],[18.55, -65.25]]);
       prBoundsGlobal = prBounds;
+      
+      // --- Primary Map (Earthquake/Choropleth) Init ---
       map = L.map('map', { zoomControl: false, zoomSnap: .25 }).fitBounds(prBounds);
 
       L.control.zoom({ position: 'topleft' }).addTo(map);
@@ -588,8 +650,7 @@
       });
       new L.Control.MapDropdown({ position: 'topleft' }).addTo(map);
 
-      const gjRes = await fetch(GEOJSON_URL + (GEOJSON_URL.includes('?')?'&':'?') + 'cb=' + Date.now());
-      fc = await gjRes.json();
+      fc = geojsonData; // Use the loaded GeoJSON data
 
       const hiStyle = { weight:3, color:'#111827', fillOpacity:0.9 };
 
@@ -598,7 +659,6 @@
         onEachFeature: (f, lyr) => {
           const p = f.properties || {};
           const name = p.NAME || p.NAMELSAD || p.name || 'Unknown';
-          const geoid = p.GEOID || p.geoid || '';
           const statsName = sanitizeName(name);
           const st = statsForMunicipio(statsName);
           
@@ -610,7 +670,7 @@
           }
           
           lyr.bindTooltip(name, { direction:'center', className:'leaflet-tooltip' });
-          lyr.bindPopup(`<strong>${name}</strong>${geoid?`<br><small>GEOID: ${geoid}</small>`:''}${changeLine}`);
+          lyr.bindPopup(`<strong>${name}</strong>${changeLine}`);
 
           lyr.on({
             mouseover: e => {
@@ -677,80 +737,6 @@
       wireMapDropdown(); 
     })();
 
-    // Style function based on current mode (Education Choropleth)
-    function styleForFeature(feature){
-      const p = feature.properties || {};
-      const name = p.NAME || p.NAMELSAD || p.name || 'Unknown';
-      const statsName = sanitizeName(name);
-      const st = statsForMunicipio(statsName);
-      
-      const value = !st ? NaN : (currentMode === 'pct' ? st.abs : st.latestVal);
-      const breaks = (currentMode === 'pct') ? ABS_BREAKS : PCT_BREAKS;
-      
-      const col = colorFor(value, breaks, currentMode === 'latest');
-      
-      let style = { fillColor: col, weight: 1.2, color:'#111827', fillOpacity:.75 };
-      
-      // Custom logic to highlight only the single min and max values 
-      if (Number.isFinite(value) && _extremeValues.min !== Infinity) {
-          const valRounded = parseFloat(value.toFixed(2));
-          const isExtreme = valRounded === _extremeValues.min || valRounded === _extremeValues.max;
-          
-          if (isExtreme && _extremeValues.min !== _extremeValues.max) { 
-              style.weight = 5;            
-              style.color = '#facc15';     
-              style.dashArray = '';        
-              style.fillOpacity = 0.95;    
-          }
-      }
-
-      return style;
-    }
-
-    // Compute ABS breaks from current data 
-    function computeBreaks(){
-      ABS_BREAKS = [0.0, 2.0, 4.0, 6.0, 8.0];
-    }
-    
-    // Wire toggles (implementation hidden for brevity, same as original)
-    function wireMetricToggle(){
-        const btnPct = document.getElementById('metricPct');
-        const btnLatest = document.getElementById('metricLatest');
-        function setActive(mode){
-            currentMode = mode;
-            btnPct.classList.toggle('bg-blue-600', mode==='pct'); btnPct.classList.toggle('text-white', mode==='pct'); btnPct.classList.toggle('hover:bg-gray-50', mode!=='pct');
-            btnLatest.classList.toggle('bg-blue-600', mode==='latest'); btnLatest.classList.toggle('text-white', mode==='latest'); btnLatest.classList.toggle('hover:bg-gray-50', mode!=='latest');
-            calculateExtremeValues(); layer.eachLayer(l => l.setStyle(styleForFeature(l.feature))); if (selectedLayer) selectedLayer.setStyle(selectedOutline); 
-        }
-        btnPct.addEventListener('click', () => setActive('pct')); btnLatest.addEventListener('click', () => setActive('latest')); setActive(currentMode);
-    }
-    function wireClearSelection(){
-        function clearSelection(){
-            lockedName = null;
-            if (selectedLayer) { layer.resetStyle(selectedLayer); selectedLayer = null; }
-            if (prBoundsGlobal) map.fitBounds(prBoundsGlobal, { padding:[15,15] });
-            updateDetails('Puerto Rico', statsForMunicipio('Puerto Rico'), null);
-        }
-        document.getElementById('clearSel').addEventListener('click', clearSelection);
-        document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape') clearSelection(); });
-    }
-    
-    // FIX APPLIED: Increased setTimeout delay from 300ms to 500ms
-    function wireDropdown() {
-        const root = document.getElementById('metrics-dropdown-root'); if (!root) return; let hoverTimeout; const menu = document.getElementById('metrics-menu');
-        function addHovering(){ clearTimeout(hoverTimeout); root.classList.add('hovering'); } 
-        function removeHovering(){ hoverTimeout = setTimeout(()=>root.classList.remove('hovering'), 500); }
-        root.addEventListener('mouseenter', addHovering); root.addEventListener('mouseleave', removeHovering); if (menu) { menu.addEventListener('mouseenter', addHovering); menu.addEventListener('mouseleave', removeHovering); }
-    }
-    
-    // FIX APPLIED: Increased setTimeout delay from 300ms to 500ms
-    function wireMapDropdown() {
-        const root = document.getElementById('map-selection-dropdown-root'); if (!root) return; let hoverTimeout; const menu = document.getElementById('map-selection-menu');
-        function addHovering(){ clearTimeout(hoverTimeout); root.classList.add('hovering'); } 
-        function removeHovering(){ hoverTimeout = setTimeout(()=>{ root.classList.remove('hovering'); }, 500); }
-        root.addEventListener('mouseenter', addHovering); root.addEventListener('mouseleave', removeHovering); if (menu) { menu.addEventListener('mouseenter', addHovering); menu.addEventListener('mouseleave', removeHovering); }
-    }
-    
     document.addEventListener('DOMContentLoaded', () => {
         const metricsLink = document.querySelector('#metrics-dropdown-root > a'); const isMetricsSubPage = window.location.pathname.includes('/metrics/');
         if (isMetricsSubPage) { metricsLink.classList.add('border-b-2', 'border-blue-600', 'text-blue-600', 'font-semibold'); metricsLink.setAttribute('aria-current', 'page');
