@@ -63,11 +63,11 @@
         width: 150px;
     }
     
-    /* CUSTOM: Hurricane Legend positioned top-right (Re-added style for the new legend) */
+    /* CUSTOM: Hurricane Legend positioned top-right (RE-ADDED) */
     .leaflet-control-hu-legend {
         position: absolute;
         top: 10px; 
-        right: 10px;  /* Position set to RIGHT */
+        right: 10px;
         background: white;
         padding: 8px 10px;
         border-radius: 8px;
@@ -267,14 +267,13 @@
   </div>
 
   <script>
-    // ---------------------- Earthquake Data Path ----------------------
+    // ---------------------- Data Paths ----------------------
     const EQ_JSON = '../data/natural_disasters/puerto_rico_earthquakes.json'; 
     let earthquakeLayerGroup = null; 
     
-    // PATH for hurricane data
     const HU_JSON = '../data/natural_disasters/caribbean_hurricane_tracks_2015_2025.json'; 
-    let hurricaneMapInstance = null; // Reference to the new map
-    let hurricaneLayerGroup = null; // Layer group for hurricane polylines (NEW)
+    let hurricaneMapInstance = null;
+    let hurricaneLayerGroup = null;
 
     // ---------------------- Earthquake Color & Size Scaling ----------------------
     const MAGNITUDE_BREAKS = [3.5, 4.5, 5.5, 6.5, 7.5];
@@ -388,26 +387,25 @@
     // ---------------------- End Earthquake Plotting Logic ----------------------
 
 
-    // ---------------------- Hurricane Plotting Logic (RE-INTRODUCED) ----------------------
+    // ---------------------- Hurricane Plotting Logic (ADDED BACK) ----------------------
     
-    // Saffir-Simpson colors (simplified for display)
     const HU_COLORS = {
         'HU': '#e74c3c', // Hurricane (Red)
         'TS': '#f39c12', // Tropical Storm (Orange)
         'TD': '#3498db', // Tropical Depression (Blue)
-        'DB': '#2ecc71', // Disturbance/Wave (Green)
+        'DB': '#2ecc71', // Tropical Disturbance (Green)
         'LO': '#bdc3c7', // Low/Other (Gray)
-        'SS': '#8e44ad', // Subtropical Storm (Purple)
-        'SD': '#34495e', // Subtropical Depression (Dark Blue)
-        'WV': '#1abc9c'  // Tropical Wave (Teal)
+        'SS': '#8e44ad', // Subtropical Storm 
+        'SD': '#34495e', // Subtropical Depression 
+        'WV': '#1abc9c'  // Tropical Wave 
     };
     
+    // Bounds near PR to filter tracks
     const PR_LAT_MIN = 16.0;
     const PR_LAT_MAX = 20.0;
     const PR_LON_MIN = -68.0;
     const PR_LON_MAX = -64.0;
     
-    // Check if the storm track came close to Puerto Rico
     function isNearPuertoRico(path) {
         return path.some(p => 
             p.lat >= PR_LAT_MIN && p.lat <= PR_LAT_MAX &&
@@ -416,7 +414,7 @@
     }
     
     function plotHurricaneTracks(data, mapInstance) {
-        if (!data || data.length === 0) return;
+        if (!data || data.length === 0 || !mapInstance) return;
 
         if (hurricaneLayerGroup) {
             hurricaneLayerGroup.clearLayers();
@@ -611,7 +609,6 @@
 
     // ---------------------- NEW Hurricane Map Initialization ----------------------
     async function initHurricaneMap() {
-        // Approximate bounds for the Eastern Caribbean/Puerto Rico for the Hurricane map
         const huBounds = L.latLngBounds([[10.0, -70.0], [25.0, -55.0]]);
         
         hurricaneMapInstance = L.map('hurricane-map', { 
@@ -627,7 +624,7 @@
             maxZoom: 19
         }).addTo(hurricaneMapInstance);
         
-        // CRUCIAL: Invalidate size after initialization to fix rendering issues on dynamic content.
+        // CRUCIAL: Invalidate size after initialization to fix rendering issues
         hurricaneMapInstance.invalidateSize(); 
 
         // Load and plot hurricane data
@@ -849,7 +846,7 @@
           console.error("Error loading or processing earthquake data:", EQ_JSON, e);
       }
       
-      // Load hurricane data for later use (no plotting implemented here yet)
+      // Load hurricane data
       let fullHurricaneData = [];
       try {
           const huRes = await fetch(HU_JSON);
@@ -868,12 +865,8 @@
       // 3. Render Earthquake Legend
       renderEarthquakeLegend(map);
       
-      // 4. Initialize the new Hurricane Map (ADDED CALL)
+      // 4. Initialize the new Hurricane Map (ADDED CALL & PLOTTING)
       initHurricaneMap();
-      
-      // 5. Plot Hurricane Tracks (New: Plotting after map initialization)
-      plotHurricaneTracks(fullHurricaneData, hurricaneMapInstance);
-      renderHurricaneLegend(hurricaneMapInstance);
 
 
       const initName = 'Puerto Rico';
