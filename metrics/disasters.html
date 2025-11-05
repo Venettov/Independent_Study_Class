@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Population & Economic Dynamics in Puerto Rico</title>
+  <title>Earthquake Analysis Map & Charts in Puerto Rico</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
 
@@ -13,6 +13,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
   <style>
+    /* ... (CSS Styles remain largely unchanged) ... */
     .card {
       background:#fff;
       border-radius:1rem;
@@ -39,84 +40,34 @@
       padding:5px 10px;
     }
 
-    .mini { min-height: 260px; }
+    .mini { min-height: 300px; } /* Increased min-height for bigger graphs */
 
-    /* --- Dropdown base state & transitions (Main Nav) --- */
-    #metrics-menu {
-      opacity: 0; visibility: hidden; transform: translateY(4px);
-      pointer-events: none;
-      transition: opacity .15s ease, transform .15s ease, visibility .15s ease;
-    }
-    #metrics-dropdown-root:hover #metrics-menu,
-    #metrics-dropdown-root.hovering #metrics-menu {
-      opacity: 1; visibility: visible; transform: translateY(0); pointer-events: auto;
-    }
-    #metrics-dropdown-root:hover #metrics-chevron,
-    #metrics-dropdown-root.hovering #metrics-chevron {
-      transform: rotate(180deg);
-    }
-
-    /* New style for simulating 65% zoom on the main content */
-    #scale-wrapper {
-        /* Apply the scale transformation */
-        transform: scale(0.65); 
-        transform-origin: top center; /* Scale from the top-center */
-        
-        /* Adjustments to compensate for the scaling effect on surrounding content */
-        height: 154%; /* Approx 1 / 0.65 to ensure vertical space is reserved */
-        padding-bottom: 200px;
-        margin-bottom: -35%; /* Pull up content following the wrapper */
-    }
-
-    /* --- LEAFLET CONTROL STYLES (Map Dropdown) --- */
-    .leaflet-control-map-dropdown {
-      padding: 0; 
-      margin-left: 45px; /* Pushes the control right to clear the zoom buttons */
-      margin-top: 5px; 
-    }
-    .leaflet-control-map-dropdown .dropdown-root {
-      background: #fff;
-      box-shadow: 0 1px 5px rgba(0,0,0,.65);
-      border-radius: 4px;
-      position: relative; 
-    }
-    .leaflet-control-map-dropdown .nav-link {
-        padding: 6px 10px;
-        color: #333;
-        font-weight: 500;
-        font-size: 13px;
-        line-height: 1.2;
-        display: flex;
-        align-items: center;
-        gap: 4px;
-        cursor: pointer;
-    }
-    
-    .leaflet-control-map-dropdown .dropdown-menu {
+    /* CUSTOM: Earthquake Legend positioned bottom-left */
+    .leaflet-control-eq-legend {
         position: absolute;
-        top: 100%;
-        left: 0;
-        margin-top: 5px; 
-        z-index: 1000;
-        
-        /* Hiding logic */
-        opacity: 0; visibility: hidden; transform: translateY(4px);
-        pointer-events: none;
-        transition: opacity .15s ease, transform .15s ease, visibility .15s ease;
+        bottom: 10px; 
+        left: 10px;  /* Position set to LEFT */
+        background: white;
+        padding: 8px 10px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,.15);
+        font: 12px/1.3 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+        z-index: 1000; 
+        width: 150px;
     }
     
-    .leaflet-control-map-dropdown .dropdown-root.hovering .dropdown-menu {
-        opacity: 1; visibility: visible; transform: translateY(0); pointer-events: auto;
-    }
-    .leaflet-control-map-dropdown .dropdown-root.hovering #map-selection-chevron {
-        transform: rotate(180deg);
-    }
-    
-    .leaflet-control-map-dropdown .dropdown-menu a {
-        text-decoration: none;
-        padding: 6px 12px;
-        font-size: 13px;
-    }
+    /* Global wrappers/dropdowns remain unchanged */
+    #metrics-menu {opacity: 0; visibility: hidden; transform: translateY(4px); pointer-events: none; transition: opacity .15s ease, transform .15s ease, visibility .15s ease;}
+    #metrics-dropdown-root:hover #metrics-menu, #metrics-dropdown-root.hovering #metrics-menu {opacity: 1; visibility: visible; transform: translateY(0); pointer-events: auto;}
+    #metrics-dropdown-root:hover #metrics-chevron, #metrics-dropdown-root.hovering #metrics-chevron {transform: rotate(180deg);}
+    #scale-wrapper {transform: scale(0.65); transform-origin: top center; height: 154%; padding-bottom: 200px; margin-bottom: -35%;}
+    .leaflet-control-map-dropdown {padding: 0; margin-left: 45px; margin-top: 5px;}
+    .leaflet-control-map-dropdown .dropdown-root {background: #fff; box-shadow: 0 1px 5px rgba(0,0,0,.65); border-radius: 4px; position: relative;}
+    .leaflet-control-map-dropdown .nav-link {padding: 6px 10px; color: #333; font-weight: 500; font-size: 13px; line-height: 1.2; display: flex; align-items: center; gap: 4px; cursor: pointer;}
+    .leaflet-control-map-dropdown .dropdown-menu {position: absolute; top: 100%; left: 0; margin-top: 5px; z-index: 1000; opacity: 0; visibility: hidden; transform: translateY(4px); pointer-events: none; transition: opacity .15s ease, transform .15s ease, visibility .15s ease;}
+    .leaflet-control-map-dropdown .dropdown-root.hovering .dropdown-menu {opacity: 1; visibility: visible; transform: translateY(0); pointer-events: auto;}
+    .leaflet-control-map-dropdown .dropdown-root.hovering #map-selection-chevron {transform: rotate(180deg);}
+    .leaflet-control-map-dropdown .dropdown-menu a {text-decoration: none; padding: 6px 12px; font-size: 13px;}
   </style>
 </head>
 <body class="bg-gray-50 text-gray-900 font-sans">
@@ -134,15 +85,14 @@
         </a>
         <div id="metrics-menu" class="absolute right-0 mt-2 w-64 rounded-xl border border-gray-200 bg-white shadow-lg ring-1 ring-black/5 z-50">
           <div class="py-2">
-            <a href="../metrics.html" class="block px-4 py-2 hover:bg-gray-50 font-semibold">All Metrics Overview</a>
-            <div class="my-1 border-t border-gray-100"></div>
             <a href="population.html"     class="block px-4 py-2 hover:bg-gray-50">Population</a>
             <a href="employment.html"     class="block px-4 py-2 hover:bg-gray-50">Employment Rate</a>
             <a href="establishments.html" class="block px-4 py-2 hover:bg-gray-50">Employer Establishments</a>
-            <a href="income.html"         class="block px-4 py-2 bg-gray-100 font-semibold">Household Income</a>
+            <a href="income.html"         class="block px-4 py-2 hover:bg-gray-50">Household Income</a>
             <a href="housing.html"        class="block px-4 py-2 hover:bg-gray-50">Housing Units</a>
             <a href="education.html"      class="block px-4 py-2 hover:bg-gray-50">Education</a>
             <a href="health.html"         class="block px-4 py-2 hover:bg-gray-50">Health</a>
+            <a href="disasters.html"      class="block px-4 py-2 bg-gray-100 font-semibold">Natural Disasters</a>
           </div>
         </div>
       </div>
@@ -163,8 +113,7 @@
               Population & Economic Dynamics in Puerto Rico
             </h1>
             <p class="mt-3 text-lg text-gray-700">
-              A graduate research project examining demographic shifts, out-migration, and sustainable development
-              strategies through linked data analysis and policy synthesis.
+              A research project comparing educational attainment trends (map) with seismic activity (charts).
             </p>
             <div class="mt-5">
               <span class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-100 text-slate-800">
@@ -181,10 +130,7 @@
           <div class="text-sm text-gray-700 font-medium">Map shading by</div>
           <div class="flex items-center gap-2">
             <div class="inline-flex rounded-lg border bg-white shadow-sm overflow-hidden">
-              <button id="metricNominalPct" type="button" class="px-3 py-1.5 text-sm font-medium hover:bg-gray-50">Nominal Change (%)</button>
-              <button id="metricNominalAbs" type="button" class="px-3 py-1.5 text-sm font-medium hover:bg-gray-50">Nominal Change ($)</button>
-              <button id="metricRealPct" type="button" class="px-3 py-1.5 text-sm font-medium bg-blue-600 text-white">Real Change (%)</button>
-            </div>
+              </div>
             <button id="clearSel" class="px-3 py-1.5 text-sm rounded-lg border bg-white hover:bg-gray-50">Clear selection</button>
           </div>
         </div>
@@ -199,15 +145,16 @@
                       <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.24 4.5a.75.75 0 01-1.08 0l-4.24-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/>
                     </svg>
                   </div>
-                  <div id="map-selection-menu" class="dropdown-menu w-64 rounded-xl border border-gray-200 bg-white shadow-lg ring-1 ring-black/5">
+                  <div id="map-selection-menu" class="dropdown-menu w-64 rounded-xl border border-gray-200 bg-white shadow-lg ring-1 ring-black/5 z-50">
                     <div class="py-2">
                       <a href="population.html"     class="block px-4 py-2 hover:bg-gray-50">Population</a>
                       <a href="employment.html"     class="block px-4 py-2 hover:bg-gray-50">Employment Rate</a>
                       <a href="establishments.html" class="block px-4 py-2 hover:bg-gray-50">Employer Establishments</a>
-                      <a href="income.html"         class="block px-4 py-2 bg-gray-100 font-semibold">Household Income</a>
+                      <a href="income.html"         class="block px-4 py-2 hover:bg-gray-50">Household Income</a>
                       <a href="housing.html"        class="block px-4 py-2 hover:bg-gray-50">Housing Units</a>
                       <a href="education.html"      class="block px-4 py-2 hover:bg-gray-50">Education</a>
                       <a href="health.html"         class="block px-4 py-2 hover:bg-gray-50">Health</a>
+                      <a href="disasters.html"      class="block px-4 py-2 bg-gray-100 font-semibold">Natural Disasters</a>
                     </div>
                   </div>
                 </div>
@@ -218,325 +165,309 @@
       </section>
 
       <section class="card p-6">
-        <h2 class="text-lg font-semibold mb-4">Household Income details</h2>
-        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          
-          <div>
-            <div class="text-sm">
-              <div>Municipio: <span id="d-name" class="font-semibold">Puerto Rico</span></div>
-              <div>Centroid: <span id="d-centroid" class="text-gray-600">—</span></div>
+        <h2 class="text-lg font-semibold mb-4">Seismic and Educational Data Visualization</h2>
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6"> 
+            <div class="lg:col-span-2">
+                <h3 class="font-semibold mb-2">Earthquake Time Series (Count M 3.5+ / Year)</h3>
+                <div class="mini bg-gray-50 rounded p-3">
+                    <canvas id="lineChart"></canvas>
+                </div>
             </div>
 
-            <div class="mt-4 text-sm">
-              <div class="font-semibold text-gray-700">Median Household Income (Vintage 2023):</div>
-              <ul class="mt-1 space-y-1">
-                <li>2023 (Nominal): <span id="d-2023" class="font-semibold">—</span></li>
-                <li>2023 (Real, 2023 $): <span id="d-2023-real" class="font-semibold">—</span></li>
-                <li>Change since 2010 (Nominal): <span id="d-chg" class="font-semibold">—</span></li>
-                <li>Change since 2010 (Real): <span id="d-chg-real" class="font-semibold">—</span></li>
-              </ul>
+            <div class="lg:col-span-1">
+                <h3 class="font-semibold mb-2">Magnitude Distribution</h3>
+                <div class="mini bg-gray-50 rounded p-3">
+                    <canvas id="barChart"></canvas>
+                </div>
             </div>
 
-            <div class="mt-4 text-sm">
-              <a id="d-census" class="text-blue-600 underline" href="#" target="_blank" rel="noopener">
-                Open on data.census.gov ↗
-              </a>
+            <div class="lg:col-span-1">
+                <h3 class="font-semibold mb-2">Total Earthquakes (M 3.5+)</h3>
+                <div id="totalEqMetricCard" class="mini bg-gray-50 rounded p-6 flex flex-col items-center justify-center">
+                    <div class="text-sm font-medium text-gray-600">Total Recorded Earthquakes</div>
+                    <div id="total-eq-val" class="mt-2 text-5xl font-extrabold text-gray-800">
+                        —
+                    </div>
+                    <div class="mt-3 text-lg font-semibold">
+                        Magnitude 3.5+
+                    </div>
+                </div>
             </div>
           </div>
+      </section>
 
-          <div>
-            <h3 class="font-semibold mb-2">Nominal Income trend (2010–2023)</h3>
-            <div class="mini bg-gray-50 rounded p-3">
-              <canvas id="lineChartNominal"></canvas>
-            </div>
-          </div>
+      <hr class="border-gray-300">
 
-          <div>
-            <h3 class="font-semibold mb-2">Nominal Annual % Change</h3>
-            <div class="mini bg-gray-50 rounded p-3">
-              <canvas id="barChartNominal"></canvas>
-            </div>
-          </div>
-          
-          <div>
-            <h3 class="font-semibold mb-2">Real Annual % Change (2023 $)</h3>
-            <div class="mini bg-gray-50 rounded p-3">
-              <canvas id="barChartReal"></canvas>
-            </div>
-          </div>
+      <section class="card p-6 space-y-6">
+        <h2 class="text-lg font-semibold">Analysis and Supporting Resources</h2>
+
+        <div class="space-y-4">
+            <h3 class="text-base font-semibold text-gray-700">Geology and Impact of Earthquakes in Puerto Rico 🇵🇷</h3>
+            <p>
+                Puerto Rico is located on a <strong>highly active tectonic boundary</strong> between the <strong>North American Plate</strong> and the <strong>Caribbean Plate</strong>. The high frequency of seismic activity is primarily driven by the complex interaction of these plates at two major offshore zones:
+                <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
+                    <li><strong>Puerto Rico Trench (North):</strong> Where the North American Plate is being subducted beneath the Caribbean Plate, forming the deepest point in the Atlantic Ocean.</li>
+                    <li><strong>Muertos Trough (South):</strong> An incipient subduction zone where the Caribbean Plate isbeing thrust southward, creating complex faulting, particularly along the southern and western coasts.</li>
+                </ul>
+            </p>
+            <p>
+                This ongoing tectonic stress results in numerous earthquakes, though most are microquakes (M &lt; 2.0). However, the region has a history of damaging events, most recently the <strong>2019-2020 earthquake swarm</strong>, which included a <strong>Magnitude 6.4</strong> shock on January 7, 2020.
+            </p>
+            <h4 class="text-sm font-semibold text-gray-600 mt-4">Socio-Economic Impact of Recent Quakes:</h4>
+            <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
+                <li><strong>Infrastructure Damage:</strong> The 2020 quakes caused widespread power outages, affecting nearly a million people, and severely damaged key infrastructure like the <strong>Costa Sur power plant</strong>.</li>
+                <li><strong>Displacement:</strong> Thousands of residents, particularly in the southern municipalities (Guánica, Yauco, Ponce), were displaced, with initial damage estimates reaching <strong>$3.1 billion</strong>.</li>
+                <li><strong>Cascading Effects:</strong> Recovery efforts were complicated by existing damage from Hurricane Maria and subsequent mental health, housing, and economic instability.</li>
+            </ul>
         </div>
         
-        <h2 class="text-lg font-semibold mb-4 pt-8 border-t border-gray-200 mt-8">Understanding the Income Metrics</h2>
-        <div class="space-y-4 text-gray-700">
-          <p>
-            The charts above illustrate the trajectory of <strong>Median Household Income</strong> in Puerto Rico, differentiating between Nominal (raw) values and Real (inflation-adjusted) values. Analyzing both is crucial for understanding genuine economic progress.
-          </p>
-          
-          <h3 class="font-semibold text-gray-800 pt-2">Nominal vs. Real Income Trends</h3>
-          <p>
-            The distinction between Nominal and Real income is primarily driven by the <strong>Consumer Price Index (CPI)</strong>, which measures inflation. 
-          </p>
-          
-          <ul class="list-disc list-inside space-y-2 ml-4">
-            <li>
-              <strong class="text-blue-600">Nominal Income</strong> is the income earned in a specific year, unadjusted for inflation. The <strong>Nominal Income Trend</strong> line chart shows a strong, consistent upward path for median income over the 2010–2023 period.
-            </li>
-            <li>
-              <strong class="text-green-600">Real Income</strong> is Nominal Income adjusted to a constant purchasing power (in this case, 2023 U.S. Dollars). This metric reveals the actual change in buying power.
-            </li>
-          </ul>
-
-          <h3 class="font-semibold text-gray-800 pt-2">Comparing Annual Percentage Changes</h3>
-          <p>
-            The two bar charts offer the clearest comparison of economic growth versus inflation.
-          </p>
-
-          <ul class="list-disc list-inside space-y-2 ml-4">
-            <li>
-              <strong class="text-blue-600">Nominal Annual % Change:</strong> This chart shows the raw, year-over-year percentage increase in reported income. A positive bar here means households received a higher dollar amount than the previous year.
-            </li>
-            <li>
-              <strong class="text-green-600">Real Annual % Change (2023 $):</strong> This chart is calculated by subtracting the rate of inflation from the Nominal rate of change.
-              <ul class="list-circle list-inside ml-6 mt-1 space-y-1 text-sm">
-                  <li>A <strong>positive bar</strong> indicates that household purchasing power *actually increased* that year (the Nominal rate outpaced inflation).</li>
-                  <li>A <strong>negative bar</strong> indicates that despite receiving more nominal dollars, household purchasing power *declined* (inflation was higher than the Nominal rate of income growth). Many years show negative real growth, highlighting the persistent challenge of inflation eroding wage gains.</li>
-              </ul>
-            </li>
-          </ul>
-        </div>
-        </section>
-
-      <section class="card p-6">
-        <h2 class="text-lg font-semibold mb-4">File Sources</h2>
-        <div class="space-y-4">
-          <p>Data for this project was derived from the U.S. Census Bureau:</p>
-          <ul class="list-disc list-inside space-y-1">
-            <li>
-              <a href="https://data.census.gov/cedsci/table?g=0400000US72&tid=ACSST5Y2023.S1901"
-                target="_blank" rel="noopener" class="text-blue-600 underline">
-                2023 ACS 5-Year Estimates - Median Household Income (Table S1901)
-              </a>
-            </li>
-            <li>
-              <a href="https://wwwcensus.gov/data/tables/time-series/demo/popest/intercensal-2010-2020-puerto-rico-municipios.html"
-                target="_blank" rel="noopener" class="text-gray-600">
-                (Original file source for municipal boundaries/GeoJSON remains valid)
-              </a>
-            </li>
-          </ul>
-
-          <p>Specific files used:</p>
-          <ul class="list-disc list-inside">
-            <li>municipios_acs_s1901_median_income_2010_2023_wide.json (site build)</li>
-            <li>municipios_acs_s1901_median_income_2010_2023_wide.csv (analysis)</li>
-            <li>prm-est2020int-pop-72.xlsx (2010–2020 intercensal)</li>
-          </ul>
+        <div class="space-y-2 text-sm text-gray-600">
+            <h4 class="font-semibold">Data Source & Research References:</h4>
+            <ul class="list-disc list-inside ml-4 space-y-1">
+                <li><strong>Earthquake Data Source:</strong> The raw earthquake data plotted on the map is assumed to be sourced from the <strong>U.S. Geological Survey (USGS)</strong> or the <strong>Puerto Rico Seismic Network (PRSN)</strong>, typically available through a JSON API. (Link: <code>../data/natural_disasters/puerto_rico_earthquakes.json</code>)</li>
+                <li><strong>Geology and Impact Research:</strong> <a href="https://pubs.usgs.gov/fs/fs141-00/fs141-00.pdf" target="_blank" class="text-blue-600 underline">USGS: Earthquakes and Tsunamis in Puerto Rico and the U.S. Virgin Islands</a></li>
+                <li><strong>2020 Quake Impact:</strong> <a href="https://recovery.pr.gov/en/earthquakes-response" target="_blank" class="text-blue-600 underline">Puerto Rico Disaster Recovery Transparency Portal (COR3)</a></li>
+            </ul>
         </div>
       </section>
-    </main>
+
+      </main>
   </div>
 
   <script>
-    const GEOJSON_URL = '../data/tl_2022_72_cousub/pr_municipalities.geojson';
-    const INCOME_JSON = '../data/household_income/municipios_acs_s1901_median_income_2010_2023_wide.json';
+    // ---------------------- Earthquake Data Path ----------------------
+    const EQ_JSON = '../data/natural_disasters/puerto_rico_earthquakes.json'; 
+    let earthquakeLayerGroup = null; 
 
-    const YEARS = [2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023];
+    // ---------------------- Earthquake Color & Size Scaling ----------------------
+    const MAGNITUDE_BREAKS = [3.5, 4.5, 5.5, 6.5, 7.5];
+    const MAGNITUDE_COLORS = ['#ffffe5', '#fee391', '#fec44f', '#fe9929', '#d95f0e', '#993404'];
+    const MIN_MAG_THRESHOLD = 3.5; 
 
-    // Format for currency and percentage
-    const fmt = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
-    const pctFmt = (v) => `${(Number(v)||0).toFixed(2)}%`;
-    const signed = (n) => (n > 0 ? '+' : '') + fmt.format(n);
-
-    // Map Mode Identifiers
-    const MODE_NOMINAL_PCT = 'nominal_pct';
-    const MODE_NOMINAL_ABS = 'nominal_abs';
-    const MODE_REAL_PCT    = 'real_pct';
-
-    // Color breaks for choropleth map
-    const CHORO_COLORS = ['#7f1d1d', '#b91c1c', '#f97316', '#bbf7d0', '#22c55e', '#15803d'];
+    function getColorForMagnitude(mag) {
+      if (mag <= MAGNITUDE_BREAKS[0]) return MAGNITUDE_COLORS[0];
+      if (mag <= MAGNITUDE_BREAKS[1]) return MAGNITUDE_COLORS[1];
+      if (mag <= MAGNITUDE_BREAKS[2]) return MAGNITUDE_COLORS[2];
+      if (mag <= MAGNITUDE_BREAKS[3]) return MAGNITUDE_COLORS[3];
+      if (mag <= MAGNITUDE_BREAKS[4]) return MAGNITUDE_COLORS[4];
+      return MAGNITUDE_COLORS[5];
+    }
     
-    // Nominal Income PCT Change (2010-2023)
-    const NOMINAL_PCT_BREAKS = [20, 30, 40, 50, 60]; 
-    // Nominal Income Absolute Change (2010-2023)
-    let NOMINAL_ABS_BREAKS = [3000, 5000, 7000, 9000, 11000]; 
-    // Real Income PCT Change (2010-2023)
-    const REAL_PCT_BREAKS = [-15, -10, -5, 0, 5]; 
-    
-    // --- Global Map Variables (Must be outside init) ---
-    let _rows = [], map, layer, fc, legend;
-    let currentMode = MODE_REAL_PCT; // Start on Real % Change
-    let lockedName = null, selectedLayer = null;
-    const selectedOutline = { weight: 4, color: '#111827', dashArray: '3', fillOpacity: 0.85 };
-    let prBoundsGlobal = null;
-    // ----------------------------------------------------
-    
-    const sanitizeName = s => String(s||'').trim();
-    const yearVal = (row,y) => {
-      const v = row?.[String(y)];
-      const n = Number(v);
-      return Number.isFinite(n) ? n : NaN;
-    };
-    const realYearVal = (row,y) => {
-      const v = row?.[`RealIncome_${y}`];
-      const n = Number(v);
-      return Number.isFinite(n) ? n : NaN;
-    };
-    
-    // Stores the global min and max values for the current map mode
-    let _extremeValues = { min: Infinity, max: -Infinity };
-
-
-    let lineChartNominal = null, barChartNominal = null, barChartReal = null;
-    
-    // Element IDs for the new detail structure
-    const dName = document.getElementById('d-name');
-    const dCent = document.getElementById('d-centroid');
-    const d2023 = document.getElementById('d-2023');
-    const d2023Real = document.getElementById('d-2023-real');
-    const dChg  = document.getElementById('d-chg');
-    const dChgReal = document.getElementById('d-chg-real');
-    const dCenL = document.getElementById('d-census');
-
-    function statsForMunicipio(name){
-      // 1. Normalize the name from the GeoJSON feature: remove "Municipio" suffix
-      const nameKey = sanitizeName(name).replace(/\s*Municipio$/,'');
-      
-      // 2. Find the row, matching against the normalized name or the special PR case
-      const row = _rows.find(r => 
-        sanitizeName(r.Municipio).replace(/\s*Municipio$/,'') === nameKey || 
-        (nameKey === 'Puerto Rico' && sanitizeName(r.Municipio) === 'Puerto Rico')
-      );
-
-      if (!row || row.metadata) return null;
-
-      // Nominal Income Metrics
-      const nominalVals = YEARS.map(y => yearVal(row,y));
-      const nominalPctYear = [];
-      for (let i=1;i<YEARS.length;i++){
-        nominalPctYear.push(((nominalVals[i]-nominalVals[i-1]) / nominalVals[i-1]) * 100);
-      }
-      
-      // Real Income Metrics
-      const realVals = YEARS.map(y => realYearVal(row,y));
-      const realPctYear = [];
-      for (let i=1;i<YEARS.length;i++){
-        realPctYear.push(((realVals[i]-realVals[i-1]) / realVals[i-1]) * 100);
-      }
-      
-      // Use the pre-calculated cumulative fields in your JSON:
-      const nominalCumAbs = row.Cum_Change_2010_2023;
-      const nominalCumPct = row.Cum_Pct_Change_2010_2023;
-      const realCumAbs = row.Real_Cum_Change_2010_2023;
-      const realCumPct = row.Real_Cum_Pct_Change_2010_2023;
-      
-      const val2023 = nominalVals[nominalVals.length - 1];
-      const realVal2023 = realVals[realVals.length - 1];
-
-      return { 
-        nominalVals, nominalCumAbs, nominalCumPct, nominalPctYear, val2023, 
-        realVals, realCumAbs, realCumPct, realPctYear, realVal2023 
-      };
+    function getRadiusForMagnitude(mag) {
+        const min_mag = 3.5;
+        const min_size = 4;
+        const size = Math.max(min_size, (mag - min_mag) * 4.5 + min_size); 
+        return Math.min(size, 18);
     }
 
-    // Function to calculate global min/max for the current map mode
-    function calculateExtremeValues() {
-        _extremeValues = { min: Infinity, max: -Infinity };
-        let valueKey;
-        const firstYear = YEARS[0];
-        const lastYear = YEARS[YEARS.length - 1];
+    function plotEarthquakes(data, mapInstance){
+        if (!data || data.length === 0) {
+            console.error("Earthquake data is empty or failed to load.");
+            return;
+        }
 
-        if (currentMode === MODE_NOMINAL_PCT) valueKey = `Cum_Pct_Change_${firstYear}_${lastYear}`;
-        else if (currentMode === MODE_NOMINAL_ABS) valueKey = `Cum_Change_${firstYear}_${lastYear}`;
-        else if (currentMode === MODE_REAL_PCT) valueKey = `Real_Cum_Pct_Change_${firstYear}_${lastYear}`;
-        else return;
+        if (earthquakeLayerGroup) {
+            earthquakeLayerGroup.clearLayers();
+        } else {
+            earthquakeLayerGroup = L.layerGroup().addTo(mapInstance);
+        }
 
-        // Iterate through all municipalities to find the global min and max value
-        const municipioRows = _rows.filter(r => r.Municipio !== 'Puerto Rico' && !r.metadata);
+        data.forEach(event => {
+            const mag = Number(event.mag);
+            
+            if (mag < MIN_MAG_THRESHOLD) return; 
+
+            const lat = event.latitude;
+            const lng = event.longitude;
+            const date = event.date;
+            const place = event.place || 'Unknown Location';
+            const depth = event.depth_km;
+
+            const radius = getRadiusForMagnitude(mag); 
+            const color = getColorForMagnitude(mag);
+
+            const circle = L.circleMarker([lat, lng], {
+                radius: radius,
+                fillColor: color, 
+                color: '#333', 
+                weight: 0.5,
+                opacity: 0.8,
+                fillOpacity: 0.8
+            }).addTo(earthquakeLayerGroup);
+
+            circle.bindPopup(`
+                <strong>Magnitude ${mag.toFixed(1)} Earthquake</strong>
+                <br>Size/Color: Scaled by Magnitude
+                <br>Place: ${place}
+                <br>Date: ${new Date(date).toLocaleString()}
+                <br>Depth: ${depth.toFixed(1)} km
+            `);
+        });
         
-        municipioRows.forEach(row => {
-            const value = Number(row[valueKey]);
+        earthquakeLayerGroup.bringToFront();
+    }
+    
+    function renderEarthquakeLegend(map){
+        const div = document.createElement('div');
+        div.className = 'leaflet-control-eq-legend'; 
+        
+        const title = 'Earthquake Magnitude (M 3.5+)';
+        let html = `<div style="font-weight:600;margin-bottom:5px; border-bottom: 1px solid #ccc;">${title}</div>`;
 
-            if (Number.isFinite(value)) {
-                _extremeValues.min = Math.min(_extremeValues.min, value);
-                _extremeValues.max = Math.max(_extremeValues.max, value);
+        MAGNITUDE_BREAKS.forEach((mag, i) => {
+            const color = MAGNITUDE_COLORS[i];
+            const size = getRadiusForMagnitude(mag);
+            
+            let label;
+            if (i === 0) {
+                label = `M $\\le$ ${mag.toFixed(1)} (Small)`;
+            } else if (i < MAGNITUDE_BREAKS.length - 1) {
+                label = `M ${MAGNITUDE_BREAKS[i-1].toFixed(1)} - ${mag.toFixed(1)}`;
+            } else {
+                 label = `M $\\ge$ ${MAGNITUDE_BREAKS[i-1].toFixed(1)} (Large)`;
+            }
+
+            html += `
+                <div style="display:flex;align-items:center;gap:8px;margin:4px 0;">
+                    <svg width="25" height="25" style="overflow: visible;">
+                        <circle cx="12.5" cy="12.5" r="${size / 2}" fill="${color}" stroke="#333" stroke-width="0.5" />
+                    </svg>
+                    <span>${label}</span>
+                </div>
+            `;
+        });
+        
+        const customControl = L.control({position: 'bottomleft'});
+        customControl.onAdd = function() {
+            div.style.position = 'relative'; 
+            return div;
+        };
+        customControl.addTo(map);
+    }
+    // ---------------------- End Earthquake Plotting Logic ----------------------
+
+
+    // ---------------------- Earthquake Chart Logic (EXISTING) ----------------------
+    function aggregateEarthquakeData(data) {
+        if (!data || data.length === 0) return { timeSeries: {}, magnitudeBins: {}, totalCount: 0 };
+
+        const timeSeries = {}; 
+        const magnitudeBins = {
+            '3.5-4.5': 0, '4.5-5.5': 0, '5.5-6.5': 0, '6.5-7.5': 0, '7.5+': 0
+        };
+        let totalCount = 0;
+
+        data.forEach(event => {
+            const mag = Number(event.mag);
+            const date = new Date(event.date);
+
+            if (mag >= MIN_MAG_THRESHOLD) {
+                totalCount++;
+
+                // 1. Time Series (by year)
+                const year = date.getFullYear();
+                timeSeries[year] = (timeSeries[year] || 0) + 1;
+
+                // 2. Magnitude Distribution
+                if (mag >= 7.5) magnitudeBins['7.5+']++;
+                else if (mag >= 6.5) magnitudeBins['6.5-7.5']++;
+                else if (mag >= 5.5) magnitudeBins['5.5-6.5']++;
+                else if (mag >= 4.5) magnitudeBins['4.5-5.5']++;
+                else if (mag >= 3.5) magnitudeBins['3.5-4.5']++;
+            }
+        });
+
+        return { timeSeries, magnitudeBins, totalCount };
+    }
+    
+    function updateEarthquakeMetricCard(count){
+        document.getElementById('total-eq-val').textContent = count.toLocaleString();
+    }
+    
+    function drawEarthquakeCharts(aggregatedData){
+        const timeSeriesCtx = document.getElementById('lineChart').getContext('2d');
+        const magDistCtx = document.getElementById('barChart').getContext('2d');
+        
+        // --- 1. Earthquake Time Series (Line Chart) ---
+        const years = Object.keys(aggregatedData.timeSeries).sort();
+        const counts = years.map(year => aggregatedData.timeSeries[year]);
+        
+        if (window.earthquakeLineChart) window.earthquakeLineChart.destroy();
+        window.earthquakeLineChart = new Chart(timeSeriesCtx, {
+            type: 'line',
+            data: {
+                labels: years,
+                datasets: [{
+                    label: 'Earthquake Count',
+                    data: counts,
+                    borderColor: '#dc2626', // Red line
+                    tension: 0.2,
+                    pointRadius: 4,
+                    fill: false
+                }]
+            },
+            options: {
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { title: { display: true, text: 'Year' } },
+                    y: { title: { display: true, text: 'Count (M 3.5+)' }, beginAtZero: true }
+                },
+                maintainAspectRatio: false
+            }
+        });
+
+        // --- 2. Magnitude Distribution (Bar Chart) ---
+        const magLabels = Object.keys(aggregatedData.magnitudeBins);
+        const magCounts = Object.values(aggregatedData.magnitudeBins);
+
+        const backgroundColors = magLabels.map((label, i) => {
+            if (label === '3.5-4.5') return MAGNITUDE_COLORS[0];
+            if (label === '4.5-5.5') return MAGNITUDE_COLORS[1];
+            if (label === '5.5-6.5') return MAGNITUDE_COLORS[2];
+            if (label === '6.5-7.5') return MAGNITUDE_COLORS[3];
+            return MAGNITUDE_COLORS[4]; // For 7.5+
+        });
+
+        if (window.earthquakeBarChart) window.earthquakeBarChart.destroy();
+        window.earthquakeBarChart = new Chart(magDistCtx, {
+            type: 'bar',
+            data: {
+                labels: magLabels,
+                datasets: [{
+                    label: 'Number of Earthquakes',
+                    data: magCounts,
+                    backgroundColor: backgroundColors
+                }]
+            },
+            options: {
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { title: { display: true, text: 'Magnitude Range' } },
+                    y: { title: { display: true, text: 'Count' }, beginAtZero: true }
+                },
+                maintainAspectRatio: false
             }
         });
         
-        // Handle floating point precision for comparison
-        _extremeValues.min = parseFloat(_extremeValues.min.toFixed(2));
-        _extremeValues.max = parseFloat(_extremeValues.max.toFixed(2));
+        updateEarthquakeMetricCard(aggregatedData.totalCount);
     }
+    // ---------------------- End Earthquake Chart Logic ----------------------
 
 
-    function censusLink(name){
-      return `https://data.census.gov/cedsci/table?g=0400000US72&tid=ACSST5Y2023.S1901`;
-    }
+    // ---------------------- Original Education Logic ----------------------
+    const GEOJSON_URL = '../data/tl_2022_72_cousub/pr_municipalities.geojson';
+    const EDU_JSON    = '../data/education/municipios_acs_education_2013_2023_wide.json';
+    const YEARS = [2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023];
 
-    function drawCharts(name, st){
-      if (!st) return;
-      const ctxLN = document.getElementById('lineChartNominal').getContext('2d');
-      const ctxBN = document.getElementById('barChartNominal').getContext('2d');
-      const ctxBR = document.getElementById('barChartReal').getContext('2d');
-
-      // Nominal Line Chart
-      if (lineChartNominal) lineChartNominal.destroy();
-      lineChartNominal = new Chart(ctxLN, {
-        type: 'line',
-        data: { labels: YEARS, datasets:[{ label:'Nominal Income', data: st.nominalVals, tension:.2, pointRadius:3 }] },
-        options: {
-          plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label:(c)=>fmt.format(c.parsed.y) } } },
-          scales:{ 
-            y:{ ticks:{ callback:v=>`${fmt.format(v).replace('$','')}` } }, 
-            x:{ ticks:{ maxRotation: 90, minRotation: 90 } }
-          },
-          maintainAspectRatio:false
-        }
-      });
-
-      const labels = YEARS.slice(1).map((y,i)=> `${YEARS[i]}→${y}`);
-      
-      // Nominal Bar Chart
-      if (barChartNominal) barChartNominal.destroy();
-      barChartNominal = new Chart(ctxBN, {
-        type:'bar',
-        data:{ labels, datasets:[{ label:'% change', data: st.nominalPctYear.map(v=>+v.toFixed(2)) }] },
-        options:{
-          plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label:(c)=>pctFmt(c.parsed.y) } } },
-          scales:{ y:{ ticks:{ callback:v=>pctFmt(v) } } },
-          maintainAspectRatio:false
-        }
-      });
-
-      // Real Bar Chart
-      if (barChartReal) barChartReal.destroy();
-      barChartReal = new Chart(ctxBR, {
-        type:'bar',
-        data:{ labels, datasets:[{ label:'% change (Real)', data: st.realPctYear.map(v=>+v.toFixed(2)) }] },
-        options:{
-          plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label:(c)=>pctFmt(c.parsed.y) } } },
-          scales:{ y:{ ticks:{ callback:v=>pctFmt(v) } } },
-          maintainAspectRatio:false
-        }
-      });
-    }
-
-    function updateDetails(name, st, centroid){
-      dName.textContent = name.replace(/\s*Municipio$/,'');
-      dCent.textContent = centroid ? `${centroid.lat.toFixed(4)}, ${centroid.lng.toFixed(4)}` : '—';
-      
-      // Nominal fields
-      d2023.textContent = Number.isFinite(st?.val2023) ? fmt.format(st.val2023) : '—';
-      dChg.textContent  = st ? `${signed(st.nominalCumAbs)} (${pctFmt(st.nominalCumPct)})` : '—';
-      
-      // Real fields
-      d2023Real.textContent = Number.isFinite(st?.realVal2023) ? fmt.format(st.realVal2023) : '—';
-      dChgReal.textContent  = st ? `${signed(st.realCumAbs)} (${pctFmt(st.realCumPct)})` : '—';
-
-      dCenL.href = censusLink(name);
-      drawCharts(name, st);
-    }
-
-    function colorFor(value, breaks) {
+    const fmtPct = (v) => `${(Number(v)||0).toFixed(1)}%`;
+    const ppFmt = (v) => `${(Number(v)||0).toFixed(2)} pp`;
+    const signedPP = (n) => (n > 0 ? '+' : '') + ppFmt(n);
+    const signedPct = (n) => (n > 0 ? '+' : '') + fmtPct(n);
+    const CHORO_COLORS = ['#7f1d1d', '#b91c1c', '#f97316', '#bbf7d0', '#22c55e', '#15803d']; 
+    const PCT_BREAKS = [20.0, 25.0, 30.0, 35.0, 40.0]; 
+    let ABS_BREAKS = [0.0, 2.0, 4.0, 6.0, 8.0]; 
+    let _extremeValues = { min: Infinity, max: -Infinity };
+    function colorFor(value, breaks, isLatest) {
       if (!Number.isFinite(value)) return '#93c5fd';
       if (value <= breaks[0]) return CHORO_COLORS[0];
       if (value <= breaks[1]) return CHORO_COLORS[1];
@@ -545,161 +476,161 @@
       if (value <= breaks[4]) return CHORO_COLORS[4];
       return CHORO_COLORS[5];
     }
-
-    function renderLegend(mode){
-      if (!legend || !legend._div) return;
-      
-      let breaks;
-      let title;
-      let isPct;
-
-      if (mode === MODE_NOMINAL_PCT) {
-          breaks = NOMINAL_PCT_BREAKS;
-          title = 'Income Change 2010–2023 — % (Nominal)';
-          isPct = true;
-      } else if (mode === MODE_REAL_PCT) {
-          breaks = REAL_PCT_BREAKS;
-          title = 'Income Change 2010–2023 — % (Real, 2023 $)';
-          isPct = true;
-      } else {
-          breaks = NOMINAL_ABS_BREAKS;
-          title = 'Income Change 2010–2023 — $ (Nominal)';
-          isPct = false;
+    function sanitizeName(s){ 
+      return String(s||'').replace(/^\s*[.\-•]\s*/, '').replace(/\s*Municipio$/,'').trim(); 
+    }
+    function valFromRow(row, y){
+      const v = row?.[String(y)];
+      const n = Number(v);
+      return Number.isFinite(n) ? n : NaN;
+    }
+    function statsForMunicipio(name){
+      name = sanitizeName(name);
+      const row = _rows.find(r => sanitizeName(r.Municipio) === name && !r.metadata);
+      if (!row) return null;
+      const vals = YEARS.map(y => valFromRow(row, y));
+      const firstYear = YEARS[0];
+      const lastYear = YEARS.length - 1;
+      const changeAbs = row[`Cum_Change_${firstYear}_${YEARS[lastYear]}`]; 
+      const changePct = row[`Cum_Pct_Change_${firstYear}_${YEARS[lastYear]}`]; 
+      const annualChange = row[`Change_${YEARS[lastYear-1]}_${YEARS[lastYear]}`];
+      if (vals.some(v => !Number.isFinite(v))) return null;
+      const ppChangeYear = [];
+      for (let i = 1; i < YEARS.length; i++) {
+        ppChangeYear.push(vals[i] - vals[i - 1]);
       }
-
-      const labels = [];
-      const row = (color, label) =>
-        `<div style="display:flex;align-items:center;gap:.5rem;margin:.2rem 0;">
-           <span style="display:inline-block;width:14px;height:14px;border-radius:3px;background:${color};
-                        border:1px solid rgba(0,0,0,.15)"></span>
-           <span>${label}</span>
-         </div>`;
-      
-      const formatBreak = (val, isPct) => {
-        if (isPct) {
-            return `${(Math.round(val * 100) / 100)}%`;
-        }
-        return `${val > 0 ? '+' : ''}$${Math.round(val/1000)}k`;
-      };
-      const fmtRange = (a,b,isPct) => `${formatBreak(a, isPct)} to ${formatBreak(b, isPct)}`;
-      
-      labels.push(`<div style="font-weight:600;margin-bottom:.25rem">${title}</div>`);
-      labels.push(row(CHORO_COLORS[0], isPct ? `≤ ${formatBreak(breaks[0], true)}` : `≤ ${formatBreak(breaks[0], false)}`));
-      labels.push(row(CHORO_COLORS[1], fmtRange(breaks[0], breaks[1], isPct)));
-      labels.push(row(CHORO_COLORS[2], fmtRange(breaks[1], breaks[2], isPct)));
-      labels.push(row(CHORO_COLORS[3], fmtRange(breaks[2], breaks[3], isPct)));
-      labels.push(row(CHORO_COLORS[4], fmtRange(breaks[3], breaks[4], isPct)));
-      labels.push(row(CHORO_COLORS[5], isPct ? `> ${formatBreak(breaks[4], true)}` : `> ${formatBreak(breaks[4], false)}`));
-
-      legend._div.innerHTML = labels.join('');
+      const latestVal = vals[vals.length - 1];
+      return { vals, abs: Number(changeAbs), pctTot: Number(changePct), ppChangeYear, latestVal, annualChange: Number(annualChange) };
     }
-
-    function computeAbsBreaks(){
-      // Fixed breaks for Nominal Absolute mode
-      NOMINAL_ABS_BREAKS = [3000, 5000, 7000, 9000, 11000];
-    }
-
-    function wireMetricToggle(){
-      const btnNomPct = document.getElementById('metricNominalPct');
-      const btnNomAbs = document.getElementById('metricNominalAbs');
-      const btnRealPct = document.getElementById('metricRealPct');
-
-      function setActive(mode){
-        currentMode = mode;
-        
-        [btnNomPct, btnNomAbs, btnRealPct].forEach(btn => {
-          const isActive = (btn.id === 'metricNominalPct' && mode === MODE_NOMINAL_PCT) ||
-                           (btn.id === 'metricNominalAbs' && mode === MODE_NOMINAL_ABS) ||
-                           (btn.id === 'metricRealPct' && mode === MODE_REAL_PCT);
-          btn.classList.toggle('bg-blue-600', isActive);
-          btn.classList.toggle('text-white', isActive);
-          btn.classList.toggle('hover:bg-gray-50', !isActive);
+    function calculateExtremeValues() {
+        _extremeValues = { min: Infinity, max: -Infinity };
+        let valueKey;
+        const lastYear = YEARS.length - 1;
+        // The original logic checks currentMode, but since the buttons are removed, 
+        // we can simplify the default view or ensure it only calculates for one state.
+        // Keeping original structure to be safe, though this function is no longer called 
+        // by the toggle buttons.
+        if (currentMode === 'pct') valueKey = `Cum_Change_${YEARS[0]}_${YEARS[lastYear]}`;
+        else if (currentMode === 'latest') valueKey = `${YEARS[lastYear]}`;
+        else return;
+        const municipioRows = _rows.filter(r => r.Municipio !== 'Puerto Rico' && !r.metadata);
+        municipioRows.forEach(row => {
+            const value = (currentMode === 'latest') ? Number(row[valueKey]) : Number(row[valueKey]);
+            if (Number.isFinite(value)) {
+                _extremeValues.min = Math.min(_extremeValues.min, value);
+                _extremeValues.max = Math.max(_extremeValues.max, value);
+            }
         });
-        
-        // Calculate extremes after setting the mode
-        calculateExtremeValues();
+        _extremeValues.min = parseFloat(_extremeValues.min.toFixed(2));
+        _extremeValues.max = parseFloat(_extremeValues.max.toFixed(2));
+    }
+    function censusLink(name){
+      return `https://data.census.gov/table?q=S1501:+EDUCATIONAL+ATTAINMENT+Puerto+Rico`;
+    }
+    const dName = document.getElementById('d-name');
+    const dCent = document.getElementById('d-centroid');
+    let _rows = [];
+    
+    function updateDetails(name, st, centroid){
+      dName.textContent = name.replace(/\s*Municipio$/,''); dCent.textContent = centroid ? `${centroid.lat.toFixed(4)}, ${centroid.lng.toFixed(4)}` : '—';
+      drawCharts(name, st); 
+    }
 
-        layer.eachLayer(l => l.setStyle(styleForFeature(l.feature)));
-        if (selectedLayer) selectedLayer.setStyle(selectedOutline);
-        renderLegend(currentMode);
-      }
-
-      btnNomPct.addEventListener('click', () => setActive(MODE_NOMINAL_PCT));
-      btnNomAbs.addEventListener('click', () => setActive(MODE_NOMINAL_ABS));
-      btnRealPct.addEventListener('click', () => setActive(MODE_REAL_PCT));
+    // REMOVED LOGIC: Removed checks for extreme values (yellow border)
+    function styleForFeature(feature){
+      const p = feature.properties || {};
+      const name = p.NAME || p.NAMELSAD || p.name || 'Unknown';
+      const statsName = sanitizeName(name);
+      const st = statsForMunicipio(statsName);
       
-      setActive(currentMode); // Initialize the state
+      const value = !st ? NaN : (currentMode === 'pct' ? st.abs : st.latestVal);
+      const breaks = (currentMode === 'pct') ? ABS_BREAKS : PCT_BREAKS;
+      
+      const col = colorFor(value, breaks, currentMode === 'latest');
+      
+      let style = { fillColor: col, weight: 1.2, color:'#111827', fillOpacity:.75 };
+      
+      // REMOVED: Custom logic to highlight the single min and max values (yellow border)
+      /* if (Number.isFinite(value) && _extremeValues.min !== Infinity) {
+          const valRounded = parseFloat(value.toFixed(2));
+          const isExtreme = valRounded === _extremeValues.min || valRounded === _extremeValues.max;
+          
+          if (isExtreme && _extremeValues.min !== _extremeValues.max) { 
+              style.weight = 5;            
+              style.color = '#facc15';     
+              style.dashArray = '';        
+              style.fillOpacity = 0.95;    
+          }
+      }
+      */
+
+      return style;
     }
 
-    // *** FIX IMPLEMENTED HERE ***
+    // Compute ABS breaks from current data 
+    function computeBreaks(){
+      // Ensuring default mode is 'pct' since the toggle is removed
+      currentMode = 'pct';
+      ABS_BREAKS = [0.0, 2.0, 4.0, 6.0, 8.0];
+    }
+    
+    // REMOVED LOGIC: Removed the metric toggle function body
+    function wireMetricToggle(){
+        /* The buttons are removed from the HTML, so this function is now empty. */
+        currentMode = 'pct'; // Ensure default state is set
+    }
+    
     function wireClearSelection(){
-      function clearSelection(){
-        // Use global variables
-        lockedName = null;
-        if (selectedLayer) { 
-            // Reset style and clear selected layer pointer
-            layer.resetStyle(selectedLayer); 
-            selectedLayer = null; 
+        function clearSelection(){
+            lockedName = null;
+            if (selectedLayer) { layer.resetStyle(selectedLayer); selectedLayer = null; }
+            if (prBoundsGlobal) map.fitBounds(prBoundsGlobal, { padding:[15,15] });
+            updateDetails('Puerto Rico', statsForMunicipio('Puerto Rico'), null);
         }
-        // Fit map back to Puerto Rico bounds
-        if (prBoundsGlobal) map.fitBounds(prBoundsGlobal, { padding:[15,15] });
-        // Update details panel to show Puerto Rico summary
-        updateDetails('Puerto Rico', statsForMunicipio('Puerto Rico'), null);
-      }
-      document.getElementById('clearSel').addEventListener('click', clearSelection);
-      document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape') clearSelection(); });
+        document.getElementById('clearSel').addEventListener('click', clearSelection);
+        document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape') clearSelection(); });
     }
-    // **************************
-
+    
+    // Dropdown fix implementations (kept at 500ms)
     function wireDropdown() {
-      const root = document.getElementById('metrics-dropdown-root');
-      if (!root) return;
-      let hoverTimeout;
-      const menu = document.getElementById('metrics-menu');
-      function addHovering(){ clearTimeout(hoverTimeout); root.classList.add('hovering'); }
-      function removeHovering(){ hoverTimeout = setTimeout(()=>root.classList.remove('hovering'), 300); }
-      root.addEventListener('mouseenter', addHovering);
-      root.addEventListener('mouseleave', removeHovering);
-      if (menu) {
-        menu.addEventListener('mouseenter', addHovering);
-        menu.addEventListener('mouseleave', removeHovering);
-      }
+        const root = document.getElementById('metrics-dropdown-root'); if (!root) return; let hoverTimeout; const menu = document.getElementById('metrics-menu');
+        function addHovering(){ clearTimeout(hoverTimeout); root.classList.add('hovering'); } 
+        function removeHovering(){ hoverTimeout = setTimeout(()=>root.classList.remove('hovering'), 500); }
+        root.addEventListener('mouseenter', addHovering); root.addEventListener('mouseleave', removeHovering); if (menu) { menu.addEventListener('mouseenter', addHovering); menu.addEventListener('mouseleave', removeHovering); }
     }
-
+    
     function wireMapDropdown() {
-        // Wires the new map selection dropdown (top left of map)
-        const root = document.getElementById('map-selection-dropdown-root');
-        if (!root) return;
-        let hoverTimeout;
-        const menu = document.getElementById('map-selection-menu');
-
-        function addHovering(){ 
-            clearTimeout(hoverTimeout); 
-            root.classList.add('hovering'); 
-        }
-        function removeHovering(){ 
-            hoverTimeout = setTimeout(()=>{
-                root.classList.remove('hovering');
-            }, 300); 
-        }
-
-        root.addEventListener('mouseenter', addHovering);
-        root.addEventListener('mouseleave', removeHovering);
-        if (menu) {
-            menu.addEventListener('mouseenter', addHovering);
-            menu.addEventListener('mouseleave', removeHovering);
-        }
+        const root = document.getElementById('map-selection-dropdown-root'); if (!root) return; let hoverTimeout; const menu = document.getElementById('map-selection-menu');
+        function addHovering(){ clearTimeout(hoverTimeout); root.classList.add('hovering'); } 
+        function removeHovering(){ hoverTimeout = setTimeout(()=>{ root.classList.remove('hovering'); }, 500); }
+        root.addEventListener('mouseenter', addHovering); root.addEventListener('mouseleave', removeHovering); if (menu) { menu.addEventListener('mouseenter', addHovering); menu.addEventListener('mouseleave', removeHovering); }
     }
+    
+    let prBoundsGlobal = null;
+    let map, layer, fc; 
+    let currentMode = 'pct'; 
+    let lockedName = null;
+    let selectedLayer = null;
+    const selectedOutline = { weight: 4, color: '#111827', dashArray: '3', fillOpacity: 0.85 };
 
     (async function init(){
-      const res = await fetch(INCOME_JSON, { cache:'no-store' });
-      _rows = await res.json();
+      
+      // Load primary data (Education and GeoJSON)
+      const res = await fetch(EDU_JSON, { cache:'no-store' });
+      const rawData = await res.json();
+      _rows = rawData.filter(row => !row.metadata);
+      
+      const gjRes = await fetch(GEOJSON_URL + '?' + Date.now());
+      const geojsonData = await gjRes.json(); // Load GeoJSON once
+
+      calculateExtremeValues();
 
       const prBounds = L.latLngBounds([[17.85, -67.45],[18.55, -65.25]]);
-      prBoundsGlobal = prBounds; // Set global bounds
-      map = L.map('map', { zoomControl: false, zoomSnap:.25 }).fitBounds(prBounds); // Fixes blank map by ensuring init runs
+      prBoundsGlobal = prBounds;
+      
+      // --- Primary Map (Earthquake/Choropleth) Init ---
+      map = L.map('map', { zoomControl: false, zoomSnap: .25 }).fitBounds(prBounds);
 
-      // Add zoom controls back as a separate control
       L.control.zoom({ position: 'topleft' }).addTo(map);
 
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -719,51 +650,51 @@
       });
       new L.Control.MapDropdown({ position: 'topleft' }).addTo(map);
 
-      const gjRes = await fetch(GEOJSON_URL + (GEOJSON_URL.includes('?')?'&':'?') + 'cb=' + Date.now());
-      fc = await gjRes.json();
+      fc = geojsonData; // Use the loaded GeoJSON data
 
       const hiStyle = { weight:3, color:'#111827', fillOpacity:0.9 };
-
-      // Calculate initial extremes
-      calculateExtremeValues();
 
       layer = L.geoJSON(fc, {
         style: (feature) => styleForFeature(feature),
         onEachFeature: (f, lyr) => {
           const p = f.properties || {};
-          const rawName = p.NAME || p.NAMELSAD || p.name || 'Unknown';
-          const geoid = p.GEOID || p.geoid || '';
+          const name = p.NAME || p.NAMELSAD || p.name || 'Unknown';
+          const statsName = sanitizeName(name);
+          const st = statsForMunicipio(statsName);
           
-          const statsName = rawName.replace(/\s*Municipio$/,'');
-          const stTip = statsForMunicipio(statsName);
+          let changeLine = '';
+          if (st) {
+            const latest = fmtPct(st.latestVal);
+            const change = signedPP(st.abs);
+            changeLine = `<br><small>Attainment (2023): ${latest}<br>Change since ${YEARS[0]}: ${change}</small>`;
+          }
           
-          const changeLine = stTip
-            ? `<br><small>2010→2023: ${signed(stTip.nominalCumAbs)} (${stTip.nominalCumPct.toFixed(2)}%)</small>`
-            : '';
-          
-          lyr.bindTooltip(rawName, { direction:'center', className:'leaflet-tooltip' });
-          lyr.bindPopup(`<strong>${rawName}</strong>${geoid?`<br><small>GEOID: ${geoid}</small>`:''}${changeLine}`);
+          lyr.bindTooltip(name, { direction:'center', className:'leaflet-tooltip' });
+          lyr.bindPopup(`<strong>${name}</strong>${changeLine}`);
 
           lyr.on({
             mouseover: e => {
-              if (lockedName) return;
+              if (lockedName) return; 
               e.target.setStyle(hiStyle);
               e.target.bringToFront?.();
               const c = e.target.getBounds().getCenter();
               updateDetails(statsName, statsForMunicipio(statsName), c);
             },
             mouseout: e => {
-              if (lockedName) return;
+              if (lockedName) return; 
               layer.resetStyle(e.target);
             },
             click: e => {
               const l = e.target;
-              const clickedName = rawName.replace(/\s*Municipio$/,'');
+              const clickedName = sanitizeName(name);
+
               if (selectedLayer) layer.resetStyle(selectedLayer);
               selectedLayer = l;
               lockedName = clickedName;
               l.setStyle(selectedOutline);
+
               map.fitBounds(l.getBounds(), { padding:[20,20] });
+
               const c = l.getBounds().getCenter();
               updateDetails(lockedName, statsForMunicipio(lockedName), c);
             }
@@ -774,47 +705,47 @@
       const b = layer.getBounds();
       if (b.isValid()) map.fitBounds(b, { padding:[15,15] });
 
-      computeAbsBreaks();
+      computeBreaks();
 
-      legend = L.control({ position:'bottomright' });
-      legend.onAdd = function(){
-        const div = L.DomUtil.create('div', 'info legend');
-        div.style.background = 'white';
-        div.style.padding = '8px 10px';
-        div.style.borderRadius = '8px';
-        div.style.boxShadow = '0 2px 8px rgba(0,0,0,.15)';
-        div.style.font = '12px/1.3 system-ui,-apple-system,Segoe UI,Roboto,sans-serif';
-        legend._div = div;
-        renderLegend(currentMode);
-        return div;
-      };
-      legend.addTo(map);
-
-      function moveLegend() {
-        const el = legend._div;
-        if (!el) return;
-        el.style.marginBottom = Math.round(map.getSize().y * 0.25) + 'px';
-        el.style.marginRight  = '8px';
+      // --- FULL EARTHQUAKE DATA LOADING AND CHARTING ---
+      let fullEarthquakeData = [];
+      let aggregatedData = { timeSeries: {}, magnitudeBins: {}, totalCount: 0 };
+      try {
+          const eqRes = await fetch(EQ_JSON);
+          fullEarthquakeData = await eqRes.json();
+          aggregatedData = aggregateEarthquakeData(fullEarthquakeData);
+      } catch (e) {
+          console.error("Error loading or processing earthquake data:", EQ_JSON, e);
       }
-      map.on('resize', moveLegend);
-      moveLegend();
+
+      // 1. Draw Earthquake Charts
+      drawEarthquakeCharts(aggregatedData);
+      
+      // 2. Plot Earthquakes on Map
+      plotEarthquakes(fullEarthquakeData, map);
+      
+      // 3. Render Earthquake Legend
+      renderEarthquakeLegend(map);
+
 
       const initName = 'Puerto Rico';
       updateDetails(initName, statsForMunicipio(initName), null);
 
       wireMetricToggle();
       wireClearSelection();
-      wireDropdown(); // Main nav dropdown
-      wireMapDropdown(); // NEW map dropdown
+      wireDropdown(); 
+      wireMapDropdown(); 
     })();
 
     document.addEventListener('DOMContentLoaded', () => {
-      const currentPathname = window.location.pathname.split('/').pop();
-      const subPageLink = document.querySelector(`#metrics-menu a[href="${currentPathname}"]`);
-      if (subPageLink) subPageLink.classList.add('bg-gray-100','font-semibold');
-
-      // Initialize the map dropdown handler
-      wireMapDropdown();
+        const metricsLink = document.querySelector('#metrics-dropdown-root > a'); const isMetricsSubPage = window.location.pathname.includes('/metrics/');
+        if (isMetricsSubPage) { metricsLink.classList.add('border-b-2', 'border-blue-600', 'text-blue-600', 'font-semibold'); metricsLink.setAttribute('aria-current', 'page');
+            const currentPathname = window.location.pathname.split('/').pop(); const subPageLink = document.querySelector(`#metrics-menu a[href="${currentPathname}"]`);
+            if (subPageLink) { subPageLink.classList.add('bg-gray-100', 'font-semibold'); }
+        } else {
+            document.querySelectorAll('.nav-link[href]').forEach(a => { if (a.href.endsWith(window.location.pathname)) { a.classList.add('border-b-2', 'border-blue-600', 'text-blue-600', 'font-semibold'); a.setAttribute('aria-current', 'page'); } });
+        }
+        wireMapDropdown(); 
     });
   </script>
 </body>
