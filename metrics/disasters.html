@@ -235,9 +235,23 @@
   </div>
 
   <script>
-    // ---------------------- Earthquake Data Path ----------------------
+    // ---------------------- Data Paths ----------------------
     const EQ_JSON = '../data/natural_disasters/puerto_rico_earthquakes.json'; 
     let earthquakeLayerGroup = null; 
+    
+    const GEOJSON_URL = '../data/tl_2022_72_cousub/pr_municipalities.geojson';
+    const EDU_JSON    = '../data/education/municipios_acs_education_2013_2023_wide.json';
+    const YEARS = [2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023];
+    
+    // --- Global Variables (Moved outside init) ---
+    let prBoundsGlobal = null;
+    let map, layer, fc; 
+    let currentMode = 'pct'; // Retained a default mode
+    let lockedName = null;
+    let selectedLayer = null;
+    const selectedOutline = { weight: 4, color: '#111827', dashArray: '3', fillOpacity: 0.85 };
+    // ---------------------------------------------
+
 
     // ---------------------- Earthquake Color & Size Scaling ----------------------
     const MAGNITUDE_BREAKS = [3.5, 4.5, 5.5, 6.5, 7.5];
@@ -457,16 +471,12 @@
     // ---------------------- Original Education Logic ----------------------
     const GEOJSON_URL = '../data/tl_2022_72_cousub/pr_municipalities.geojson';
     const EDU_JSON    = '../data/education/municipios_acs_education_2013_2023_wide.json';
-    const YEARS = [2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023];
-
-    const fmtPct = (v) => `${(Number(v)||0).toFixed(1)}%`;
-    const ppFmt = (v) => `${(Number(v)||0).toFixed(2)} pp`;
-    const signedPP = (n) => (n > 0 ? '+' : '') + ppFmt(n);
-    const signedPct = (n) => (n > 0 ? '+' : '') + fmtPct(n);
     const CHORO_COLORS = ['#7f1d1d', '#b91c1c', '#f97316', '#bbf7d0', '#22c55e', '#15803d']; 
     const PCT_BREAKS = [20.0, 25.0, 30.0, 35.0, 40.0]; 
     let ABS_BREAKS = [0.0, 2.0, 4.0, 6.0, 8.0]; 
     let _extremeValues = { min: Infinity, max: -Infinity };
+
+    // --- Core Data Helpers (Required for Map Styling and Detail Panel) ---
     function colorFor(value, breaks, isLatest) {
       if (!Number.isFinite(value)) return '#93c5fd';
       if (value <= breaks[0]) return CHORO_COLORS[0];
@@ -476,9 +486,7 @@
       if (value <= breaks[4]) return CHORO_COLORS[4];
       return CHORO_COLORS[5];
     }
-    function sanitizeName(s){ 
-      return String(s||'').replace(/^\s*[.\-•]\s*/, '').replace(/\s*Municipio$/,'').trim(); 
-    }
+    function sanitizeName(s){ return String(s||'').replace(/^\s*[.\-•]\s*/, '').replace(/\s*Municipio$/,'').trim(); }
     function valFromRow(row, y){
       const v = row?.[String(y)];
       const n = Number(v);
@@ -506,10 +514,8 @@
         _extremeValues = { min: Infinity, max: -Infinity };
         let valueKey;
         const lastYear = YEARS.length - 1;
-        // The original logic checks currentMode, but since the buttons are removed, 
-        // we can simplify the default view or ensure it only calculates for one state.
-        // Keeping original structure to be safe, though this function is no longer called 
-        // by the toggle buttons.
+        // Since buttons are removed, default to 'pct' which is used below
+        currentMode = 'pct';
         if (currentMode === 'pct') valueKey = `Cum_Change_${YEARS[0]}_${YEARS[lastYear]}`;
         else if (currentMode === 'latest') valueKey = `${YEARS[lastYear]}`;
         else return;
@@ -524,9 +530,6 @@
         _extremeValues.min = parseFloat(_extremeValues.min.toFixed(2));
         _extremeValues.max = parseFloat(_extremeValues.max.toFixed(2));
     }
-    function censusLink(name){
-      return `https://data.census.gov/table?q=S1501:+EDUCATIONAL+ATTAINMENT+Puerto+Rico`;
-    }
     const dName = document.getElementById('d-name');
     const dCent = document.getElementById('d-centroid');
     let _rows = [];
@@ -536,7 +539,7 @@
       drawCharts(name, st); 
     }
 
-    // REMOVED LOGIC: Removed checks for extreme values (yellow border)
+    // UPDATED LOGIC: Removed checks for extreme values (yellow border)
     function styleForFeature(feature){
       const p = feature.properties || {};
       const name = p.NAME || p.NAMELSAD || p.name || 'Unknown';
@@ -548,40 +551,24 @@
       
       const col = colorFor(value, breaks, currentMode === 'latest');
       
-      let style = { fillColor: col, weight: 1.2, color:'#111827', fillOpacity:.75 };
-      
-      // REMOVED: Custom logic to highlight the single min and max values (yellow border)
-      /* if (Number.isFinite(value) && _extremeValues.min !== Infinity) {
-          const valRounded = parseFloat(value.toFixed(2));
-          const isExtreme = valRounded === _extremeValues.min || valRounded === _extremeValues.max;
-          
-          if (isExtreme && _extremeValues.min !== _extremeValues.max) { 
-              style.weight = 5;            
-              style.color = '#facc15';     
-              style.dashArray = '';        
-              style.fillOpacity = 0.95;    
-          }
-      }
-      */
-
-      return style;
+      // Returns standard style without yellow border highlight logic
+      return { fillColor: col, weight: 1.2, color:'#111827', fillOpacity:.75 };
     }
 
-    // Compute ABS breaks from current data 
     function computeBreaks(){
-      // Ensuring default mode is 'pct' since the toggle is removed
-      currentMode = 'pct';
+      currentMode = 'pct'; // Enforce default state
       ABS_BREAKS = [0.0, 2.0, 4.0, 6.0, 8.0];
     }
     
-    // REMOVED LOGIC: Removed the metric toggle function body
+    // UPDATED LOGIC: Removed metric toggle function body
     function wireMetricToggle(){
-        /* The buttons are removed from the HTML, so this function is now empty. */
-        currentMode = 'pct'; // Ensure default state is set
+        currentMode = 'pct';
     }
     
+    // UPDATED LOGIC: wireClearSelection now correctly accesses global scope
     function wireClearSelection(){
         function clearSelection(){
+            // These variables are now globally accessible
             lockedName = null;
             if (selectedLayer) { layer.resetStyle(selectedLayer); selectedLayer = null; }
             if (prBoundsGlobal) map.fitBounds(prBoundsGlobal, { padding:[15,15] });
@@ -606,13 +593,7 @@
         root.addEventListener('mouseenter', addHovering); root.addEventListener('mouseleave', removeHovering); if (menu) { menu.addEventListener('mouseenter', addHovering); menu.addEventListener('mouseleave', removeHovering); }
     }
     
-    let prBoundsGlobal = null;
-    let map, layer, fc; 
-    let currentMode = 'pct'; 
-    let lockedName = null;
-    let selectedLayer = null;
-    const selectedOutline = { weight: 4, color: '#111827', dashArray: '3', fillOpacity: 0.85 };
-
+    // --- Main Initialization ---
     (async function init(){
       
       // Load primary data (Education and GeoJSON)
@@ -626,7 +607,7 @@
       calculateExtremeValues();
 
       const prBounds = L.latLngBounds([[17.85, -67.45],[18.55, -65.25]]);
-      prBoundsGlobal = prBounds;
+      prBoundsGlobal = prBounds; // Set global bounds
       
       // --- Primary Map (Earthquake/Choropleth) Init ---
       map = L.map('map', { zoomControl: false, zoomSnap: .25 }).fitBounds(prBounds);
