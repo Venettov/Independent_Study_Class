@@ -281,12 +281,9 @@
             const place = event.place || 'Unknown Location';
             const depth = event.depth_km;
 
-            const radius = getRadiusForMagnitude(mag); 
-            const color = getColorForMagnitude(mag);
-
             const circle = L.circleMarker([lat, lng], {
-                radius: radius,
-                fillColor: color, 
+                radius: getRadiusForMagnitude(mag), 
+                fillColor: getColorForMagnitude(mag), 
                 color: '#333', 
                 weight: 0.5,
                 opacity: 0.8,
@@ -461,18 +458,17 @@
     const ppFmt = (v) => `${(Number(v)||0).toFixed(2)} pp`;
     const signedPP = (n) => (n > 0 ? '+' : '') + ppFmt(n);
     const signedPct = (n) => (n > 0 ? '+' : '') + fmtPct(n);
+    // Use the color index 4: #22c55e (Green)
     const CHORO_COLORS = ['#7f1d1d', '#b91c1c', '#f97316', '#bbf7d0', '#22c55e', '#15803d']; 
+    const FIXED_GREEN_COLOR = CHORO_COLORS[4]; // <-- Target Green Color: #22c55e
+
     const PCT_BREAKS = [20.0, 25.0, 30.0, 35.0, 40.0]; 
     let ABS_BREAKS = [0.0, 2.0, 4.0, 6.0, 8.0]; 
     let _extremeValues = { min: Infinity, max: -Infinity };
     function colorFor(value, breaks, isLatest) {
-      if (!Number.isFinite(value)) return '#93c5fd';
-      if (value <= breaks[0]) return CHORO_COLORS[0];
-      if (value <= breaks[1]) return CHORO_COLORS[1];
-      if (value <= breaks[2]) return CHORO_COLORS[2];
-      if (value <= breaks[3]) return CHORO_COLORS[3];
-      if (value <= breaks[4]) return CHORO_COLORS[4];
-      return CHORO_COLORS[5];
+      if (!Number.isFinite(value)) return FIXED_GREEN_COLOR; // Default/Error color is fixed green
+      // No longer using the color breaks logic, forcing green.
+      return FIXED_GREEN_COLOR;
     }
     function sanitizeName(s){ 
       return String(s||'').replace(/^\s*[.\-•]\s*/, '').replace(/\s*Municipio$/,'').trim(); 
@@ -530,25 +526,13 @@
     function updateDetails(name, st, centroid){
       dName.textContent = name.replace(/\s*Municipio$/,''); 
       dCent.textContent = centroid ? `${centroid.lat.toFixed(4)}, ${centroid.lng.toFixed(4)}` : '—';
-      // No more detailed chart updates needed since interaction is removed
-      // Keeping a call to drawCharts for initial rendering compatibility
       drawCharts(name, st); 
     }
 
-    // UPDATED: Simplifies styling to remove all interaction and highlighting logic
+    // UPDATED: Simplifies styling to force FIXED GREEN color and remove all interaction/highlighting logic
     function styleForFeature(feature){
-      const p = feature.properties || {};
-      const name = p.NAME || p.NAMELSAD || p.name || 'Unknown';
-      const statsName = sanitizeName(name);
-      const st = statsForMunicipio(statsName);
-      
-      const value = !st ? NaN : (currentMode === 'pct' ? st.abs : st.latestVal);
-      const breaks = (currentMode === 'pct') ? ABS_BREAKS : PCT_BREAKS;
-      
-      const col = colorFor(value, breaks, currentMode === 'latest');
-      
-      // Returns standard style (no hover, no selection outline, no extreme highlight)
-      return { fillColor: col, weight: 1.2, color:'#111827', fillOpacity:.75 };
+      // Returns static green style, removing all choropleth and highlighting logic
+      return { fillColor: FIXED_GREEN_COLOR, weight: 1.2, color:'#111827', fillOpacity:.75 };
     }
 
     // Compute ABS breaks from current data 
@@ -557,11 +541,9 @@
       ABS_BREAKS = [0.0, 2.0, 4.0, 6.0, 8.0];
     }
     
-    // REMOVED LOGIC: Clears out all map interaction wiring
+    // REMOVED LOGIC: Clears out all map interaction wiring bodies
     function wireMetricToggle(){ currentMode = 'pct'; }
-    function wireClearSelection(){ 
-        // Removing listener, since the button is now removed from HTML
-    }
+    function wireClearSelection(){ }
     
     // Dropdown fix implementations (kept at 500ms)
     function wireDropdown() {
@@ -624,8 +606,6 @@
 
       fc = geojsonData; // Use the loaded GeoJSON data
 
-      // REMOVED: hiStyle definition is no longer needed
-      
       // UPDATED: Removed all onEachFeature click/hover event binding
       layer = L.geoJSON(fc, {
         style: (feature) => styleForFeature(feature),
@@ -638,15 +618,14 @@
           if (st) {
             const latest = fmtPct(st.latestVal);
             const change = signedPP(st.abs);
-            changeLine = `<br><small>Attainment (2023): ${latest}<br>Change since ${YEARS[0]}: ${change}</small>`;
+            changeLine = `Attainment (2023): ${latest} | Change: ${change}`;
           }
           
-          // Tooltip and Popup remain for general info display
-          lyr.bindTooltip(name, { direction:'center', className:'leaflet-tooltip' });
-          lyr.bindPopup(`<strong>${name}</strong>${changeLine}`);
+          // UPDATED: Bind popup with ONLY the name
+          lyr.bindPopup(`<strong>${name}</strong>`);
           
-          // REMOVED: lyr.on({ mouseover, mouseout, click }) events
-
+          // Tooltip remains for general info display
+          lyr.bindTooltip(name, { direction:'center', className:'leaflet-tooltip' });
         }
       }).addTo(map);
 
@@ -677,11 +656,10 @@
 
 
       const initName = 'Puerto Rico';
-      // UPDATED: Initial detail update still runs
       updateDetails(initName, statsForMunicipio(initName), null);
 
       wireMetricToggle();
-      wireClearSelection(); // Still called, but function body is empty/non-functional
+      wireClearSelection(); 
       wireDropdown(); 
       wireMapDropdown(); 
     })();
