@@ -154,7 +154,7 @@
                       <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.24 4.5a.75.75 0 01-1.08 0l-4.24-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/>
                     </svg>
                   </div>
-                  <div id="map-selection-menu" class="dropdown-menu w-64 rounded-xl border border-gray-200 bg-white shadow-lg ring-1 ring-black/5">
+                  <div id="map-selection-menu" class="dropdown-menu w-64 rounded-xl border border-gray-200 bg-white shadow-lg ring-1 ring-black/5 z-50">
                     <div class="py-2">
                       <a href="population.html"     class="block px-4 py-2 hover:bg-gray-50">Population</a>
                       <a href="employment.html"     class="block px-4 py-2 hover:bg-gray-50">Employment Rate</a>
@@ -479,7 +479,7 @@
     // ---------------------- Municipio Boundary Map Initialization (FINAL FIX) ----------------------
     function initMunicipioMap(geojsonData, bounds) {
         
-        // This is the core fix: Delaying map initialization using a 50ms setTimeout
+        // This is the core fix: Delaying map initialization using a 300ms setTimeout
         // to allow the parent CSS transforms to finish calculating.
         setTimeout(() => {
             try {
@@ -498,7 +498,7 @@
                     maxZoom: 19
                 }).addTo(municipioMapInstance);
                 
-                // 3. Function to style the GeoJSON for simple boundaries (Same as primary map's base layer)
+                // 3. Function to style the GeoJSON for simple boundaries (White/Light gray fill)
                 function boundaryStyle(feature) {
                     return {
                         fillColor: '#f7f7f7', // Light gray/off-white fill
@@ -520,7 +520,7 @@
             } catch (e) {
                 console.error("Error initializing Municipio Map:", e);
             }
-        }, 50); // 50ms delay for robustness
+        }, 300); // Increased delay to 300ms for robust rendering
     }
     // ---------------------- End Municipio Boundary Map Initialization ----------------------
 
