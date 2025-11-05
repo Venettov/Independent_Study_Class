@@ -118,8 +118,7 @@
             <div class="mt-5">
               <span class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-100 text-slate-800">
                 <span class="inline-flex w-5 h-5 items-center justify-center rounded-full bg-slate-800 text-white text-xs">i</span>
-                Hover over the map to see county / municipality details
-              </span>
+                </span>
             </div>
           </div>
         </div>
@@ -131,8 +130,7 @@
           <div class="flex items-center gap-2">
             <div class="inline-flex rounded-lg border bg-white shadow-sm overflow-hidden">
               </div>
-            <button id="clearSel" class="px-3 py-1.5 text-sm rounded-lg border bg-white hover:bg-gray-50">Clear selection</button>
-          </div>
+            </div>
         </div>
         <div id="map" class="mt-3">
           <div class="leaflet-control-container" id="map-dropdown-container">
@@ -235,7 +233,7 @@
   </div>
 
   <script>
-    // ---------------------- Earthquake Data Path ----------------------
+    // ---------------------- Data Paths ----------------------
     const EQ_JSON = '../data/natural_disasters/puerto_rico_earthquakes.json'; 
     let earthquakeLayerGroup = null; 
 
@@ -506,10 +504,7 @@
         _extremeValues = { min: Infinity, max: -Infinity };
         let valueKey;
         const lastYear = YEARS.length - 1;
-        // The original logic checks currentMode, but since the buttons are removed, 
-        // we can simplify the default view or ensure it only calculates for one state.
-        // Keeping original structure to be safe, though this function is no longer called 
-        // by the toggle buttons.
+        currentMode = 'pct';
         if (currentMode === 'pct') valueKey = `Cum_Change_${YEARS[0]}_${YEARS[lastYear]}`;
         else if (currentMode === 'latest') valueKey = `${YEARS[lastYear]}`;
         else return;
@@ -531,12 +526,16 @@
     const dCent = document.getElementById('d-centroid');
     let _rows = [];
     
+    // UPDATED: Detail updates only for initialization/reset
     function updateDetails(name, st, centroid){
-      dName.textContent = name.replace(/\s*Municipio$/,''); dCent.textContent = centroid ? `${centroid.lat.toFixed(4)}, ${centroid.lng.toFixed(4)}` : '—';
+      dName.textContent = name.replace(/\s*Municipio$/,''); 
+      dCent.textContent = centroid ? `${centroid.lat.toFixed(4)}, ${centroid.lng.toFixed(4)}` : '—';
+      // No more detailed chart updates needed since interaction is removed
+      // Keeping a call to drawCharts for initial rendering compatibility
       drawCharts(name, st); 
     }
 
-    // REMOVED LOGIC: Removed checks for extreme values (yellow border)
+    // UPDATED: Simplifies styling to remove all interaction and highlighting logic
     function styleForFeature(feature){
       const p = feature.properties || {};
       const name = p.NAME || p.NAMELSAD || p.name || 'Unknown';
@@ -548,47 +547,20 @@
       
       const col = colorFor(value, breaks, currentMode === 'latest');
       
-      let style = { fillColor: col, weight: 1.2, color:'#111827', fillOpacity:.75 };
-      
-      // REMOVED: Custom logic to highlight the single min and max values (yellow border)
-      /* if (Number.isFinite(value) && _extremeValues.min !== Infinity) {
-          const valRounded = parseFloat(value.toFixed(2));
-          const isExtreme = valRounded === _extremeValues.min || valRounded === _extremeValues.max;
-          
-          if (isExtreme && _extremeValues.min !== _extremeValues.max) { 
-              style.weight = 5;            
-              style.color = '#facc15';     
-              style.dashArray = '';        
-              style.fillOpacity = 0.95;    
-          }
-      }
-      */
-
-      return style;
+      // Returns standard style (no hover, no selection outline, no extreme highlight)
+      return { fillColor: col, weight: 1.2, color:'#111827', fillOpacity:.75 };
     }
 
     // Compute ABS breaks from current data 
     function computeBreaks(){
-      // Ensuring default mode is 'pct' since the toggle is removed
       currentMode = 'pct';
       ABS_BREAKS = [0.0, 2.0, 4.0, 6.0, 8.0];
     }
     
-    // REMOVED LOGIC: Removed the metric toggle function body
-    function wireMetricToggle(){
-        /* The buttons are removed from the HTML, so this function is now empty. */
-        currentMode = 'pct'; // Ensure default state is set
-    }
-    
-    function wireClearSelection(){
-        function clearSelection(){
-            lockedName = null;
-            if (selectedLayer) { layer.resetStyle(selectedLayer); selectedLayer = null; }
-            if (prBoundsGlobal) map.fitBounds(prBoundsGlobal, { padding:[15,15] });
-            updateDetails('Puerto Rico', statsForMunicipio('Puerto Rico'), null);
-        }
-        document.getElementById('clearSel').addEventListener('click', clearSelection);
-        document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape') clearSelection(); });
+    // REMOVED LOGIC: Clears out all map interaction wiring
+    function wireMetricToggle(){ currentMode = 'pct'; }
+    function wireClearSelection(){ 
+        // Removing listener, since the button is now removed from HTML
     }
     
     // Dropdown fix implementations (kept at 500ms)
@@ -652,15 +624,15 @@
 
       fc = geojsonData; // Use the loaded GeoJSON data
 
-      const hiStyle = { weight:3, color:'#111827', fillOpacity:0.9 };
-
+      // REMOVED: hiStyle definition is no longer needed
+      
+      // UPDATED: Removed all onEachFeature click/hover event binding
       layer = L.geoJSON(fc, {
         style: (feature) => styleForFeature(feature),
         onEachFeature: (f, lyr) => {
           const p = f.properties || {};
           const name = p.NAME || p.NAMELSAD || p.name || 'Unknown';
-          const statsName = sanitizeName(name);
-          const st = statsForMunicipio(statsName);
+          const st = statsForMunicipio(sanitizeName(name));
           
           let changeLine = '';
           if (st) {
@@ -669,36 +641,12 @@
             changeLine = `<br><small>Attainment (2023): ${latest}<br>Change since ${YEARS[0]}: ${change}</small>`;
           }
           
+          // Tooltip and Popup remain for general info display
           lyr.bindTooltip(name, { direction:'center', className:'leaflet-tooltip' });
           lyr.bindPopup(`<strong>${name}</strong>${changeLine}`);
+          
+          // REMOVED: lyr.on({ mouseover, mouseout, click }) events
 
-          lyr.on({
-            mouseover: e => {
-              if (lockedName) return; 
-              e.target.setStyle(hiStyle);
-              e.target.bringToFront?.();
-              const c = e.target.getBounds().getCenter();
-              updateDetails(statsName, statsForMunicipio(statsName), c);
-            },
-            mouseout: e => {
-              if (lockedName) return; 
-              layer.resetStyle(e.target);
-            },
-            click: e => {
-              const l = e.target;
-              const clickedName = sanitizeName(name);
-
-              if (selectedLayer) layer.resetStyle(selectedLayer);
-              selectedLayer = l;
-              lockedName = clickedName;
-              l.setStyle(selectedOutline);
-
-              map.fitBounds(l.getBounds(), { padding:[20,20] });
-
-              const c = l.getBounds().getCenter();
-              updateDetails(lockedName, statsForMunicipio(lockedName), c);
-            }
-          });
         }
       }).addTo(map);
 
@@ -729,10 +677,11 @@
 
 
       const initName = 'Puerto Rico';
+      // UPDATED: Initial detail update still runs
       updateDetails(initName, statsForMunicipio(initName), null);
 
       wireMetricToggle();
-      wireClearSelection();
+      wireClearSelection(); // Still called, but function body is empty/non-functional
       wireDropdown(); 
       wireMapDropdown(); 
     })();
