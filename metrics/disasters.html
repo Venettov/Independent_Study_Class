@@ -27,15 +27,8 @@
         linear-gradient(180deg, #fafafa 0%, #f3f4f6 100%);
     }
     #map { height: 48vh; width: 100%; border-radius: .75rem; }
-    #hurricane-map { height: 48vh; width: 100%; border-radius: .75rem; }
-    @media (min-width: 1280px) { 
-        #map { height: 46vh; } 
-        #hurricane-map { height: 46vh; }
-    }
-    @media (max-width: 640px)  { 
-        #map { height: 54vh; } 
-        #hurricane-map { height: 54vh; }
-    }
+    @media (min-width: 1280px) { #map { height: 46vh; } }
+    @media (max-width: 640px)  { #map { height: 54vh; } }
 
     .leaflet-tooltip {
       background: rgba(255,255,255,.95);
@@ -61,20 +54,6 @@
         font: 12px/1.3 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
         z-index: 1000; 
         width: 150px;
-    }
-    
-    /* CUSTOM: Hurricane Legend positioned top-right */
-    .leaflet-control-hu-legend {
-        position: absolute;
-        top: 10px; 
-        right: 10px;
-        background: white;
-        padding: 8px 10px;
-        border-radius: 8px;
-        box-shadow: 0 2px 8px rgba(0,0,0,.15);
-        font: 12px/1.3 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
-        z-index: 1000; 
-        width: 170px;
     }
     
     /* Global wrappers/dropdowns remain unchanged */
@@ -253,30 +232,15 @@
             </ul>
         </div>
       </section>
-
-      <hr class="border-gray-300"> 
-      
-      <section class="card p-6 space-y-4">
-        <h2 class="text-lg font-semibold">Caribbean Hurricane Tracks (2015-2025) - TEST PLOT: Hurricane Maria</h2>
-        <p>
-            This map displays a single test trajectory (Hurricane Maria, 2017) to confirm the Leaflet map initialization is working correctly despite the page's CSS scaling. If this map is blank, please check the console for Leaflet errors.
-        </p>
-        <div id="hurricane-map" class="mt-3"></div>
-      </section>
       </main>
   </div>
 
   <script>
-    // ---------------------- Data Paths ----------------------
+    // ---------------------- Earthquake Data Path ----------------------
     const EQ_JSON = '../data/natural_disasters/puerto_rico_earthquakes.json'; 
     let earthquakeLayerGroup = null; 
-    
-    // Original path, unused in this test but kept for structure.
-    const HU_JSON = '../data/natural_disasters/caribbean_hurricane_tracks_2015_2025.json'; 
-    let hurricaneMapInstance = null;
-    let hurricaneLayerGroup = null;
 
-    // ---------------------- Earthquake Color & Size Scaling (EXISTING) ----------------------
+    // ---------------------- Earthquake Color & Size Scaling ----------------------
     const MAGNITUDE_BREAKS = [3.5, 4.5, 5.5, 6.5, 7.5];
     const MAGNITUDE_COLORS = ['#ffffe5', '#fee391', '#fec44f', '#fe9929', '#d95f0e', '#993404'];
     const MIN_MAG_THRESHOLD = 3.5; 
@@ -351,20 +315,17 @@
         const title = 'Earthquake Magnitude (M 3.5+)';
         let html = `<div style="font-weight:600;margin-bottom:5px; border-bottom: 1px solid #ccc;">${title}</div>`;
 
-        const legendBreaks = [3.5, 4.5, 5.5, 6.5];
-        const legendColors = ['#ffffe5', '#fec44f', '#fe9929', '#d95f0e', '#993404'];
-
-        legendBreaks.forEach((mag, i) => {
-            const color = legendColors[i];
+        MAGNITUDE_BREAKS.forEach((mag, i) => {
+            const color = MAGNITUDE_COLORS[i];
             const size = getRadiusForMagnitude(mag);
             
             let label;
             if (i === 0) {
-                label = `M < ${legendBreaks[i+1].toFixed(1)}`;
-            } else if (i < legendBreaks.length - 1) {
-                label = `M ${legendBreaks[i].toFixed(1)} - ${legendBreaks[i+1].toFixed(1)}`;
+                label = `M $\\le$ ${mag.toFixed(1)} (Small)`;
+            } else if (i < MAGNITUDE_BREAKS.length - 1) {
+                label = `M ${MAGNITUDE_BREAKS[i-1].toFixed(1)} - ${mag.toFixed(1)}`;
             } else {
-                 label = `M $\\ge$ ${legendBreaks[i].toFixed(1)}`;
+                 label = `M $\\ge$ ${MAGNITUDE_BREAKS[i-1].toFixed(1)} (Large)`;
             }
 
             html += `
@@ -387,53 +348,10 @@
     // ---------------------- End Earthquake Plotting Logic ----------------------
 
 
-    // ---------------------- Hurricane Plotting Logic (MINIMAL TEST - RE-IMPLEMENTED) ----------------------
-    
-    const MARIA_PATH = [
-        [15.4, -61.3],
-        [17.0, -64.3],
-        [18.2, -66.2],
-        [18.6, -67.0],
-        [19.9, -68.8]
-    ];
-    
-    const HU_COLOR = '#800080'; // Purple for test
-
-    function plotTestTrack(mapInstance) {
-        if (!mapInstance) return;
-
-        L.polyline(MARIA_PATH, {
-            color: HU_COLOR,
-            weight: 4,
-            opacity: 0.8
-        }).addTo(mapInstance).bindPopup('**TEST TRACK: Hurricane Maria (2017)** - Should appear in purple.');
-        
-        L.circleMarker(MARIA_PATH[0], { radius: 6, fillColor: '#006400', color: '#000', weight: 1, fillOpacity: 1 })
-            .addTo(mapInstance).bindPopup('Maria Start (Test)');
-        L.circleMarker(MARIA_PATH[MARIA_PATH.length - 1], { radius: 6, fillColor: '#FFA500', color: '#000', weight: 1, fillOpacity: 1 })
-            .addTo(mapInstance).bindPopup('Maria End (Test)');
-            
-        const div = document.createElement('div');
-        div.className = 'leaflet-control-hu-legend'; 
-        div.innerHTML = `<div style="font-weight:600;">Hurricane Test Track</div>
-                         <div style="display:flex;align-items:center;gap:8px;margin:4px 0;">
-                             <span style="display:inline-block;width:14px;height:2px;background:${HU_COLOR};"></span>
-                             <span>Hurricane Maria (2017)</span>
-                         </div>`;
-                         
-        const customControl = L.control({position: 'topright'});
-        customControl.onAdd = function() {
-            div.style.position = 'relative'; 
-            return div;
-        };
-        customControl.addTo(mapInstance);
-    }
-    // ---------------------- End Hurricane Plotting Logic ----------------------
-
-
-    // ---------------------- Earthquake Chart Logic (EXISTING) ----------------------
+    // ---------------------- Earthquake Chart Logic (NEW) ----------------------
     function aggregateEarthquakeData(data) {
-        // ... (Chart logic remains unchanged) ...
+        if (!data || data.length === 0) return { timeSeries: {}, magnitudeBins: {}, totalCount: 0 };
+
         const timeSeries = {}; 
         const magnitudeBins = {
             '3.5-4.5': 0, '4.5-5.5': 0, '5.5-6.5': 0, '6.5-7.5': 0, '7.5+': 0
@@ -447,9 +365,11 @@
             if (mag >= MIN_MAG_THRESHOLD) {
                 totalCount++;
 
+                // 1. Time Series (by year)
                 const year = date.getFullYear();
                 timeSeries[year] = (timeSeries[year] || 0) + 1;
 
+                // 2. Magnitude Distribution
                 if (mag >= 7.5) magnitudeBins['7.5+']++;
                 else if (mag >= 6.5) magnitudeBins['6.5-7.5']++;
                 else if (mag >= 5.5) magnitudeBins['5.5-6.5']++;
@@ -469,7 +389,7 @@
         const timeSeriesCtx = document.getElementById('lineChart').getContext('2d');
         const magDistCtx = document.getElementById('barChart').getContext('2d');
         
-        // ... (Chart drawing logic remains unchanged) ...
+        // --- 1. Earthquake Time Series (Line Chart) ---
         const years = Object.keys(aggregatedData.timeSeries).sort();
         const counts = years.map(year => aggregatedData.timeSeries[year]);
         
@@ -481,7 +401,7 @@
                 datasets: [{
                     label: 'Earthquake Count',
                     data: counts,
-                    borderColor: '#dc2626', 
+                    borderColor: '#dc2626', // Red line
                     tension: 0.2,
                     pointRadius: 4,
                     fill: false
@@ -497,6 +417,7 @@
             }
         });
 
+        // --- 2. Magnitude Distribution (Bar Chart) ---
         const magLabels = Object.keys(aggregatedData.magnitudeBins);
         const magCounts = Object.values(aggregatedData.magnitudeBins);
 
@@ -505,7 +426,7 @@
             if (label === '4.5-5.5') return MAGNITUDE_COLORS[1];
             if (label === '5.5-6.5') return MAGNITUDE_COLORS[2];
             if (label === '6.5-7.5') return MAGNITUDE_COLORS[3];
-            return MAGNITUDE_COLORS[4];
+            return MAGNITUDE_COLORS[4]; // For 7.5+
         });
 
         if (window.earthquakeBarChart) window.earthquakeBarChart.destroy();
@@ -533,68 +454,99 @@
     }
     // ---------------------- End Earthquake Chart Logic ----------------------
 
-    // ---------------------- NEW Hurricane Map Initialization ----------------------
-    function initHurricaneMap() {
-        // Bounds focusing on the Caribbean/Atlantic for the test track
-        const huBounds = L.latLngBounds([[10.0, -75.0], [25.0, -58.0]]);
-        
-        // This is the core fix: Using a slight delay to allow the parent CSS transforms 
-        // to finish calculating before Leaflet initializes.
-        setTimeout(() => {
-            // 1. Initialize map instance
-            hurricaneMapInstance = L.map('hurricane-map', { 
-                zoomControl: false, 
-                zoomSnap: .25 
-            }).fitBounds(huBounds);
-
-            L.control.zoom({ position: 'topleft' }).addTo(hurricaneMapInstance);
-
-            // 2. Add tile layer
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; OpenStreetMap contributors',
-                minZoom: 6, 
-                maxZoom: 19
-            }).addTo(hurricaneMapInstance);
-            
-            // 3. CRUCIAL: Invalidate size immediately after initialization
-            hurricaneMapInstance.invalidateSize(); 
-            
-            // 4. Plot the single test track
-            plotTestTrack(hurricaneMapInstance);
-
-        }, 50); // Increased delay slightly to 50ms for high confidence of success
-    }
-    // ---------------------- End Hurricane Map Initialization ----------------------
-
 
     // ---------------------- Original Education Logic ----------------------
     const GEOJSON_URL = '../data/tl_2022_72_cousub/pr_municipalities.geojson';
     const EDU_JSON    = '../data/education/municipios_acs_education_2013_2023_wide.json';
     const YEARS = [2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023];
 
-    // ... (rest of original education logic and wiring functions remain unchanged) ...
-    function styleForFeature(feature){ /* ... */ return {fillColor: '#ccc', weight: 1.2, color:'#111827', fillOpacity:.75 }; }
-    function computeBreaks(){ ABS_BREAKS = [0.0, 2.0, 4.0, 6.0, 8.0]; }
-    function wireMetricToggle(){ /* ... */ }
-    function wireClearSelection(){ /* ... */ }
-    function updatePctChangeMetricCard(st){ /* ... */ }
-    function drawCharts(name, st){ updatePctChangeMetricCard(st); }
-    function updateDetails(name, st, centroid){ /* ... */ }
-
-    // Dropdown fix implementations (kept at 500ms)
-    function wireDropdown() {
-        const root = document.getElementById('metrics-dropdown-root'); if (!root) return; let hoverTimeout; const menu = document.getElementById('metrics-menu');
-        function addHovering(){ clearTimeout(hoverTimeout); root.classList.add('hovering'); } 
-        function removeHovering(){ hoverTimeout = setTimeout(()=>root.classList.remove('hovering'), 500); }
-        root.addEventListener('mouseenter', addHovering); root.addEventListener('mouseleave', removeHovering); if (menu) { menu.addEventListener('mouseenter', addHovering); menu.addEventListener('mouseleave', removeHovering); }
+    // ... (Original helper functions and choropleth logic remain unchanged for brevity) ...
+    const fmtPct = (v) => `${(Number(v)||0).toFixed(1)}%`;
+    const ppFmt = (v) => `${(Number(v)||0).toFixed(2)} pp`;
+    const signedPP = (n) => (n > 0 ? '+' : '') + ppFmt(n);
+    const signedPct = (n) => (n > 0 ? '+' : '') + fmtPct(n);
+    const CHORO_COLORS = ['#7f1d1d', '#b91c1c', '#f97316', '#bbf7d0', '#22c55e', '#15803d']; 
+    const PCT_BREAKS = [20.0, 25.0, 30.0, 35.0, 40.0]; 
+    let ABS_BREAKS = [0.0, 2.0, 4.0, 6.0, 8.0]; 
+    let _extremeValues = { min: Infinity, max: -Infinity };
+    function colorFor(value, breaks, isLatest) {
+      if (!Number.isFinite(value)) return '#93c5fd';
+      if (value <= breaks[0]) return CHORO_COLORS[0];
+      if (value <= breaks[1]) return CHORO_COLORS[1];
+      if (value <= breaks[2]) return CHORO_COLORS[2];
+      if (value <= breaks[3]) return CHORO_COLORS[3];
+      if (value <= breaks[4]) return CHORO_COLORS[4];
+      return CHORO_COLORS[5];
     }
-    function wireMapDropdown() {
-        const root = document.getElementById('map-selection-dropdown-root'); if (!root) return; let hoverTimeout; const menu = document.getElementById('map-selection-menu');
-        function addHovering(){ clearTimeout(hoverTimeout); root.classList.add('hovering'); } 
-        function removeHovering(){ hoverTimeout = setTimeout(()=>{ root.classList.remove('hovering'); }, 500); }
-        root.addEventListener('mouseenter', addHovering); root.addEventListener('mouseleave', removeHovering); if (menu) { menu.addEventListener('mouseenter', addHovering); menu.addEventListener('mouseleave', removeHovering); }
+    function sanitizeName(s){ 
+      return String(s||'').replace(/^\s*[.\-•]\s*/, '').replace(/\s*Municipio$/,'').trim(); 
     }
-    // End Dropdown fix implementations
+    function valFromRow(row, y){
+      const v = row?.[String(y)];
+      const n = Number(v);
+      return Number.isFinite(n) ? n : NaN;
+    }
+    function statsForMunicipio(name){
+      name = sanitizeName(name);
+      const row = _rows.find(r => sanitizeName(r.Municipio) === name && !r.metadata);
+      if (!row) return null;
+      const vals = YEARS.map(y => valFromRow(row, y));
+      const firstYear = YEARS[0];
+      const lastYear = YEARS.length - 1;
+      const changeAbs = row[`Cum_Change_${firstYear}_${YEARS[lastYear]}`]; 
+      const changePct = row[`Cum_Pct_Change_${firstYear}_${YEARS[lastYear]}`]; 
+      const annualChange = row[`Change_${YEARS[lastYear-1]}_${YEARS[lastYear]}`];
+      if (vals.some(v => !Number.isFinite(v))) return null;
+      const ppChangeYear = [];
+      for (let i = 1; i < YEARS.length; i++) {
+        ppChangeYear.push(vals[i] - vals[i - 1]);
+      }
+      const latestVal = vals[vals.length - 1];
+      return { vals, abs: Number(changeAbs), pctTot: Number(changePct), ppChangeYear, latestVal, annualChange: Number(annualChange) };
+    }
+    function calculateExtremeValues() {
+        _extremeValues = { min: Infinity, max: -Infinity };
+        let valueKey;
+        const lastYear = YEARS.length - 1;
+        if (currentMode === 'pct') valueKey = `Cum_Change_${YEARS[0]}_${YEARS[lastYear]}`;
+        else if (currentMode === 'latest') valueKey = `${YEARS[lastYear]}`;
+        else return;
+        const municipioRows = _rows.filter(r => r.Municipio !== 'Puerto Rico' && !r.metadata);
+        municipioRows.forEach(row => {
+            const value = (currentMode === 'latest') ? Number(row[valueKey]) : Number(row[valueKey]);
+            if (Number.isFinite(value)) {
+                _extremeValues.min = Math.min(_extremeValues.min, value);
+                _extremeValues.max = Math.max(_extremeValues.max, value);
+            }
+        });
+        _extremeValues.min = parseFloat(_extremeValues.min.toFixed(2));
+        _extremeValues.max = parseFloat(_extremeValues.max.toFixed(2));
+    }
+    function censusLink(name){
+      return `https://data.census.gov/table?q=S1501:+EDUCATIONAL+ATTAINMENT+Puerto+Rico`;
+    }
+    const dName = document.getElementById('d-name');
+    const dCent = document.getElementById('d-centroid');
+    // Removed old detail DOM targets
+    let lineChart = null, barChart = null; 
+    function updatePctChangeMetricCard(st){
+        const valEl = document.getElementById('pct-change-val');
+        const iconEl = document.getElementById('pct-change-icon').querySelector('span');
+        if (!st || !Number.isFinite(st.pctTot)){
+            valEl.textContent = '—'; iconEl.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold'; iconEl.innerHTML = '&nbsp;'; return;}
+        const val = st.pctTot; const fmtVal = signedPct(val); let arrow, colorClass;
+        if (val > 0) { arrow = '&#9650;'; colorClass = 'bg-green-100 text-green-800';} else if (val < 0) { arrow = '&#9660;'; colorClass = 'bg-red-100 text-red-800';} else { arrow = '—'; colorClass = 'bg-gray-100 text-gray-800';}
+        valEl.textContent = fmtVal; iconEl.className = `inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${colorClass}`; iconEl.innerHTML = `${arrow} ${fmtVal}`;
+    }
+    function drawCharts(name, st){
+        // Retain the ability to update the metric card for Education data
+        updatePctChangeMetricCard(st); 
+    }
+    function updateDetails(name, st, centroid){
+      dName.textContent = name.replace(/\s*Municipio$/,''); dCent.textContent = centroid ? `${centroid.lat.toFixed(4)}, ${centroid.lng.toFixed(4)}` : '—';
+      // No longer updating specific education fields in the details panel
+      drawCharts(name, st); 
+    }
 
     let _rows = []; 
     let map, layer, fc; 
@@ -705,10 +657,6 @@
       } catch (e) {
           console.error("Error loading or processing earthquake data:", EQ_JSON, e);
       }
-      
-      // We skip loading hurricane data for this minimal test.
-      // let fullHurricaneData = []; 
-
 
       // 1. Draw Earthquake Charts
       drawEarthquakeCharts(aggregatedData);
@@ -718,9 +666,6 @@
       
       // 3. Render Earthquake Legend
       renderEarthquakeLegend(map);
-      
-      // 4. Initialize the new Hurricane Map (TEST CALL)
-      initHurricaneMap();
 
 
       const initName = 'Puerto Rico';
@@ -731,6 +676,91 @@
       wireDropdown(); 
       wireMapDropdown(); 
     })();
+
+    // Style function based on current mode (Education Choropleth)
+    function styleForFeature(feature){
+      const p = feature.properties || {};
+      const name = p.NAME || p.NAMELSAD || p.name || 'Unknown';
+      const statsName = sanitizeName(name);
+      const st = statsForMunicipio(statsName);
+      
+      const value = !st ? NaN : (currentMode === 'pct' ? st.abs : st.latestVal);
+      const breaks = (currentMode === 'pct') ? ABS_BREAKS : PCT_BREAKS;
+      
+      const col = colorFor(value, breaks, currentMode === 'latest');
+      
+      let style = { fillColor: col, weight: 1.2, color:'#111827', fillOpacity:.75 };
+      
+      // Custom logic to highlight only the single min and max values 
+      if (Number.isFinite(value) && _extremeValues.min !== Infinity) {
+          const valRounded = parseFloat(value.toFixed(2));
+          const isExtreme = valRounded === _extremeValues.min || valRounded === _extremeValues.max;
+          
+          if (isExtreme && _extremeValues.min !== _extremeValues.max) { 
+              style.weight = 5;            
+              style.color = '#facc15';     
+              style.dashArray = '';        
+              style.fillOpacity = 0.95;    
+          }
+      }
+
+      return style;
+    }
+
+    // Compute ABS breaks from current data 
+    function computeBreaks(){
+      ABS_BREAKS = [0.0, 2.0, 4.0, 6.0, 8.0];
+    }
+    
+    // Wire toggles (implementation hidden for brevity, same as original)
+    function wireMetricToggle(){
+        const btnPct = document.getElementById('metricPct');
+        const btnLatest = document.getElementById('metricLatest');
+        function setActive(mode){
+            currentMode = mode;
+            btnPct.classList.toggle('bg-blue-600', mode==='pct'); btnPct.classList.toggle('text-white', mode==='pct'); btnPct.classList.toggle('hover:bg-gray-50', mode!=='pct');
+            btnLatest.classList.toggle('bg-blue-600', mode==='latest'); btnLatest.classList.toggle('text-white', mode==='latest'); btnLatest.classList.toggle('hover:bg-gray-50', mode!=='latest');
+            calculateExtremeValues(); layer.eachLayer(l => l.setStyle(styleForFeature(l.feature))); if (selectedLayer) selectedLayer.setStyle(selectedOutline); 
+        }
+        btnPct.addEventListener('click', () => setActive('pct')); btnLatest.addEventListener('click', () => setActive('latest')); setActive(currentMode);
+    }
+    function wireClearSelection(){
+        function clearSelection(){
+            lockedName = null;
+            if (selectedLayer) { layer.resetStyle(selectedLayer); selectedLayer = null; }
+            if (prBoundsGlobal) map.fitBounds(prBoundsGlobal, { padding:[15,15] });
+            updateDetails('Puerto Rico', statsForMunicipio('Puerto Rico'), null);
+        }
+        document.getElementById('clearSel').addEventListener('click', clearSelection);
+        document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape') clearSelection(); });
+    }
+    
+    // FIX APPLIED: Increased setTimeout delay from 300ms to 500ms
+    function wireDropdown() {
+        const root = document.getElementById('metrics-dropdown-root'); if (!root) return; let hoverTimeout; const menu = document.getElementById('metrics-menu');
+        function addHovering(){ clearTimeout(hoverTimeout); root.classList.add('hovering'); } 
+        function removeHovering(){ hoverTimeout = setTimeout(()=>root.classList.remove('hovering'), 500); }
+        root.addEventListener('mouseenter', addHovering); root.addEventListener('mouseleave', removeHovering); if (menu) { menu.addEventListener('mouseenter', addHovering); menu.addEventListener('mouseleave', removeHovering); }
+    }
+    
+    // FIX APPLIED: Increased setTimeout delay from 300ms to 500ms
+    function wireMapDropdown() {
+        const root = document.getElementById('map-selection-dropdown-root'); if (!root) return; let hoverTimeout; const menu = document.getElementById('map-selection-menu');
+        function addHovering(){ clearTimeout(hoverTimeout); root.classList.add('hovering'); } 
+        function removeHovering(){ hoverTimeout = setTimeout(()=>{ root.classList.remove('hovering'); }, 500); }
+        root.addEventListener('mouseenter', addHovering); root.addEventListener('mouseleave', removeHovering); if (menu) { menu.addEventListener('mouseenter', addHovering); menu.addEventListener('mouseleave', removeHovering); }
+    }
+    
+    document.addEventListener('DOMContentLoaded', () => {
+        const metricsLink = document.querySelector('#metrics-dropdown-root > a'); const isMetricsSubPage = window.location.pathname.includes('/metrics/');
+        if (isMetricsSubPage) { metricsLink.classList.add('border-b-2', 'border-blue-600', 'text-blue-600', 'font-semibold'); metricsLink.setAttribute('aria-current', 'page');
+            const currentPathname = window.location.pathname.split('/').pop(); const subPageLink = document.querySelector(`#metrics-menu a[href="${currentPathname}"]`);
+            if (subPageLink) { subPageLink.classList.add('bg-gray-100', 'font-semibold'); }
+        } else {
+            document.querySelectorAll('.nav-link[href]').forEach(a => { if (a.href.endsWith(window.location.pathname)) { a.classList.add('border-b-2', 'border-blue-600', 'text-blue-600', 'font-semibold'); a.setAttribute('aria-current', 'page'); } });
+        }
+        wireMapDropdown(); 
+    });
   </script>
 </body>
 </html>
