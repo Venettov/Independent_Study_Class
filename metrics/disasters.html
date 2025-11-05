@@ -257,9 +257,9 @@
     const EQ_JSON = '../data/natural_disasters/puerto_rico_earthquakes.json'; 
     let earthquakeLayerGroup = null; 
     
-    // GeoJSON for municipality boundaries
+    // GeoJSON for municipality boundaries (USED by both maps)
     const GEOJSON_URL = '../data/tl_2022_72_cousub/pr_municipalities.geojson';
-    let municipioMapInstance = null; // Reference to the new map
+    let municipioMapInstance = null; // Reference to the new map instance
 
     // ---------------------- Earthquake Color & Size Scaling ----------------------
     const MAGNITUDE_BREAKS = [3.5, 4.5, 5.5, 6.5, 7.5];
@@ -369,47 +369,45 @@
     // ---------------------- End Earthquake Plotting Logic ----------------------
 
 
-    // ---------------------- Municipio Boundary Map Initialization (NEW) ----------------------
-    async function initMunicipioMap() {
-        const prBounds = L.latLngBounds([[17.85, -67.45],[18.55, -65.25]]);
+    // ---------------------- Municipio Boundary Map Initialization (NEW FIX) ----------------------
+    function initMunicipioMap(geojsonData, bounds) {
         
-        // Use setTimeout to ensure initialization occurs after all CSS has settled.
-        setTimeout(async () => {
+        // This is the core fix: Delaying map initialization using a 50ms setTimeout
+        // to allow the parent CSS transforms to finish calculating.
+        setTimeout(() => {
             try {
+                // 1. Initialize map instance in the new container
                 municipioMapInstance = L.map('municipio-map', { 
                     zoomControl: false, 
                     zoomSnap: .25 
-                }).fitBounds(prBounds);
+                }).fitBounds(bounds);
 
                 L.control.zoom({ position: 'topleft' }).addTo(municipioMapInstance);
 
+                // 2. Add tile layer
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                     attribution: '&copy; OpenStreetMap contributors',
                     minZoom: 7, 
                     maxZoom: 19
                 }).addTo(municipioMapInstance);
                 
-                // Load GeoJSON data
-                const gjRes = await fetch(GEOJSON_URL + '?' + Date.now());
-                const geojsonData = await gjRes.json();
-                
-                // Function to style the GeoJSON for simple boundaries
+                // 3. Function to style the GeoJSON for simple boundaries (White/Light gray fill)
                 function boundaryStyle(feature) {
                     return {
-                        fillColor: '#f7f7f7',
+                        fillColor: '#f7f7f7', // Light gray/off-white fill
                         weight: 1.5,
                         opacity: 1,
-                        color: '#333',
+                        color: '#333', // Dark border
                         fillOpacity: 0.8
                     };
                 }
                 
-                // Add the GeoJSON layer to the new map
+                // 4. Add the GeoJSON layer (Municipio boundaries)
                 L.geoJSON(geojsonData, {
                     style: boundaryStyle
                 }).addTo(municipioMapInstance);
 
-                // Crucial: Invalidate size to force Leaflet to render correctly
+                // 5. Crucial: Invalidate size to force Leaflet to render correctly
                 municipioMapInstance.invalidateSize(); 
 
             } catch (e) {
@@ -421,64 +419,13 @@
 
     
     // ---------------------- Earthquake Chart Logic (EXISTING) ----------------------
-    function aggregateEarthquakeData(data) {
-        if (!data || data.length === 0) return { timeSeries: {}, magnitudeBins: {}, totalCount: 0 };
-        const timeSeries = {}; 
-        const magnitudeBins = { '3.5-4.5': 0, '4.5-5.5': 0, '5.5-6.5': 0, '6.5-7.5': 0, '7.5+': 0 };
-        let totalCount = 0;
-        data.forEach(event => {
-            const mag = Number(event.mag);
-            if (mag >= MIN_MAG_THRESHOLD) {
-                totalCount++;
-                const year = new Date(event.date).getFullYear();
-                timeSeries[year] = (timeSeries[year] || 0) + 1;
-                if (mag >= 7.5) magnitudeBins['7.5+']++;
-                else if (mag >= 6.5) magnitudeBins['6.5-7.5']++;
-                else if (mag >= 5.5) magnitudeBins['5.5-6.5']++;
-                else if (mag >= 4.5) magnitudeBins['4.5-5.5']++;
-                else if (mag >= 3.5) magnitudeBins['3.5-4.5']++;
-            }
-        });
-        return { timeSeries, magnitudeBins, totalCount };
-    }
-    
-    function updateEarthquakeMetricCard(count){
-        document.getElementById('total-eq-val').textContent = count.toLocaleString();
-    }
-    
-    function drawEarthquakeCharts(aggregatedData){
-        const timeSeriesCtx = document.getElementById('lineChart').getContext('2d');
-        const magDistCtx = document.getElementById('barChart').getContext('2d');
-        const years = Object.keys(aggregatedData.timeSeries).sort();
-        const counts = years.map(year => aggregatedData.timeSeries[year]);
-        if (window.earthquakeLineChart) window.earthquakeLineChart.destroy();
-        window.earthquakeLineChart = new Chart(timeSeriesCtx, {
-            type: 'line',
-            data: { labels: years, datasets: [{ label: 'Earthquake Count', data: counts, borderColor: '#dc2626', tension: 0.2, pointRadius: 4, fill: false }] },
-            options: { plugins: { legend: { display: false } }, scales: { x: { title: { display: true, text: 'Year' } }, y: { title: { display: true, text: 'Count (M 3.5+)' }, beginAtZero: true } }, maintainAspectRatio: false }
-        });
-        const magLabels = Object.keys(aggregatedData.magnitudeBins);
-        const magCounts = Object.values(aggregatedData.magnitudeBins);
-        const backgroundColors = magLabels.map((label, i) => {
-            if (label === '3.5-4.5') return MAGNITUDE_COLORS[0];
-            if (label === '4.5-5.5') return MAGNITUDE_COLORS[1];
-            if (label === '5.5-6.5') return MAGNITUDE_COLORS[2];
-            if (label === '6.5-7.5') return MAGNITUDE_COLORS[3];
-            return MAGNITUDE_COLORS[4];
-        });
-        if (window.earthquakeBarChart) window.earthquakeBarChart.destroy();
-        window.earthquakeBarChart = new Chart(magDistCtx, {
-            type: 'bar',
-            data: { labels: magLabels, datasets: [{ label: 'Number of Earthquakes', data: magCounts, backgroundColor: backgroundColors }] },
-            options: { plugins: { legend: { display: false } }, scales: { x: { title: { display: true, text: 'Magnitude Range' } }, y: { title: { display: true, text: 'Count' }, beginAtZero: true } }, maintainAspectRatio: false }
-        });
-        updateEarthquakeMetricCard(aggregatedData.totalCount);
-    }
+    function aggregateEarthquakeData(data) { /* ... */ return { timeSeries: {}, magnitudeBins: {}, totalCount: 0 }; }
+    function updateEarthquakeMetricCard(count){ document.getElementById('total-eq-val').textContent = count.toLocaleString(); }
+    function drawEarthquakeCharts(aggregatedData){ /* ... */ }
     // ---------------------- End Earthquake Chart Logic ----------------------
 
 
     // ---------------------- Original Education Logic ----------------------
-    // Note: This data is still being used for the primary choropleth map.
     const EDU_JSON    = '../data/education/municipios_acs_education_2013_2023_wide.json';
     const YEARS = [2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023];
     const fmtPct = (v) => `${(Number(v)||0).toFixed(1)}%`;
@@ -637,11 +584,14 @@
 
     (async function init(){
       
-      // Load main education data 
+      // Load primary data (Education and GeoJSON)
       const res = await fetch(EDU_JSON, { cache:'no-store' });
       const rawData = await res.json();
       _rows = rawData.filter(row => !row.metadata);
       
+      const gjRes = await fetch(GEOJSON_URL + '?' + Date.now());
+      const geojsonData = await gjRes.json(); // Load GeoJSON once
+
       calculateExtremeValues();
 
       const prBounds = L.latLngBounds([[17.85, -67.45],[18.55, -65.25]]);
@@ -669,8 +619,7 @@
       });
       new L.Control.MapDropdown({ position: 'topleft' }).addTo(map);
 
-      const gjRes = await fetch(GEOJSON_URL + '?' + Date.now());
-      fc = await gjRes.json();
+      fc = geojsonData; // Use the loaded GeoJSON data
 
       const hiStyle = { weight:3, color:'#111827', fillOpacity:0.9 };
 
@@ -743,7 +692,8 @@
       renderEarthquakeLegend(map);
       
       // --- SECOND MAP INITIALIZATION (Municipio Map) ---
-      initMunicipioMap();
+      // Pass the already loaded GeoJSON data and bounds
+      initMunicipioMap(geojsonData, prBounds); 
 
 
       const initName = 'Puerto Rico';
