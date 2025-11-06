@@ -26,9 +26,9 @@
         radial-gradient(1200px 600px at 80% -10%, rgba(37,99,235,.10), transparent 60%),
         linear-gradient(180deg, #fafafa 0%, #f3f4f6 100%);
     }
-    #map { height: 48vh; width: 100%; border-radius: .75rem; }
-    @media (min-width: 1280px) { #map { height: 46vh; } }
-    @media (max-width: 640px)  { #map { height: 54vh; } }
+    #map, #map2 { height: 48vh; width: 100%; border-radius: .75rem; } /* Added #map2 */
+    @media (min-width: 1280px) { #map, #map2 { height: 46vh; } } /* Added #map2 */
+    @media (max-width: 640px)  { #map, #map2 { height: 54vh; } } /* Added #map2 */
 
     .leaflet-tooltip {
       background: rgba(255,255,255,.95);
@@ -123,7 +123,45 @@
           </div>
         </div>
       </header>
-      
+
+      <section class="card p-4">
+        <div class="flex items-center justify-between gap-3">
+          <div class="text-sm text-gray-700 font-medium">Map shading by</div>
+          <div class="flex items-center gap-2">
+            <div class="inline-flex rounded-lg border bg-white shadow-sm overflow-hidden">
+              </div>
+            </div>
+        </div>
+        <div id="map" class="mt-3">
+          <div class="leaflet-control-container" id="map-dropdown-container">
+            <div class="leaflet-top leaflet-left">
+              <div class="leaflet-control leaflet-control-map-dropdown">
+                <div class="relative dropdown-root" id="map-selection-dropdown-root">
+                  <div class="nav-link inline-flex items-center gap-1 cursor-pointer select-none">
+                    Metric Selection
+                    <svg id="map-selection-chevron" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 transition-transform" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                      <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.24 4.5a.75.75 0 01-1.08 0l-4.24-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/>
+                    </svg>
+                  </div>
+                  <div id="map-selection-menu" class="dropdown-menu w-64 rounded-xl border border-gray-200 bg-white shadow-lg ring-1 ring-black/5 z-50">
+                    <div class="py-2">
+                      <a href="population.html"     class="block px-4 py-2 hover:bg-gray-50">Population</a>
+                      <a href="employment.html"     class="block px-4 py-2 hover:bg-gray-50">Employment Rate</a>
+                      <a href="establishments.html" class="block px-4 py-2 hover:bg-gray-50">Employer Establishments</a>
+                      <a href="income.html"         class="block px-4 py-2 hover:bg-gray-50">Household Income</a>
+                      <a href="housing.html"        class="block px-4 py-2 hover:bg-gray-50">Housing Units</a>
+                      <a href="education.html"      class="block px-4 py-2 hover:bg-gray-50">Education</a>
+                      <a href="health.html"         class="block px-4 py-2 hover:bg-gray-50">Health</a>
+                      <a href="disasters.html"      class="block px-4 py-2 bg-gray-100 font-semibold">Natural Disasters</a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          </div>
+      </section>
+
       <section class="card p-6">
         <h2 class="text-lg font-semibold mb-4">Seismic and Educational Data Visualization</h2>
         <div class="grid grid-cols-1 lg:grid-cols-4 gap-6"> 
@@ -199,18 +237,18 @@
               </div>
             </div>
         </div>
-        <div id="map" class="mt-3">
-          <div class="leaflet-control-container" id="map-dropdown-container">
+        <div id="map2" class="mt-3">
+          <div class="leaflet-control-container" id="map2-dropdown-container">
             <div class="leaflet-top leaflet-left">
               <div class="leaflet-control leaflet-control-map-dropdown">
-                <div class="relative dropdown-root" id="map-selection-dropdown-root">
+                <div class="relative dropdown-root" id="map2-selection-dropdown-root">
                   <div class="nav-link inline-flex items-center gap-1 cursor-pointer select-none">
                     Metric Selection
-                    <svg id="map-selection-chevron" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 transition-transform" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <svg id="map2-selection-chevron" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 transition-transform" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                       <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.24 4.5a.75.75 0 01-1.08 0l-4.24-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/>
                     </svg>
                   </div>
-                  <div id="map-selection-menu" class="dropdown-menu w-64 rounded-xl border border-gray-200 bg-white shadow-lg ring-1 ring-black/5 z-50">
+                  <div id="map2-selection-menu" class="dropdown-menu w-64 rounded-xl border border-gray-200 bg-white shadow-lg ring-1 ring-black/5 z-50">
                     <div class="py-2">
                       <a href="population.html"     class="block px-4 py-2 hover:bg-gray-50">Population</a>
                       <a href="employment.html"     class="block px-4 py-2 hover:bg-gray-50">Employment Rate</a>
@@ -257,17 +295,14 @@
         return Math.min(size, 18);
     }
 
+    // UPDATED: Now plots on the passed mapInstance, allowing multiple maps to share data.
     function plotEarthquakes(data, mapInstance){
         if (!data || data.length === 0) {
             console.error("Earthquake data is empty or failed to load.");
             return;
         }
 
-        if (earthquakeLayerGroup) {
-            earthquakeLayerGroup.clearLayers();
-        } else {
-            earthquakeLayerGroup = L.layerGroup().addTo(mapInstance);
-        }
+        let currentLayerGroup = L.layerGroup().addTo(mapInstance);
 
         data.forEach(event => {
             const mag = Number(event.mag);
@@ -287,7 +322,7 @@
                 weight: 0.5,
                 opacity: 0.8,
                 fillOpacity: 0.8
-            }).addTo(earthquakeLayerGroup);
+            }).addTo(currentLayerGroup);
 
             circle.bindPopup(`
                 <strong>Magnitude ${mag.toFixed(1)} Earthquake</strong>
@@ -298,7 +333,7 @@
             `);
         });
         
-        earthquakeLayerGroup.bringToFront();
+        currentLayerGroup.bringToFront();
     }
     
     function renderEarthquakeLegend(map){
@@ -424,7 +459,7 @@
             if (label === '6.5-7.5') return NEW_COLORS[3]; // Even Darker Blue
             return NEW_COLORS[4]; // For 7.5+ (Deep Blue)
         });
-        
+
         if (window.earthquakeBarChart) window.earthquakeBarChart.destroy();
         window.earthquakeBarChart = new Chart(magDistCtx, {
             type: 'bar',
@@ -526,11 +561,7 @@
     
     // UPDATED: Detail updates only for initialization/reset
     function updateDetails(name, st, centroid){
-      // Note: dName and dCent elements are no longer present in the updated HTML structure, 
-      // but the function is kept for data flow.
-      // dName.textContent = name.replace(/\s*Municipio$/,''); 
-      // dCent.textContent = centroid ? `${centroid.lat.toFixed(4)}, ${centroid.lng.toFixed(4)}` : '—';
-      // drawCharts(name, st); 
+      // dName and dCent elements are not present, this function is now just for data flow setup
     }
 
     // UPDATED: Simplifies styling to force FIXED GREEN color and remove all interaction/highlighting logic
@@ -565,7 +596,7 @@
     }
     
     let prBoundsGlobal = null;
-    let map, layer, fc; 
+    let map, map2, layer, layer2, fc; // map2 and layer2 added
     let currentMode = 'pct'; 
     let lockedName = null;
     let selectedLayer = null;
@@ -586,7 +617,7 @@
       const prBounds = L.latLngBounds([[17.85, -67.45],[18.55, -65.25]]);
       prBoundsGlobal = prBounds;
       
-      // --- Primary Map (Earthquake/Choropleth) Init ---
+      // --- Primary Map (Earthquake/Choropleth) Init: MAP 1 ---
       map = L.map('map', { zoomControl: false, zoomSnap: .25 }).fitBounds(prBounds);
 
       L.control.zoom({ position: 'topleft' }).addTo(map);
@@ -596,7 +627,7 @@
         minZoom: 7, maxZoom: 19
       }).addTo(map);
 
-      // Initialize the map dropdown control
+      // Initialize the map dropdown control for map 1
       L.Control.MapDropdown = L.Control.extend({
           onAdd: function(map) {
               const container = L.DomUtil.get('map-dropdown-container');
@@ -610,7 +641,6 @@
 
       fc = geojsonData; // Use the loaded GeoJSON data
 
-      // UPDATED: Removed all onEachFeature click/hover event binding
       layer = L.geoJSON(fc, {
         style: (feature) => styleForFeature(feature),
         onEachFeature: (f, lyr) => {
@@ -633,11 +663,43 @@
         }
       }).addTo(map);
 
-      // Ensure map dimensions are recalculated after the container might have been moved
-      map.invalidateSize(); 
-      
       const b = layer.getBounds();
       if (b.isValid()) map.fitBounds(b, { padding:[15,15] });
+
+      // --- Duplicate Map (Earthquake/Choropleth) Init: MAP 2 ---
+      map2 = L.map('map2', { zoomControl: false, zoomSnap: .25 }).fitBounds(prBounds); // New map instance
+
+      L.control.zoom({ position: 'topleft' }).addTo(map2);
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors',
+        minZoom: 7, maxZoom: 19
+      }).addTo(map2);
+
+      // Initialize the map dropdown control for map 2
+      L.Control.MapDropdown2 = L.Control.extend({ // New control class to avoid conflicts
+          onAdd: function(map) {
+              const container = L.DomUtil.get('map2-dropdown-container'); // Use map2 container ID
+              L.DomEvent.disableClickPropagation(container);
+              L.DomEvent.disableScrollPropagation(container);
+              return container.querySelector('.leaflet-control-map-dropdown');
+          },
+          onRemove: function(map) {}
+      });
+      new L.Control.MapDropdown2({ position: 'topleft' }).addTo(map2); // Add to map2
+
+      layer2 = L.geoJSON(fc, { // New layer variable
+        style: (feature) => styleForFeature(feature),
+        onEachFeature: (f, lyr) => {
+          const p = f.properties || {};
+          const name = p.NAME || p.NAMELSAD || p.name || 'Unknown';
+          lyr.bindPopup(`<strong>${name}</strong>`);
+          lyr.bindTooltip(name, { direction:'center', className:'leaflet-tooltip' });
+        }
+      }).addTo(map2); // Add to map2
+
+      if (b.isValid()) map2.fitBounds(b, { padding:[15,15] }); // Fit map2 to bounds
+
 
       computeBreaks();
 
@@ -655,11 +717,13 @@
       // 1. Draw Earthquake Charts
       drawEarthquakeCharts(aggregatedData);
       
-      // 2. Plot Earthquakes on Map
+      // 2. Plot Earthquakes on Both Maps
       plotEarthquakes(fullEarthquakeData, map);
+      plotEarthquakes(fullEarthquakeData, map2); // Plot on map2
       
-      // 3. Render Earthquake Legend
+      // 3. Render Earthquake Legend on Both Maps
       renderEarthquakeLegend(map);
+      renderEarthquakeLegend(map2); // Render on map2
 
 
       const initName = 'Puerto Rico';
