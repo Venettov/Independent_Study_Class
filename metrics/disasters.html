@@ -26,9 +26,10 @@
         radial-gradient(1200px 600px at 80% -10%, rgba(37,99,235,.10), transparent 60%),
         linear-gradient(180deg, #fafafa 0%, #f3f4f6 100%);
     }
-    #map, #map2 { height: 48vh; width: 100%; border-radius: .75rem; } /* Added #map2 */
-    @media (min-width: 1280px) { #map, #map2 { height: 46vh; } } /* Added #map2 */
-    @media (max-width: 640px)  { #map, #map2 { height: 54vh; } } /* Added #map2 */
+    /* Map IDs updated to target both maps */
+    #map, #map2 { height: 48vh; width: 100%; border-radius: .75rem; } 
+    @media (min-width: 1280px) { #map, #map2 { height: 46vh; } } 
+    @media (max-width: 640px)  { #map, #map2 { height: 54vh; } } 
 
     .leaflet-tooltip {
       background: rgba(255,255,255,.95);
@@ -47,6 +48,20 @@
         position: absolute;
         bottom: 10px; 
         left: 10px;  /* Position set to LEFT */
+        background: white;
+        padding: 8px 10px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,.15);
+        font: 12px/1.3 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+        z-index: 1000; 
+        width: 150px;
+    }
+
+    /* CUSTOM: Hurricane Legend positioned bottom-right */
+    .leaflet-control-hu-legend {
+        position: absolute;
+        bottom: 10px; 
+        right: 10px;  /* Position set to RIGHT */
         background: white;
         padding: 8px 10px;
         border-radius: 8px;
@@ -223,6 +238,7 @@
             <h4 class="font-semibold">Data Source & Research References:</h4>
             <ul class="list-disc list-inside ml-4 space-y-1">
                 <li><strong>Earthquake Data Source:</strong> The raw earthquake data plotted on the map is assumed to be sourced from the <strong>U.S. Geological Survey (USGS)</strong> or the <strong>Puerto Rico Seismic Network (PRSN)</strong>, typically available through a JSON API. (Link: <code>../data/natural_disasters/puerto_rico_earthquakes.json</code>)</li>
+                <li><strong>Hurricane Data Source:</strong> Filtered tracks for the Caribbean from 2015-2025. (Link: <code>../data/natural_disasters/pr_vicinity_hurricane_tracks.json</code>)</li>
                 <li><strong>Geology and Impact Research:</strong> <a href="https://pubs.usgs.gov/fs/fs141-00/fs141-00.pdf" target="_blank" class="text-blue-600 underline">USGS: Earthquakes and Tsunamis in Puerto Rico and the U.S. Virgin Islands</a></li>
                 <li><strong>2020 Quake Impact:</strong> <a href="https://recovery.pr.gov/en/earthquakes-response" target="_blank" class="text-blue-600 underline">Puerto Rico Disaster Recovery Transparency Portal (COR3)</a></li>
             </ul>
@@ -230,6 +246,7 @@
       </section>
       
       <section class="card p-4">
+        <h2 class="text-lg font-semibold mb-3">Hurricane Tracks (2015-2025) near Puerto Rico</h2>
         <div class="flex items-center justify-between gap-3">
           <div class="text-sm text-gray-700 font-medium">Map shading by</div>
           <div class="flex items-center gap-2">
@@ -272,7 +289,9 @@
   <script>
     // ---------------------- Data Paths ----------------------
     const EQ_JSON = '../data/natural_disasters/puerto_rico_earthquakes.json'; 
+    const HU_JSON = './pr_vicinity_hurricane_tracks.json'; // New JSON file path
     let earthquakeLayerGroup = null; 
+    let hurricaneLayerGroup = null; 
 
     // ---------------------- Earthquake Color & Size Scaling ----------------------
     const MAGNITUDE_BREAKS = [3.5, 4.5, 5.5, 6.5, 7.5];
@@ -295,14 +314,17 @@
         return Math.min(size, 18);
     }
 
-    // UPDATED: Now plots on the passed mapInstance, allowing multiple maps to share data.
     function plotEarthquakes(data, mapInstance){
         if (!data || data.length === 0) {
             console.error("Earthquake data is empty or failed to load.");
             return;
         }
 
-        let currentLayerGroup = L.layerGroup().addTo(mapInstance);
+        if (earthquakeLayerGroup) {
+            earthquakeLayerGroup.clearLayers();
+        } else {
+            earthquakeLayerGroup = L.layerGroup().addTo(mapInstance);
+        }
 
         data.forEach(event => {
             const mag = Number(event.mag);
@@ -322,7 +344,7 @@
                 weight: 0.5,
                 opacity: 0.8,
                 fillOpacity: 0.8
-            }).addTo(currentLayerGroup);
+            }).addTo(earthquakeLayerGroup);
 
             circle.bindPopup(`
                 <strong>Magnitude ${mag.toFixed(1)} Earthquake</strong>
@@ -333,7 +355,7 @@
             `);
         });
         
-        currentLayerGroup.bringToFront();
+        earthquakeLayerGroup.bringToFront();
     }
     
     function renderEarthquakeLegend(map){
@@ -343,6 +365,7 @@
         const title = 'Earthquake Magnitude (M 3.5+)';
         let html = `<div style="font-weight:600;margin-bottom:5px; border-bottom: 1px solid #ccc;">${title}</div>`;
 
+        // Using the predefined Magnitude breaks and colors for the legend
         MAGNITUDE_BREAKS.forEach((mag, i) => {
             const color = MAGNITUDE_COLORS[i];
             const size = getRadiusForMagnitude(mag);
@@ -376,15 +399,128 @@
     // ---------------------- End Earthquake Plotting Logic ----------------------
 
 
+    // ---------------------- Hurricane Plotting Logic ----------------------
+
+    const HU_WIND_BREAKS = [34, 64, 83, 96, 113]; // Knots (TS, HU1, HU2, HU3, HU4/5)
+    // Custom palette: Gray, Blue (TS), Yellow (HU1), Orange (HU2), Red (HU3), Dark Red (HU4/5)
+    const HU_COLORS = ['#a3a3a3', '#3b82f6', '#fde047', '#fb923c', '#dc2626', '#991b1b']; 
+
+    function getTrackColor(wind) {
+        if (wind < HU_WIND_BREAKS[0]) return HU_COLORS[0];
+        if (wind < HU_WIND_BREAKS[1]) return HU_COLORS[1];
+        if (wind < HU_WIND_BREAKS[2]) return HU_COLORS[2];
+        if (wind < HU_WIND_BREAKS[3]) return HU_COLORS[3];
+        if (wind < HU_WIND_BREAKS[4]) return HU_COLORS[4];
+        return HU_COLORS[5];
+    }
+    
+    function getStatusLabel(wind, status) {
+        if (status === 'TS') return 'Tropical Storm';
+        if (status === 'HU') {
+            if (wind < 83) return 'Hurricane Cat 1';
+            if (wind < 96) return 'Hurricane Cat 2';
+            if (wind < 113) return 'Hurricane Cat 3';
+            return 'Hurricane Cat 4+';
+        }
+        return 'Tropical Depression/Other';
+    }
+
+    function plotHurricaneTracks(data, mapInstance) {
+        if (!data || data.length === 0) {
+            console.error("Hurricane data is empty or failed to load.");
+            return;
+        }
+
+        if (hurricaneLayerGroup) {
+            hurricaneLayerGroup.clearLayers();
+        } else {
+            hurricaneLayerGroup = L.layerGroup().addTo(mapInstance);
+        }
+
+        data.forEach(storm => {
+            const latlons = storm.path.map(p => [p.lat, p.lon]);
+            const pathData = storm.path;
+            const stormName = storm.name;
+
+            // 1. Draw the polylines
+            L.polyline(latlons, { 
+                color: '#333', // Neutral color for the line itself
+                weight: 1.5,
+                opacity: 0.6 
+            }).addTo(hurricaneLayerGroup);
+
+            // 2. Draw the markers for each point, colored by wind speed
+            pathData.forEach(p => {
+                const wind_knots = p.wind;
+                const color = getTrackColor(wind_knots);
+                const statusLabel = getStatusLabel(wind_knots, p.status);
+                const date = p.date.replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3');
+
+                L.circleMarker([p.lat, p.lon], {
+                    radius: 3.5, // Small fixed radius for track points
+                    fillColor: color, 
+                    color: '#000', 
+                    weight: 0.5,
+                    opacity: 0.9,
+                    fillOpacity: 0.9
+                }).bindPopup(`
+                    <strong>${stormName} - ${statusLabel} (${p.status})</strong>
+                    <br>Date: ${date}
+                    <br>Wind: ${wind_knots} knots (${(wind_knots * 1.15078).toFixed(0)} mph)
+                    <br>Location: ${p.lat.toFixed(2)}N, ${p.lon.toFixed(2)}W
+                `).addTo(hurricaneLayerGroup);
+            });
+        });
+        
+        hurricaneLayerGroup.bringToFront();
+    }
+
+    function renderHurricaneLegend(map){
+        const div = document.createElement('div');
+        div.className = 'leaflet-control-hu-legend'; 
+        
+        const title = 'Hurricane Track Wind Status (knots)';
+        let html = `<div style="font-weight:600;margin-bottom:5px; border-bottom: 1px solid #ccc;">${title}</div>`;
+
+        const legendItems = [
+            { label: '< 34 knots (TD/Other)', color: HU_COLORS[0] },
+            { label: '34-63 knots (TS)', color: HU_COLORS[1] },
+            { label: '64-82 knots (HU Cat 1)', color: HU_COLORS[2] },
+            { label: '83-95 knots (HU Cat 2)', color: HU_COLORS[3] },
+            { label: '96-112 knots (HU Cat 3)', color: HU_COLORS[4] },
+            { label: '$\ge$ 113 knots (HU Cat 4/5)', color: HU_COLORS[5] }
+        ];
+
+        legendItems.forEach(item => {
+            html += `
+                <div style="display:flex;align-items:center;gap:8px;margin:4px 0;">
+                    <div style="width:12px;height:12px;border-radius:50%;background:${item.color};border:1px solid #000;box-shadow:0 1px 2px rgba(0,0,0,.1);"></div>
+                    <span>${item.label}</span>
+                </div>
+            `;
+        });
+        
+        const customControl = L.control({position: 'bottomright'});
+        customControl.onAdd = function() {
+            div.style.position = 'relative'; 
+            return div;
+        };
+        customControl.addTo(map);
+    }
+    // ---------------------- End Hurricane Plotting Logic ----------------------
+
+
     // ---------------------- Earthquake Chart Logic (UPDATED COLORS) ----------------------
     function aggregateEarthquakeData(data) {
         if (!data || data.length === 0) return { timeSeries: {}, magnitudeBins: {}, totalCount: 0 };
-
+        // ... (data aggregation logic remains the same) ...
         const timeSeries = {}; 
         const magnitudeBins = {
             '3.5-4.5': 0, '4.5-5.5': 0, '5.5-6.5': 0, '6.5-7.5': 0, '7.5+': 0
         };
         let totalCount = 0;
+
+        const MIN_MAG_THRESHOLD = 3.5;
 
         data.forEach(event => {
             const mag = Number(event.mag);
@@ -589,10 +725,25 @@
     }
     
     function wireMapDropdown() {
-        const root = document.getElementById('map-selection-dropdown-root'); if (!root) return; let hoverTimeout; const menu = document.getElementById('map-selection-menu');
-        function addHovering(){ clearTimeout(hoverTimeout); root.classList.add('hovering'); } 
-        function removeHovering(){ hoverTimeout = setTimeout(()=>{ root.classList.remove('hovering'); }, 500); }
-        root.addEventListener('mouseenter', addHovering); root.addEventListener('mouseleave', removeHovering); if (menu) { menu.addEventListener('mouseenter', addHovering); menu.addEventListener('mouseleave', removeHovering); }
+        // Wiring for map 1 dropdown
+        const root1 = document.getElementById('map-selection-dropdown-root'); 
+        if (root1) { 
+            let hoverTimeout; const menu = document.getElementById('map-selection-menu');
+            function addHovering(){ clearTimeout(hoverTimeout); root1.classList.add('hovering'); } 
+            function removeHovering(){ hoverTimeout = setTimeout(()=>{ root1.classList.remove('hovering'); }, 500); }
+            root1.addEventListener('mouseenter', addHovering); root1.addEventListener('mouseleave', removeHovering); 
+            if (menu) { menu.addEventListener('mouseenter', addHovering); menu.addEventListener('mouseleave', removeHovering); }
+        }
+        
+        // Wiring for map 2 dropdown (map2-selection-dropdown-root)
+        const root2 = document.getElementById('map2-selection-dropdown-root'); 
+        if (root2) { 
+            let hoverTimeout2; const menu2 = document.getElementById('map2-selection-menu');
+            function addHovering2(){ clearTimeout(hoverTimeout2); root2.classList.add('hovering'); } 
+            function removeHovering2(){ hoverTimeout2 = setTimeout(()=>{ root2.classList.remove('hovering'); }, 500); }
+            root2.addEventListener('mouseenter', addHovering2); root2.addEventListener('mouseleave', removeHovering2); 
+            if (menu2) { menu2.addEventListener('mouseenter', addHovering2); menu2.addEventListener('mouseleave', removeHovering2); }
+        }
     }
     
     let prBoundsGlobal = null;
@@ -617,7 +768,7 @@
       const prBounds = L.latLngBounds([[17.85, -67.45],[18.55, -65.25]]);
       prBoundsGlobal = prBounds;
       
-      // --- Primary Map (Earthquake/Choropleth) Init: MAP 1 ---
+      // --- Map 1 Init (Earthquakes / Educational Choropleth) ---
       map = L.map('map', { zoomControl: false, zoomSnap: .25 }).fitBounds(prBounds);
 
       L.control.zoom({ position: 'topleft' }).addTo(map);
@@ -655,10 +806,7 @@
             changeLine = `Attainment (2023): ${latest} | Change: ${change}`;
           }
           
-          // UPDATED: Bind popup with ONLY the name
           lyr.bindPopup(`<strong>${name}</strong>`);
-          
-          // Tooltip remains for general info display
           lyr.bindTooltip(name, { direction:'center', className:'leaflet-tooltip' });
         }
       }).addTo(map);
@@ -666,7 +814,8 @@
       const b = layer.getBounds();
       if (b.isValid()) map.fitBounds(b, { padding:[15,15] });
 
-      // --- Duplicate Map (Earthquake/Choropleth) Init: MAP 2 ---
+
+      // --- Map 2 Init (Hurricane Tracks / Educational Choropleth) ---
       map2 = L.map('map2', { zoomControl: false, zoomSnap: .25 }).fitBounds(prBounds); // New map instance
 
       L.control.zoom({ position: 'topleft' }).addTo(map2);
@@ -703,7 +852,9 @@
 
       computeBreaks();
 
-      // --- FULL EARTHQUAKE DATA LOADING AND CHARTING ---
+      // --- DATA LOADING AND PLOTTING ---
+      
+      // 1. Earthquake Data (Map 1 and Charts)
       let fullEarthquakeData = [];
       let aggregatedData = { timeSeries: {}, magnitudeBins: {}, totalCount: 0 };
       try {
@@ -713,18 +864,22 @@
       } catch (e) {
           console.error("Error loading or processing earthquake data:", EQ_JSON, e);
       }
-
-      // 1. Draw Earthquake Charts
+      
       drawEarthquakeCharts(aggregatedData);
-      
-      // 2. Plot Earthquakes on Both Maps
-      plotEarthquakes(fullEarthquakeData, map);
-      plotEarthquakes(fullEarthquakeData, map2); // Plot on map2
-      
-      // 3. Render Earthquake Legend on Both Maps
-      renderEarthquakeLegend(map);
-      renderEarthquakeLegend(map2); // Render on map2
+      plotEarthquakes(fullEarthquakeData, map); // Plot on Map 1
+      renderEarthquakeLegend(map); // Legend on Map 1
 
+      // 2. Hurricane Data (Map 2)
+      let fullHurricaneData = [];
+      try {
+          const huRes = await fetch(HU_JSON);
+          fullHurricaneData = await huRes.json();
+      } catch (e) {
+          console.error("Error loading or processing hurricane data:", HU_JSON, e);
+      }
+      
+      plotHurricaneTracks(fullHurricaneData, map2); // Plot on Map 2
+      renderHurricaneLegend(map2); // Legend on Map 2
 
       const initName = 'Puerto Rico';
       updateDetails(initName, statsForMunicipio(initName), null);
