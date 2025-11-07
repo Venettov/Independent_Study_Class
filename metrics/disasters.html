@@ -288,6 +288,10 @@
 
   <script>
     // ---------------------- Data Paths ----------------------
+    // NOTE: This path is set to the standard relative path that should be correct.
+    // If running on GitHub Pages and this fails (404), you may need to try 
+    // const HU_JSON = './data/natural_disasters/caribbean_hurricane_tracks_2015_2025.json'; 
+    // (removing the ../) OR ensure the data folder is pushed correctly.
     const EQ_JSON = '../data/natural_disasters/puerto_rico_earthquakes.json'; 
     const HU_JSON = '../data/natural_disasters/caribbean_hurricane_tracks_2015_2025.json'; 
     let earthquakeLayerGroup = null; 
@@ -422,12 +426,20 @@
             if (wind < 113) return 'Hurricane Cat 3';
             return 'Hurricane Cat 4+';
         }
-        return 'Tropical Depression/Other';
+        // Added status check for non-TS/HU statuses (DB, LO, SD, WV)
+        if (status === 'DB') return 'Tropical Disturbance';
+        if (status === 'TD') return 'Tropical Depression';
+        if (status === 'SS') return 'Subtropical Storm';
+        if (status === 'SD') return 'Subtropical Depression';
+        if (status === 'LO') return 'Low';
+        if (status === 'WV') return 'Tropical Wave';
+        
+        return 'Other'; // Fallback for any status not explicitly listed
     }
 
     function plotHurricaneTracks(data, mapInstance) {
         if (!data || data.length === 0) {
-            console.error("Hurricane data is empty or failed to load.");
+            console.warn("Hurricane data is empty or failed to load. Check console for fetch errors (404).");
             return;
         }
 
@@ -473,6 +485,7 @@
         });
         
         hurricaneLayerGroup.bringToFront();
+        console.log("✅ Hurricane tracks plotted successfully.");
     }
 
     function renderHurricaneLegend(map){
@@ -483,7 +496,7 @@
         let html = `<div style="font-weight:600;margin-bottom:5px; border-bottom: 1px solid #ccc;">${title}</div>`;
 
         const legendItems = [
-            { label: '< 34 knots (TD/Other)', color: HU_COLORS[0] },
+            { label: '$\le$ 33 knots (TD/Other)', color: HU_COLORS[0] }, // Adjusted label to reflect new getStatusLabel logic
             { label: '34-63 knots (TS)', color: HU_COLORS[1] },
             { label: '64-82 knots (HU Cat 1)', color: HU_COLORS[2] },
             { label: '83-95 knots (HU Cat 2)', color: HU_COLORS[3] },
@@ -756,6 +769,7 @@
     (async function init(){
       
       // Load primary data (Education and GeoJSON)
+      // NOTE: Using the standard relative path here
       const res = await fetch(EDU_JSON, { cache:'no-store' });
       const rawData = await res.json();
       _rows = rawData.filter(row => !row.metadata);
@@ -858,6 +872,7 @@
       let fullEarthquakeData = [];
       let aggregatedData = { timeSeries: {}, magnitudeBins: {}, totalCount: 0 };
       try {
+          // *** WARNING: If this still fails, your GitHub Pages path is the issue. ***
           const eqRes = await fetch(EQ_JSON);
           fullEarthquakeData = await eqRes.json();
           aggregatedData = aggregateEarthquakeData(fullEarthquakeData);
@@ -872,6 +887,7 @@
       // 2. Hurricane Data (Map 2)
       let fullHurricaneData = [];
       try {
+          // *** WARNING: If this still fails, your GitHub Pages path is the issue. ***
           const huRes = await fetch(HU_JSON);
           fullHurricaneData = await huRes.json();
       } catch (e) {
