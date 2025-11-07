@@ -238,7 +238,7 @@
             <h4 class="font-semibold">Data Source & Research References:</h4>
             <ul class="list-disc list-inside ml-4 space-y-1">
                 <li><strong>Earthquake Data Source:</strong> The raw earthquake data plotted on the map is assumed to be sourced from the <strong>U.S. Geological Survey (USGS)</strong> or the <strong>Puerto Rico Seismic Network (PRSN)</strong>, typically available through a JSON API. (Link: <code>../data/natural_disasters/puerto_rico_earthquakes.json</code>)</li>
-                <li><strong>Hurricane Data Source:</strong> Filtered tracks for the Caribbean from 2015-2025. (Link: <code>../data/natural_disasters/pr_vicinity_hurricane_tracks.json</code>)</li>
+                <li><strong>Hurricane Data Source:</strong> Filtered tracks for the Caribbean from 2015-2025. (Link: <code>../data/natural_disasters/caribbean_hurricane_tracks_2015_2025.json</code>)</li>
                 <li><strong>Geology and Impact Research:</strong> <a href="https://pubs.usgs.gov/fs/fs141-00/fs141-00.pdf" target="_blank" class="text-blue-600 underline">USGS: Earthquakes and Tsunamis in Puerto Rico and the U.S. Virgin Islands</a></li>
                 <li><strong>2020 Quake Impact:</strong> <a href="https://recovery.pr.gov/en/earthquakes-response" target="_blank" class="text-blue-600 underline">Puerto Rico Disaster Recovery Transparency Portal (COR3)</a></li>
             </ul>
@@ -289,7 +289,7 @@
   <script>
     // ---------------------- Data Paths ----------------------
     const EQ_JSON = '../data/natural_disasters/puerto_rico_earthquakes.json'; 
-    const HU_JSON = '../data/natural_disasters/caribbean_hurricane_tracks_2015_2025.json'; // New JSON file path
+    const HU_JSON = '../data/natural_disasters/caribbean_hurricane_tracks_2015_2025.json'; 
     let earthquakeLayerGroup = null; 
     let hurricaneLayerGroup = null; 
 
