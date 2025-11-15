@@ -69,6 +69,12 @@
     .leaflet-control-map-dropdown .dropdown-root.hovering .dropdown-menu {opacity: 1; visibility: visible; transform: translateY(0); pointer-events: auto;}
     .leaflet-control-map-dropdown .dropdown-root.hovering #map-selection-chevron {transform: rotate(180deg);}
     .leaflet-control-map-dropdown .dropdown-menu a {text-decoration: none; padding: 6px 12px; font-size: 13px;}
+
+    /* NEW: Fixes Chart.js rendering issue inside hidden/scaled containers */
+    .mini canvas {
+        width: 100% !important;
+        height: 100% !important;
+    }
   </style>
 </head>
 <body class="bg-gray-50 text-gray-900 font-sans">
@@ -615,9 +621,11 @@
       plotHurricaneTracks(fullHurricaneData, map); // Plot tracks on map
       renderHurricaneLegend(map); // Legend on map
 
-      // Call the new charting function
+      // ** FIX FOR BLANK GRAPHS: Wait for DOM resize before drawing charts **
       const hurricaneStats = aggregateHurricaneData(fullHurricaneData);
-      drawHurricaneCharts(hurricaneStats);
+      setTimeout(() => {
+          drawHurricaneCharts(hurricaneStats);
+      }, 500); // 500ms delay to allow parent container to fully size
 
       // ... Initial detail updates and wiring ...
       wireMetricToggle();
