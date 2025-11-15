@@ -44,7 +44,6 @@
     .mini { min-height: 300px; } /* Increased min-height for bigger graphs */
 
     /* CUSTOM: Hurricane Legend positioned bottom-right */
-    /* NOTE: Added !important and used Leaflet's dedicated control containers to ensure visibility */
     .leaflet-control-hu-legend {
         position: absolute !important; 
         bottom: 10px !important; 
@@ -93,8 +92,7 @@
             <a href="income.html"         class="block px-4 py-2 hover:bg-gray-50">Household Income</a>
             <a href="housing.html"        class="block px-4 py-2 hover:bg-gray-50">Housing Units</a>
             <a href="education.html"      class="block px-4 py-2 hover:bg-gray-50">Education</a>
-            <a href="health.html"         class="block px-4 py-2 hover:bg-gray-50">Health</a>
-            <a href="disasters.html"      class="block px-4 py-2 bg-gray-100 font-semibold">Natural Disasters</a>
+            <a href="health.html"         class="block px-4 py-2 bg-gray-100 font-semibold">Natural Disasters</a>
           </div>
         </div>
       </div>
@@ -173,24 +171,24 @@
         <div class="space-y-4">
             <h3 class="text-base font-semibold text-gray-700">Hurricane Impact and Migration in Puerto Rico 🇵🇷</h3>
             <p>
-                Puerto Rico is geographically exposed to frequent and severe **tropical cyclones (hurricanes and tropical storms)**, with impacts often triggering significant socioeconomic shifts, most notably mass migration.
+                Puerto Rico is geographically exposed to frequent and severe <strong>tropical cyclones (hurricanes and tropical storms)</strong>, with impacts often triggering significant socioeconomic shifts, most notably mass migration.
             </p>
             
             <h4 class="text-sm font-semibold text-gray-600 mt-4">Socioeconomic and Infrastructural Impact:</h4>
             <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
-                <li>Major hurricanes inflict severe damage to the island's already fragile **infrastructure**, including the electrical grid, transportation networks, and housing stock.</li>
-                <li>The recovery process is often slow and complicated by existing **economic instability** and structural vulnerabilities.</li>
-                <li>The destruction leads to long-term **service disruption**, including prolonged power outages and limited access to essential medical and educational services.</li>
+                <li>Major hurricanes inflict severe damage to the island's already fragile <strong>infrastructure</strong>, including the electrical grid, transportation networks, and housing stock.</li>
+                <li>The recovery process is often slow and complicated by existing <strong>economic instability</strong> and structural vulnerabilities.</li>
+                <li>The destruction leads to long-term <strong>service disruption</strong>, including prolonged power outages and limited access to essential medical and educational services.</li>
             </ul>
 
             <h4 class="text-sm font-semibold text-gray-600 mt-4">Disaster-Driven Migration:</h4>
             <p>
-                Hurricanes serve as significant accelerators of pre-existing **migration trends** from Puerto Rico to the U.S. mainland. The displacement caused by severe storms is often permanent, transforming the migration pattern from economic necessity to survival:
+                Hurricanes serve as significant accelerators of pre-existing <strong>migration trends</strong> from Puerto Rico to the U.S. mainland. The displacement caused by severe storms is often permanent, transforming the migration pattern from economic necessity to survival:
             </p>
             <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
-                <li>Following **Hurricane Maria in 2017**, Puerto Rico experienced one of the largest **mass displacement events** in recent U.S. history, with hundreds of thousands of residents relocating, primarily to Florida and other eastern states.</li>
-                <li>Migration rates accelerate sharply in the years immediately following major storms, driven by the loss of homes, lack of **job opportunities**, and the realization that rebuilding will take years.</li>
-                <li>This outward migration results in a **long-term decline in the tax base and population**, challenging the island’s ability to recover economically and manage its debt.</li>
+                <li>Following <strong>Hurricane Maria in 2017</strong>, Puerto Rico experienced one of the largest <strong>mass displacement events</strong> in recent U.S. history, with hundreds of thousands of residents relocating, primarily to Florida and other eastern states.</li>
+                <li>Migration rates accelerate sharply in the years immediately following major storms, driven by the loss of homes, lack of <strong>job opportunities</strong>, and the realization that rebuilding will take years.</li>
+                <li>This outward migration results in a <strong>long-term decline in the tax base and population</strong>, challenging the island’s ability to recover economically and manage its debt.</li>
             </ul>
         </div>
         
@@ -202,6 +200,29 @@
                 <li><strong>Disaster Recovery Portal:</strong> Puerto Rico Disaster Recovery Transparency Portal (COR3) for economic impact data.</li>
             </ul>
         </div>
+      </section>
+
+      <section class="card p-6">
+          <h2 class="text-lg font-semibold mb-4">Caribbean Tropical Cyclone Trends (2015-2024)</h2>
+          <p class="mb-4 text-sm text-gray-600">
+              The following graphs illustrate the frequency and intensity of tropical systems in the Caribbean region over the past decade, derived from track data.
+          </p>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div>
+                  <h3 class="font-semibold mb-2">Number of Named Tropical Systems per Year</h3>
+                  <div class="mini bg-gray-50 rounded p-3 flex items-center justify-center">
+                      <img src="hurricane_time_series.png" alt="Line chart showing the number of named tropical systems per year from 2015 to 2024. The highest count is 13 systems in 2020." class="w-full h-full object-contain">
+                  </div>
+              </div>
+
+              <div>
+                  <h3 class="font-semibold mb-2">Maximum Category Reached by Systems</h3>
+                  <div class="mini bg-gray-50 rounded p-3 flex items-center justify-center">
+                      <img src="hurricane_category_distribution.png" alt="Bar chart showing the distribution of the maximum wind category reached by named tropical systems from 2015 to 2024." class="w-full h-full object-contain">
+                  </div>
+              </div>
+          </div>
       </section>
       
       </main>
@@ -336,6 +357,9 @@
         // Use a dedicated control container to ensure proper positioning in Leaflet
         L.Control.HurricaneLegend = L.Control.extend({
             onAdd: function(map) {
+                // Attach the manually created div element
+                L.DomUtil.addClass(div, 'leaflet-control-hu-legend');
+                L.DomEvent.disableClickPropagation(div);
                 return div;
             },
             onRemove: function(map) {
