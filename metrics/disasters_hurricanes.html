@@ -5,25 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Natural Disaster Map: Hurricane Tracks in Puerto Rico</title>
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
 
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
   <style>
-    /* ... (Existing CSS) ... */
-
-    .mini { min-height: 300px; } 
-
-    /* IMPORTANT FIX: Force canvas dimensions for Chart.js inside scaled/flex containers */
-    .mini canvas {
-        width: 100% !important;
-        height: 100% !important;
-        display: block; /* Ensure it behaves correctly in the flow */
-    }
-    
-    /* ... (Remaining CSS) ... */
+    /* ... (CSS Styles remain largely unchanged) ... */
     .card {
       background:#fff;
       border-radius:1rem;
@@ -51,6 +41,15 @@
       padding:5px 10px;
     }
 
+    .mini { min-height: 300px; } /* Increased min-height for bigger graphs */
+    
+    /* IMPORTANT FIX: Force canvas dimensions for Chart.js inside containers */
+    .mini canvas {
+        width: 100% !important;
+        height: 100% !important;
+        display: block; /* Ensure it behaves correctly in the flow */
+    }
+
     /* CUSTOM: Hurricane Legend positioned bottom-right */
     .leaflet-control-hu-legend {
         position: absolute !important; 
@@ -66,6 +65,7 @@
     }
     
     /* Global wrappers/dropdowns remain unchanged */
+    /* NOTE: Original transition timing (300ms) is increased in JS for smoother hover */
     #metrics-menu {opacity: 0; visibility: hidden; transform: translateY(4px); pointer-events: none; transition: opacity .15s ease, transform .15s ease, visibility .15s ease;}
     #metrics-dropdown-root:hover #metrics-menu, #metrics-dropdown-root.hovering #metrics-menu {opacity: 1; visibility: visible; transform: translateY(0); pointer-events: auto;}
     #metrics-dropdown-root:hover #metrics-chevron, #metrics-dropdown-root.hovering #metrics-chevron {transform: rotate(180deg);}
@@ -386,7 +386,7 @@
     }
     // ---------------------- End Hurricane Plotting Logic ----------------------
 
-    // ---------------------- Hurricane Chart Logic (NEW) ----------------------
+    // ---------------------- Hurricane Chart Logic ----------------------
     
     function categorizeWind(wind) {
         if (wind < 64) return 'TD/TS (< 64 kt)';
@@ -424,7 +424,6 @@
             maxCategoryCounts[cat] = (maxCategoryCounts[cat] || 0) + 1;
         });
 
-        // Order the categories correctly for the chart
         const orderedCategoryCounts = {};
         categoryOrder.forEach(cat => {
             if (cat in maxCategoryCounts) {
@@ -515,6 +514,7 @@
             }
         });
     }
+    // ---------------------- End Hurricane Chart Logic ----------------------
 
     // ---------------------- Unused Logic Stubs ----------------------
     const GEOJSON_URL = '../data/tl_2022_72_cousub/pr_municipalities.geojson';
@@ -530,6 +530,9 @@
     function computeBreaks(){}
     function wireMetricToggle(){}
     function wireClearSelection(){}
+    // ---------------------- End Unused Logic Stubs ----------------------
+    
+    // FIX 2: Increased hover timeout for smoother dropdown experience
     function wireDropdown() {
         const root = document.getElementById('metrics-dropdown-root'); if (!root) return; let hoverTimeout; const menu = document.getElementById('metrics-menu');
         function addHovering(){ clearTimeout(hoverTimeout); root.classList.add('hovering'); } 
@@ -541,13 +544,12 @@
         if (root1) { 
             let hoverTimeout; const menu = document.getElementById('map-selection-menu');
             function addHovering(){ clearTimeout(hoverTimeout); root1.classList.add('hovering'); } 
-            function removeHovering(){ hoverTimeout = setTimeout(()=>{ root1.classList.remove('hovering'); }, 500); }
+            function removeHovering(){ hoverTimeout = setTimeout(()=>{ root1.classList.remove('hovering'); }, 500); } // Increased to 500ms
             root1.addEventListener('mouseenter', addHovering); root1.addEventListener('mouseleave', removeHovering); 
             if (menu) { menu.addEventListener('mouseenter', addHovering); menu.addEventListener('mouseleave', removeHovering); }
         }
     }
-    // ---------------------- End Unused Logic Stubs ----------------------
-
+    
     (async function init(){
       
       // Load primary data (Education and GeoJSON)
