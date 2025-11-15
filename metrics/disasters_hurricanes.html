@@ -92,7 +92,8 @@
             <a href="income.html"         class="block px-4 py-2 hover:bg-gray-50">Household Income</a>
             <a href="housing.html"        class="block px-4 py-2 hover:bg-gray-50">Housing Units</a>
             <a href="education.html"      class="block px-4 py-2 hover:bg-gray-50">Education</a>
-            <a href="health.html"         class="block px-4 py-2 bg-gray-100 font-semibold">Natural Disasters</a>
+            <a href="health.html"         class="block px-4 py-2 hover:bg-gray-50">Health</a>
+            <a href="disasters.html"      class="block px-4 py-2 bg-gray-100 font-semibold">Natural Disasters</a>
           </div>
         </div>
       </div>
@@ -211,15 +212,15 @@
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div>
                   <h3 class="font-semibold mb-2">Number of Named Tropical Systems per Year</h3>
-                  <div class="mini bg-gray-50 rounded p-3 flex items-center justify-center">
-                      <img src="hurricane_time_series.png" alt="Line chart showing the number of named tropical systems per year from 2015 to 2024. The highest count is 13 systems in 2020." class="w-full h-full object-contain">
+                  <div class="mini bg-gray-50 rounded p-3">
+                      <canvas id="huLineChart"></canvas>
                   </div>
               </div>
 
               <div>
                   <h3 class="font-semibold mb-2">Maximum Category Reached by Systems</h3>
-                  <div class="mini bg-gray-50 rounded p-3 flex items-center justify-center">
-                      <img src="hurricane_category_distribution.png" alt="Bar chart showing the distribution of the maximum wind category reached by named tropical systems from 2015 to 2024." class="w-full h-full object-contain">
+                  <div class="mini bg-gray-50 rounded p-3">
+                      <canvas id="huBarChart"></canvas>
                   </div>
               </div>
           </div>
@@ -235,6 +236,9 @@
     
     let earthquakeLayerGroup = null; 
     let hurricaneLayerGroup = null; 
+    let huLineChart = null;
+    let huBarChart = null;
+
 
     // ---------------------- Earthquake Plotting Logic (REMOVED/EMPTY) ----------------------
     function plotEarthquakes(data, mapInstance){
@@ -374,17 +378,144 @@
     }
     // ---------------------- End Hurricane Plotting Logic ----------------------
 
+    // ---------------------- Hurricane Chart Logic (NEW) ----------------------
+    
+    function categorizeWind(wind) {
+        if (wind < 64) return 'TD/TS (< 64 kt)';
+        if (wind <= 82) return 'Cat 1 (64-82 kt)';
+        if (wind <= 95) return 'Cat 2 (83-95 kt)';
+        if (wind <= 113) return 'Cat 3 (96-113 kt)';
+        if (wind <= 136) return 'Cat 4 (114-136 kt)';
+        return 'Cat 5 (> 136 kt)';
+    }
+
+    function aggregateHurricaneData(data) {
+        const stormCounts = {};
+        const maxWinds = [];
+
+        data.forEach(storm => {
+            if (storm.path && storm.path.length > 0) {
+                const year = storm.path[0].year;
+                stormCounts[year] = (stormCounts[year] || 0) + 1;
+
+                let maxWind = 0;
+                storm.path.forEach(point => {
+                    maxWind = Math.max(maxWind, point.wind);
+                });
+
+                if (maxWind >= 34) { // Filter out non-tropical systems below TS level
+                    maxWinds.push(maxWind);
+                }
+            }
+        });
+
+        const categoryOrder = ['TD/TS (< 64 kt)', 'Cat 1 (64-82 kt)', 'Cat 2 (83-95 kt)', 'Cat 3 (96-113 kt)', 'Cat 4 (114-136 kt)', 'Cat 5 (> 136 kt)'];
+        const maxCategoryCounts = {};
+        
+        maxWinds.map(categorizeWind).forEach(cat => {
+            maxCategoryCounts[cat] = (maxCategoryCounts[cat] || 0) + 1;
+        });
+
+        // Order the categories correctly for the chart
+        const orderedCategoryCounts = {};
+        categoryOrder.forEach(cat => {
+            if (cat in maxCategoryCounts) {
+                orderedCategoryCounts[cat] = maxCategoryCounts[cat];
+            }
+        });
+
+        return { 
+            timeSeries: stormCounts, 
+            maxCategoryDistribution: orderedCategoryCounts
+        };
+    }
+
+    function drawHurricaneCharts(aggregatedData) {
+        const tsCtx = document.getElementById('huLineChart').getContext('2d');
+        const catCtx = document.getElementById('huBarChart').getContext('2d');
+
+        // --- 1. Time Series Chart (Named Storms per Year) ---
+        const years = Object.keys(aggregatedData.timeSeries).sort((a, b) => a - b);
+        const counts = years.map(year => aggregatedData.timeSeries[year]);
+
+        if (huLineChart) huLineChart.destroy();
+        huLineChart = new Chart(tsCtx, {
+            type: 'line',
+            data: {
+                labels: years,
+                datasets: [{
+                    label: 'Storm Count',
+                    data: counts,
+                    borderColor: '#3b82f6', // Tailwind blue-500
+                    tension: 0.2,
+                    pointRadius: 4,
+                    fill: false
+                }]
+            },
+            options: {
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { title: { display: true, text: 'Year' } },
+                    y: { 
+                        title: { display: true, text: 'Named Systems Count' }, 
+                        beginAtZero: true, 
+                        suggestedMax: Math.max(...counts) * 1.1 
+                    }
+                },
+                maintainAspectRatio: false
+            }
+        });
+
+        // --- 2. Maximum Category Distribution (Bar Chart) ---
+        const catLabels = Object.keys(aggregatedData.maxCategoryDistribution);
+        const catCounts = Object.values(aggregatedData.maxCategoryDistribution);
+
+        // Map colors based on category index (from HU_COLORS used for the map legend)
+        const HU_COLORS_CHART = ['#a3a3a3', '#3b82f6', '#fde047', '#fb923c', '#dc2626', '#991b1b']; 
+        const categoryOrder = ['TD/TS (< 64 kt)', 'Cat 1 (64-82 kt)', 'Cat 2 (83-95 kt)', 'Cat 3 (96-113 kt)', 'Cat 4 (114-136 kt)', 'Cat 5 (> 136 kt)'];
+        
+        const barColors = catLabels.map(label => {
+            const index = categoryOrder.indexOf(label);
+            return (index !== -1) ? HU_COLORS_CHART[index] : '#ccc';
+        });
+
+        if (huBarChart) huBarChart.destroy();
+        huBarChart = new Chart(catCtx, {
+            type: 'bar',
+            data: {
+                labels: catLabels,
+                datasets: [{
+                    label: 'Number of Systems',
+                    data: catCounts,
+                    backgroundColor: barColors
+                }]
+            },
+            options: {
+                plugins: { 
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: (c) => `Systems: ${c.parsed.y}`
+                        }
+                    }
+                },
+                scales: {
+                    x: { title: { display: true, text: 'Maximum Wind Category' } },
+                    y: { title: { display: true, text: 'Count' }, beginAtZero: true }
+                },
+                maintainAspectRatio: false
+            }
+        });
+    }
 
     // ---------------------- Unused Logic Stubs ----------------------
     const GEOJSON_URL = '../data/tl_2022_72_cousub/pr_municipalities.geojson';
     const EDU_JSON    = '../data/education/municipios_acs_education_2013_2023_wide.json';
-    const YEARS = [2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023];
     const FIXED_GREEN_COLOR = '#22c55e'; // Kept constant for styleForFeature
 
     function styleForFeature(feature){
       return { fillColor: FIXED_GREEN_COLOR, weight: 1.2, color:'#111827', fillOpacity:.75 };
     }
-
     // Dummy functions for compilation
     let _rows = []; 
     function calculateExtremeValues(){}
@@ -431,7 +562,6 @@
         console.error("Failed to load GeoJSON data.");
       }
 
-      calculateExtremeValues();
 
       const prBounds = L.latLngBounds([[17.85, -67.45],[18.55, -65.25]]);
       
@@ -471,8 +601,6 @@
         if (b.isValid()) map.fitBounds(b, { padding:[15,15] });
       }
 
-      computeBreaks();
-
       // --- DATA LOADING AND PLOTTING ---
       
       // 1. Hurricane Data (Plot on Map 1)
@@ -484,8 +612,12 @@
           console.error("Error loading or processing hurricane data:", HU_JSON, e);
       }
       
-      plotHurricaneTracks(fullHurricaneData, map); // Plot on Map 1
-      renderHurricaneLegend(map); // Legend on Map 1
+      plotHurricaneTracks(fullHurricaneData, map); // Plot tracks on map
+      renderHurricaneLegend(map); // Legend on map
+
+      // Call the new charting function
+      const hurricaneStats = aggregateHurricaneData(fullHurricaneData);
+      drawHurricaneCharts(hurricaneStats);
 
       // ... Initial detail updates and wiring ...
       wireMetricToggle();
