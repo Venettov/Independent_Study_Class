@@ -287,11 +287,8 @@
   </div>
 
   <script>
-    // ---------------------- Data Paths ----------------------
-    // NOTE: This path is set to the standard relative path that should be correct.
-    // If running on GitHub Pages and this fails (404), you may need to try 
-    // const HU_JSON = './data/natural_disasters/caribbean_hurricane_tracks_2015_2025.json'; 
-    // (removing the ../) OR ensure the data folder is pushed correctly.
+    // ---------------------- Data Paths (REVERTED TO ORIGINAL ../data/ PATH) ----------------------
+    // NOTE: Paths are maintained as per user's working server environment.
     const EQ_JSON = '../data/natural_disasters/puerto_rico_earthquakes.json'; 
     const HU_JSON = '../data/natural_disasters/caribbean_hurricane_tracks_2015_2025.json'; 
     let earthquakeLayerGroup = null; 
@@ -769,12 +766,14 @@
     (async function init(){
       
       // Load primary data (Education and GeoJSON)
-      // NOTE: Using the standard relative path here
-      const res = await fetch(EDU_JSON, { cache:'no-store' });
+      const EDU_JSON_PATH = '../data/education/municipios_acs_education_2013_2023_wide.json'; // Original Path
+      const GEOJSON_URL_PATH = '../data/tl_2022_72_cousub/pr_municipalities.geojson'; // Original Path
+      
+      const res = await fetch(EDU_JSON_PATH, { cache:'no-store' });
       const rawData = await res.json();
       _rows = rawData.filter(row => !row.metadata);
       
-      const gjRes = await fetch(GEOJSON_URL + '?' + Date.now());
+      const gjRes = await fetch(GEOJSON_URL_PATH + '?' + Date.now());
       const geojsonData = await gjRes.json(); // Load GeoJSON once
 
       calculateExtremeValues();
@@ -872,7 +871,6 @@
       let fullEarthquakeData = [];
       let aggregatedData = { timeSeries: {}, magnitudeBins: {}, totalCount: 0 };
       try {
-          // *** WARNING: If this still fails, your GitHub Pages path is the issue. ***
           const eqRes = await fetch(EQ_JSON);
           fullEarthquakeData = await eqRes.json();
           aggregatedData = aggregateEarthquakeData(fullEarthquakeData);
@@ -887,7 +885,6 @@
       // 2. Hurricane Data (Map 2)
       let fullHurricaneData = [];
       try {
-          // *** WARNING: If this still fails, your GitHub Pages path is the issue. ***
           const huRes = await fetch(HU_JSON);
           fullHurricaneData = await huRes.json();
       } catch (e) {
