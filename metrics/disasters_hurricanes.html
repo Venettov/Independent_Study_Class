@@ -5,15 +5,25 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Natural Disaster Map: Hurricane Tracks in Puerto Rico</title>
 
-  <script src="https://cdn.tailwindcss.com"></script>
-
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
-
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+
 
   <style>
-    /* ... (CSS Styles remain largely unchanged) ... */
+    /* ... (Existing CSS) ... */
+
+    .mini { min-height: 300px; } 
+
+    /* IMPORTANT FIX: Force canvas dimensions for Chart.js inside scaled/flex containers */
+    .mini canvas {
+        width: 100% !important;
+        height: 100% !important;
+        display: block; /* Ensure it behaves correctly in the flow */
+    }
+    
+    /* ... (Remaining CSS) ... */
     .card {
       background:#fff;
       border-radius:1rem;
@@ -41,8 +51,6 @@
       padding:5px 10px;
     }
 
-    .mini { min-height: 300px; } /* Increased min-height for bigger graphs */
-
     /* CUSTOM: Hurricane Legend positioned bottom-right */
     .leaflet-control-hu-legend {
         position: absolute !important; 
@@ -69,12 +77,6 @@
     .leaflet-control-map-dropdown .dropdown-root.hovering .dropdown-menu {opacity: 1; visibility: visible; transform: translateY(0); pointer-events: auto;}
     .leaflet-control-map-dropdown .dropdown-root.hovering #map-selection-chevron {transform: rotate(180deg);}
     .leaflet-control-map-dropdown .dropdown-menu a {text-decoration: none; padding: 6px 12px; font-size: 13px;}
-
-    /* NEW: Fixes Chart.js rendering issue inside hidden/scaled containers */
-    .mini canvas {
-        width: 100% !important;
-        height: 100% !important;
-    }
   </style>
 </head>
 <body class="bg-gray-50 text-gray-900 font-sans">
@@ -621,7 +623,7 @@
       plotHurricaneTracks(fullHurricaneData, map); // Plot tracks on map
       renderHurricaneLegend(map); // Legend on map
 
-      // ** FIX FOR BLANK GRAPHS: Wait for DOM resize before drawing charts **
+      // ** FIX FOR BLANK GRAPHS: Deferred Chart Initialization **
       const hurricaneStats = aggregateHurricaneData(fullHurricaneData);
       setTimeout(() => {
           drawHurricaneCharts(hurricaneStats);
