@@ -43,21 +43,7 @@
 
     .mini { min-height: 300px; } /* Increased min-height for bigger graphs */
 
-    /* CUSTOM: Earthquake Legend positioned bottom-left */
-    .leaflet-control-eq-legend {
-        position: absolute;
-        bottom: 10px; 
-        left: 10px;  /* Position set to LEFT */
-        background: white;
-        padding: 8px 10px;
-        border-radius: 8px;
-        box-shadow: 0 2px 8px rgba(0,0,0,.15);
-        font: 12px/1.3 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
-        z-index: 1000; 
-        width: 150px;
-    }
-
-    /* CUSTOM: Removed Hurricane Legend positioning */
+    /* CUSTOM: Removed Earthquake Legend CSS */
     
     /* Global wrappers/dropdowns remain unchanged */
     #metrics-menu {opacity: 0; visibility: hidden; transform: translateY(4px); pointer-events: none; transition: opacity .15s ease, transform .15s ease, visibility .15s ease;}
@@ -226,7 +212,6 @@
             <h4 class="font-semibold">Data Source & Research References:</h4>
             <ul class="list-disc list-inside ml-4 space-y-1">
                 <li><strong>Earthquake Data Source:</strong> The raw earthquake data plotted on the map is assumed to be sourced from the <strong>U.S. Geological Survey (USGS)</strong> or the <strong>Puerto Rico Seismic Network (PRSN)</strong>, typically available through a JSON API. (Link: <code>../data/natural_disasters/puerto_rico_earthquakes.json</code>)</li>
-                <li><strong>Hurricane Data Source:</strong> Filtered tracks for the Caribbean from 2015-2025. (Link: <code>../data/natural_disasters/caribbean_hurricane_tracks_2015_2025.json</code>)</li>
                 <li><strong>Geology and Impact Research:</strong> <a href="https://pubs.usgs.gov/fs/fs141-00/fs141-00.pdf" target="_blank" class="text-blue-600 underline">USGS: Earthquakes and Tsunamis in Puerto Rico and the U.S. Virgin Islands</a></li>
                 <li><strong>2020 Quake Impact:</strong> <a href="https://recovery.pr.gov/en/earthquakes-response" target="_blank" class="text-blue-600 underline">Puerto Rico Disaster Recovery Transparency Portal (COR3)</a></li>
             </ul>
@@ -239,14 +224,15 @@
   <script>
     // ---------------------- Data Paths ----------------------
     const EQ_JSON = '../data/natural_disasters/puerto_rico_earthquakes.json'; 
-    // Removed HU_JSON and related variables
+    // Removed HU_JSON
     let earthquakeLayerGroup = null; 
     
-    // ---------------------- Earthquake Color & Size Scaling ----------------------
-    const MAGNITUDE_BREAKS = [3.5, 4.5, 5.5, 6.5, 7.5];
-    const MAGNITUDE_COLORS = ['#ffffe5', '#fee391', '#fec44f', '#fe9929', '#d95f0e', '#993404'];
-    const MIN_MAG_THRESHOLD = 3.5; 
+    // ---------------------- Earthquake Color & Size Scaling (REMOVED) ----------------------
+    const MAGNITUDE_BREAKS = [3.5, 4.5, 5.5, 6.5, 7.5]; // Retained for plotEarthquakes but not used below
+    const MAGNITUDE_COLORS = ['#ffffe5', '#fee391', '#fec44f', '#fe9929', '#d95f0e', '#993404']; // Retained for plotEarthquakes but not used below
+    const MIN_MAG_THRESHOLD = 3.5; // Retained for plotEarthquakes but not used below
 
+    // Removed helper functions for plotting color and radius (kept plotEarthquakes for now)
     function getColorForMagnitude(mag) {
       if (mag <= MAGNITUDE_BREAKS[0]) return MAGNITUDE_COLORS[0];
       if (mag <= MAGNITUDE_BREAKS[1]) return MAGNITUDE_COLORS[1];
@@ -263,204 +249,38 @@
         return Math.min(size, 18);
     }
 
+    // REMOVED: plotEarthquakes function body (now empty)
     function plotEarthquakes(data, mapInstance){
+        // This function is intentionally left empty to prevent plotting earthquake data on Map 1.
         if (!data || data.length === 0) {
-            console.error("Earthquake data is empty or failed to load.");
+            console.error("Earthquake data is empty or failed to load. (Not Plotting on Map 1)");
             return;
         }
-
-        if (earthquakeLayerGroup) {
-            earthquakeLayerGroup.clearLayers();
-        } else {
-            earthquakeLayerGroup = L.layerGroup().addTo(mapInstance);
-        }
-
-        data.forEach(event => {
-            const mag = Number(event.mag);
-            
-            if (mag < MIN_MAG_THRESHOLD) return; 
-
-            const lat = event.latitude;
-            const lng = event.longitude;
-            const date = event.date;
-            const place = event.place || 'Unknown Location';
-            const depth = event.depth_km;
-
-            const circle = L.circleMarker([lat, lng], {
-                radius: getRadiusForMagnitude(mag), 
-                fillColor: getColorForMagnitude(mag), 
-                color: '#333', 
-                weight: 0.5,
-                opacity: 0.8,
-                fillOpacity: 0.8
-            }).addTo(earthquakeLayerGroup);
-
-            circle.bindPopup(`
-                <strong>Magnitude ${mag.toFixed(1)} Earthquake</strong>
-                <br>Size/Color: Scaled by Magnitude
-                <br>Place: ${place}
-                <br>Date: ${new Date(date).toLocaleString()}
-                <br>Depth: ${depth.toFixed(1)} km
-            `);
-        });
-        
-        earthquakeLayerGroup.bringToFront();
     }
     
+    // REMOVED: renderEarthquakeLegend function
     function renderEarthquakeLegend(map){
-        const div = document.createElement('div');
-        div.className = 'leaflet-control-eq-legend'; 
-        
-        const title = 'Earthquake Magnitude (M 3.5+)';
-        let html = `<div style="font-weight:600;margin-bottom:5px; border-bottom: 1px solid #ccc;">${title}</div>`;
-
-        // Using the predefined Magnitude breaks and colors for the legend
-        MAGNITUDE_BREAKS.forEach((mag, i) => {
-            const color = MAGNITUDE_COLORS[i];
-            const size = getRadiusForMagnitude(mag);
-            
-            let label;
-            if (i === 0) {
-                label = `M $\\le$ ${mag.toFixed(1)} (Small)`;
-            } else if (i < MAGNITUDE_BREAKS.length - 1) {
-                label = `M ${MAGNITUDE_BREAKS[i-1].toFixed(1)} - ${mag.toFixed(1)}`;
-            } else {
-                 label = `M $\\ge$ ${MAGNITUDE_BREAKS[i-1].toFixed(1)} (Large)`;
-            }
-
-            html += `
-                <div style="display:flex;align-items:center;gap:8px;margin:4px 0;">
-                    <svg width="25" height="25" style="overflow: visible;">
-                        <circle cx="12.5" cy="12.5" r="${size / 2}" fill="${color}" stroke="#333" stroke-width="0.5" />
-                    </svg>
-                    <span>${label}</span>
-                </div>
-            `;
-        });
-        
-        const customControl = L.control({position: 'bottomleft'});
-        customControl.onAdd = function() {
-            div.style.position = 'relative'; 
-            return div;
-        };
-        customControl.addTo(map);
+        // Function removed entirely.
     }
     // ---------------------- End Earthquake Plotting Logic ----------------------
 
+    // ---------------------- Hurricane Plotting Logic (REMOVED in previous step) ----------------------
 
-    // ---------------------- Hurricane Plotting Logic (REMOVED) ----------------------
-    // Removed all HU_WIND_BREAKS, HU_COLORS, getTrackColor, getStatusLabel, plotHurricaneTracks, and renderHurricaneLegend functions.
-    // ---------------------- End Hurricane Plotting Logic ----------------------
-
-
-    // ---------------------- Earthquake Chart Logic (UPDATED COLORS) ----------------------
+    // ---------------------- Earthquake Chart Logic (REMOVED/Made Empty) ----------------------
+    // Removed dependency on Chart.js initialization logic
+    
     function aggregateEarthquakeData(data) {
-        if (!data || data.length === 0) return { timeSeries: {}, magnitudeBins: {}, totalCount: 0 };
-        // ... (data aggregation logic remains the same) ...
-        const timeSeries = {}; 
-        const magnitudeBins = {
-            '3.5-4.5': 0, '4.5-5.5': 0, '5.5-6.5': 0, '6.5-7.5': 0, '7.5+': 0
-        };
-        let totalCount = 0;
-
-        const MIN_MAG_THRESHOLD = 3.5;
-
-        data.forEach(event => {
-            const mag = Number(event.mag);
-            const date = new Date(event.date);
-
-            if (mag >= MIN_MAG_THRESHOLD) {
-                totalCount++;
-
-                // 1. Time Series (by year)
-                const year = date.getFullYear();
-                timeSeries[year] = (timeSeries[year] || 0) + 1;
-
-                // 2. Magnitude Distribution
-                if (mag >= 7.5) magnitudeBins['7.5+']++;
-                else if (mag >= 6.5) magnitudeBins['6.5-7.5']++;
-                else if (mag >= 5.5) magnitudeBins['5.5-6.5']++;
-                else if (mag >= 4.5) magnitudeBins['4.5-5.5']++;
-                else if (mag >= 3.5) magnitudeBins['3.5-4.5']++;
-            }
-        });
-
-        return { timeSeries, magnitudeBins, totalCount };
+        // Function removed entirely.
+        return { timeSeries: {}, magnitudeBins: {}, totalCount: 0 };
     }
     
     function updateEarthquakeMetricCard(count){
-        document.getElementById('total-eq-val').textContent = count.toLocaleString();
+        // Function removed entirely.
+        document.getElementById('total-eq-val').textContent = '—';
     }
     
     function drawEarthquakeCharts(aggregatedData){
-        const timeSeriesCtx = document.getElementById('lineChart').getContext('2d');
-        const magDistCtx = document.getElementById('barChart').getContext('2d');
-        
-        // --- 1. Earthquake Time Series (Line Chart) ---
-        const years = Object.keys(aggregatedData.timeSeries).sort();
-        const counts = years.map(year => aggregatedData.timeSeries[year]);
-        
-        if (window.earthquakeLineChart) window.earthquakeLineChart.destroy();
-        window.earthquakeLineChart = new Chart(timeSeriesCtx, {
-            type: 'line',
-            data: {
-                labels: years,
-                datasets: [{
-                    label: 'Earthquake Count',
-                    data: counts,
-                    borderColor: '#dc2626', // Red line
-                    tension: 0.2,
-                    pointRadius: 4,
-                    fill: false
-                }]
-            },
-            options: {
-                plugins: { legend: { display: false } },
-                scales: {
-                    x: { title: { display: true, text: 'Year' } },
-                    y: { title: { display: true, text: 'Count (M 3.5+)' }, beginAtZero: true }
-                },
-                maintainAspectRatio: false
-            }
-        });
-
-        // --- 2. Magnitude Distribution (Bar Chart) ---
-        const magLabels = Object.keys(aggregatedData.magnitudeBins);
-        const magCounts = Object.values(aggregatedData.magnitudeBins);
-        
-        // UPDATED COLORS: New Blue/Cyan Palette for Bar Chart
-        const NEW_COLORS = ['#38bdf8', '#0ea5e9', '#0284c7', '#0369a1', '#075985'];
-        
-        const backgroundColors = magLabels.map((label, i) => {
-            if (label === '3.5-4.5') return NEW_COLORS[0]; // Light Blue/Sky
-            if (label === '4.5-5.5') return NEW_COLORS[1]; // Regular Blue/Cyan
-            if (label === '5.5-6.5') return NEW_COLORS[2]; // Darker Blue
-            if (label === '6.5-7.5') return NEW_COLORS[3]; // Even Darker Blue
-            return NEW_COLORS[4]; // For 7.5+ (Deep Blue)
-        });
-
-        if (window.earthquakeBarChart) window.earthquakeBarChart.destroy();
-        window.earthquakeBarChart = new Chart(magDistCtx, {
-            type: 'bar',
-            data: {
-                labels: magLabels,
-                datasets: [{
-                    label: 'Number of Earthquakes',
-                    data: magCounts,
-                    backgroundColor: backgroundColors
-                }]
-            },
-            options: {
-                plugins: { legend: { display: false } },
-                scales: {
-                    x: { title: { display: true, text: 'Magnitude Range' } },
-                    y: { title: { display: true, text: 'Count' }, beginAtZero: true }
-                },
-                maintainAspectRatio: false
-            }
-        });
-        
-        updateEarthquakeMetricCard(aggregatedData.totalCount);
+        // Function removed entirely.
     }
     // ---------------------- End Earthquake Chart Logic ----------------------
 
@@ -607,7 +427,7 @@
       const prBounds = L.latLngBounds([[17.85, -67.45],[18.55, -65.25]]);
       prBoundsGlobal = prBounds;
       
-      // --- Map 1 Init (Earthquakes / Educational Choropleth) ---
+      // --- Map 1 Init (Educational Choropleth) ---
       map = L.map('map', { zoomControl: false, zoomSnap: .25 }).fitBounds(prBounds);
 
       L.control.zoom({ position: 'topleft' }).addTo(map);
@@ -654,25 +474,12 @@
       if (b.isValid()) map.fitBounds(b, { padding:[15,15] });
 
 
+      computeBreaks();
+
       // --- DATA LOADING AND PLOTTING ---
       
-      // 1. Earthquake Data (Map 1 and Charts)
-      let fullEarthquakeData = [];
-      let aggregatedData = { timeSeries: {}, magnitudeBins: {}, totalCount: 0 };
-      try {
-          const eqRes = await fetch(EQ_JSON);
-          fullEarthquakeData = await eqRes.json();
-          aggregatedData = aggregateEarthquakeData(fullEarthquakeData);
-      } catch (e) {
-          console.error("Error loading or processing earthquake data:", EQ_JSON, e);
-      }
-      
-      drawEarthquakeCharts(aggregatedData);
-      plotEarthquakes(fullEarthquakeData, map); // Plot on Map 1
-      renderEarthquakeLegend(map); // Legend on Map 1
-
-      // 2. Hurricane Data (Map 2) - Removed Plotting and Fetch Logic
-      // Removed fetch(HU_JSON) and plotHurricaneTracks/renderHurricaneLegend calls.
+      // 1. Earthquake Data (Map 1 and Charts) - Fetching is removed
+      // No data fetching, plotting, or legend rendering for Earthquakes is executed.
 
       const initName = 'Puerto Rico';
       updateDetails(initName, statsForMunicipio(initName), null);
