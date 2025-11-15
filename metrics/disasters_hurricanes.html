@@ -44,10 +44,11 @@
     .mini { min-height: 300px; } /* Increased min-height for bigger graphs */
 
     /* CUSTOM: Hurricane Legend positioned bottom-right */
+    /* NOTE: Added !important and used Leaflet's dedicated control containers to ensure visibility */
     .leaflet-control-hu-legend {
-        position: absolute;
-        bottom: 10px; 
-        right: 10px;  /* Position set to RIGHT */
+        position: absolute !important; 
+        bottom: 10px !important; 
+        right: 10px !important;
         background: white;
         padding: 8px 10px;
         border-radius: 8px;
@@ -170,30 +171,35 @@
         <h2 class="text-lg font-semibold">Analysis and Supporting Resources</h2>
 
         <div class="space-y-4">
-            <h3 class="text-base font-semibold text-gray-700">Seismic and Hurricane Risk in Puerto Rico 🇵🇷</h3>
+            <h3 class="text-base font-semibold text-gray-700">Hurricane Impact and Migration in Puerto Rico 🇵🇷</h3>
             <p>
-                Puerto Rico faces high exposure to two major geophysical risks: **seismic activity** and **tropical cyclones**. These hazards compound socioeconomic challenges, particularly infrastructure vulnerability and population displacement.
+                Puerto Rico is geographically exposed to frequent and severe **tropical cyclones (hurricanes and tropical storms)**, with impacts often triggering significant socioeconomic shifts, most notably mass migration.
             </p>
             
-            <h4 class="text-sm font-semibold text-gray-600 mt-4">Tectonic Risk & Earthquake Impact:</h4>
+            <h4 class="text-sm font-semibold text-gray-600 mt-4">Socioeconomic and Infrastructural Impact:</h4>
             <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
-                <li>Puerto Rico lies on a **highly active tectonic boundary** between the **North American Plate** and the **Caribbean Plate**, generating frequent seismic activity.</li>
-                <li>Major offshore zones include the **Puerto Rico Trench** (subduction zone to the north) and the **Muertos Trough** (incipient subduction zone to the south).</li>
-                <li>The **2019-2020 earthquake swarm**, which peaked with a **Magnitude 6.4** shock, caused widespread power outages, severely damaged key infrastructure (like the Costa Sur power plant), and resulted in damage estimated at **$3.1 billion**.</li>
+                <li>Major hurricanes inflict severe damage to the island's already fragile **infrastructure**, including the electrical grid, transportation networks, and housing stock.</li>
+                <li>The recovery process is often slow and complicated by existing **economic instability** and structural vulnerabilities.</li>
+                <li>The destruction leads to long-term **service disruption**, including prolonged power outages and limited access to essential medical and educational services.</li>
             </ul>
 
-            <h4 class="text-sm font-semibold text-gray-600 mt-4">Hurricane Risk & Climatological Impact:</h4>
+            <h4 class="text-sm font-semibold text-gray-600 mt-4">Disaster-Driven Migration:</h4>
+            <p>
+                Hurricanes serve as significant accelerators of pre-existing **migration trends** from Puerto Rico to the U.S. mainland. The displacement caused by severe storms is often permanent, transforming the migration pattern from economic necessity to survival:
+            </p>
             <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
-                <li>The region is frequently impacted by tropical cyclones (hurricanes and tropical storms) during the Atlantic season, with the map visualizing tracks from 2015 to 2025.</li>
-                <li>Recent high-impact events like **Hurricane Maria (2017)** and others have led to cascading effects on housing, employment, and public health, significantly complicating post-earthquake recovery efforts.</li>
+                <li>Following **Hurricane Maria in 2017**, Puerto Rico experienced one of the largest **mass displacement events** in recent U.S. history, with hundreds of thousands of residents relocating, primarily to Florida and other eastern states.</li>
+                <li>Migration rates accelerate sharply in the years immediately following major storms, driven by the loss of homes, lack of **job opportunities**, and the realization that rebuilding will take years.</li>
+                <li>This outward migration results in a **long-term decline in the tax base and population**, challenging the island’s ability to recover economically and manage its debt.</li>
             </ul>
         </div>
         
         <div class="space-y-2 text-sm text-gray-600">
             <h4 class="font-semibold">Research References:</h4>
             <ul class="list-disc list-inside ml-4 space-y-1">
-                <li><strong>Geology and Impact Research:</strong> <a href="https://pubs.usgs.gov/fs/fs141-00/fs141-00.pdf" target="_blank" class="text-blue-600 underline">USGS: Earthquakes and Tsunamis in Puerto Rico and the U.S. Virgin Islands</a></li>
-                <li><strong>2020 Quake Impact:</strong> <a href="https://recovery.pr.gov/en/earthquakes-response" target="_blank" class="text-blue-600 underline">Puerto Rico Disaster Recovery Transparency Portal (COR3)</a></li>
+                <li><strong>Migration and Demographic Shifts:</strong> Center for Puerto Rican Studies (CUNY) research on post-Maria migration trends.</li>
+                <li><strong>Hurricane Risk and Climate Vulnerability:</strong> General NOAA/NHC data on tropical cyclone exposure in the Caribbean.</li>
+                <li><strong>Disaster Recovery Portal:</strong> Puerto Rico Disaster Recovery Transparency Portal (COR3) for economic impact data.</li>
             </ul>
         </div>
       </section>
@@ -209,6 +215,16 @@
     let earthquakeLayerGroup = null; 
     let hurricaneLayerGroup = null; 
 
+    // ---------------------- Earthquake Plotting Logic (REMOVED/EMPTY) ----------------------
+    function plotEarthquakes(data, mapInstance){
+        if (!data || data.length === 0) {
+            return;
+        }
+    }
+    
+    function renderEarthquakeLegend(map){
+    }
+    
     // ---------------------- Hurricane Plotting Logic ----------------------
 
     const HU_WIND_BREAKS = [34, 64, 83, 96, 113]; // Knots (TS, HU1, HU2, HU3, HU4/5)
@@ -261,7 +277,7 @@
             // 1. Draw the polylines
             L.polyline(latlons, { 
                 color: '#333', 
-                weight: 3.0, // MODIFIED: Thicker line
+                weight: 3.0, 
                 opacity: 0.6 
             }).addTo(hurricaneLayerGroup);
 
@@ -273,7 +289,7 @@
                 const date = p.date.replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3');
 
                 L.circleMarker([p.lat, p.lon], {
-                    radius: 6.0, // MODIFIED: Larger circle
+                    radius: 6.0, 
                     fillColor: color, 
                     color: '#000', 
                     weight: 0.5,
@@ -317,12 +333,20 @@
             `;
         });
         
-        const customControl = L.control({position: 'bottomright'});
-        customControl.onAdd = function() {
-            div.style.position = 'relative'; 
-            return div;
-        };
-        customControl.addTo(map);
+        // Use a dedicated control container to ensure proper positioning in Leaflet
+        L.Control.HurricaneLegend = L.Control.extend({
+            onAdd: function(map) {
+                return div;
+            },
+            onRemove: function(map) {
+                // Nothing to do here
+            }
+        });
+        
+        // Check if control already exists before adding
+        if (!map.findControl(L.Control.HurricaneLegend)) {
+            new L.Control.HurricaneLegend({position: 'bottomright'}).addTo(map);
+        }
     }
     // ---------------------- End Hurricane Plotting Logic ----------------------
 
@@ -331,95 +355,24 @@
     const GEOJSON_URL = '../data/tl_2022_72_cousub/pr_municipalities.geojson';
     const EDU_JSON    = '../data/education/municipios_acs_education_2013_2023_wide.json';
     const YEARS = [2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023];
-
-    const fmtPct = (v) => `${(Number(v)||0).toFixed(1)}%`;
-    const ppFmt = (v) => `${(Number(v)||0).toFixed(2)} pp`;
-    const signedPP = (n) => (n > 0 ? '+' : '') + ppFmt(n);
-    const signedPct = (n) => (n > 0 ? '+' : '') + fmtPct(n);
-    const CHORO_COLORS = ['#7f1d1d', '#b91c1c', '#f97316', '#bbf7d0', '#22c55e', '#15803d']; 
-    const FIXED_GREEN_COLOR = CHORO_COLORS[4]; 
-
-    const PCT_BREAKS = [20.0, 25.0, 30.0, 35.0, 40.0]; 
-    let ABS_BREAKS = [0.0, 2.0, 4.0, 6.0, 8.0]; 
-    let _extremeValues = { min: Infinity, max: -Infinity };
-    function colorFor(value, breaks, isLatest) {
-      if (!Number.isFinite(value)) return FIXED_GREEN_COLOR; 
-      return FIXED_GREEN_COLOR;
-    }
-    function sanitizeName(s){ 
-      return String(s||'').replace(/^\s*[.\-•]\s*/, '').replace(/\s*Municipio$/,'').trim(); 
-    }
-    function valFromRow(row, y){
-      const v = row?.[String(y)];
-      const n = Number(v);
-      return Number.isFinite(n) ? n : NaN;
-    }
-    function statsForMunicipio(name){
-      name = sanitizeName(name);
-      const row = _rows.find(r => sanitizeName(r.Municipio) === name && !r.metadata);
-      if (!row) return null;
-      const vals = YEARS.map(y => valFromRow(row, y));
-      const firstYear = YEARS[0];
-      const lastYear = YEARS.length - 1;
-      const changeAbs = row[`Cum_Change_${firstYear}_${YEARS[lastYear]}`]; 
-      const changePct = row[`Cum_Pct_Change_${firstYear}_${YEARS[lastYear]}`]; 
-      const annualChange = row[`Change_${YEARS[lastYear-1]}_${YEARS[lastYear]}`];
-      if (vals.some(v => !Number.isFinite(v))) return null;
-      const ppChangeYear = [];
-      for (let i = 1; i < YEARS.length; i++) {
-        ppChangeYear.push(vals[i] - vals[i - 1]);
-      }
-      const latestVal = vals[vals.length - 1];
-      return { vals, abs: Number(changeAbs), pctTot: Number(changePct), ppChangeYear, latestVal, annualChange: Number(annualChange) };
-    }
-    function calculateExtremeValues() {
-        _extremeValues = { min: Infinity, max: -Infinity };
-        let valueKey;
-        const lastYear = YEARS.length - 1;
-        currentMode = 'pct';
-        if (currentMode === 'pct') valueKey = `Cum_Change_${YEARS[0]}_${YEARS[lastYear]}`;
-        else if (currentMode === 'latest') valueKey = `${YEARS[lastYear]}`;
-        else return;
-        const municipioRows = _rows.filter(r => r.Municipio !== 'Puerto Rico' && !r.metadata);
-        municipioRows.forEach(row => {
-            const value = (currentMode === 'latest') ? Number(row[valueKey]) : Number(row[valueKey]);
-            if (Number.isFinite(value)) {
-                _extremeValues.min = Math.min(_extremeValues.min, value);
-                _extremeValues.max = Math.max(_extremeValues.max, value);
-            }
-        });
-        _extremeValues.min = parseFloat(_extremeValues.min.toFixed(2));
-        _extremeValues.max = parseFloat(_extremeValues.max.toFixed(2));
-    }
-    function censusLink(name){
-      return `https://data.census.gov/table?q=S1501:+EDUCATIONAL+ATTAINMENT+Puerto+Rico`;
-    }
-    const dName = document.getElementById('d-name');
-    const dCent = document.getElementById('d-centroid');
-    let _rows = [];
-    
-    function updateDetails(name, st, centroid){
-    }
+    const FIXED_GREEN_COLOR = '#22c55e'; // Kept constant for styleForFeature
 
     function styleForFeature(feature){
       return { fillColor: FIXED_GREEN_COLOR, weight: 1.2, color:'#111827', fillOpacity:.75 };
     }
 
-    function computeBreaks(){
-      currentMode = 'pct';
-      ABS_BREAKS = [0.0, 2.0, 4.0, 6.0, 8.0];
-    }
-    
-    function wireMetricToggle(){ currentMode = 'pct'; }
-    function wireClearSelection(){ }
-    
+    // Dummy functions for compilation
+    let _rows = []; 
+    function calculateExtremeValues(){}
+    function computeBreaks(){}
+    function wireMetricToggle(){}
+    function wireClearSelection(){}
     function wireDropdown() {
         const root = document.getElementById('metrics-dropdown-root'); if (!root) return; let hoverTimeout; const menu = document.getElementById('metrics-menu');
         function addHovering(){ clearTimeout(hoverTimeout); root.classList.add('hovering'); } 
         function removeHovering(){ hoverTimeout = setTimeout(()=>root.classList.remove('hovering'), 500); }
         root.addEventListener('mouseenter', addHovering); root.addEventListener('mouseleave', removeHovering); if (menu) { menu.addEventListener('mouseenter', addHovering); menu.addEventListener('mouseleave', removeHovering); }
     }
-    
     function wireMapDropdown() {
         const root1 = document.getElementById('map-selection-dropdown-root'); 
         if (root1) { 
@@ -430,13 +383,6 @@
             if (menu) { menu.addEventListener('mouseenter', addHovering); menu.addEventListener('mouseleave', removeHovering); }
         }
     }
-    
-    let prBoundsGlobal = null;
-    let map, layer, fc; 
-    let currentMode = 'pct'; 
-    let lockedName = null;
-    let selectedLayer = null;
-    const selectedOutline = { weight: 4, color: '#111827', dashArray: '3', fillOpacity: 0.85 };
     // ---------------------- End Unused Logic Stubs ----------------------
 
     (async function init(){
@@ -445,17 +391,25 @@
       const EDU_JSON_PATH = '../data/education/municipios_acs_education_2013_2023_wide.json'; 
       const GEOJSON_URL_PATH = '../data/tl_2022_72_cousub/pr_municipalities.geojson'; 
       
-      const res = await fetch(EDU_JSON_PATH, { cache:'no-store' });
-      const rawData = await res.json();
-      _rows = rawData.filter(row => !row.metadata);
+      try {
+        const res = await fetch(EDU_JSON_PATH, { cache:'no-store' });
+        const rawData = await res.json();
+        _rows = rawData.filter(row => !row.metadata);
+      } catch (e) {
+        console.error("Failed to load Education data.");
+      }
       
-      const gjRes = await fetch(GEOJSON_URL_PATH + '?' + Date.now());
-      const geojsonData = await gjRes.json(); 
+      let geojsonData;
+      try {
+        const gjRes = await fetch(GEOJSON_URL_PATH + '?' + Date.now());
+        geojsonData = await gjRes.json(); 
+      } catch (e) {
+        console.error("Failed to load GeoJSON data.");
+      }
 
       calculateExtremeValues();
 
       const prBounds = L.latLngBounds([[17.85, -67.45],[18.55, -65.25]]);
-      prBoundsGlobal = prBounds;
       
       // --- Map 1 Init (Choropleth/Hurricane Tracks) ---
       map = L.map('map', { zoomControl: false, zoomSnap: .25 }).fitBounds(prBounds);
@@ -479,30 +433,19 @@
       });
       new L.Control.MapDropdown({ position: 'topleft' }).addTo(map);
 
-      fc = geojsonData; 
-
-      layer = L.geoJSON(fc, {
-        style: (feature) => styleForFeature(feature),
-        onEachFeature: (f, lyr) => {
-          const p = f.properties || {};
-          const name = p.NAME || p.NAMELSAD || p.name || 'Unknown';
-          const st = statsForMunicipio(sanitizeName(name));
-          
-          let changeLine = '';
-          if (st) {
-            const latest = fmtPct(st.latestVal);
-            const change = signedPP(st.abs);
-            changeLine = `Attainment (2023): ${latest} | Change: ${change}`;
+      if (geojsonData) {
+        let fc = geojsonData; 
+        let layer = L.geoJSON(fc, {
+          style: (feature) => styleForFeature(feature),
+          onEachFeature: (f, lyr) => {
+            lyr.bindPopup(`<strong>${f.properties.NAME || 'Unknown'}</strong>`);
+            lyr.bindTooltip(f.properties.NAME || 'Unknown', { direction:'center', className:'leaflet-tooltip' });
           }
-          
-          lyr.bindPopup(`<strong>${name}</strong>`);
-          lyr.bindTooltip(name, { direction:'center', className:'leaflet-tooltip' });
-        }
-      }).addTo(map);
+        }).addTo(map);
 
-      const b = layer.getBounds();
-      if (b.isValid()) map.fitBounds(b, { padding:[15,15] });
-
+        const b = layer.getBounds();
+        if (b.isValid()) map.fitBounds(b, { padding:[15,15] });
+      }
 
       computeBreaks();
 
@@ -520,9 +463,7 @@
       plotHurricaneTracks(fullHurricaneData, map); // Plot on Map 1
       renderHurricaneLegend(map); // Legend on Map 1
 
-      const initName = 'Puerto Rico';
-      updateDetails(initName, statsForMunicipio(initName), null);
-
+      // ... Initial detail updates and wiring ...
       wireMetricToggle();
       wireClearSelection(); 
       wireDropdown(); 
