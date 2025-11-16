@@ -474,6 +474,7 @@
                 maintainAspectRatio: false
             }
         });
+        huLineChart.update(); // <-- ADDED: Force redrawing on creation
 
         // --- 2. Maximum Category Distribution (Bar Chart) ---
         const catLabels = Object.keys(aggregatedData.maxCategoryDistribution);
@@ -515,6 +516,7 @@
                 maintainAspectRatio: false
             }
         });
+        huBarChart.update(); // <-- ADDED: Force redrawing on creation
     }
     // ---------------------- End Hurricane Chart Logic ----------------------
 
@@ -627,11 +629,19 @@
       plotHurricaneTracks(fullHurricaneData, map); // Plot tracks on map
       renderHurricaneLegend(map); // Legend on map
 
-      // ** FIX FOR BLANK GRAPHS: Deferred Chart Initialization **
+      // ** FIX FOR BLANK GRAPHS: Robust Chart Initialization **
       const hurricaneStats = aggregateHurricaneData(fullHurricaneData);
-      setTimeout(() => {
+      
+      if (Object.keys(hurricaneStats.timeSeries).length === 0) {
+          console.error("Chart data aggregation failed or returned empty results. Cannot draw charts.");
+          // Fallback message display
+          const fallbackMsg = '<p class="text-center py-5 text-red-500">Error: Could not load hurricane data for charts. Check data path.</p>';
+          document.getElementById('huLineChart').parentNode.innerHTML = fallbackMsg;
+          document.getElementById('huBarChart').parentNode.innerHTML = fallbackMsg;
+      } else {
           drawHurricaneCharts(hurricaneStats);
-      }, 1000); // Changed from 500ms to 1000ms delay to allow parent container to fully size
+          console.log("✅ Hurricane charts initialized successfully.");
+      }
 
       // ... Initial detail updates and wiring ...
       wireMetricToggle();
