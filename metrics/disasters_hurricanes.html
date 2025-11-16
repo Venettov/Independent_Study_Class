@@ -13,7 +13,6 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
   <style>
-    /* ... (CSS Styles remain largely unchanged) ... */
     .card {
       background:#fff;
       border-radius:1rem;
@@ -43,14 +42,14 @@
 
     .mini { min-height: 300px; } /* Increased min-height for bigger graphs */
     
-    /* IMPORTANT FIX: Force canvas dimensions for Chart.js inside containers */
+    /* Force canvas dimensions for Chart.js inside containers */
     .mini canvas {
         width: 100% !important;
         height: 100% !important;
-        display: block; /* Ensure it behaves correctly in the flow */
+        display: block;
     }
 
-    /* CUSTOM: Hurricane Legend positioned bottom-right */
+    /* Hurricane Legend positioned bottom-right */
     .leaflet-control-hu-legend {
         position: absolute !important; 
         bottom: 10px !important; 
@@ -65,10 +64,18 @@
     }
     
     /* Global wrappers/dropdowns remain unchanged */
-    /* NOTE: Original transition timing (300ms) is increased in JS for smoother hover */
-    #metrics-menu {opacity: 0; visibility: hidden; transform: translateY(4px); pointer-events: none; transition: opacity .15s ease, transform .15s ease, visibility .15s ease;}
-    #metrics-dropdown-root:hover #metrics-menu, #metrics-dropdown-root.hovering #metrics-menu {opacity: 1; visibility: visible; transform: translateY(0); pointer-events: auto;}
-    #metrics-dropdown-root:hover #metrics-chevron, #metrics-dropdown-root.hovering #metrics-chevron {transform: rotate(180deg);}
+    #metrics-menu {
+      opacity: 0; visibility: hidden; transform: translateY(4px); pointer-events: none;
+      transition: opacity .15s ease, transform .15s ease, visibility .15s ease;
+    }
+    #metrics-dropdown-root:hover #metrics-menu,
+    #metrics-dropdown-root.hovering #metrics-menu {
+      opacity: 1; visibility: visible; transform: translateY(0); pointer-events: auto;
+    }
+    #metrics-dropdown-root:hover #metrics-chevron,
+    #metrics-dropdown-root.hovering #metrics-chevron {
+      transform: rotate(180deg);
+    }
     #scale-wrapper {transform: scale(0.65); transform-origin: top center; height: 154%; padding-bottom: 200px; margin-bottom: -35%;}
     .leaflet-control-map-dropdown {padding: 0; margin-left: 45px; margin-top: 5px;}
     .leaflet-control-map-dropdown .dropdown-root {background: #fff; box-shadow: 0 1px 5px rgba(0,0,0,.65); border-radius: 4px; position: relative;}
@@ -128,7 +135,7 @@
             <div class="mt-5">
               <span class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-100 text-slate-800">
                 <span class="inline-flex w-5 h-5 items-center justify-center rounded-full bg-slate-800 text-white text-xs">i</span>
-                </span>
+              </span>
             </div>
           </div>
         </div>
@@ -140,8 +147,8 @@
           <div class="text-sm text-gray-700 font-medium">Map shading by</div>
           <div class="flex items-center gap-2">
             <div class="inline-flex rounded-lg border bg-white shadow-sm overflow-hidden">
-              </div>
             </div>
+          </div>
         </div>
         <div id="map" class="mt-3">
           <div class="leaflet-control-container" id="map-dropdown-container">
@@ -171,7 +178,7 @@
               </div>
             </div>
           </div>
-          </div>
+        </div>
       </section>
 
       <hr class="border-gray-300">
@@ -180,63 +187,63 @@
         <h2 class="text-lg font-semibold">Analysis and Supporting Resources</h2>
 
         <div class="space-y-4">
-            <h3 class="text-base font-semibold text-gray-700">Hurricane Impact and Migration in Puerto Rico 🇵🇷</h3>
-            <p>
-                Puerto Rico is geographically exposed to frequent and severe <strong>tropical cyclones (hurricanes and tropical storms)</strong>, with impacts often triggering significant socioeconomic shifts, most notably mass migration.
-            </p>
-            
-            <h4 class="text-sm font-semibold text-gray-600 mt-4">Socioeconomic and Infrastructural Impact:</h4>
-            <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
-                <li>Major hurricanes inflict severe damage to the island's already fragile <strong>infrastructure</strong>, including the electrical grid, transportation networks, and housing stock.</li>
-                <li>The recovery process is often slow and complicated by existing <strong>economic instability</strong> and structural vulnerabilities.</li>
-                <li>The destruction leads to long-term <strong>service disruption</strong>, including prolonged power outages and limited access to essential medical and educational services.</li>
-            </ul>
+          <h3 class="text-base font-semibold text-gray-700">Hurricane Impact and Migration in Puerto Rico 🇵🇷</h3>
+          <p>
+            Puerto Rico is geographically exposed to frequent and severe <strong>tropical cyclones (hurricanes and tropical storms)</strong>, with impacts often triggering significant socioeconomic shifts, most notably mass migration.
+          </p>
+          
+          <h4 class="text-sm font-semibold text-gray-600 mt-4">Socioeconomic and Infrastructural Impact:</h4>
+          <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
+            <li>Major hurricanes inflict severe damage to the island's already fragile <strong>infrastructure</strong>, including the electrical grid, transportation networks, and housing stock.</li>
+            <li>The recovery process is often slow and complicated by existing <strong>economic instability</strong> and structural vulnerabilities.</li>
+            <li>The destruction leads to long-term <strong>service disruption</strong>, including prolonged power outages and limited access to essential medical and educational services.</li>
+          </ul>
 
-            <h4 class="text-sm font-semibold text-gray-600 mt-4">Disaster-Driven Migration:</h4>
-            <p>
-                Hurricanes serve as significant accelerators of pre-existing <strong>migration trends</strong> from Puerto Rico to the U.S. mainland. The displacement caused by severe storms is often permanent, transforming the migration pattern from economic necessity to survival:
-            </p>
-            <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
-                <li>Following <strong>Hurricane Maria in 2017</strong>, Puerto Rico experienced one of the largest <strong>mass displacement events</strong> in recent U.S. history, with hundreds of thousands of residents relocating, primarily to Florida and other eastern states.</li>
-                <li>Migration rates accelerate sharply in the years immediately following major storms, driven by the loss of homes, lack of <strong>job opportunities</strong>, and the realization that rebuilding will take years.</li>
-                <li>This outward migration results in a <strong>long-term decline in the tax base and population</strong>, challenging the island’s ability to recover economically and manage its debt.</li>
-            </ul>
+          <h4 class="text-sm font-semibold text-gray-600 mt-4">Disaster-Driven Migration:</h4>
+          <p>
+            Hurricanes serve as significant accelerators of pre-existing <strong>migration trends</strong> from Puerto Rico to the U.S. mainland. The displacement caused by severe storms is often permanent, transforming the migration pattern from economic necessity to survival:
+          </p>
+          <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
+            <li>Following <strong>Hurricane Maria in 2017</strong>, Puerto Rico experienced one of the largest <strong>mass displacement events</strong> in recent U.S. history, with hundreds of thousands of residents relocating, primarily to Florida and other eastern states.</li>
+            <li>Migration rates accelerate sharply in the years immediately following major storms, driven by the loss of homes, lack of <strong>job opportunities</strong>, and the realization that rebuilding will take years.</li>
+            <li>This outward migration results in a <strong>long-term decline in the tax base and population</strong>, challenging the island’s ability to recover economically and manage its debt.</li>
+          </ul>
         </div>
         
         <div class="space-y-2 text-sm text-gray-600">
-            <h4 class="font-semibold">Research References:</h4>
-            <ul class="list-disc list-inside ml-4 space-y-1">
-                <li><strong>Migration and Demographic Shifts:</strong> Center for Puerto Rican Studies (CUNY) research on post-Maria migration trends.</li>
-                <li><strong>Hurricane Risk and Climate Vulnerability:</strong> General NOAA/NHC data on tropical cyclone exposure in the Caribbean.</li>
-                <li><strong>Disaster Recovery Portal:</strong> Puerto Rico Disaster Recovery Transparency Portal (COR3) for economic impact data.</li>
-            </ul>
+          <h4 class="font-semibold">Research References:</h4>
+          <ul class="list-disc list-inside ml-4 space-y-1">
+            <li><strong>Migration and Demographic Shifts:</strong> Center for Puerto Rican Studies (CUNY) research on post-Maria migration trends.</li>
+            <li><strong>Hurricane Risk and Climate Vulnerability:</strong> General NOAA/NHC data on tropical cyclone exposure in the Caribbean.</li>
+            <li><strong>Disaster Recovery Portal:</strong> Puerto Rico Disaster Recovery Transparency Portal (COR3) for economic impact data.</li>
+          </ul>
         </div>
       </section>
 
       <section class="card p-6">
-          <h2 class="text-lg font-semibold mb-4">Caribbean Tropical Cyclone Trends (2015-2024)</h2>
-          <p class="mb-4 text-sm text-gray-600">
-              The following graphs illustrate the frequency and intensity of tropical systems in the Caribbean region over the past decade, derived from track data.
-          </p>
+        <h2 class="text-lg font-semibold mb-4">Caribbean Tropical Cyclone Trends (2015-2024)</h2>
+        <p class="mb-4 text-sm text-gray-600">
+          The following graphs illustrate the frequency and intensity of tropical systems in the Caribbean region over the past decade, derived from track data.
+        </p>
 
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div>
-                  <h3 class="font-semibold mb-2">Number of Named Tropical Systems per Year</h3>
-                  <div class="mini bg-gray-50 rounded p-3">
-                      <canvas id="huLineChart"></canvas>
-                  </div>
-              </div>
-
-              <div>
-                  <h3 class="font-semibold mb-2">Maximum Category Reached by Systems</h3>
-                  <div class="mini bg-gray-50 rounded p-3">
-                      <canvas id="huBarChart"></canvas>
-                  </div>
-              </div>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div>
+            <h3 class="font-semibold mb-2">Number of Named Tropical Systems per Year</h3>
+            <div class="mini bg-gray-50 rounded p-3">
+              <canvas id="huLineChart"></canvas>
+            </div>
           </div>
+
+          <div>
+            <h3 class="font-semibold mb-2">Maximum Category Reached by Systems</h3>
+            <div class="mini bg-gray-50 rounded p-3">
+              <canvas id="huBarChart"></canvas>
+            </div>
+          </div>
+        </div>
       </section>
       
-      </main>
+    </main>
   </div>
 
   <script>
@@ -248,9 +255,9 @@
     let hurricaneLayerGroup = null; 
     let huLineChart = null;
     let huBarChart = null;
+    let map;
 
-
-    // ---------------------- Earthquake Plotting Logic (REMOVED/EMPTY) ----------------------
+    // ---------------------- Earthquake Plotting Logic (EMPTY STUBS) ----------------------
     function plotEarthquakes(data, mapInstance){
         if (!data || data.length === 0) {
             return;
@@ -351,12 +358,12 @@
         let html = `<div style="font-weight:600;margin-bottom:5px; border-bottom: 1px solid #ccc;">${title}</div>`;
 
         const legendItems = [
-            { label: '$\le$ 33 knots (TD/Other)', color: HU_COLORS[0] }, 
+            { label: '&le; 33 knots (TD/Other)', color: HU_COLORS[0] }, 
             { label: '34-63 knots (TS)', color: HU_COLORS[1] },
             { label: '64-82 knots (HU Cat 1)', color: HU_COLORS[2] },
             { label: '83-95 knots (HU Cat 2)', color: HU_COLORS[3] },
             { label: '96-112 knots (HU Cat 3)', color: HU_COLORS[4] },
-            { label: '$\ge$ 113 knots (HU Cat 4/5)', color: HU_COLORS[5] }
+            { label: '&ge; 113 knots (HU Cat 4/5)', color: HU_COLORS[5] }
         ];
 
         legendItems.forEach(item => {
@@ -368,28 +375,23 @@
             `;
         });
         
-        // Use a dedicated control container to ensure proper positioning in Leaflet
         L.Control.HurricaneLegend = L.Control.extend({
             onAdd: function(map) {
-                // Attach the manually created div element
                 L.DomUtil.addClass(div, 'leaflet-control-hu-legend');
                 L.DomEvent.disableClickPropagation(div);
                 return div;
             },
             onRemove: function(map) {
-                // Nothing to do here
+                // nothing special
             }
         });
         
-        // Check if control already exists before adding
-        if (!map.findControl(L.Control.HurricaneLegend)) {
-            new L.Control.HurricaneLegend({position: 'bottomright'}).addTo(map);
-        }
+        // Just add the legend once in this init flow
+        new L.Control.HurricaneLegend({position: 'bottomright'}).addTo(map);
     }
     // ---------------------- End Hurricane Plotting Logic ----------------------
 
     // ---------------------- Hurricane Chart Logic ----------------------
-    
     function categorizeWind(wind) {
         if (wind < 64) return 'TD/TS (< 64 kt)';
         if (wind <= 82) return 'Cat 1 (64-82 kt)';
@@ -405,21 +407,40 @@
 
         data.forEach(storm => {
             if (storm.path && storm.path.length > 0) {
-                const year = storm.path[0].year;
+                const firstPoint = storm.path[0];
+                let year = firstPoint.year;
+
+                // Fallback: try deriving from date if needed
+                if (!year && firstPoint.date) {
+                    const d = String(firstPoint.date);
+                    if (d.length >= 4) {
+                        year = d.slice(0,4);
+                    }
+                }
+                if (!year) return;
+
                 stormCounts[year] = (stormCounts[year] || 0) + 1;
 
                 let maxWind = 0;
                 storm.path.forEach(point => {
-                    maxWind = Math.max(maxWind, point.wind);
+                    const w = Number(point.wind ?? point.wind_kts ?? 0);
+                    maxWind = Math.max(maxWind, w);
                 });
 
-                if (maxWind >= 34) { // Filter out non-tropical systems below TS level
+                if (maxWind >= 34) {
                     maxWinds.push(maxWind);
                 }
             }
         });
 
-        const categoryOrder = ['TD/TS (< 64 kt)', 'Cat 1 (64-82 kt)', 'Cat 2 (83-95 kt)', 'Cat 3 (96-113 kt)', 'Cat 4 (114-136 kt)', 'Cat 5 (> 136 kt)'];
+        const categoryOrder = [
+          'TD/TS (< 64 kt)',
+          'Cat 1 (64-82 kt)',
+          'Cat 2 (83-95 kt)',
+          'Cat 3 (96-113 kt)',
+          'Cat 4 (114-136 kt)',
+          'Cat 5 (> 136 kt)'
+        ];
         const maxCategoryCounts = {};
         
         maxWinds.map(categorizeWind).forEach(cat => {
@@ -440,7 +461,6 @@
     }
 
     function drawHurricaneCharts(aggregatedData) {
-        // *** NEW: Check for context before creating chart (prevents errors if canvas ID is wrong/missing) ***
         const tsCanvas = document.getElementById('huLineChart');
         const catCanvas = document.getElementById('huBarChart');
         if (!tsCanvas || !catCanvas) {
@@ -463,14 +483,13 @@
                 datasets: [{
                     label: 'Storm Count',
                     data: counts,
-                    borderColor: '#3b82f6', // Tailwind blue-500
+                    borderColor: '#3b82f6',
                     tension: 0.2,
                     pointRadius: 4,
                     fill: false
                 }]
             },
             options: {
-                // *** ADDED: Explicitly disable animations to avoid rendering race conditions ***
                 animation: false, 
                 responsive: true,
                 maintainAspectRatio: false, 
@@ -485,15 +504,21 @@
                 }
             }
         });
-        huLineChart.update(); // Force redrawing on creation
+        huLineChart.update();
 
         // --- 2. Maximum Category Distribution (Bar Chart) ---
         const catLabels = Object.keys(aggregatedData.maxCategoryDistribution);
         const catCounts = Object.values(aggregatedData.maxCategoryDistribution);
 
-        // Map colors based on category index (from HU_COLORS used for the map legend)
         const HU_COLORS_CHART = ['#a3a3a3', '#3b82f6', '#fde047', '#fb923c', '#dc2626', '#991b1b']; 
-        const categoryOrder = ['TD/TS (< 64 kt)', 'Cat 1 (64-82 kt)', 'Cat 2 (83-95 kt)', 'Cat 3 (96-113 kt)', 'Cat 4 (114-136 kt)', 'Cat 5 (> 136 kt)'];
+        const categoryOrder = [
+          'TD/TS (< 64 kt)',
+          'Cat 1 (64-82 kt)',
+          'Cat 2 (83-95 kt)',
+          'Cat 3 (96-113 kt)',
+          'Cat 4 (114-136 kt)',
+          'Cat 5 (> 136 kt)'
+        ];
         
         const barColors = catLabels.map(label => {
             const index = categoryOrder.indexOf(label);
@@ -512,7 +537,6 @@
                 }]
             },
             options: {
-                // *** ADDED: Explicitly disable animations to avoid rendering race conditions ***
                 animation: false, 
                 responsive: true,
                 maintainAspectRatio: false, 
@@ -530,19 +554,18 @@
                 }
             }
         });
-        huBarChart.update(); // Force redrawing on creation
+        huBarChart.update();
     }
     // ---------------------- End Hurricane Chart Logic ----------------------
 
     // ---------------------- Unused Logic Stubs ----------------------
     const GEOJSON_URL = '../data/tl_2022_72_cousub/pr_municipalities.geojson';
     const EDU_JSON    = '../data/education/municipios_acs_education_2013_2023_wide.json';
-    const FIXED_GREEN_COLOR = '#22c55e'; // Kept constant for styleForFeature
+    const FIXED_GREEN_COLOR = '#22c55e';
 
     function styleForFeature(feature){
       return { fillColor: FIXED_GREEN_COLOR, weight: 1.2, color:'#111827', fillOpacity:.75 };
     }
-    // Dummy functions for compilation
     let _rows = []; 
     function calculateExtremeValues(){}
     function computeBreaks(){}
@@ -550,26 +573,41 @@
     function wireClearSelection(){}
     // ---------------------- End Unused Logic Stubs ----------------------
     
-    // FIX 2: Increased hover timeout for smoother dropdown experience
+    // Dropdown wiring
     function wireDropdown() {
-        const root = document.getElementById('metrics-dropdown-root'); if (!root) return; let hoverTimeout; const menu = document.getElementById('metrics-menu');
+        const root = document.getElementById('metrics-dropdown-root');
+        if (!root) return;
+        let hoverTimeout;
+        const menu = document.getElementById('metrics-menu');
+
         function addHovering(){ clearTimeout(hoverTimeout); root.classList.add('hovering'); } 
         function removeHovering(){ hoverTimeout = setTimeout(()=>root.classList.remove('hovering'), 500); }
-        root.addEventListener('mouseenter', addHovering); root.addEventListener('mouseleave', removeHovering); if (menu) { menu.addEventListener('mouseenter', addHovering); menu.addEventListener('mouseleave', removeHovering); }
+
+        root.addEventListener('mouseenter', addHovering);
+        root.addEventListener('mouseleave', removeHovering);
+        if (menu) {
+          menu.addEventListener('mouseenter', addHovering);
+          menu.addEventListener('mouseleave', removeHovering);
+        }
     }
+
     function wireMapDropdown() {
         const root1 = document.getElementById('map-selection-dropdown-root'); 
         if (root1) { 
-            let hoverTimeout; const menu = document.getElementById('map-selection-menu');
+            let hoverTimeout;
+            const menu = document.getElementById('map-selection-menu');
             function addHovering(){ clearTimeout(hoverTimeout); root1.classList.add('hovering'); } 
-            function removeHovering(){ hoverTimeout = setTimeout(()=>{ root1.classList.remove('hovering'); }, 500); } // Increased to 500ms
-            root1.addEventListener('mouseenter', addHovering); root1.addEventListener('mouseleave', removeHovering); 
-            if (menu) { menu.addEventListener('mouseenter', addHovering); menu.addEventListener('mouseleave', removeHovering); }
+            function removeHovering(){ hoverTimeout = setTimeout(()=>{ root1.classList.remove('hovering'); }, 500); }
+            root1.addEventListener('mouseenter', addHovering);
+            root1.addEventListener('mouseleave', removeHovering); 
+            if (menu) {
+              menu.addEventListener('mouseenter', addHovering);
+              menu.addEventListener('mouseleave', removeHovering);
+            }
         }
     }
     
     (async function init(){
-      
       // Load primary data (Education and GeoJSON)
       const EDU_JSON_PATH = '../data/education/municipios_acs_education_2013_2023_wide.json'; 
       const GEOJSON_URL_PATH = '../data/tl_2022_72_cousub/pr_municipalities.geojson'; 
@@ -590,10 +628,9 @@
         console.error("Failed to load GeoJSON data.");
       }
 
-
       const prBounds = L.latLngBounds([[17.85, -67.45],[18.55, -65.25]]);
       
-      // --- Map 1 Init (Choropleth/Hurricane Tracks) ---
+      // --- Map Init (Choropleth + Hurricane Tracks) ---
       map = L.map('map', { zoomControl: false, zoomSnap: .25 }).fitBounds(prBounds);
 
       L.control.zoom({ position: 'topleft' }).addTo(map);
@@ -603,7 +640,7 @@
         minZoom: 7, maxZoom: 19
       }).addTo(map);
 
-      // Initialize the map dropdown control for map 1
+      // Initialize the map dropdown control
       L.Control.MapDropdown = L.Control.extend({
           onAdd: function(map) {
               const container = L.DomUtil.get('map-dropdown-container');
@@ -630,8 +667,6 @@
       }
 
       // --- DATA LOADING AND PLOTTING ---
-      
-      // 1. Hurricane Data (Plot on Map 1)
       let fullHurricaneData = [];
       try {
           const huRes = await fetch(HU_JSON);
@@ -640,24 +675,29 @@
           console.error("Error loading or processing hurricane data:", HU_JSON, e);
       }
       
-      plotHurricaneTracks(fullHurricaneData, map); // Plot tracks on map
-      renderHurricaneLegend(map); // Legend on map
+      // Plot tracks + legend
+      plotHurricaneTracks(fullHurricaneData, map);
+      renderHurricaneLegend(map);
 
-      // ** FIX FOR BLANK GRAPHS: Robust Chart Initialization **
+      // Aggregate + Charts
       const hurricaneStats = aggregateHurricaneData(fullHurricaneData);
       
-      if (Object.keys(hurricaneStats.timeSeries).length === 0) {
+      if (!hurricaneStats || Object.keys(hurricaneStats.timeSeries).length === 0) {
           console.error("Chart data aggregation failed or returned empty results. Cannot draw charts.");
-          // Fallback message display
-          const fallbackMsg = '<p class="text-center py-5 text-red-500">Error: Could not load hurricane data for charts. Check data path.</p>';
-          document.getElementById('huLineChart').parentNode.innerHTML = fallbackMsg;
-          document.getElementById('huBarChart').parentNode.innerHTML = fallbackMsg;
+          const fallbackMsg = '<p class="text-center py-5 text-red-500">Error: Could not load hurricane data for charts. Check data path or JSON format.</p>';
+
+          const lineCanvas = document.getElementById('huLineChart');
+          const barCanvas  = document.getElementById('huBarChart');
+          const lineWrapper = lineCanvas ? lineCanvas.parentNode : null;
+          const barWrapper  = barCanvas ? barCanvas.parentNode : null;
+
+          if (lineWrapper) lineWrapper.innerHTML = fallbackMsg;
+          if (barWrapper && barWrapper !== lineWrapper) barWrapper.innerHTML = fallbackMsg;
       } else {
           drawHurricaneCharts(hurricaneStats);
           console.log("✅ Hurricane charts initialized successfully.");
       }
 
-      // ... Initial detail updates and wiring ...
       wireMetricToggle();
       wireClearSelection(); 
       wireDropdown(); 
@@ -665,12 +705,21 @@
     })();
 
     document.addEventListener('DOMContentLoaded', () => {
-        const metricsLink = document.querySelector('#metrics-dropdown-root > a'); const isMetricsSubPage = window.location.pathname.includes('/metrics/');
-        if (isMetricsSubPage) { metricsLink.classList.add('border-b-2', 'border-blue-600', 'text-blue-600', 'font-semibold'); metricsLink.setAttribute('aria-current', 'page');
-            const currentPathname = window.location.pathname.split('/').pop(); const subPageLink = document.querySelector(`#metrics-menu a[href="${currentPathname}"]`);
+        const metricsLink = document.querySelector('#metrics-dropdown-root > a');
+        const isMetricsSubPage = window.location.pathname.includes('/metrics/');
+        if (isMetricsSubPage) {
+            metricsLink.classList.add('border-b-2', 'border-blue-600', 'text-blue-600', 'font-semibold');
+            metricsLink.setAttribute('aria-current', 'page');
+            const currentPathname = window.location.pathname.split('/').pop();
+            const subPageLink = document.querySelector(`#metrics-menu a[href="${currentPathname}"]`);
             if (subPageLink) { subPageLink.classList.add('bg-gray-100', 'font-semibold'); }
         } else {
-            document.querySelectorAll('.nav-link[href]').forEach(a => { if (a.href.endsWith(window.location.pathname)) { a.classList.add('border-b-2', 'border-blue-600', 'text-blue-600', 'font-semibold'); a.setAttribute('aria-current', 'page'); } });
+            document.querySelectorAll('.nav-link[href]').forEach(a => {
+                if (a.href.endsWith(window.location.pathname)) {
+                    a.classList.add('border-b-2', 'border-blue-600', 'text-blue-600', 'font-semibold');
+                    a.setAttribute('aria-current', 'page');
+                }
+            });
         }
         wireMapDropdown(); 
     });
