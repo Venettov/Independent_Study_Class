@@ -42,7 +42,7 @@
 
     .mini { min-height: 300px; } 
     
-    /* Force canvas dimensions for Chart.js inside containers (now redundant, but left for safety) */
+    /* Force canvas dimensions for Chart.js inside containers (critical for rendering) */
     .mini canvas {
         width: 100% !important;
         height: 100% !important;
@@ -187,49 +187,71 @@
         <h2 class="text-lg font-semibold">Analysis and Supporting Resources</h2>
 
         <div class="space-y-4">
-            <h3 class="text-base font-semibold text-gray-700">Hurricane Impact and Migration in Puerto Rico 🇵🇷</h3>
-            <p>
-                Puerto Rico is geographically exposed to frequent and severe <strong>tropical cyclones (hurricanes and tropical storms)</strong>, with impacts often triggering significant socioeconomic shifts, most notably mass migration.
-            </p>
-            
-            <h4 class="text-sm font-semibold text-gray-600 mt-4">Socioeconomic and Infrastructural Impact:</h4>
-            <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
-                <li>Major hurricanes inflict severe damage to the island's already fragile <strong>infrastructure</strong>, including the electrical grid, transportation networks, and housing stock.</li>
-                <li>The recovery process is often slow and complicated by existing <strong>economic instability</strong> and structural vulnerabilities.</li>
-                <li>The destruction leads to long-term <strong>service disruption</strong>, including prolonged power outages and limited access to essential medical and educational services.</li>
-            </ul>
+          <h3 class="text-base font-semibold text-gray-700">Hurricane Impact and Migration in Puerto Rico 🇵🇷</h3>
+          <p>
+            Puerto Rico is geographically exposed to frequent and severe <strong>tropical cyclones (hurricanes and tropical storms)</strong>, with impacts often triggering significant socioeconomic shifts, most notably mass migration.
+          </p>
+          
+          <h4 class="text-sm font-semibold text-gray-600 mt-4">Socioeconomic and Infrastructural Impact:</h4>
+          <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
+            <li>Major hurricanes inflict severe damage to the island's already fragile <strong>infrastructure</strong>, including the electrical grid, transportation networks, and housing stock.</li>
+            <li>The recovery process is often slow and complicated by existing <strong>economic instability</strong> and structural vulnerabilities.</li>
+            <li>The destruction leads to long-term <strong>service disruption</strong>, including prolonged power outages and limited access to essential medical and educational services.</li>
+          </ul>
 
-            <h4 class="text-sm font-semibold text-gray-600 mt-4">Disaster-Driven Migration:</h4>
-            <p>
-                Hurricanes serve as significant accelerators of pre-existing <strong>migration trends</strong> from Puerto Rico to the U.S. mainland. The displacement caused by severe storms is often permanent, transforming the migration pattern from economic necessity to survival:
-            </p>
-            <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
-                <li>Following <strong>Hurricane Maria in 2017</strong>, Puerto Rico experienced one of the largest <strong>mass displacement events</strong> in recent U.S. history, with hundreds of thousands of residents relocating, primarily to Florida and other eastern states.</li>
-                <li>Migration rates accelerate sharply in the years immediately following major storms, driven by the loss of homes, lack of <strong>job opportunities</strong>, and the realization that rebuilding will take years.</li>
-                <li>This outward migration results in a <strong>long-term decline in the tax base and population</strong>, challenging the island’s ability to recover economically and manage its debt.</li>
-            </ul>
+          <h4 class="text-sm font-semibold text-gray-600 mt-4">Disaster-Driven Migration:</h4>
+          <p>
+            Hurricanes serve as significant accelerators of pre-existing <strong>migration trends</strong> from Puerto Rico to the U.S. mainland. The displacement caused by severe storms is often permanent, transforming the migration pattern from economic necessity to survival:
+          </p>
+          <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
+            <li>Following <strong>Hurricane Maria in 2017</strong>, Puerto Rico experienced one of the largest <strong>mass displacement events</strong> in recent U.S. history, with hundreds of thousands of residents relocating, primarily to Florida and other eastern states.</li>
+            <li>Migration rates accelerate sharply in the years immediately following major storms, driven by the loss of homes, lack of <strong>job opportunities</strong>, and the realization that rebuilding will take years.</li>
+            <li>This outward migration results in a <strong>long-term decline in the tax base and population</strong>, challenging the island’s ability to recover economically and manage its debt.</li>
+          </ul>
         </div>
         
         <div class="space-y-2 text-sm text-gray-600">
-            <h4 class="font-semibold">Research References:</h4>
-            <ul class="list-disc list-inside ml-4 space-y-1">
-                <li>
-                    <strong>Migration and Demographic Shifts:</strong> 
-                    <a href="#" target="_blank" class="text-blue-600 hover:text-blue-800 hover:underline">Center for Puerto Rican Studies (CUNY) research on post-Maria migration trends.</a>
-                </li>
-                <li>
-                    <strong>Hurricane Risk and Climate Vulnerability:</strong> 
-                    <a href="#" target="_blank" class="text-blue-600 hover:text-blue-800 hover:underline">General NOAA/NHC data on tropical cyclone exposure in the Caribbean.</a>
-                </li>
-                <li>
-                    <strong>Disaster Recovery Portal:</strong> 
-                    <a href="#" target="_blank" class="text-blue-600 hover:text-blue-800 hover:underline">Puerto Rico Disaster Recovery Transparency Portal (COR3) for economic impact data.</a>
-                </li>
-            </ul>
+          <h4 class="font-semibold">Research References:</h4>
+          <ul class="list-disc list-inside ml-4 space-y-1">
+            <li>
+              <strong>Migration and Demographic Shifts:</strong> 
+              <a href="#" target="_blank" class="text-blue-600 hover:text-blue-800 hover:underline">Center for Puerto Rican Studies (CUNY) research on post-Maria migration trends.</a>
+            </li>
+            <li>
+              <strong>Hurricane Risk and Climate Vulnerability:</strong> 
+              <a href="#" target="_blank" class="text-blue-600 hover:text-blue-800 hover:underline">General NOAA/NHC data on tropical cyclone exposure in the Caribbean.</a>
+            </li>
+            <li>
+              <strong>Disaster Recovery Portal:</strong> 
+              <a href="#" target="_blank" class="text-blue-600 hover:text-blue-800 hover:underline">Puerto Rico Disaster Recovery Transparency Portal (COR3) for economic impact data.</a>
+            </li>
+          </ul>
         </div>
       </section>
-      
-    </main>
+
+      <section class="card p-6">
+          <h2 class="text-lg font-semibold mb-4">Caribbean Tropical Cyclone Trends (2015-2024)</h2>
+          <p class="mb-4 text-sm text-gray-600">
+              The following graphs illustrate the frequency and intensity of tropical systems in the Caribbean region over the past decade, derived from track data.
+          </p>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div>
+                  <h3 class="font-semibold mb-2">Number of Named Tropical Systems per Year</h3>
+                  <div class="mini bg-gray-50 rounded p-3">
+                      <canvas id="huLineChart"></canvas>
+                  </div>
+              </div>
+
+              <div>
+                  <h3 class="font-semibold mb-2">Maximum Category Reached by Systems</h3>
+                  <div class="mini bg-gray-50 rounded p-3">
+                      <canvas id="huBarChart"></canvas>
+                  </div>
+              </div>
+          </div>
+      </section>
+      </main>
   </div>
 
   <script>
@@ -240,6 +262,9 @@
     let earthquakeLayerGroup = null; 
     let hurricaneLayerGroup = null; 
     let map;
+    // REINSTATED: Chart Variables
+    let huLineChart = null;
+    let huBarChart = null;
 
     // ---------------------- Earthquake Plotting Logic (EMPTY STUBS) ----------------------
     function plotEarthquakes(data, mapInstance){
@@ -373,6 +398,149 @@
         new L.Control.HurricaneLegend({position: 'bottomright'}).addTo(map);
     }
     // ---------------------- End Hurricane Plotting Logic ----------------------
+
+    // ---------------------- Hurricane Chart Logic (RESTORED) ----------------------
+    
+    function categorizeWind(wind) {
+        if (wind < 64) return 'TD/TS (< 64 kt)';
+        if (wind <= 82) return 'Cat 1 (64-82 kt)';
+        if (wind <= 95) return 'Cat 2 (83-95 kt)';
+        if (wind <= 113) return 'Cat 3 (96-113 kt)';
+        if (wind <= 136) return 'Cat 4 (114-136 kt)';
+        return 'Cat 5 (> 136 kt)';
+    }
+
+    function aggregateHurricaneData(data) {
+        const stormCounts = {};
+        const maxWinds = [];
+
+        data.forEach(storm => {
+            if (storm.path && storm.path.length > 0) {
+                const year = storm.path[0].year;
+                stormCounts[year] = (stormCounts[year] || 0) + 1;
+
+                let maxWind = 0;
+                storm.path.forEach(point => {
+                    maxWind = Math.max(maxWind, point.wind);
+                });
+
+                if (maxWind >= 34) { // Filter out non-tropical systems below TS level
+                    maxWinds.push(maxWind);
+                }
+            }
+        });
+
+        const categoryOrder = ['TD/TS (< 64 kt)', 'Cat 1 (64-82 kt)', 'Cat 2 (83-95 kt)', 'Cat 3 (96-113 kt)', 'Cat 4 (114-136 kt)', 'Cat 5 (> 136 kt)'];
+        const maxCategoryCounts = {};
+        
+        maxWinds.map(categorizeWind).forEach(cat => {
+            maxCategoryCounts[cat] = (maxCategoryCounts[cat] || 0) + 1;
+        });
+
+        const orderedCategoryCounts = {};
+        categoryOrder.forEach(cat => {
+            if (cat in maxCategoryCounts) {
+                orderedCategoryCounts[cat] = maxCategoryCounts[cat];
+            }
+        });
+
+        return { 
+            timeSeries: stormCounts, 
+            maxCategoryDistribution: orderedCategoryCounts
+        };
+    }
+
+    function drawHurricaneCharts(aggregatedData) {
+        // --- Robust Canvas Check ---
+        const tsCanvas = document.getElementById('huLineChart');
+        const catCanvas = document.getElementById('huBarChart');
+        if (!tsCanvas || !catCanvas) {
+            console.error("One or both chart canvas elements are missing from the DOM.");
+            return;
+        }
+
+        const tsCtx = tsCanvas.getContext('2d');
+        const catCtx = catCanvas.getContext('2d');
+        
+        const HU_COLORS_CHART = ['#a3a3a3', '#3b82f6', '#fde047', '#fb923c', '#dc2626', '#991b1b']; 
+        const categoryOrder = ['TD/TS (< 64 kt)', 'Cat 1 (64-82 kt)', 'Cat 2 (83-95 kt)', 'Cat 3 (96-113 kt)', 'Cat 4 (114-136 kt)', 'Cat 5 (> 136 kt)'];
+
+        // --- 1. Time Series Chart (Named Storms per Year) ---
+        const years = Object.keys(aggregatedData.timeSeries).sort((a, b) => a - b);
+        const counts = years.map(year => aggregatedData.timeSeries[year]);
+
+        if (huLineChart) huLineChart.destroy();
+        huLineChart = new Chart(tsCtx, {
+            type: 'line',
+            data: {
+                labels: years,
+                datasets: [{
+                    label: 'Storm Count',
+                    data: counts,
+                    borderColor: '#3b82f6', // Tailwind blue-500
+                    tension: 0.2,
+                    pointRadius: 4,
+                    fill: false
+                }]
+            },
+            options: {
+                animation: false, 
+                responsive: true,
+                maintainAspectRatio: false, 
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { title: { display: true, text: 'Year' } },
+                    y: { 
+                        title: { display: true, text: 'Named Systems Count' }, 
+                        beginAtZero: true, 
+                        suggestedMax: Math.max(...counts) * 1.1 
+                    }
+                }
+            }
+        });
+        huLineChart.update();
+
+        // --- 2. Maximum Category Distribution (Bar Chart) ---
+        const catLabels = Object.keys(aggregatedData.maxCategoryDistribution);
+        const catCounts = Object.values(aggregatedData.maxCategoryDistribution);
+
+        const barColors = catLabels.map(label => {
+            const index = categoryOrder.indexOf(label);
+            return (index !== -1) ? HU_COLORS_CHART[index] : '#ccc';
+        });
+
+        if (huBarChart) huBarChart.destroy();
+        huBarChart = new Chart(catCtx, {
+            type: 'bar',
+            data: {
+                labels: catLabels,
+                datasets: [{
+                    label: 'Number of Systems',
+                    data: catCounts,
+                    backgroundColor: barColors
+                }]
+            },
+            options: {
+                animation: false, 
+                responsive: true,
+                maintainAspectRatio: false, 
+                plugins: { 
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: (c) => `Systems: ${c.parsed.y}`
+                        }
+                    }
+                },
+                scales: {
+                    x: { title: { display: true, text: 'Maximum Wind Category' } },
+                    y: { title: { display: true, text: 'Count' }, beginAtZero: true }
+                }
+            }
+        });
+        huBarChart.update();
+    }
+    // ---------------------- End Hurricane Chart Logic ----------------------
     
     // ---------------------- Unused Logic Stubs ----------------------
     const GEOJSON_URL = '../data/tl_2022_72_cousub/pr_municipalities.geojson';
@@ -494,6 +662,22 @@
       // Plot tracks + legend
       plotHurricaneTracks(fullHurricaneData, map);
       renderHurricaneLegend(map);
+      
+      // ** Chart Initialization (RESTORED) **
+      const hurricaneStats = aggregateHurricaneData(fullHurricaneData);
+      
+      if (Object.keys(hurricaneStats.timeSeries).length === 0) {
+          console.error("Chart data aggregation failed or returned empty results. Cannot draw charts.");
+          // Fallback message display
+          const fallbackMsg = '<p class="text-center py-5 text-red-500">Error: Could not load hurricane data for charts. Check data path.</p>';
+          // Ensure the elements exist before trying to update innerHTML (they should exist since we restored the HTML)
+          document.getElementById('huLineChart').parentNode.innerHTML = fallbackMsg;
+          document.getElementById('huBarChart').parentNode.innerHTML = fallbackMsg;
+      } else {
+          drawHurricaneCharts(hurricaneStats);
+          console.log("✅ Hurricane charts initialized successfully.");
+      }
+      // ** End Chart Initialization **
 
       wireMetricToggle();
       wireClearSelection(); 
