@@ -631,7 +631,7 @@
       const hurricaneStats = aggregateHurricaneData(fullHurricaneData);
       setTimeout(() => {
           drawHurricaneCharts(hurricaneStats);
-      }, 500); // 500ms delay to allow parent container to fully size
+      }, 1000); // Changed from 500ms to 1000ms delay to allow parent container to fully size
 
       // ... Initial detail updates and wiring ...
       wireMetricToggle();
