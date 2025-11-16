@@ -440,8 +440,16 @@
     }
 
     function drawHurricaneCharts(aggregatedData) {
-        const tsCtx = document.getElementById('huLineChart').getContext('2d');
-        const catCtx = document.getElementById('huBarChart').getContext('2d');
+        // *** NEW: Check for context before creating chart (prevents errors if canvas ID is wrong/missing) ***
+        const tsCanvas = document.getElementById('huLineChart');
+        const catCanvas = document.getElementById('huBarChart');
+        if (!tsCanvas || !catCanvas) {
+            console.error("One or both chart canvas elements are missing from the DOM.");
+            return;
+        }
+
+        const tsCtx = tsCanvas.getContext('2d');
+        const catCtx = catCanvas.getContext('2d');
 
         // --- 1. Time Series Chart (Named Storms per Year) ---
         const years = Object.keys(aggregatedData.timeSeries).sort((a, b) => a - b);
@@ -462,6 +470,10 @@
                 }]
             },
             options: {
+                // *** ADDED: Explicitly disable animations to avoid rendering race conditions ***
+                animation: false, 
+                responsive: true,
+                maintainAspectRatio: false, 
                 plugins: { legend: { display: false } },
                 scales: {
                     x: { title: { display: true, text: 'Year' } },
@@ -470,11 +482,10 @@
                         beginAtZero: true, 
                         suggestedMax: Math.max(...counts) * 1.1 
                     }
-                },
-                maintainAspectRatio: false
+                }
             }
         });
-        huLineChart.update(); // <-- ADDED: Force redrawing on creation
+        huLineChart.update(); // Force redrawing on creation
 
         // --- 2. Maximum Category Distribution (Bar Chart) ---
         const catLabels = Object.keys(aggregatedData.maxCategoryDistribution);
@@ -501,6 +512,10 @@
                 }]
             },
             options: {
+                // *** ADDED: Explicitly disable animations to avoid rendering race conditions ***
+                animation: false, 
+                responsive: true,
+                maintainAspectRatio: false, 
                 plugins: { 
                     legend: { display: false },
                     tooltip: {
@@ -512,11 +527,10 @@
                 scales: {
                     x: { title: { display: true, text: 'Maximum Wind Category' } },
                     y: { title: { display: true, text: 'Count' }, beginAtZero: true }
-                },
-                maintainAspectRatio: false
+                }
             }
         });
-        huBarChart.update(); // <-- ADDED: Force redrawing on creation
+        huBarChart.update(); // Force redrawing on creation
     }
     // ---------------------- End Hurricane Chart Logic ----------------------
 
