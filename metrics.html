@@ -49,11 +49,6 @@
     }
     .chart-content-wrapper { height: 400px; }
     
-    /* --- UPDATED SECTION TITLE SPACING --- */
-    .section-title { 
-        @apply text-2xl font-bold text-gray-800 mt-8 mb-6; /* Increased margins & font size */
-    }
-    
     #municipioList {
         max-height: 480px; 
         overflow-y: scroll; 
@@ -308,8 +303,6 @@
               </div>
           </div>
           
-          <div class="section-title col-span-full">Selected Municipality Trends: <span id="trendMuniName" class="text-blue-400">Puerto Rico</span></div>
-
           <div id="trendCharts" class="card grid grid-cols-1 md:grid-cols-2 gap-4 col-span-full p-4">
               <div class="chart-container"> 
                   <h3 class="text-base font-semibold mb-2 text-black">Population & Housing Trend</h3>
@@ -330,7 +323,12 @@
       </main>
     </div>
 
-    <div class="fixed bottom-8 right-8 z-50">
+    <div class="fixed bottom-8 right-8 z-50 flex flex-col items-end gap-3">
+        
+        <div class="bg-white px-4 py-2 rounded-lg shadow-lg border border-gray-200 text-gray-700 font-medium text-sm animate-fade-in">
+            Selected: <span id="trendMuniName" class="text-blue-600 font-bold">Puerto Rico</span>
+        </div>
+
         <button onclick="openPolicyModal()" class="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-4 rounded-full shadow-2xl transition transform hover:scale-105 font-bold text-lg">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
@@ -629,7 +627,10 @@
             data: { labels: YEARS.ACS, datasets: [{ label: 'Real Income (2023 $)', data: muniData.Income_TimeSeries, yAxisID: 'yIncome', borderColor: '#f59e0b', backgroundColor: 'rgba(245, 158, 11, 0.2)', fill: false, tension: 0.3 }, { label: 'Unemployment Rate (%)', data: muniData.Employment_TimeSeries, yAxisID: 'yUnemp', borderColor: '#dc2626', backgroundColor: 'rgba(220, 38, 38, 0.2)', fill: false, tension: 0.3 }] },
             options: { maintainAspectRatio: false, layout: { padding: { bottom: 20 } }, plugins: { legend: { labels: { color: '#000' } } }, scales: { x: { ticks: { color: '#000', maxRotation: 0, minRotation: 0, font: { size: 8 } }, grid: { color: '#bbb' }, labels: YEARS.ACS }, yIncome: { type: 'linear', position: 'left', id: 'yIncome', title: { display: true, text: 'Real Median Income ($)', color: '#f59e0b' }, ticks: { color: '#f59e0b', callback: v => fmtCurr(v) }, grid: { color: '#bbb' } }, yUnemp: { type: 'linear', position: 'right', id: 'yUnemp', title: { display: true, text: 'Unemployment Rate (%)', color: '#dc2626' }, ticks: { color: '#dc2626', callback: v => fmtPct(v) }, grid: { drawOnChartArea: false } } } }
         });
-        document.getElementById('trendMuniName').textContent = muniName;
+        // UPDATE: We ensure the ID is still there, even if we moved the element in HTML.
+        const nameEl = document.getElementById('trendMuniName');
+        if(nameEl) nameEl.textContent = muniName;
+        
         document.getElementById('chart-narrative-1').innerHTML = narrative.chart1;
         document.getElementById('chart-narrative-2').innerHTML = narrative.chart2;
     }
