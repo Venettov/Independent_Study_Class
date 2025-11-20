@@ -6,12 +6,11 @@
   <title>Population & Economic Dynamics in Puerto Rico</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
-
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.2.1/dist/chartjs-plugin-annotation.min.js"></script>
 
   <style>
-    /* Global Card Style (White Background) */
+    /* Global Card Style */
     .card {
       background:#fff;
       border-radius:1rem;
@@ -25,51 +24,37 @@
         linear-gradient(180deg, #fafafa 0%, #f3f4f6 100%);
     }
 
-    /* --- DASHBOARD SPECIFIC STYLES --- */
+    /* Dashboard Specific Styles */
     .dashboard-block {
       background: #f3f4f6; 
       border-radius: 1rem;
       padding: 1.5rem;
       box-shadow: 0 4px 6px -1px rgba(0,0,0,.1), 0 2px 4px -2px rgba(0,0,0,.06);
     }
-    .kpi-group-heading {
-        @apply text-xl font-bold text-gray-900 mb-3; 
-    }
+    .kpi-group-heading { @apply text-xl font-bold text-gray-900 mb-3; }
     .stat-card {
       display:flex; gap:.75rem; align-items:flex-start;
       background:#fff; border-radius:.75rem; padding:1rem;
       box-shadow: 0 4px 10px rgba(0,0,0,.06);
     }
-    .stat-icon {
-        @apply text-2xl text-gray-600 flex-shrink-0 pt-0.5;
-    }
-    .stat-label {
-        @apply text-base font-medium text-gray-700;
-    }
-    .stat-value {
-        @apply text-3xl font-extrabold leading-none mt-1 text-gray-900;
-    }
-    .stat-link {
-        @apply text-sm text-blue-600 mt-2 block;
-    }
+    .stat-icon { @apply text-2xl text-gray-600 flex-shrink-0 pt-0.5; }
+    .stat-label { @apply text-base font-medium text-gray-700; }
+    .stat-value { @apply text-3xl font-extrabold leading-none mt-1 text-gray-900; }
+    .stat-link { @apply text-sm text-blue-600 mt-2 block; }
 
-    /* CHART BACKGROUND FIXES */
+    /* Chart & List Containers */
     .chart-container {
-        background-color: #f0f8ff; /* AliceBlue */
+        background-color: #f0f8ff; 
         @apply p-4 text-black rounded-xl; 
     }
-    .chart-content-wrapper {
-        height: 400px; 
-    }
-    .section-title {
-        @apply text-xl font-bold text-gray-800 mb-4 pt-4;
-    }
+    .chart-content-wrapper { height: 400px; }
+    .section-title { @apply text-xl font-bold text-gray-800 mb-4 pt-4; }
+    
     #municipioList {
         max-height: 480px; 
         overflow-y: scroll; 
         padding-top: 4px; 
     }
-    /* Webkit Scrollbar Styling */
     #municipioList::-webkit-scrollbar { width: 8px; }
     #municipioList::-webkit-scrollbar-thumb { background-color: #a7f3d0; border-radius: 4px; }
     #municipioList::-webkit-scrollbar-track { background: #f0fff0; }
@@ -94,7 +79,7 @@
     }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     
-    /* Dropdown Styles */
+    /* Navigation Dropdown */
     #metrics-menu { opacity: 0; visibility: hidden; transform: translateY(4px); pointer-events: none; transition: all .15s ease; }
     #metrics-dropdown-root:hover #metrics-menu, #metrics-dropdown-root.hovering #metrics-menu { opacity: 1; visibility: visible; transform: translateY(0); pointer-events: auto; }
     #metrics-dropdown-root:hover #metrics-chevron, #metrics-dropdown-root.hovering #metrics-chevron { transform: rotate(180deg); }
@@ -110,7 +95,7 @@
     }
     #scale-wrapper.disable-scale { transform: none !important; height: auto !important; margin-bottom: 0 !important; }
     
-    /* Maximize Logic */
+    /* Maximize/Fullscreen Logic */
     #dashboardVisuals { position: relative; transition: all 0.3s ease; }
     #dashboardVisuals.maximized { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 900; background: #f3f4f6; margin: 0 !important; padding: 0 !important; overflow-y: auto; display: block !important; }
     #dashboardVisuals.maximized #main-panel { display: flex !important; flex-direction: row !important; padding: 1rem !important; gap: 1rem !important; width: 100%; max-width: 1050px; margin: 0 auto; }
@@ -123,7 +108,7 @@
     #dashboardVisuals.maximized .section-title { font-size: 1.5rem; padding: 1rem 1rem 0 1rem; max-width: 1050px; margin: 0 auto; }
     #maximizeButtonContainer { position: absolute; top: 1.5rem; right: 1.5rem; z-index: 910; }
 
-    /* --- POLICY ENGINE STYLES --- */
+    /* Policy Modal Styles */
     #scoreCircle { transition: stroke-dashoffset 1.5s ease-out; }
     .backdrop-blur-sm { backdrop-filter: blur(4px); }
     #policyModal { z-index: 2000; } 
@@ -145,24 +130,24 @@
 
         <div id="metrics-menu" class="absolute right-0 mt-2 w-64 rounded-xl border border-gray-200 bg-white shadow-lg ring-1 ring-black/5">
           <div class="py-2">
-            <a href="metrics.html"               class="block px-4 py-2 hover:bg-gray-50 font-semibold">All Metrics Overview</a>
+            <a href="metrics.html" class="block px-4 py-2 hover:bg-gray-50 font-semibold">All Metrics Overview</a>
             <div class="my-1 border-t border-gray-100"></div>
-            <a href="metrics/population.html"     class="block px-4 py-2 hover:bg-gray-50">Population</a>
-            <a href="metrics/employment.html"     class="block px-4 py-2 hover:bg-gray-50">Employment Rate</a>
+            <a href="metrics/population.html" class="block px-4 py-2 hover:bg-gray-50">Population</a>
+            <a href="metrics/employment.html" class="block px-4 py-2 hover:bg-gray-50">Employment Rate</a>
             <a href="metrics/establishments.html" class="block px-4 py-2 hover:bg-gray-50">Employer Establishments</a>
-            <a href="metrics/income.html"         class="block px-4 py-2 hover:bg-gray-50">Household Income</a>
-            <a href="metrics/housing.html"        class="block px-4 py-2 hover:bg-gray-50">Housing Units</a>
-            <a href="metrics/education.html"      class="block px-4 py-2 hover:bg-gray-50">Education</a>
-            <a href="metrics/health.html"         class="block px-4 py-2 hover:bg-gray-50">Health</a>
-            <a href="metrics/disasters_earthquakes.html"      class="block px-4 py-2 hover:bg-gray-50">Earthquakes</a>
-            <a href="metrics/disasters_hurricanes.html"      class="block px-4 py-2 hover:bg-gray-50">Hurricanes</a>
+            <a href="metrics/income.html" class="block px-4 py-2 hover:bg-gray-50">Household Income</a>
+            <a href="metrics/housing.html" class="block px-4 py-2 hover:bg-gray-50">Housing Units</a>
+            <a href="metrics/education.html" class="block px-4 py-2 hover:bg-gray-50">Education</a>
+            <a href="metrics/health.html" class="block px-4 py-2 hover:bg-gray-50">Health</a>
+            <a href="metrics/disasters_earthquakes.html" class="block px-4 py-2 hover:bg-gray-50">Earthquakes</a>
+            <a href="metrics/disasters_hurricanes.html" class="block px-4 py-2 hover:bg-gray-50">Hurricanes</a>
           </div>
         </div>
       </div>
 
-      <a href="literature.html"  class="nav-link border-b-2 border-transparent">Literature</a>
-      <a href="strategy.html"class="nav-link border-b-2 border-transparent">Strategy</a>
-      <a href="about.html"   class="nav-link border-b-2 border-transparent">About</a>
+      <a href="literature.html" class="nav-link border-b-2 border-transparent">Literature</a>
+      <a href="strategy.html" class="nav-link border-b-2 border-transparent">Strategy</a>
+      <a href="about.html" class="nav-link border-b-2 border-transparent">About</a>
     </div>
   </nav>
   
@@ -711,6 +696,16 @@
         document.getElementById('policyModal').classList.add('hidden');
     }
 
+    // --- HELPER TO CALCULATE RADAR SCORES DYNAMICALLY ---
+    function getRadarScores(muniData) {
+        if (!muniData) return [0, 0, 0, 0];
+        const pScore = Math.min(100, Math.max(0, 50 + muniData.Population_PctChange * 2));
+        const iScore = Math.min(100, (muniData.Income_Real2023 / 35000) * 100);
+        const eScore = Math.min(100, Math.max(0, 100 - (muniData.Employment_Unemp2023 * 4)));
+        const hScore = Math.min(100, Math.max(0, 100 - (muniData.Health_2023 * 5)));
+        return [pScore, iScore, eScore, hScore];
+    }
+
     function analyzeMunicipality(data) {
         // 1. CALCULATE VITALITY SCORE
         let popScore = ((data.Population_PctChange - (-40)) / (5 - (-40))) * 100;
@@ -726,12 +721,11 @@
         // FIX: SVG math
         const circle = document.getElementById('scoreCircle');
         const circumference = 2 * Math.PI * 58; 
-        circle.style.strokeDasharray = circumference; // Set total length
-        circle.style.strokeDashoffset = circumference - (finalScore / 100) * circumference; // Set offset based on score
+        circle.style.strokeDasharray = circumference; 
+        circle.style.strokeDashoffset = circumference - (finalScore / 100) * circumference; 
 
         let label = "", color = "", directive = "", situation = "", actions = [];
         
-        // Get the badge element
         const badge = document.getElementById('modalCategory');
 
         if (finalScore < 30) {
@@ -776,19 +770,22 @@
     function drawRadar(data) {
         const ctx = document.getElementById('radarChart').getContext('2d');
         if (policyRadarChart) policyRadarChart.destroy();
-        const pScore = Math.min(100, Math.max(0, 50 + data.Population_PctChange * 2));
-        const iScore = Math.min(100, (data.Income_Real2023 / 35000) * 100);
-        const eScore = Math.min(100, Math.max(0, 100 - (data.Employment_Unemp2023 * 4)));
-        const hScore = Math.min(100, 100 - (data.Health_2023 * 5));
+        
+        // Calculate scores for selected muni
+        const selectedScores = getRadarScores(data);
+        // Calculate scores for PR baseline
+        const prData = getMuniData('Puerto Rico');
+        const prScores = getRadarScores(prData);
+
         policyRadarChart = new Chart(ctx, {
             type: 'radar',
             data: {
                 labels: ['Pop Retention', 'Income Level', 'Employment', 'Health Access'],
                 datasets: [{
-                    label: data.Municipio, data: [pScore, iScore, eScore, hScore],
+                    label: data.Municipio, data: selectedScores,
                     backgroundColor: 'rgba(79, 70, 229, 0.2)', borderColor: 'rgba(79, 70, 229, 1)', pointBackgroundColor: 'rgba(79, 70, 229, 1)', borderWidth: 2
                 }, {
-                    label: 'PR Average', data: [50, 55, 60, 70],
+                    label: 'PR Average', data: prScores,
                     backgroundColor: 'rgba(148, 163, 184, 0.1)', borderColor: 'rgba(148, 163, 184, 0.5)', borderDash: [5, 5], pointRadius: 0, borderWidth: 1
                 }]
             },
