@@ -6,11 +6,12 @@
   <title>Population & Economic Dynamics in Puerto Rico</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
+
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.2.1/dist/chartjs-plugin-annotation.min.js"></script>
 
   <style>
-    /* Global Card Style */
+    /* Global Card Style (White Background) */
     .card {
       background:#fff;
       border-radius:1rem;
@@ -24,37 +25,51 @@
         linear-gradient(180deg, #fafafa 0%, #f3f4f6 100%);
     }
 
-    /* Dashboard Specific Styles */
+    /* --- DASHBOARD SPECIFIC STYLES --- */
     .dashboard-block {
       background: #f3f4f6; 
       border-radius: 1rem;
       padding: 1.5rem;
       box-shadow: 0 4px 6px -1px rgba(0,0,0,.1), 0 2px 4px -2px rgba(0,0,0,.06);
     }
-    .kpi-group-heading { @apply text-xl font-bold text-gray-900 mb-3; }
+    .kpi-group-heading {
+        @apply text-xl font-bold text-gray-900 mb-3; 
+    }
     .stat-card {
       display:flex; gap:.75rem; align-items:flex-start;
       background:#fff; border-radius:.75rem; padding:1rem;
       box-shadow: 0 4px 10px rgba(0,0,0,.06);
     }
-    .stat-icon { @apply text-2xl text-gray-600 flex-shrink-0 pt-0.5; }
-    .stat-label { @apply text-base font-medium text-gray-700; }
-    .stat-value { @apply text-3xl font-extrabold leading-none mt-1 text-gray-900; }
-    .stat-link { @apply text-sm text-blue-600 mt-2 block; }
+    .stat-icon {
+        @apply text-2xl text-gray-600 flex-shrink-0 pt-0.5;
+    }
+    .stat-label {
+        @apply text-base font-medium text-gray-700;
+    }
+    .stat-value {
+        @apply text-3xl font-extrabold leading-none mt-1 text-gray-900;
+    }
+    .stat-link {
+        @apply text-sm text-blue-600 mt-2 block;
+    }
 
-    /* Chart & List Containers */
+    /* CHART BACKGROUND FIXES */
     .chart-container {
-        background-color: #f0f8ff; 
+        background-color: #f0f8ff; /* AliceBlue */
         @apply p-4 text-black rounded-xl; 
     }
-    .chart-content-wrapper { height: 400px; }
-    .section-title { @apply text-xl font-bold text-gray-800 mb-4 pt-4; }
-    
+    .chart-content-wrapper {
+        height: 400px; 
+    }
+    .section-title {
+        @apply text-xl font-bold text-gray-800 mb-4 pt-4;
+    }
     #municipioList {
         max-height: 480px; 
         overflow-y: scroll; 
         padding-top: 4px; 
     }
+    /* Webkit Scrollbar Styling */
     #municipioList::-webkit-scrollbar { width: 8px; }
     #municipioList::-webkit-scrollbar-thumb { background-color: #a7f3d0; border-radius: 4px; }
     #municipioList::-webkit-scrollbar-track { background: #f0fff0; }
@@ -79,12 +94,12 @@
     }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     
-    /* Navigation Dropdown */
+    /* Dropdown Styles */
     #metrics-menu { opacity: 0; visibility: hidden; transform: translateY(4px); pointer-events: none; transition: all .15s ease; }
     #metrics-dropdown-root:hover #metrics-menu, #metrics-dropdown-root.hovering #metrics-menu { opacity: 1; visibility: visible; transform: translateY(0); pointer-events: auto; }
     #metrics-dropdown-root:hover #metrics-chevron, #metrics-dropdown-root.hovering #metrics-chevron { transform: rotate(180deg); }
 
-    /* Scale Wrapper (for global zoom effect) */
+    /* Scale Wrapper */
     #scale-wrapper {
         transform: scale(0.65); 
         transform-origin: top center; 
@@ -95,7 +110,7 @@
     }
     #scale-wrapper.disable-scale { transform: none !important; height: auto !important; margin-bottom: 0 !important; }
     
-    /* Maximize/Fullscreen Logic */
+    /* Maximize Logic */
     #dashboardVisuals { position: relative; transition: all 0.3s ease; }
     #dashboardVisuals.maximized { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 900; background: #f3f4f6; margin: 0 !important; padding: 0 !important; overflow-y: auto; display: block !important; }
     #dashboardVisuals.maximized #main-panel { display: flex !important; flex-direction: row !important; padding: 1rem !important; gap: 1rem !important; width: 100%; max-width: 1050px; margin: 0 auto; }
@@ -108,7 +123,7 @@
     #dashboardVisuals.maximized .section-title { font-size: 1.5rem; padding: 1rem 1rem 0 1rem; max-width: 1050px; margin: 0 auto; }
     #maximizeButtonContainer { position: absolute; top: 1.5rem; right: 1.5rem; z-index: 910; }
 
-    /* Policy Modal Styles */
+    /* --- POLICY ENGINE STYLES --- */
     #scoreCircle { transition: stroke-dashoffset 1.5s ease-out; }
     .backdrop-blur-sm { backdrop-filter: blur(4px); }
     #policyModal { z-index: 2000; } 
@@ -130,24 +145,24 @@
 
         <div id="metrics-menu" class="absolute right-0 mt-2 w-64 rounded-xl border border-gray-200 bg-white shadow-lg ring-1 ring-black/5">
           <div class="py-2">
-            <a href="metrics.html" class="block px-4 py-2 hover:bg-gray-50 font-semibold">All Metrics Overview</a>
+            <a href="metrics.html"               class="block px-4 py-2 hover:bg-gray-50 font-semibold">All Metrics Overview</a>
             <div class="my-1 border-t border-gray-100"></div>
-            <a href="metrics/population.html" class="block px-4 py-2 hover:bg-gray-50">Population</a>
-            <a href="metrics/employment.html" class="block px-4 py-2 hover:bg-gray-50">Employment Rate</a>
+            <a href="metrics/population.html"     class="block px-4 py-2 hover:bg-gray-50">Population</a>
+            <a href="metrics/employment.html"     class="block px-4 py-2 hover:bg-gray-50">Employment Rate</a>
             <a href="metrics/establishments.html" class="block px-4 py-2 hover:bg-gray-50">Employer Establishments</a>
-            <a href="metrics/income.html" class="block px-4 py-2 hover:bg-gray-50">Household Income</a>
-            <a href="metrics/housing.html" class="block px-4 py-2 hover:bg-gray-50">Housing Units</a>
-            <a href="metrics/education.html" class="block px-4 py-2 hover:bg-gray-50">Education</a>
-            <a href="metrics/health.html" class="block px-4 py-2 hover:bg-gray-50">Health</a>
-            <a href="metrics/disasters_earthquakes.html" class="block px-4 py-2 hover:bg-gray-50">Earthquakes</a>
-            <a href="metrics/disasters_hurricanes.html" class="block px-4 py-2 hover:bg-gray-50">Hurricanes</a>
+            <a href="metrics/income.html"         class="block px-4 py-2 hover:bg-gray-50">Household Income</a>
+            <a href="metrics/housing.html"        class="block px-4 py-2 hover:bg-gray-50">Housing Units</a>
+            <a href="metrics/education.html"      class="block px-4 py-2 hover:bg-gray-50">Education</a>
+            <a href="metrics/health.html"         class="block px-4 py-2 hover:bg-gray-50">Health</a>
+            <a href="metrics/disasters_earthquakes.html"      class="block px-4 py-2 hover:bg-gray-50">Earthquakes</a>
+            <a href="metrics/disasters_hurricanes.html"      class="block px-4 py-2 hover:bg-gray-50">Hurricanes</a>
           </div>
         </div>
       </div>
 
-      <a href="literature.html" class="nav-link border-b-2 border-transparent">Literature</a>
-      <a href="strategy.html" class="nav-link border-b-2 border-transparent">Strategy</a>
-      <a href="about.html" class="nav-link border-b-2 border-transparent">About</a>
+      <a href="literature.html"  class="nav-link border-b-2 border-transparent">Literature</a>
+      <a href="strategy.html"class="nav-link border-b-2 border-transparent">Strategy</a>
+      <a href="about.html"   class="nav-link border-b-2 border-transparent">About</a>
     </div>
   </nav>
   
@@ -342,8 +357,8 @@
                     <h3 class="text-gray-500 text-sm font-semibold uppercase tracking-wider">Composite Vitality Score</h3>
                     <div class="relative mt-4 inline-flex items-center justify-center">
                         <svg class="w-32 h-32 transform -rotate-90">
-                            <circle cx="64" cy="64" r="60" stroke="#e2e8f0" stroke-width="12" fill="none" />
-                            <circle id="scoreCircle" cx="64" cy="64" r="60" stroke="#3b82f6" stroke-width="12" fill="none" stroke-dasharray="377" stroke-dashoffset="100" class="transition-all duration-1000 ease-out" />
+                            <circle cx="64" cy="64" r="58" stroke="#e2e8f0" stroke-width="12" fill="none" />
+                            <circle id="scoreCircle" cx="64" cy="64" r="58" stroke="#3b82f6" stroke-width="12" fill="none" stroke-dasharray="365" stroke-dashoffset="100" class="transition-all duration-1000 ease-out" />
                         </svg>
                         <span id="vitalityScore" class="absolute text-4xl font-extrabold text-slate-800">--</span>
                     </div>
@@ -427,6 +442,7 @@
 
     // --- Formatters ---
     const fmt = new Intl.NumberFormat('en-US');
+    const fmtDec = new Intl.NumberFormat('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
     const fmtCurr = (v) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(v);
     const fmtPct = (v) => `${(v||0).toFixed(1)}%`;
     const fmtInt = (v) => fmt.format(Math.round(v));
@@ -697,7 +713,6 @@
 
     function analyzeMunicipality(data) {
         // 1. CALCULATE VITALITY SCORE
-        // Normalized logic: Pop Change (-40% to +5%), Income (10k to 50k), Unemployment (25% to 4%)
         let popScore = ((data.Population_PctChange - (-40)) / (5 - (-40))) * 100;
         let incScore = ((data.Income_Real2023 - 10000) / (50000 - 10000)) * 100;
         let empScore = ((25 - data.Employment_Unemp2023) / (25 - 4)) * 100;
@@ -707,26 +722,36 @@
         // 2. UPDATE UI
         document.getElementById('modalMuniName').innerText = data.Municipio;
         document.getElementById('vitalityScore').innerText = finalScore;
+        
+        // FIX: SVG math
         const circle = document.getElementById('scoreCircle');
-        const circumference = 2 * Math.PI * 60; 
-        circle.style.strokeDashoffset = circumference - (finalScore / 100) * circumference;
+        const circumference = 2 * Math.PI * 58; 
+        circle.style.strokeDasharray = circumference; // Set total length
+        circle.style.strokeDashoffset = circumference - (finalScore / 100) * circumference; // Set offset based on score
 
         let label = "", color = "", directive = "", situation = "", actions = [];
+        
+        // Get the badge element
+        const badge = document.getElementById('modalCategory');
+
         if (finalScore < 30) {
             label = "CRITICAL DISTRESS"; color = "#ef4444";
-            document.getElementById('modalCategory').className = "inline-block px-3 py-1 rounded-full text-xs font-bold bg-red-100 text-red-700 mt-2";
+            badge.innerText = label;
+            badge.className = "inline-block px-3 py-1 rounded-full text-xs font-bold bg-red-100 text-red-700 mt-2";
             situation = `${data.Municipio} is facing an existential crisis. With a population change of <span class="font-bold text-red-600">${fmtPct(data.Population_PctChange)}</span> and a real median income of ${fmtCurr(data.Income_Real2023)}, the tax base is eroding faster than infrastructure costs can be reduced.`;
             directive = "Immediate State & Federal Intervention Required. Focus on stabilization.";
             actions = ["<strong>Fiscal Subsidy:</strong> Allocate emergency block grants to maintain essential municipal services.", "<strong>Depopulation Management:</strong> Consolidate low-density infrastructure to reduce overhead.", "<strong>Opportunity Zones:</strong> Designate as tax-free zone to attract light manufacturing."];
         } else if (finalScore < 60) {
             label = "AT RISK"; color = "#f59e0b";
-            document.getElementById('modalCategory').className = "inline-block px-3 py-1 rounded-full text-xs font-bold bg-orange-100 text-orange-700 mt-2";
+            badge.innerText = label;
+            badge.className = "inline-block px-3 py-1 rounded-full text-xs font-bold bg-orange-100 text-orange-700 mt-2";
             situation = `${data.Municipio} is showing signs of stagnation. While not in immediate collapse, the unemployment rate of ${fmtPct(data.Employment_Unemp2023)} and housing vacancy trends indicate a lack of economic dynamism.`;
             directive = "Targeted Economic Stimulus. Focus on job creation and retraining.";
             actions = ["<strong>Small Business Grants:</strong> Incentives for local startups in tourism or agriculture.", "<strong>Housing Rehab:</strong> Subsidies for renovating vacant housing to attract remote workers.", "<strong>Education alignment:</strong> Partner local vocational schools with regional employers."];
         } else {
             label = "STABLE / THRIVING"; color = "#22c55e";
-            document.getElementById('modalCategory').className = "inline-block px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700 mt-2";
+            badge.innerText = label;
+            badge.className = "inline-block px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700 mt-2";
             situation = `${data.Municipio} is outperforming the regional average. It acts as an economic anchor with relatively stable population trends and higher income levels (${fmtCurr(data.Income_Real2023)}).`;
             directive = "Sustainable Growth Management. Focus on quality of life.";
             actions = ["<strong>Infrastructure Expansion:</strong> Upgrade digital/physical infrastructure to support expansion.", "<strong>Magnet Programs:</strong> Invest in specialized high-school programs to retain families.", "<strong>Regional Leadership:</strong> Establish shared-service agreements with neighbors."];
@@ -782,11 +807,9 @@
             if (masterData.length === 0) { console.error("No valid data."); return; }
             document.getElementById('chart-loader').classList.add('hidden');
             document.getElementById('scatter-canvas-wrapper').classList.remove('hidden');
-            
             updateMunicipioList(); 
             drawScatterPlot(); 
             drawTrendCharts(selectedMunicipio);
-            
             document.getElementById('xAxisSelect').addEventListener('change', drawScatterPlot);
             document.getElementById('yAxisSelect').addEventListener('change', drawScatterPlot);
             document.getElementById('colorSelect').addEventListener('change', drawScatterPlot);
