@@ -26,22 +26,14 @@
     }
 
     /* --- DASHBOARD SPECIFIC STYLES (High Contrast Light Theme) --- */
-    /* Container for the entire dashboard section (light gray background, rounded corners) */
     .dashboard-block {
       background: #f3f4f6; /* light gray background color for the overall section */
       border-radius: 1rem;
       padding: 1.5rem;
       box-shadow: 0 4px 6px -1px rgba(0,0,0,.1), 0 2px 4px -2px rgba(0,0,0,.06);
     }
-
-    /* --- CUSTOM STYLES FOR STATIC KPI CARDS (Restored to match screenshot) --- */
     .kpi-group-heading {
         @apply text-xl font-bold text-gray-900 mb-3; 
-    }
-    /* Base Card Style matching the "Total Population" element in the screenshot */
-    .stat-card-clean {
-        @apply bg-white p-4 rounded-xl shadow-md flex items-start;
-        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
     }
     .stat-card {
       display:flex; gap:.75rem; align-items:flex-start;
@@ -49,7 +41,6 @@
       box-shadow: 0 4px 10px rgba(0,0,0,.06);
     }
     .stat-icon {
-        /* Generic styling for the placeholder icon/symbol */
         @apply text-2xl text-gray-600 flex-shrink-0 pt-0.5;
     }
     .stat-label {
@@ -61,15 +52,13 @@
     .stat-link {
         @apply text-sm text-blue-600 mt-2 block;
     }
-    /* --- END CUSTOM STYLES --- */
 
 
-    /* CHART BACKGROUND FIX: Light Blue/Cyan Background */
+    /* CHART BACKGROUND FIXES */
     .chart-container {
         background-color: #f0f8ff; /* AliceBlue */
         @apply p-4 text-black rounded-xl; 
     }
-    /* CHART CONTENT WRAPPER - This inner div ensures the canvas maintains height */
     .chart-content-wrapper {
         height: 400px; 
     }
@@ -77,9 +66,7 @@
         @apply text-xl font-bold text-gray-800 mb-4 pt-4;
     }
     #municipioList {
-        /* Adjusted max-height to better utilize space in the narrower column */
         max-height: 480px; 
-        /* FIX: Forces scrollbar to be always visible */
         overflow-y: scroll; 
         padding-top: 4px; 
     }
@@ -88,49 +75,45 @@
         width: 8px;
     }
     #municipioList::-webkit-scrollbar-thumb {
-        background-color: #a7f3d0; /* Light green thumb */
+        background-color: #a7f3d0; 
         border-radius: 4px;
     }
     #municipioList::-webkit-scrollbar-track {
-        background: #f0fff0; /* Honeydew background of the list */
+        background: #f0fff0; 
     }
     .municipio-item {
-        /* FIX: Reduced text size for narrower column */
         @apply cursor-pointer p-1 rounded-lg text-xs transition-all text-black; 
     }
     .municipio-item:hover {
-        background-color: #d1fae5; /* Lighter green on hover */
+        background-color: #d1fae5; 
     }
     .selected-muni {
         @apply bg-blue-600 text-white font-semibold;
     }
-    /* SCATTER PLOT BACKGROUND FIX: Light Blue/Cyan Background */
     #scatterPlotContainer {
         background-color: #f0f8ff; /* AliceBlue */
         @apply rounded-xl p-4;
     }
-    /* MUNICIPALITY SELECTOR BACKGROUND FIX: Light Green Background */
     #main-panel .p-4.bg-gray-800 {
         background-color: #f0fff0; /* Honeydew */
-        @apply rounded-xl text-black; /* Default text color for the panel */
+        @apply rounded-xl text-black; 
     }
     
-    /* Input and internal text within the light green selector */
     #main-panel .p-4.bg-gray-800 h2,
     #main-panel .p-4.bg-gray-800 input,
     #main-panel .p-4.bg-gray-800 .municipio-item {
         color: #000 !important;
     }
     #main-panel .p-4.bg-gray-800 input {
-        background-color: #e5f5e5; /* Slightly darker green input background */
+        background-color: #e5f5e5; 
         border-color: #10b981;
     }
     
     #scatter-canvas-wrapper {
-        height: 450px; 
+        height: 450px; /* Default desktop view height */
     }
     .loader {
-      border: 4px solid rgba(0, 0, 0, 0.3); /* Darker loader for light background */
+      border: 4px solid rgba(0, 0, 0, 0.3); 
       border-radius: 50%;
       border-top: 4px solid #3b82f6;
       width: 40px;
@@ -140,24 +123,119 @@
       margin: 0 auto;
     }
     
-    /* --- END DASHBOARD SPECIFIC STYLES --- */
-    
     /* Standard project styles */
     .mini { min-height: 260px; }
     #metrics-menu { opacity: 0; visibility: hidden; transform: translateY(4px); pointer-events: none; transition: opacity .15s ease, transform .15s ease, visibility .15s ease; }
     #metrics-dropdown-root:hover #metrics-menu, #metrics-dropdown-root.hovering #metrics-menu { opacity: 1; visibility: visible; transform: translateY(0); pointer-events: auto; }
     #metrics-dropdown-root:hover #metrics-chevron, #metrics-dropdown-root.hovering #metrics-chevron { transform: rotate(180deg); }
 
-    /* New style for simulating 65% zoom on the main content */
+    /* Scale Wrapper for overall view */
     #scale-wrapper {
-        /* Apply the scale transformation */
         transform: scale(0.65); 
-        transform-origin: top center; /* Scale from the top-center */
+        transform-origin: top center; 
+        height: 154%; 
+        padding-bottom: 200px; 
+        margin-bottom: -35%; 
+        transition: all 0.3s ease; 
+    }
+    
+    /* NEW: Class applied to #scale-wrapper when maximization is active */
+    #scale-wrapper.disable-scale {
+        transform: none !important; 
+        height: auto !important;
+        margin-bottom: 0 !important;
+    }
+    
+    /* NEW MAXIMIZE TARGET STYLES */
+    /* Target for maximization: The section containing scatter plot and selectors */
+    #dashboardVisuals {
+        position: relative;
+        transition: all 0.3s ease;
+    }
+
+    /* 1. Maximized state for the visual dashboard area (fullscreen positioning) */
+    #dashboardVisuals.maximized {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: 1000;
+        background: #f3f4f6; 
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow-y: auto; 
+        display: block !important; 
+    }
+    
+    /* 2. Adjust internal layout using Flexbox override for stability */
+    #dashboardVisuals.maximized #main-panel {
+        /* CRITICAL FIX: Use flexbox for reliable side-by-side layout */
+        display: flex !important;
+        flex-direction: row !important;
         
-        /* Adjust the height to accommodate the scaled content */
-        height: 154%; /* Set height to approx 1/0.65 to fit content without scroll */
-        padding-bottom: 200px; /* Add extra padding for safety */
-        margin-bottom: -35%; /* Compensate for the scale to pull up following elements */
+        padding: 1rem !important;
+        gap: 1rem !important;
+        width: 100%;
+        
+        /* FINAL FIX: Constrain max width and center the content when maximized */
+        max-width: 1050px; 
+        margin: 0 auto;
+    }
+
+    /* 3. CRITICAL FIX: Explicitly set widths for stable 1fr / 300px split */
+    #dashboardVisuals.maximized #scatterPlotContainer {
+        width: calc(100% - 200px - 1rem) !important; /* 100% - selector width - gap */
+        flex-shrink: 0;
+    }
+    #dashboardVisuals.maximized .lg\:col-span-2 {
+        width: 200px !important; /* Selector is a fixed width */
+        flex-shrink: 0;
+    }
+
+
+    /* 4. Ensure component heights use max space */
+    #dashboardVisuals.maximized #scatter-canvas-wrapper {
+        /* FIX: Increase height to use more screen space when maximized, based on user request */
+        height: 50vh !important; 
+    }
+    
+    #dashboardVisuals.maximized #municipioList {
+        /* FIX: Max height adjusted to match new scatter height (40vh) */
+        max-height: calc(40vh + 195px) !important; 
+        height: auto !important; 
+        overflow-y: scroll !important;
+    }
+    
+    /* Trends (kept below as requested) */
+    #dashboardVisuals.maximized #trendCharts {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        width: 100%;
+        max-width: 1050px; /* Constrain trend charts to the same width */
+        margin: 0 auto 2rem auto;
+    }
+    
+    #dashboardVisuals.maximized #trendCharts .chart-content-wrapper {
+        /* ADJUSTED: Optimized to 30vh for fit-to-screen without scrolling */
+        height: 30vh !important; 
+    }
+    
+    #dashboardVisuals.maximized .section-title {
+        font-size: 1.5rem;
+        padding: 1rem 1rem 0 1rem; 
+        max-width: 1050px; /* Constrain title to the same width */
+        margin: 0 auto;
+    }
+
+
+    /* Maximize button placement */
+    #maximizeButtonContainer {
+        position: absolute;
+        top: 1.5rem; 
+        right: 1.5rem; 
+        z-index: 1010;
     }
   </style>
 </head>
@@ -186,6 +264,8 @@
             <a href="metrics/housing.html"        class="block px-4 py-2 hover:bg-gray-50">Housing Units</a>
             <a href="metrics/education.html"      class="block px-4 py-2 hover:bg-gray-50">Education</a>
             <a href="metrics/health.html"         class="block px-4 py-2 hover:bg-gray-50">Health</a>
+            <a href="metrics/disasters_earthquakes.html"      class="block px-4 py-2 hover:bg-gray-50">Earthquakes</a>
+            <a href="metrics/disasters_hurricanes.html"      class="block px-4 py-2 hover:bg-gray-50">Hurricanes</a>
           </div>
         </div>
       </div>
@@ -308,11 +388,23 @@
               </div>
           </div>
       </div>
-      <section class="dashboard-block">
+      
+      <section id="dashboardVisuals" class="dashboard-block">
+        
+        <div id="maximizeButtonContainer">
+            <button id="maximizeButton" onclick="toggleMaximize()" class="text-gray-500 hover:text-blue-600 transition p-1 rounded-md bg-white shadow-md">
+                <svg id="maximizeIcon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75h4.5m-4.5 0v4.5m0-4.5L9 9M15.75 3.75h4.5m-4.5 0v4.5m0-4.5L15 9m3.75 7.5h-4.5m4.5 0v-4.5m0 4.5L15 15M3.75 15.75h4.5m-4.5 0v4.5m0-4.5L9 15" />
+                </svg>
+                <svg id="minimizeIcon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6 hidden">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 9V4.5M9 9H4.5M9 9l-4.5-4.5M15 15v4.5m0-4.5h4.5m0 0l-4.5 4.5M9 15v4.5M9 15H4.5M9 15l-4.5 4.5M15 9v-4.5M15 9h4.5m0 0l-4.5-4.5" />
+                </svg>
+            </button>
+        </div>
           
-          <div id="main-panel" class="card grid grid-cols-1 lg:grid-cols-12 gap-4 mt-6 p-0">
+          <div id="main-panel" class="card grid grid-cols-1 lg:grid-cols-12 gap-4 p-0">
               
-              <div class="lg:col-span-10 p-4" id="scatterPlotContainer">
+              <div class="lg:col-span-10 p-4" id="scatterPlotContainer"> 
                   <h2 class="text-lg font-semibold mb-3 text-black">Socio-Economic Relationship by Municipality</h2>
                   <div id="chart-loader" class="text-center mt-20 hidden">
                       <div class="loader"></div>
@@ -348,7 +440,7 @@
                           </select>
                       </div>
                   </div>
-                  <p id="scatter-narrative" class="text-xs mt-4 text-gray-700">
+                  <p id="scatter-narrative" class="text-sm mt-4 text-gray-700">
                       This scatter plot compares two selected municipal metrics (X and Y axis) against each other. 
                       Each dot represents one municipality in Puerto Rico. The <strong>color of the dot</strong> represents the value of the third selected metric. 
                       Clicking on a dot will select that municipality, highlight it in yellow, and update the detailed trend charts below.
@@ -372,14 +464,14 @@
                   <div class="chart-content-wrapper">
                       <canvas id="trendChart1"></canvas>
                   </div>
-                  <p id="chart-narrative-1" class="text-xs mt-2 text-gray-700"></p>
+                  <p id="chart-narrative-1" class="text-sm mt-2 text-gray-700"></p>
               </div>
               <div class="chart-container"> 
                   <h3 class="text-base font-semibold mb-2 text-black">Employment & Income Trend</h3>
                   <div class="chart-content-wrapper">
                       <canvas id="trendChart2"></canvas>
                   </div>
-                  <p id="chart-narrative-2" class="text-xs mt-2 text-gray-700"></p>
+                  <p id="chart-narrative-2" class="text-sm mt-2 text-gray-700"></p>
               </div>
           </div>
       </section>
@@ -507,7 +599,7 @@
         // FIX for Education KPI: Calculate the true average percentage attainment for Puerto Rico
         const prData = merged['Puerto Rico'];
         if (prData) {
-            const allEduValues = masterData.filter(m => m.Municipio !== 'Puerto Rico')
+            const allEduValues = Object.values(merged).filter(m => m.Municipio !== 'Puerto Rico')
                                             .map(m => m.Education_2023)
                                             .filter(v => Number.isFinite(v));
             if (allEduValues.length > 0) {
@@ -580,7 +672,7 @@
             x: m[xKey],
             y: m[yKey],
             colorValue: m[colorKey],
-            r: 5,
+            r: 25,
             name: m.Municipio
         })).filter(p => p.x !== undefined && p.y !== undefined && Number.isFinite(p.x) && Number.isFinite(p.y));
         
@@ -591,7 +683,7 @@
                 x: selectedMuni[xKey],
                 y: selectedMuni[yKey],
                 colorValue: selectedMuni[colorKey],
-                r: 12, // Increased size for visibility
+                r: 25, 
                 name: selectedMuni.Municipio,
                 borderColor: '#facc15', // Yellow highlight
                 borderWidth: 4, // Increased border width
@@ -945,6 +1037,31 @@
             drawTrendCharts(selectedMunicipio);
         }
     }
+    
+    // NEW: Maximize/Minimize Toggle Function
+    function toggleMaximize() {
+        const wrapper = document.getElementById('scale-wrapper');
+        const visuals = document.getElementById('dashboardVisuals');
+        const maximizeIcon = document.getElementById('maximizeIcon');
+        const minimizeIcon = document.getElementById('minimizeIcon');
+        
+        const isMaximized = visuals.classList.toggle('maximized');
+        
+        // CRITICAL FIX: Toggle the class on the scale-wrapper to disable the scaling effect
+        wrapper.classList.toggle('disable-scale', isMaximized);
+        
+        // Toggle icons visibility
+        maximizeIcon.classList.toggle('hidden', isMaximized);
+        minimizeIcon.classList.toggle('hidden', !isMaximized);
+        
+        // Redraw charts to adjust to new container size
+        // This short delay allows the browser to re-layout the screen before calculating chart size.
+        setTimeout(() => {
+            if (scatterChart) scatterChart.resize(); 
+            if (trendChart1) trendChart1.resize();
+            if (trendChart2) trendChart2.resize();
+        }, 100);
+    }
 
 
     // --- Initialization ---
@@ -971,15 +1088,22 @@
             document.getElementById('scatter-canvas-wrapper').classList.remove('hidden');
 
             // Initial render
-            updateKPIs(); // This is just for background data processing now
+            updateKPIs(); 
             updateMunicipioList();
             drawScatterPlot();
+            
+            // REMOVED: Immediate scatterChart.resize() call here, relying on 
+            // resizing via user interaction or the delayed call in toggleMaximize() for layout stability.
+            
             drawTrendCharts(selectedMunicipio);
 
             // Wire up axis selection handlers
             document.getElementById('xAxisSelect').addEventListener('change', drawScatterPlot);
             document.getElementById('yAxisSelect').addEventListener('change', drawScatterPlot);
             document.getElementById('colorSelect').addEventListener('change', drawScatterPlot);
+            
+            // Expose the function globally for the HTML button's onclick attribute
+            window.toggleMaximize = toggleMaximize;
             
         } catch (error) {
             console.error("Failed to initialize dashboard:", error);
@@ -1006,7 +1130,7 @@
       root.addEventListener('mouseleave', removeHovering);
       if (menu) {
         menu.addEventListener('mouseenter', addHovering);
-        menu.addEventListener('mouseleave', removeDoing);
+        menu.addEventListener('mouseleave', removeHovering); 
       }
     }
   </script>

@@ -478,7 +478,6 @@
       </main>
     </div> <script>
     // --- Configuration & Paths ---
-    // NOTE: Paths adjusted relative to index.html (removed '../' or used '.')
     const JSON_FILES = {
         POP:        './data/population/prm-est2010_2024.json',
         HOUSING:    './data/housing/municipios_acs_housing_2013_2023_wide.json',
@@ -493,6 +492,23 @@
         POP: [2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024],
         ACS: [2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023],
         EST: [2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023],
+    };
+    
+    // --- LAND AREA CONSTANTS (SQ MILES) ---
+    // Added to calculate density since it is not in the raw JSON files.
+    const MUNI_AREAS_SQ_MI = {
+        'Puerto Rico': 3515.1, 'San Juan': 47.7, 'Bayamón': 44.2, 'Ponce': 116.3, 'Caguas': 58.7, 'Guaynabo': 27.2, 'Carolina': 46.2,
+        'Aguas Buenas': 29.8, 'Comerío': 28.3, 'Loíza': 19.4, 'Adjuntas': 66.6, 'Aguada': 30.6, 'Aguadilla': 36.1, 'Aibonito': 39.8,
+        'Añasco': 38.6, 'Arecibo': 125.7, 'Arroyo': 4.7, 'Barceloneta': 17.5, 'Barranquitas': 33.9, 'Cabo Rojo': 59.8, 'Camuy': 46.3,
+        'Canóvanas': 46.9, 'Cataño': 4.8, 'Cayey': 50.7, 'Ceiba': 28.5, 'Ciales': 67.5, 'Cidra': 36.5, 'Coamo': 76.5, 'Corozal': 42.1,
+        'Culebra': 11.7, 'Dorado': 23.4, 'Fajardo': 30.1, 'Florida': 15.6, 'Guánica': 37.8, 'Guayama': 64.9, 'Guayanilla': 42.9,
+        'Gurabo': 28.1, 'Hatillo': 66.8, 'Hormigueros': 11.6, 'Humacao': 44.7, 'Isabela': 47.6, 'Jayuya': 67.8, 'Juana Díaz': 59.8,
+        'Juncos': 26.6, 'Lajas': 60.1, 'Lares': 61.6, 'Las Marías': 46.6, 'Las Piedras': 33.8, 'Luquillo': 26.7, 'Manatí': 46.5,
+        'Maricao': 36.8, 'Maunabo': 20.2, 'Mayagüez': 77.5, 'Moca': 50.3, 'Morovis': 40.5, 'Naguabo': 52.4, 'Naranjito': 26.1,
+        'Orocovis': 62.3, 'Patillas': 47.7, 'Peñuelas': 43.1, 'Quebradillas': 22.8, 'Rincón': 14.7, 'Río Grande': 60.1,
+        'Sabana Grande': 36.0, 'Salinas': 69.9, 'San Germán': 55.4, 'San Lorenzo': 53.0, 'San Sebastián': 69.4, 'Santa Isabel': 36.3,
+        'Toa Alta': 26.3, 'Toa Baja': 18.0, 'Trujillo Alto': 20.6, 'Utuado': 113.8, 'Vega Alta': 27.8, 'Vega Baja': 46.4, 'Vieques': 50.9,
+        'Villalba': 35.8, 'Yabucoa': 53.6, 'Yauco': 65.5
     };
 
     // --- Global State ---
@@ -529,7 +545,6 @@
         const merged = {};
 
         results.forEach(({ key, data }) => {
-            // FIX: Filter out rows that contain the long descriptive string which is not a municipality.
             const dataRows = data.filter(r => 
                 !r.metadata && 
                 !String(r.Municipio).includes("Annual and Cumulative")
@@ -546,8 +561,15 @@
                     const popLatest = Number(row['2024']);
                     
                     merged[muniName].Population_2024 = popLatest;
-                    // Note: popDensity is calculated in the population script. Assuming zero for aggregate here.
-                    merged[muniName].Population_Density = Number(row.popDensity) || 0; 
+                    
+                    // FIX: Calculate density dynamically using the new AREA constant
+                    const areaSqMi = MUNI_AREAS_SQ_MI[muniName];
+                    if (areaSqMi && areaSqMi > 0) {
+                        merged[muniName].Population_Density = popLatest / areaSqMi;
+                    } else {
+                        merged[muniName].Population_Density = 0;
+                    }
+
                     merged[muniName].Population_PctChange = ((popLatest - popStart) / popStart) * 100;
                     
                     merged[muniName].Population_TimeSeries = YEARS.POP.map(y => Number(row[y]) || 0);
@@ -604,10 +626,9 @@
                                             .filter(v => Number.isFinite(v));
             if (allEduValues.length > 0) {
                 const average = allEduValues.reduce((a, b) => a + b, 0) / allEduValues.length;
-                prData.Education_2023 = average; // Overwrite the incorrect value from the JSON with the true average
+                prData.Education_2023 = average; 
             }
         }
-
 
         // Filter out any municipios that failed to load essential data
         return Object.values(merged).filter(m => m.Population_2024 != null);
@@ -975,11 +996,8 @@
     // --- Interaction Handlers ---
 
     function updateKPIs() {
-        // This function is kept but has no DOM effect on the new static KPI section.
         const prData = getMuniData('Puerto Rico');
         if (!prData) return;
-        
-        // ... (data manipulation logic for PR average, if needed elsewhere, is kept in processData)
     }
     
     function updateMunicipioList() {
@@ -1055,7 +1073,6 @@
         minimizeIcon.classList.toggle('hidden', !isMaximized);
         
         // Redraw charts to adjust to new container size
-        // This short delay allows the browser to re-layout the screen before calculating chart size.
         setTimeout(() => {
             if (scatterChart) scatterChart.resize(); 
             if (trendChart1) trendChart1.resize();
@@ -1091,9 +1108,6 @@
             updateKPIs(); 
             updateMunicipioList();
             drawScatterPlot();
-            
-            // REMOVED: Immediate scatterChart.resize() call here, relying on 
-            // resizing via user interaction or the delayed call in toggleMaximize() for layout stability.
             
             drawTrendCharts(selectedMunicipio);
 
