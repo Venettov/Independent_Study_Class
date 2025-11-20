@@ -42,25 +42,23 @@
 
     .mini { min-height: 300px; } 
     
-    /* Force canvas dimensions for Chart.js inside containers (now redundant, but left for safety) */
+    /* Force canvas dimensions for Chart.js inside containers */
     .mini canvas {
         width: 100% !important;
         height: 100% !important;
         display: block;
     }
 
-    /* Hurricane Legend positioned bottom-right */
+    /* UPDATED LEGEND CSS: Removed absolute positioning to let Leaflet control it */
     .leaflet-control-hu-legend {
-        position: absolute !important; 
-        bottom: 10px !important; 
-        right: 10px !important;
         background: white;
         padding: 8px 10px;
         border-radius: 8px;
         box-shadow: 0 2px 8px rgba(0,0,0,.15);
         font: 12px/1.3 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
-        z-index: 1000; 
-        width: 150px;
+        width: 160px;
+        margin-right: 10px;
+        margin-bottom: 25px; /* Spacing to avoid overlap with attribution */
     }
     
     /* Global wrappers/dropdowns remain unchanged */
@@ -181,6 +179,27 @@
         </div>
       </section>
 
+      <section class="card p-6">
+        <h2 class="text-lg font-semibold mb-4">Hurricane Statistics (2015-2025)</h2>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            
+            <div class="mini relative">
+                <h3 class="text-sm text-gray-500 font-medium mb-2 text-center">Storm Frequency by Year</h3>
+                <div class="h-64 w-full">
+                    <canvas id="chart-frequency"></canvas>
+                </div>
+            </div>
+
+            <div class="mini relative">
+                <h3 class="text-sm text-gray-500 font-medium mb-2 text-center">Top 10 Strongest Storms (Max Wind)</h3>
+                <div class="h-64 w-full">
+                    <canvas id="chart-intensity"></canvas>
+                </div>
+            </div>
+            
+        </div>
+      </section>
+
       <hr class="border-gray-300">
 
       <section class="card p-6 space-y-6">
@@ -234,9 +253,9 @@
 
   <script>
     // ---------------------- Data Paths ----------------------
+    // Ensure this path is correct relative to your HTML file location
     const HU_JSON = '../data/natural_disasters/caribbean_hurricane_tracks_2015_2025.json'; 
     
-    let earthquakeLayerGroup = null; 
     let hurricaneLayerGroup = null; 
     let map;
     
@@ -268,7 +287,6 @@
         if (status === 'SD') return 'Subtropical Depression';
         if (status === 'LO') return 'Low';
         if (status === 'WV') return 'Tropical Wave';
-        
         return 'Other'; 
     }
 
@@ -296,7 +314,7 @@
                 opacity: 0.6 
             }).addTo(hurricaneLayerGroup);
 
-            // 2. Draw the markers for each point, colored by wind speed
+            // 2. Draw the markers for each point
             pathData.forEach(p => {
                 const wind_knots = p.wind;
                 const color = getTrackColor(wind_knots);
@@ -325,7 +343,8 @@
 
     function renderHurricaneLegend(map){
         const div = document.createElement('div');
-        div.className = 'leaflet-control-hu-legend'; 
+        // FIX: Added standard leaflet control class
+        div.className = 'leaflet-control leaflet-control-hu-legend'; 
         
         const title = 'Hurricane Track Wind Status (knots)';
         let html = `<div style="font-weight:600;margin-bottom:5px; border-bottom: 1px solid #ccc;">${title}</div>`;
@@ -348,23 +367,114 @@
             `;
         });
         
+        div.innerHTML = html;
+
         L.Control.HurricaneLegend = L.Control.extend({
             onAdd: function(map) {
-                L.DomUtil.addClass(div, 'leaflet-control-hu-legend');
+                // Prevent clicks on legend from zooming map
                 L.DomEvent.disableClickPropagation(div);
                 return div;
             },
-            onRemove: function(map) {
-                // nothing special
-            }
+            onRemove: function(map) {}
         });
         
         new L.Control.HurricaneLegend({position: 'bottomright'}).addTo(map);
     }
-    // ---------------------- End Hurricane Plotting Logic ----------------------
+    
+    // ---------------------- Chart Plotting Logic ----------------------
+    function renderCharts(data) {
+        if (!data || data.length === 0) return;
+
+        const yearCounts = {};
+        const intensityData = [];
+
+        data.forEach(storm => {
+            // SAFETY CHECK: Ensure path is not empty to prevent crash
+            if (!storm.path || storm.path.length === 0) return;
+
+            // Get Year
+            const year = storm.path[0].year;
+            yearCounts[year] = (yearCounts[year] || 0) + 1;
+
+            // Get Max Wind
+            const maxWind = Math.max(...storm.path.map(p => p.wind));
+            intensityData.push({
+                name: storm.name + ` (${year})`,
+                wind: maxWind
+            });
+        });
+
+        // Prepare Frequency Chart Data
+        const years = Object.keys(yearCounts).sort();
+        const counts = years.map(y => yearCounts[y]);
+
+        // Prepare Intensity Chart Data (Sort descending and take top 10)
+        intensityData.sort((a, b) => b.wind - a.wind);
+        const top10 = intensityData.slice(0, 10);
+        
+        // --- Render Chart 1: Frequency ---
+        const ctxFreq = document.getElementById('chart-frequency');
+        if(ctxFreq) {
+            new Chart(ctxFreq.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: years,
+                    datasets: [{
+                        label: 'Number of Storms',
+                        data: counts,
+                        backgroundColor: '#3b82f6', // Blue-500
+                        borderRadius: 4,
+                        hoverBackgroundColor: '#2563eb'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, ticks: { stepSize: 1 }, title: { display: true, text: 'Count' } }
+                    }
+                }
+            });
+        }
+
+        // --- Render Chart 2: Intensity (Top 10) ---
+        const ctxInt = document.getElementById('chart-intensity');
+        if(ctxInt) {
+            // Helper to color bars based on category
+            const getBarColor = (val) => {
+                if(val >= 113) return '#991b1b'; // Cat 4/5
+                if(val >= 96)  return '#dc2626'; // Cat 3
+                if(val >= 83)  return '#fb923c'; // Cat 2
+                if(val >= 64)  return '#fde047'; // Cat 1
+                return '#3b82f6'; // TS and below
+            };
+            
+            new Chart(ctxInt.getContext('2d'), {
+                type: 'bar',
+                indexAxis: 'y', // Horizontal Bar Chart
+                data: {
+                    labels: top10.map(d => d.name),
+                    datasets: [{
+                        label: 'Max Wind (knots)',
+                        data: top10.map(d => d.wind),
+                        backgroundColor: top10.map(d => getBarColor(d.wind)),
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { beginAtZero: true, title: { display: true, text: 'Wind Speed (knots)' } }
+                    }
+                }
+            });
+        }
+    }
     
     // ---------------------- Unused Logic Stubs ----------------------
-    const GEOJSON_URL = '../data/tl_2022_72_cousub/pr_municipalities.geojson';
     const FIXED_GREEN_COLOR = '#22c55e';
 
     function styleForFeature(feature){
@@ -472,6 +582,9 @@
       // Plot tracks + legend
       plotHurricaneTracks(fullHurricaneData, map);
       renderHurricaneLegend(map);
+      
+      // Render Statistical Charts (New Call)
+      renderCharts(fullHurricaneData);
 
       wireMetricToggle();
       wireClearSelection(); 
