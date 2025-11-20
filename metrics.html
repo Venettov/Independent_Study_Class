@@ -6,12 +6,11 @@
   <title>Population & Economic Dynamics in Puerto Rico</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
-
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.2.1/dist/chartjs-plugin-annotation.min.js"></script>
 
   <style>
-    /* Global Card Style (White Background) */
+    /* Global Card Style */
     .card {
       background:#fff;
       border-radius:1rem;
@@ -25,111 +24,67 @@
         linear-gradient(180deg, #fafafa 0%, #f3f4f6 100%);
     }
 
-    /* --- DASHBOARD SPECIFIC STYLES (High Contrast Light Theme) --- */
+    /* Dashboard Specific Styles */
     .dashboard-block {
-      background: #f3f4f6; /* light gray background color for the overall section */
+      background: #f3f4f6; 
       border-radius: 1rem;
       padding: 1.5rem;
       box-shadow: 0 4px 6px -1px rgba(0,0,0,.1), 0 2px 4px -2px rgba(0,0,0,.06);
     }
-    .kpi-group-heading {
-        @apply text-xl font-bold text-gray-900 mb-3; 
-    }
+    .kpi-group-heading { @apply text-xl font-bold text-gray-900 mb-3; }
     .stat-card {
       display:flex; gap:.75rem; align-items:flex-start;
       background:#fff; border-radius:.75rem; padding:1rem;
       box-shadow: 0 4px 10px rgba(0,0,0,.06);
     }
-    .stat-icon {
-        @apply text-2xl text-gray-600 flex-shrink-0 pt-0.5;
-    }
-    .stat-label {
-        @apply text-base font-medium text-gray-700;
-    }
-    .stat-value {
-        @apply text-3xl font-extrabold leading-none mt-1 text-gray-900;
-    }
-    .stat-link {
-        @apply text-sm text-blue-600 mt-2 block;
-    }
+    .stat-icon { @apply text-2xl text-gray-600 flex-shrink-0 pt-0.5; }
+    .stat-label { @apply text-base font-medium text-gray-700; }
+    .stat-value { @apply text-3xl font-extrabold leading-none mt-1 text-gray-900; }
+    .stat-link { @apply text-sm text-blue-600 mt-2 block; }
 
-
-    /* CHART BACKGROUND FIXES */
+    /* Chart & List Containers */
     .chart-container {
-        background-color: #f0f8ff; /* AliceBlue */
+        background-color: #f0f8ff; 
         @apply p-4 text-black rounded-xl; 
     }
-    .chart-content-wrapper {
-        height: 400px; 
-    }
-    .section-title {
-        @apply text-xl font-bold text-gray-800 mb-4 pt-4;
-    }
+    .chart-content-wrapper { height: 400px; }
+    .section-title { @apply text-xl font-bold text-gray-800 mb-4 pt-4; }
+    
     #municipioList {
         max-height: 480px; 
         overflow-y: scroll; 
         padding-top: 4px; 
     }
-    /* Webkit Scrollbar Styling (Forces visibility) */
-    #municipioList::-webkit-scrollbar {
-        width: 8px;
-    }
-    #municipioList::-webkit-scrollbar-thumb {
-        background-color: #a7f3d0; 
-        border-radius: 4px;
-    }
-    #municipioList::-webkit-scrollbar-track {
-        background: #f0fff0; 
-    }
-    .municipio-item {
-        @apply cursor-pointer p-1 rounded-lg text-xs transition-all text-black; 
-    }
-    .municipio-item:hover {
-        background-color: #d1fae5; 
-    }
-    .selected-muni {
-        @apply bg-blue-600 text-white font-semibold;
-    }
+    #municipioList::-webkit-scrollbar { width: 8px; }
+    #municipioList::-webkit-scrollbar-thumb { background-color: #a7f3d0; border-radius: 4px; }
+    #municipioList::-webkit-scrollbar-track { background: #f0fff0; }
+    
+    .municipio-item { @apply cursor-pointer p-1 rounded-lg text-xs transition-all text-black; }
+    .municipio-item:hover { background-color: #d1fae5; }
+    .selected-muni { @apply bg-blue-600 text-white font-semibold; }
+    
     #scatterPlotContainer {
-        background-color: #f0f8ff; /* AliceBlue */
+        background-color: #f0f8ff; 
         @apply rounded-xl p-4;
     }
-    #main-panel .p-4.bg-gray-800 {
-        background-color: #f0fff0; /* Honeydew */
-        @apply rounded-xl text-black; 
-    }
+    #scatter-canvas-wrapper { height: 450px; }
     
-    #main-panel .p-4.bg-gray-800 h2,
-    #main-panel .p-4.bg-gray-800 input,
-    #main-panel .p-4.bg-gray-800 .municipio-item {
-        color: #000 !important;
-    }
-    #main-panel .p-4.bg-gray-800 input {
-        background-color: #e5f5e5; 
-        border-color: #10b981;
-    }
-    
-    #scatter-canvas-wrapper {
-        height: 450px; /* Default desktop view height */
-    }
     .loader {
       border: 4px solid rgba(0, 0, 0, 0.3); 
       border-radius: 50%;
       border-top: 4px solid #3b82f6;
-      width: 40px;
-      height: 40px;
-      -webkit-animation: spin 2s linear infinite;
+      width: 40px; height: 40px;
       animation: spin 2s linear infinite;
       margin: 0 auto;
     }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     
-    /* Standard project styles */
-    .mini { min-height: 260px; }
-    #metrics-menu { opacity: 0; visibility: hidden; transform: translateY(4px); pointer-events: none; transition: opacity .15s ease, transform .15s ease, visibility .15s ease; }
+    /* Navigation Dropdown */
+    #metrics-menu { opacity: 0; visibility: hidden; transform: translateY(4px); pointer-events: none; transition: all .15s ease; }
     #metrics-dropdown-root:hover #metrics-menu, #metrics-dropdown-root.hovering #metrics-menu { opacity: 1; visibility: visible; transform: translateY(0); pointer-events: auto; }
     #metrics-dropdown-root:hover #metrics-chevron, #metrics-dropdown-root.hovering #metrics-chevron { transform: rotate(180deg); }
 
-    /* Scale Wrapper for overall view */
+    /* Scale Wrapper (for global zoom effect) */
     #scale-wrapper {
         transform: scale(0.65); 
         transform-origin: top center; 
@@ -138,105 +93,25 @@
         margin-bottom: -35%; 
         transition: all 0.3s ease; 
     }
+    #scale-wrapper.disable-scale { transform: none !important; height: auto !important; margin-bottom: 0 !important; }
     
-    /* NEW: Class applied to #scale-wrapper when maximization is active */
-    #scale-wrapper.disable-scale {
-        transform: none !important; 
-        height: auto !important;
-        margin-bottom: 0 !important;
-    }
-    
-    /* NEW MAXIMIZE TARGET STYLES */
-    /* Target for maximization: The section containing scatter plot and selectors */
-    #dashboardVisuals {
-        position: relative;
-        transition: all 0.3s ease;
-    }
+    /* Maximize/Fullscreen Logic */
+    #dashboardVisuals { position: relative; transition: all 0.3s ease; }
+    #dashboardVisuals.maximized { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 900; background: #f3f4f6; margin: 0 !important; padding: 0 !important; overflow-y: auto; display: block !important; }
+    #dashboardVisuals.maximized #main-panel { display: flex !important; flex-direction: row !important; padding: 1rem !important; gap: 1rem !important; width: 100%; max-width: 1050px; margin: 0 auto; }
+    #dashboardVisuals.maximized #scatterPlotContainer { width: calc(100% - 200px - 1rem) !important; flex-shrink: 0; }
+    #dashboardVisuals.maximized .lg\:col-span-2 { width: 200px !important; flex-shrink: 0; }
+    #dashboardVisuals.maximized #scatter-canvas-wrapper { height: 50vh !important; }
+    #dashboardVisuals.maximized #municipioList { max-height: calc(40vh + 195px) !important; height: auto !important; }
+    #dashboardVisuals.maximized #trendCharts { display: grid !important; grid-template-columns: 1fr 1fr; gap: 1rem; width: 100%; max-width: 1050px; margin: 0 auto 2rem auto; }
+    #dashboardVisuals.maximized #trendCharts .chart-content-wrapper { height: 30vh !important; }
+    #dashboardVisuals.maximized .section-title { font-size: 1.5rem; padding: 1rem 1rem 0 1rem; max-width: 1050px; margin: 0 auto; }
+    #maximizeButtonContainer { position: absolute; top: 1.5rem; right: 1.5rem; z-index: 910; }
 
-    /* 1. Maximized state for the visual dashboard area (fullscreen positioning) */
-    #dashboardVisuals.maximized {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        z-index: 1000;
-        background: #f3f4f6; 
-        margin: 0 !important;
-        padding: 0 !important;
-        overflow-y: auto; 
-        display: block !important; 
-    }
-    
-    /* 2. Adjust internal layout using Flexbox override for stability */
-    #dashboardVisuals.maximized #main-panel {
-        /* CRITICAL FIX: Use flexbox for reliable side-by-side layout */
-        display: flex !important;
-        flex-direction: row !important;
-        
-        padding: 1rem !important;
-        gap: 1rem !important;
-        width: 100%;
-        
-        /* FINAL FIX: Constrain max width and center the content when maximized */
-        max-width: 1050px; 
-        margin: 0 auto;
-    }
-
-    /* 3. CRITICAL FIX: Explicitly set widths for stable 1fr / 300px split */
-    #dashboardVisuals.maximized #scatterPlotContainer {
-        width: calc(100% - 200px - 1rem) !important; /* 100% - selector width - gap */
-        flex-shrink: 0;
-    }
-    #dashboardVisuals.maximized .lg\:col-span-2 {
-        width: 200px !important; /* Selector is a fixed width */
-        flex-shrink: 0;
-    }
-
-
-    /* 4. Ensure component heights use max space */
-    #dashboardVisuals.maximized #scatter-canvas-wrapper {
-        /* FIX: Increase height to use more screen space when maximized, based on user request */
-        height: 50vh !important; 
-    }
-    
-    #dashboardVisuals.maximized #municipioList {
-        /* FIX: Max height adjusted to match new scatter height (40vh) */
-        max-height: calc(40vh + 195px) !important; 
-        height: auto !important; 
-        overflow-y: scroll !important;
-    }
-    
-    /* Trends (kept below as requested) */
-    #dashboardVisuals.maximized #trendCharts {
-        display: grid !important;
-        grid-template-columns: 1fr 1fr;
-        gap: 1rem;
-        width: 100%;
-        max-width: 1050px; /* Constrain trend charts to the same width */
-        margin: 0 auto 2rem auto;
-    }
-    
-    #dashboardVisuals.maximized #trendCharts .chart-content-wrapper {
-        /* ADJUSTED: Optimized to 30vh for fit-to-screen without scrolling */
-        height: 30vh !important; 
-    }
-    
-    #dashboardVisuals.maximized .section-title {
-        font-size: 1.5rem;
-        padding: 1rem 1rem 0 1rem; 
-        max-width: 1050px; /* Constrain title to the same width */
-        margin: 0 auto;
-    }
-
-
-    /* Maximize button placement */
-    #maximizeButtonContainer {
-        position: absolute;
-        top: 1.5rem; 
-        right: 1.5rem; 
-        z-index: 1010;
-    }
+    /* Policy Modal Styles */
+    #scoreCircle { transition: stroke-dashoffset 1.5s ease-out; }
+    .backdrop-blur-sm { backdrop-filter: blur(4px); }
+    #policyModal { z-index: 2000; } 
   </style>
 </head>
 <body class="bg-gray-50 text-gray-900 font-sans">
@@ -255,24 +130,24 @@
 
         <div id="metrics-menu" class="absolute right-0 mt-2 w-64 rounded-xl border border-gray-200 bg-white shadow-lg ring-1 ring-black/5">
           <div class="py-2">
-            <a href="metrics.html"               class="block px-4 py-2 hover:bg-gray-50 font-semibold">All Metrics Overview</a>
+            <a href="metrics.html" class="block px-4 py-2 hover:bg-gray-50 font-semibold">All Metrics Overview</a>
             <div class="my-1 border-t border-gray-100"></div>
-            <a href="metrics/population.html"     class="block px-4 py-2 hover:bg-gray-50">Population</a>
-            <a href="metrics/employment.html"     class="block px-4 py-2 hover:bg-gray-50">Employment Rate</a>
+            <a href="metrics/population.html" class="block px-4 py-2 hover:bg-gray-50">Population</a>
+            <a href="metrics/employment.html" class="block px-4 py-2 hover:bg-gray-50">Employment Rate</a>
             <a href="metrics/establishments.html" class="block px-4 py-2 hover:bg-gray-50">Employer Establishments</a>
-            <a href="metrics/income.html"         class="block px-4 py-2 hover:bg-gray-50">Household Income</a>
-            <a href="metrics/housing.html"        class="block px-4 py-2 hover:bg-gray-50">Housing Units</a>
-            <a href="metrics/education.html"      class="block px-4 py-2 hover:bg-gray-50">Education</a>
-            <a href="metrics/health.html"         class="block px-4 py-2 hover:bg-gray-50">Health</a>
-            <a href="metrics/disasters_earthquakes.html"      class="block px-4 py-2 hover:bg-gray-50">Earthquakes</a>
-            <a href="metrics/disasters_hurricanes.html"      class="block px-4 py-2 hover:bg-gray-50">Hurricanes</a>
+            <a href="metrics/income.html" class="block px-4 py-2 hover:bg-gray-50">Household Income</a>
+            <a href="metrics/housing.html" class="block px-4 py-2 hover:bg-gray-50">Housing Units</a>
+            <a href="metrics/education.html" class="block px-4 py-2 hover:bg-gray-50">Education</a>
+            <a href="metrics/health.html" class="block px-4 py-2 hover:bg-gray-50">Health</a>
+            <a href="metrics/disasters_earthquakes.html" class="block px-4 py-2 hover:bg-gray-50">Earthquakes</a>
+            <a href="metrics/disasters_hurricanes.html" class="block px-4 py-2 hover:bg-gray-50">Hurricanes</a>
           </div>
         </div>
       </div>
 
-      <a href="literature.html"  class="nav-link border-b-2 border-transparent">Literature</a>
-      <a href="strategy.html"class="nav-link border-b-2 border-transparent">Strategy</a>
-      <a href="about.html"   class="nav-link border-b-2 border-transparent">About</a>
+      <a href="literature.html" class="nav-link border-b-2 border-transparent">Literature</a>
+      <a href="strategy.html" class="nav-link border-b-2 border-transparent">Strategy</a>
+      <a href="about.html" class="nav-link border-b-2 border-transparent">About</a>
     </div>
   </nav>
   
@@ -292,35 +167,11 @@
                 </p>
             </div>
         </div>
-
-        <div class="absolute bottom-4 right-4 group">
-          <div class="text-right">
-            <span class="text-sm font-semibold text-gray-700 cursor-pointer group-hover:text-blue-700 transition">
-              Project Customer: Puerto Rico Planning Board
-            </span>
-          </div>
-
-          <div class="absolute right-0 bottom-full mb-2 w-96 bg-white text-gray-800 p-4 rounded-lg shadow-xl border border-gray-200 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50">
-            <p class="text-gray-700 text-sm">
-              The Planning Board oversees long-term economic development, demographic analysis, and land-use
-              planning for Puerto Rico. This project’s interactive maps, municipal-level dashboards, and
-              population change analyses provide actionable insights that could directly support their policy
-              models and strategic decision-making.
-            </p>
-            <p class="text-sm mt-3">
-              🔗 <a href="https://jp.pr.gov" target="_blank" rel="noopener" class="text-blue-600 underline">
-                Visit Puerto Rico Planning Board Website
-              </a>
-            </p>
-          </div>
-        </div>
       </header>
       
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-          
           <div class="space-y-4">
               <h2 class="kpi-group-heading"><strong>Populations and People</strong></h2>
-              
               <div class="space-y-4">
                   <div class="stat-card">
                     <div class="stat-icon">👥</div>
@@ -330,7 +181,6 @@
                       <a target="_blank" rel="noopener" href="https://data.census.gov/table?q=P1&g=040XX00US72">P1 • 2020 Decennial Census</a>
                     </div>
                   </div>
-                  
                   <div class="stat-card">
                     <div class="stat-icon">📈</div>
                     <div class="stat-body min-w-0">
@@ -344,7 +194,6 @@
 
           <div class="space-y-4">
               <h2 class="kpi-group-heading"><strong>Business and Economy</strong></h2>
-              
               <div class="space-y-4">
                   <div class="stat-card">
                     <div class="stat-icon">🏢</div>
@@ -367,7 +216,6 @@
 
           <div class="space-y-4">
               <h2 class="kpi-group-heading"><strong>Education & Health</strong></h2>
-              
               <div class="space-y-4">
                   <div class="stat-card">
                     <div class="stat-icon">🎓</div>
@@ -476,7 +324,67 @@
           </div>
       </section>
       </main>
-    </div> <script>
+    </div>
+
+    <div class="fixed bottom-8 right-8 z-50">
+        <button onclick="openPolicyModal()" class="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-4 rounded-full shadow-2xl transition transform hover:scale-105 font-bold text-lg">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+            </svg>
+            Generate Policy Insight
+        </button>
+    </div>
+
+    <div id="policyModal" class="fixed inset-0 bg-gray-900 bg-opacity-75 hidden flex items-center justify-center backdrop-blur-sm p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto flex flex-col md:flex-row">
+            <div class="w-full md:w-2/5 bg-slate-50 p-8 border-r border-gray-200 flex flex-col items-center justify-center">
+                <div class="text-center mb-6">
+                    <h3 class="text-gray-500 text-sm font-semibold uppercase tracking-wider">Composite Vitality Score</h3>
+                    <div class="relative mt-4 inline-flex items-center justify-center">
+                        <svg class="w-32 h-32 transform -rotate-90">
+                            <circle cx="64" cy="64" r="60" stroke="#e2e8f0" stroke-width="12" fill="none" />
+                            <circle id="scoreCircle" cx="64" cy="64" r="60" stroke="#3b82f6" stroke-width="12" fill="none" stroke-dasharray="377" stroke-dashoffset="100" class="transition-all duration-1000 ease-out" />
+                        </svg>
+                        <span id="vitalityScore" class="absolute text-4xl font-extrabold text-slate-800">--</span>
+                    </div>
+                    <p id="vitalityLabel" class="mt-2 font-bold text-lg text-blue-600">--</p>
+                </div>
+                <div class="w-full h-64">
+                    <canvas id="radarChart"></canvas>
+                </div>
+            </div>
+            <div class="w-full md:w-3/5 p-8">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <h2 class="text-3xl font-bold text-slate-900" id="modalMuniName">Municipality</h2>
+                        <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-gray-200 text-gray-700 mt-2" id="modalCategory">Analysis Pending</span>
+                    </div>
+                    <button onclick="closePolicyModal()" class="text-gray-400 hover:text-gray-600">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+                <div class="space-y-6">
+                    <div>
+                        <h4 class="text-sm font-bold text-gray-400 uppercase mb-1">Current Situation</h4>
+                        <p id="situationText" class="text-gray-700 leading-relaxed">Generating analysis...</p>
+                    </div>
+                    <div class="bg-indigo-50 border-l-4 border-indigo-500 p-4 rounded-r">
+                        <h4 class="text-indigo-900 font-bold flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                            Strategic Directive
+                        </h4>
+                        <p id="directiveText" class="text-indigo-800 text-sm mt-1">--</p>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-bold text-gray-400 uppercase mb-3">Resource Allocation Plan</h4>
+                        <ul id="actionPlan" class="space-y-3"></ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
     // --- Configuration & Paths ---
     const JSON_FILES = {
         POP:        './data/population/prm-est2010_2024.json',
@@ -494,8 +402,6 @@
         EST: [2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023],
     };
     
-    // --- LAND AREA CONSTANTS (SQ MILES) ---
-    // Added to calculate density since it is not in the raw JSON files.
     const MUNI_AREAS_SQ_MI = {
         'Puerto Rico': 3515.1, 'San Juan': 47.7, 'Bayamón': 44.2, 'Ponce': 116.3, 'Caguas': 58.7, 'Guaynabo': 27.2, 'Carolina': 46.2,
         'Aguas Buenas': 29.8, 'Comerío': 28.3, 'Loíza': 19.4, 'Adjuntas': 66.6, 'Aguada': 30.6, 'Aguadilla': 36.1, 'Aibonito': 39.8,
@@ -517,19 +423,16 @@
     let trendChart1 = null;
     let trendChart2 = null;
     let selectedMunicipio = 'Puerto Rico'; 
+    let policyRadarChart = null;
 
     // --- Formatters ---
     const fmt = new Intl.NumberFormat('en-US');
-    const fmtDec = new Intl.NumberFormat('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
     const fmtCurr = (v) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(v);
     const fmtPct = (v) => `${(v||0).toFixed(1)}%`;
     const fmtInt = (v) => fmt.format(Math.round(v));
     const cleanName = (s) => String(s || '').replace(/\s*Municipio$/g, '').trim();
 
-
     // --- Data Merging Logic ---
-
-    // Fetches all JSON files
     async function fetchAllData() {
         document.getElementById('chart-loader').classList.remove('hidden');
         const promises = Object.entries(JSON_FILES).map(([key, url]) => 
@@ -540,102 +443,56 @@
         return results;
     }
 
-    // Merges all data files into a single array of objects, one per municipio
     function processData(results) {
         const merged = {};
-
         results.forEach(({ key, data }) => {
-            const dataRows = data.filter(r => 
-                !r.metadata && 
-                !String(r.Municipio).includes("Annual and Cumulative")
-            );
-            
+            const dataRows = data.filter(r => !r.metadata && !String(r.Municipio).includes("Annual and Cumulative"));
             dataRows.forEach(row => {
                 const muniName = cleanName(row.Municipio);
-                if (!merged[muniName]) {
-                    merged[muniName] = { Municipio: muniName };
-                }
-                
+                if (!merged[muniName]) merged[muniName] = { Municipio: muniName };
                 if (key === 'POP') {
                     const popStart = Number(row['2010']);
                     const popLatest = Number(row['2024']);
-                    
                     merged[muniName].Population_2024 = popLatest;
-                    
-                    // FIX: Calculate density dynamically using the new AREA constant
                     const areaSqMi = MUNI_AREAS_SQ_MI[muniName];
-                    if (areaSqMi && areaSqMi > 0) {
-                        merged[muniName].Population_Density = popLatest / areaSqMi;
-                    } else {
-                        merged[muniName].Population_Density = 0;
-                    }
-
+                    merged[muniName].Population_Density = (areaSqMi && areaSqMi > 0) ? popLatest / areaSqMi : 0;
                     merged[muniName].Population_PctChange = ((popLatest - popStart) / popStart) * 100;
-                    
                     merged[muniName].Population_TimeSeries = YEARS.POP.map(y => Number(row[y]) || 0);
-
                 } else if (key === 'HOUSING') {
-                    const housingStart = Number(row['2013']);
-                    const housingLatest = Number(row['2023']);
-                    
-                    merged[muniName].Housing_2023 = housingLatest;
+                    merged[muniName].Housing_2023 = Number(row['2023']);
                     merged[muniName].Housing_PctChange = Number(row.Cum_Pct_Change_2013_2023);
-
                     merged[muniName].Housing_TimeSeries = YEARS.ACS.map(y => Number(row[y]) || 0);
-                    
                 } else if (key === 'EMP') {
                     merged[muniName].Employment_EmpPop2023 = Number(row.EmpPop_2023);
                     merged[muniName].Employment_Unemp2023 = Number(row.Unemp_2023);
                     merged[muniName].Employment_Labor2023 = Number(row.LaborForce_2023);
-                    
                     merged[muniName].Employment_TimeSeries = YEARS.ACS.map(y => Number(row[`Unemp_${y}`]) || 0);
-
                 } else if (key === 'INCOME') {
                     merged[muniName].Income_Nominal2023 = Number(row['2023']);
                     merged[muniName].Income_Real2023 = Number(row.RealIncome_2023);
-                    
                     merged[muniName].Income_TimeSeries = YEARS.ACS.map(y => Number(row[`RealIncome_${y}`]) || 0);
-                    
                 } else if (key === 'EDU') {
                     merged[muniName].Education_2023 = Number(row['2023']);
-                    
                     merged[muniName].Education_TimeSeries = YEARS.ACS.map(y => Number(row[y]) || 0);
-
                 } else if (key === 'EST') {
-                    const estStart = Number(row['2012']);
-                    const estLatest = Number(row['2023']);
-
-                    merged[muniName].Establishments_2023 = estLatest;
+                    merged[muniName].Establishments_2023 = Number(row['2023']);
                     merged[muniName].Establishments_PctChange = Number(row.Cum_Pct_Change_2012_2023);
-                    
                     merged[muniName].Establishments_TimeSeries = YEARS.EST.map(y => Number(row[y]) || 0);
-
                 } else if (key === 'HEALTH') {
-                    merged[muniName].Health_2023 = Number(row['2023']); // % without coverage
-                    
+                    merged[muniName].Health_2023 = Number(row['2023']);
                     merged[muniName].Health_TimeSeries = YEARS.ACS.map(y => Number(row[y]) || 0);
                 }
             });
         });
-        
-        // FIX for Education KPI: Calculate the true average percentage attainment for Puerto Rico
         const prData = merged['Puerto Rico'];
         if (prData) {
-            const allEduValues = Object.values(merged).filter(m => m.Municipio !== 'Puerto Rico')
-                                            .map(m => m.Education_2023)
-                                            .filter(v => Number.isFinite(v));
-            if (allEduValues.length > 0) {
-                const average = allEduValues.reduce((a, b) => a + b, 0) / allEduValues.length;
-                prData.Education_2023 = average; 
-            }
+            const allEduValues = Object.values(merged).filter(m => m.Municipio !== 'Puerto Rico').map(m => m.Education_2023).filter(v => Number.isFinite(v));
+            if (allEduValues.length > 0) prData.Education_2023 = allEduValues.reduce((a, b) => a + b, 0) / allEduValues.length;
         }
-
-        // Filter out any municipios that failed to load essential data
         return Object.values(merged).filter(m => m.Population_2024 != null);
     }
 
     // --- Charting Logic ---
-
     function getAxisLabel(key) {
         const labels = {
             'Population_PctChange': 'Population Change (2010-2024, %)',
@@ -660,130 +517,55 @@
         return masterData.find(m => cleanName(m.Municipio) === cleanName(municipioName));
     }
 
-
     function drawScatterPlot() {
         const ctx = document.getElementById('scatterPlot').getContext('2d');
         if (scatterChart) scatterChart.destroy();
-        
-        // Show the chart container now that the data is ready
         document.getElementById('scatter-canvas-wrapper').classList.remove('hidden');
-
         const xKey = document.getElementById('xAxisSelect').value;
         const yKey = document.getElementById('yAxisSelect').value;
         const colorKey = document.getElementById('colorSelect').value;
-        
         const muniData = masterData.filter(m => m.Municipio !== 'Puerto Rico');
-
-        // Determine min/max for color scale (linear interpolation for hue/saturation)
         const colorValues = muniData.map(m => m[colorKey]).filter(v => v !== undefined && Number.isFinite(v));
         const colorMin = Math.min(...colorValues);
         const colorMax = Math.max(...colorValues);
-
         const getColor = (value) => {
             if (value === undefined || !Number.isFinite(value)) return 'rgba(156, 163, 175, 0.5)';
             const normalized = (value - colorMin) / (colorMax - colorMin);
-            // Red (high) to Green (low) for Unemployment/Health, or vice-versa for Income/Education
             const isLowerBetter = (colorKey.includes('Unemp') || colorKey.includes('Health'));
-            
-            const hue = isLowerBetter ? (1 - normalized) * 120 : normalized * 120; // 0 (Red) to 120 (Green)
+            const hue = isLowerBetter ? (1 - normalized) * 120 : normalized * 120;
             return `hsl(${hue}, 80%, 50%)`;
         };
-        
         const dataPoints = muniData.map(m => ({
-            x: m[xKey],
-            y: m[yKey],
-            colorValue: m[colorKey],
-            r: 25,
-            name: m.Municipio
+            x: m[xKey], y: m[yKey], colorValue: m[colorKey], r: 25, name: m.Municipio
         })).filter(p => p.x !== undefined && p.y !== undefined && Number.isFinite(p.x) && Number.isFinite(p.y));
         
-        // Highlight the selected municipality
         const selectedMuni = getMuniData(selectedMunicipio);
         if (selectedMuni && selectedMunicipio !== 'Puerto Rico') {
              dataPoints.push({
-                x: selectedMuni[xKey],
-                y: selectedMuni[yKey],
-                colorValue: selectedMuni[colorKey],
-                r: 25, 
-                name: selectedMuni.Municipio,
-                borderColor: '#facc15', // Yellow highlight
-                borderWidth: 4, // Increased border width
+                x: selectedMuni[xKey], y: selectedMuni[yKey], colorValue: selectedMuni[colorKey],
+                r: 25, name: selectedMuni.Municipio, borderColor: '#facc15', borderWidth: 4,
             });
         }
-        
         scatterChart = new Chart(ctx, {
             type: 'scatter',
-            data: {
-                datasets: [{
-                    label: 'Municipalities',
-                    data: dataPoints,
-                    backgroundColor: dataPoints.map(p => getColor(p.colorValue)),
-                    pointBorderColor: dataPoints.map(p => p.borderColor || 'transparent'),
-                    pointBorderWidth: dataPoints.map(p => p.borderWidth || 1),
-                }]
-            },
+            data: { datasets: [{ label: 'Municipalities', data: dataPoints, backgroundColor: dataPoints.map(p => getColor(p.colorValue)), pointBorderColor: dataPoints.map(p => p.borderColor || 'transparent'), pointBorderWidth: dataPoints.map(p => p.borderWidth || 1) }] },
             options: {
-                maintainAspectRatio: false,
-                responsive: true,
-                onClick: handleScatterClick,
+                maintainAspectRatio: false, responsive: true, onClick: handleScatterClick,
                 plugins: {
                     legend: { display: false },
-                    tooltip: {
-                        callbacks: {
-                            label: (context) => {
+                    tooltip: { callbacks: { label: (context) => {
                                 const p = context.raw;
-                                const xFormatted = getAxisFormat(xKey)(p.x);
-                                const yFormatted = getAxisFormat(yKey)(p.y);
-                                const colorFormatted = getAxisFormat(colorKey)(p.colorValue);
-
-                                return [
-                                    p.name,
-                                    `${getAxisLabel(xKey).split('(')[0].trim()}: ${xFormatted}`,
-                                    `${getAxisLabel(yKey).split('(')[0].trim()}: ${yFormatted}`,
-                                    `${getAxisLabel(colorKey).split('(')[0].trim()}: ${colorFormatted}`,
-                                ];
-                            }
-                        }
-                    },
-                    annotation: {
-                        annotations: {
-                            // Dynamically add text annotation for the selected municipality
-                            selectedMuniLabel: selectedMunicipio !== 'Puerto Rico' ? {
-                                type: 'label',
-                                xValue: selectedMuni[xKey],
-                                yValue: selectedMuni[yKey],
-                                content: selectedMuni.Municipio,
-                                font: {
-                                    size: 14,
-                                    weight: 'bold'
-                                },
-                                backgroundColor: 'rgba(255, 255, 255, 0.7)',
-                                color: '#f59e0b', // Amber text color
-                                xAdjust: 15,
-                                yAdjust: -15,
-                                position: 'right',
-                                display: true
-                            } : { display: false }
-                        }
-                    }
+                                return [p.name, `${getAxisLabel(xKey).split('(')[0].trim()}: ${getAxisFormat(xKey)(p.x)}`, `${getAxisLabel(yKey).split('(')[0].trim()}: ${getAxisFormat(yKey)(p.y)}`, `${getAxisLabel(colorKey).split('(')[0].trim()}: ${getAxisFormat(colorKey)(p.colorValue)}`];
+                    }}},
+                    annotation: { annotations: { selectedMuniLabel: selectedMunicipio !== 'Puerto Rico' ? { type: 'label', xValue: selectedMuni[xKey], yValue: selectedMuni[yKey], content: selectedMuni.Municipio, font: { size: 14, weight: 'bold' }, backgroundColor: 'rgba(255, 255, 255, 0.7)', color: '#f59e0b', xAdjust: 15, yAdjust: -15, position: 'right', display: true } : { display: false } } }
                 },
                 scales: {
-                    x: {
-                        title: { display: true, text: getAxisLabel(xKey), color: '#000' }, /* Changed to Black */
-                        grid: { color: '#bbb' }, /* Changed grid color */
-                        ticks: { color: '#000', callback: v => getAxisFormat(xKey)(v) } /* Changed to Black */
-                    },
-                    y: {
-                        title: { display: true, text: getAxisLabel(yKey), color: '#000' }, /* Changed to Black */
-                        grid: { color: '#bbb' }, /* Changed grid color */
-                        ticks: { color: '#000', callback: v => getAxisFormat(yKey)(v) } /* Changed to Black */
-                    }
+                    x: { title: { display: true, text: getAxisLabel(xKey), color: '#000' }, grid: { color: '#bbb' }, ticks: { color: '#000', callback: v => getAxisFormat(xKey)(v) } },
+                    y: { title: { display: true, text: getAxisLabel(yKey), color: '#000' }, grid: { color: '#bbb' }, ticks: { color: '#000', callback: v => getAxisFormat(yKey)(v) } }
                 }
             }
         });
     }
-
-    // --- Chart Narrative Logic ---
 
     function generateChartNarrative(muniData) {
         if (muniData.Municipio === 'Puerto Rico') {
@@ -792,243 +574,82 @@
                 chart2: "The <strong>Employment & Income Trend</strong> shows the island-wide <strong>Real Median Income</strong> (2023$, amber line) fluctuating around the $20,000–$25,000 range, while the <strong>Unemployment Rate</strong> (red line) has shown a long-term decline from the early 2010s peak, reflecting an improving job market but stagnant real earning power."
             };
         }
-
-        // --- Population & Housing Narrative (Chart 1) ---
-        const pop2010 = muniData.Population_TimeSeries[YEARS.POP.indexOf(2010)];
-        const pop2024 = muniData.Population_2024;
         const popChange = muniData.Population_PctChange;
-
-        const housing2013 = muniData.Housing_TimeSeries[0];
-        const housing2023 = muniData.Housing_2023;
         const housingChange = muniData.Housing_PctChange;
         
-        let popNarrative, housingNarrative;
-
-        // Population Trend
-        if (popChange < -10) {
-            popNarrative = `The <strong>population</strong> of ${muniData.Municipio} has seen severe decline, dropping by <strong>${fmtPct(Math.abs(popChange))}</strong> since 2010.`;
-        } else if (popChange < 0) {
-            popNarrative = `The <strong>population</strong> has experienced a notable decrease, falling by <strong>${fmtPct(Math.abs(popChange))}</strong> since 2010.`;
-        } else {
-            popNarrative = `The <strong>population</strong> has managed to stabilize or slightly grow, rising by <strong>${fmtPct(popChange)}</strong> since 2010.`;
-        }
-
-        // Housing Trend
-        if (housingChange > 5) {
-             housingNarrative = `Meanwhile, <strong>Housing Units</strong> have grown significantly, increasing by <strong>${fmtPct(housingChange)}</strong> since 2013, indicating new construction despite demographic contraction.`;
-        } else if (housingChange > 0) {
-            housingNarrative = `<strong>Housing Units</strong> have seen moderate growth, up <strong>${fmtPct(housingChange)}</strong> since 2013, contributing to increased vacancy.`;
-        } else {
-            housingNarrative = `<strong>Housing Units</strong> have declined by <strong>${fmtPct(Math.abs(housingChange))}</strong> since 2013, suggesting housing stock is contracting in line with population loss.`;
-        }
-
-        // --- Employment & Income Narrative (Chart 2) ---
+        let popNarrative;
+        if (popChange < -10) popNarrative = `The <strong>population</strong> of ${muniData.Municipio} has seen severe decline, dropping by <strong>${fmtPct(Math.abs(popChange))}</strong> since 2010.`;
+        else if (popChange < 0) popNarrative = `The <strong>population</strong> has experienced a notable decrease, falling by <strong>${fmtPct(Math.abs(popChange))}</strong> since 2010.`;
+        else popNarrative = `The <strong>population</strong> has managed to stabilize or slightly grow, rising by <strong>${fmtPct(popChange)}</strong> since 2010.`;
+        
+        let housingNarrative;
+        if (housingChange > 5) housingNarrative = `Meanwhile, <strong>Housing Units</strong> have grown significantly, increasing by <strong>${fmtPct(housingChange)}</strong> since 2013, indicating new construction despite demographic contraction.`;
+        else if (housingChange > 0) housingNarrative = `<strong>Housing Units</strong> have seen moderate growth, up <strong>${fmtPct(housingChange)}</strong> since 2013, contributing to increased vacancy.`;
+        else housingNarrative = `<strong>Housing Units</strong> have declined by <strong>${fmtPct(Math.abs(housingChange))}</strong> since 2013, suggesting housing stock is contracting in line with population loss.`;
+        
         const incomeLatest = muniData.Income_Real2023;
         const unempLatest = muniData.Employment_Unemp2023;
-        
         const incomeTimeSeries = muniData.Income_TimeSeries.slice(0);
         const incomeMax = Math.max(...incomeTimeSeries);
         const incomePeakYear = YEARS.ACS[incomeTimeSeries.indexOf(incomeMax)];
         
-        let incomeNarrative, unempNarrative;
+        let incomeNarrative;
+        if (incomeLatest > 25000) incomeNarrative = `<strong>Real Median Income</strong> (amber line) is relatively strong at <strong>${fmtCurr(incomeLatest)}</strong>, though it peaked around ${incomePeakYear}.`;
+        else if (incomeLatest > 20000) incomeNarrative = `<strong>Real Median Income</strong> sits at <strong>${fmtCurr(incomeLatest)}</strong>, reflecting moderate real earning power.`;
+        else incomeNarrative = `<strong>Real Median Income</strong> is low at <strong>${fmtCurr(incomeLatest)}</strong>, indicating significant economic hardship.`;
         
-        // Income Trend
-        if (incomeLatest > 25000) {
-            incomeNarrative = `<strong>Real Median Income</strong> (amber line) is relatively strong at <strong>${fmtCurr(incomeLatest)}</strong>, though it peaked around ${incomePeakYear}.`;
-        } else if (incomeLatest > 20000) {
-            incomeNarrative = `<strong>Real Median Income</strong> sits at <strong>${fmtCurr(incomeLatest)}</strong>, reflecting moderate real earning power.`;
-        } else {
-            incomeNarrative = `<strong>Real Median Income</strong> is low at <strong>${fmtCurr(incomeLatest)}</strong>, indicating significant economic hardship.`;
-        }
+        let unempNarrative;
+        if (unempLatest < 8) unempNarrative = `The <strong>Unemployment Rate</strong> (red line) is low at <strong>${fmtPct(unempLatest)}</strong>, suggesting a tighter local labor market.`;
+        else if (unempLatest < 12) unempNarrative = `The <strong>Unemployment Rate</strong> is moderate at <strong>${fmtPct(unempLatest)}</strong>.`;
+        else unempNarrative = `The <strong>Unemployment Rate</strong> remains high at <strong>${fmtPct(unempLatest)}</strong>, indicating persistent employment challenges.`;
         
-        // Unemployment Trend
-        if (unempLatest < 8) {
-            unempNarrative = `The <strong>Unemployment Rate</strong> (red line) is low at <strong>${fmtPct(unempLatest)}</strong>, suggesting a tighter local labor market.`;
-        } else if (unempLatest < 12) {
-            unempNarrative = `The <strong>Unemployment Rate</strong> is moderate at <strong>${fmtPct(unempLatest)}</strong>.`;
-        } else {
-            unempNarrative = `The <strong>Unemployment Rate</strong> remains high at <strong>${fmtPct(unempLatest)}</strong>, indicating persistent employment challenges.`;
-        }
-
-        return {
-            chart1: `${popNarrative} ${housingNarrative}`,
-            chart2: `${incomeNarrative} ${unempNarrative}`
-        };
+        return { chart1: `${popNarrative} ${housingNarrative}`, chart2: `${incomeNarrative} ${unempNarrative}` };
     }
     
     function drawTrendCharts(muniName) {
         const muniData = getMuniData(muniName);
         if (!muniData) return;
-
         const ctx1 = document.getElementById('trendChart1').getContext('2d');
         const ctx2 = document.getElementById('trendChart2').getContext('2d');
-        
         const narrative = generateChartNarrative(muniData);
-
-        // ------------------ Chart 1: Population & Housing Trends ------------------
         if (trendChart1) trendChart1.destroy();
         trendChart1 = new Chart(ctx1, {
             type: 'line',
-            data: {
-                labels: YEARS.POP,
-                datasets: [
-                    {
-                        label: 'Population',
-                        data: muniData.Population_TimeSeries,
-                        yAxisID: 'yPop',
-                        borderColor: '#3b82f6', // Blue
-                        backgroundColor: 'rgba(59, 130, 246, 0.2)',
-                        fill: false, tension: 0.3
-                    },
-                    {
-                        label: 'Housing Units',
-                        data: muniData.Housing_TimeSeries,
-                        yAxisID: 'yHousing',
-                        borderColor: '#10b981', // Green
-                        backgroundColor: 'rgba(16, 185, 129, 0.2)',
-                        fill: false, tension: 0.3,
-                        // Skip points before 2013 as Housing data starts then
-                        skip: (ctx) => YEARS.POP[ctx.p.parsed.x] < YEARS.ACS[0]
-                    }
-                ]
-            },
-            options: {
-                maintainAspectRatio: false,
-                layout: {
-                    padding: {
-                        bottom: 20 // FIX: Add bottom padding for labels
-                    }
-                },
-                plugins: { legend: { labels: { color: '#000' } } }, /* Changed to Black */
-                scales: {
-                    x: { 
-                        ticks: { 
-                            color: '#000', 
-                            maxRotation: 0,
-                            minRotation: 0,
-                            font: { size: 8 } /* Decreased font size */
-                        }, 
-                        grid: { color: '#bbb' } 
-                    }, /* Changed to Black / Light Grid */
-                    yPop: {
-                        type: 'linear', position: 'left', id: 'yPop',
-                        title: { display: true, text: 'Population (Count)', color: '#3b82f6' },
-                        ticks: { color: '#3b82f6', callback: v => fmtInt(v) },
-                        grid: { color: '#bbb' } /* Changed grid color */
-                    },
-                    yHousing: {
-                        type: 'linear', position: 'right', id: 'yHousing',
-                        title: { display: true, text: 'Housing Units (Count)', color: '#10b981' },
-                        ticks: { color: '#10b981', callback: v => fmtInt(v) },
-                        grid: { drawOnChartArea: false }
-                    }
-                }
-            }
+            data: { labels: YEARS.POP, datasets: [{ label: 'Population', data: muniData.Population_TimeSeries, yAxisID: 'yPop', borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.2)', fill: false, tension: 0.3 }, { label: 'Housing Units', data: muniData.Housing_TimeSeries, yAxisID: 'yHousing', borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.2)', fill: false, tension: 0.3, skip: (ctx) => YEARS.POP[ctx.p.parsed.x] < YEARS.ACS[0] }] },
+            options: { maintainAspectRatio: false, layout: { padding: { bottom: 20 } }, plugins: { legend: { labels: { color: '#000' } } }, scales: { x: { ticks: { color: '#000', maxRotation: 0, minRotation: 0, font: { size: 8 } }, grid: { color: '#bbb' } }, yPop: { type: 'linear', position: 'left', id: 'yPop', title: { display: true, text: 'Population (Count)', color: '#3b82f6' }, ticks: { color: '#3b82f6', callback: v => fmtInt(v) }, grid: { color: '#bbb' } }, yHousing: { type: 'linear', position: 'right', id: 'yHousing', title: { display: true, text: 'Housing Units (Count)', color: '#10b981' }, ticks: { color: '#10b981', callback: v => fmtInt(v) }, grid: { drawOnChartArea: false } } } }
         });
-
-        // ------------------ Chart 2: Employment & Income Trends ------------------
         if (trendChart2) trendChart2.destroy();
         trendChart2 = new Chart(ctx2, {
             type: 'line',
-            data: {
-                labels: YEARS.ACS, // Use ACS years since both start at 2013
-                datasets: [
-                    {
-                        label: 'Real Income (2023 $)',
-                        data: muniData.Income_TimeSeries,
-                        yAxisID: 'yIncome',
-                        borderColor: '#f59e0b', // Yellow/Amber
-                        backgroundColor: 'rgba(245, 158, 11, 0.2)',
-                        fill: false, tension: 0.3
-                    },
-                    {
-                        label: 'Unemployment Rate (%)',
-                        data: muniData.Employment_TimeSeries,
-                        yAxisID: 'yUnemp',
-                        borderColor: '#dc2626', // Red
-                        backgroundColor: 'rgba(220, 38, 38, 0.2)',
-                        fill: false, tension: 0.3
-                    }
-                ]
-            },
-            options: {
-                maintainAspectRatio: false,
-                layout: {
-                    padding: {
-                        bottom: 20 // FIX: Add bottom padding for labels
-                    }
-                },
-                plugins: { legend: { labels: { color: '#000' } } }, /* Changed to Black */
-                scales: {
-                    x: { 
-                        ticks: { 
-                            color: '#000', 
-                            maxRotation: 0, 
-                            minRotation: 0,
-                            font: { size: 8 } /* Decreased font size */
-                        }, 
-                        grid: { color: '#bbb' }, 
-                        labels: YEARS.ACS 
-                    }, /* Changed to Black / Light Grid */
-                    yIncome: {
-                        type: 'linear', position: 'left', id: 'yIncome',
-                        title: { display: true, text: 'Real Median Income ($)', color: '#f59e0b' },
-                        ticks: { color: '#f59e0b', callback: v => fmtCurr(v) },
-                        grid: { color: '#bbb' } /* Changed grid color */
-                    },
-                    yUnemp: {
-                        type: 'linear', position: 'right', id: 'yUnemp',
-                        title: { display: true, text: 'Unemployment Rate (%)', color: '#dc2626' },
-                        ticks: { color: '#dc2626', callback: v => fmtPct(v) },
-                        grid: { drawOnChartArea: false }
-                    }
-                }
-            }
+            data: { labels: YEARS.ACS, datasets: [{ label: 'Real Income (2023 $)', data: muniData.Income_TimeSeries, yAxisID: 'yIncome', borderColor: '#f59e0b', backgroundColor: 'rgba(245, 158, 11, 0.2)', fill: false, tension: 0.3 }, { label: 'Unemployment Rate (%)', data: muniData.Employment_TimeSeries, yAxisID: 'yUnemp', borderColor: '#dc2626', backgroundColor: 'rgba(220, 38, 38, 0.2)', fill: false, tension: 0.3 }] },
+            options: { maintainAspectRatio: false, layout: { padding: { bottom: 20 } }, plugins: { legend: { labels: { color: '#000' } } }, scales: { x: { ticks: { color: '#000', maxRotation: 0, minRotation: 0, font: { size: 8 } }, grid: { color: '#bbb' }, labels: YEARS.ACS }, yIncome: { type: 'linear', position: 'left', id: 'yIncome', title: { display: true, text: 'Real Median Income ($)', color: '#f59e0b' }, ticks: { color: '#f59e0b', callback: v => fmtCurr(v) }, grid: { color: '#bbb' } }, yUnemp: { type: 'linear', position: 'right', id: 'yUnemp', title: { display: true, text: 'Unemployment Rate (%)', color: '#dc2626' }, ticks: { color: '#dc2626', callback: v => fmtPct(v) }, grid: { drawOnChartArea: false } } } }
         });
-        
         document.getElementById('trendMuniName').textContent = muniName;
-        
-        // Update Narrative Text
         document.getElementById('chart-narrative-1').innerHTML = narrative.chart1;
         document.getElementById('chart-narrative-2').innerHTML = narrative.chart2;
     }
 
-    // --- Interaction Handlers ---
-
-    function updateKPIs() {
-        const prData = getMuniData('Puerto Rico');
-        if (!prData) return;
-    }
-    
     function updateMunicipioList() {
         const listEl = document.getElementById('municipioList');
         const searchInput = document.getElementById('muniSearch');
         const searchTerm = searchInput.value.toLowerCase();
-        
         listEl.innerHTML = '';
-        
-        // Add Puerto Rico first
         let prItem = document.createElement('div');
         prItem.className = `municipio-item ${selectedMunicipio === 'Puerto Rico' ? 'selected-muni' : ''}`;
         prItem.textContent = 'Puerto Rico (Islandwide)';
         prItem.dataset.muni = 'Puerto Rico';
         listEl.appendChild(prItem);
-        
-        masterData
-            .filter(m => m.Municipio !== 'Puerto Rico' && m.Municipio.toLowerCase().includes(searchTerm))
-            .sort((a, b) => a.Municipio.localeCompare(b.Municipio))
-            .forEach(m => {
+        masterData.filter(m => m.Municipio !== 'Puerto Rico' && m.Municipio.toLowerCase().includes(searchTerm)).sort((a, b) => a.Municipio.localeCompare(b.Municipio)).forEach(m => {
                 let item = document.createElement('div');
                 item.className = `municipio-item ${selectedMunicipio === m.Municipio ? 'selected-muni' : ''}`;
                 item.textContent = m.Municipio;
                 item.dataset.muni = m.Municipio;
                 listEl.appendChild(item);
             });
-            
         listEl.querySelectorAll('.municipio-item').forEach(item => {
             item.addEventListener('click', () => {
                 selectedMunicipio = item.dataset.muni;
-                updateMunicipioList(); // Re-render to highlight selection
+                updateMunicipioList();
                 drawScatterPlot();
                 drawTrendCharts(selectedMunicipio);
             });
@@ -1037,116 +658,152 @@
 
     function handleScatterClick(event) {
         const points = scatterChart.getElementsAtEventForMode(event, 'nearest', { intersect: true }, true);
-        
         if (points.length) {
             const firstPoint = points[0];
             const index = firstPoint.index;
-            
             const dataPoint = scatterChart.data.datasets[0].data[index]; 
-            
-            if (dataPoint && dataPoint.name) {
-                selectedMunicipio = dataPoint.name;
-            } else if (dataPoint.name === 'Puerto Rico') {
-                selectedMunicipio = 'Puerto Rico';
-            }
-            
+            if (dataPoint && dataPoint.name) selectedMunicipio = dataPoint.name;
+            else if (dataPoint.name === 'Puerto Rico') selectedMunicipio = 'Puerto Rico';
             updateMunicipioList();
-            drawScatterPlot(); // Re-render to draw the highlight
+            drawScatterPlot();
             drawTrendCharts(selectedMunicipio);
         }
     }
     
-    // NEW: Maximize/Minimize Toggle Function
     function toggleMaximize() {
         const wrapper = document.getElementById('scale-wrapper');
         const visuals = document.getElementById('dashboardVisuals');
         const maximizeIcon = document.getElementById('maximizeIcon');
         const minimizeIcon = document.getElementById('minimizeIcon');
-        
         const isMaximized = visuals.classList.toggle('maximized');
-        
-        // CRITICAL FIX: Toggle the class on the scale-wrapper to disable the scaling effect
         wrapper.classList.toggle('disable-scale', isMaximized);
-        
-        // Toggle icons visibility
         maximizeIcon.classList.toggle('hidden', isMaximized);
         minimizeIcon.classList.toggle('hidden', !isMaximized);
-        
-        // Redraw charts to adjust to new container size
-        setTimeout(() => {
-            if (scatterChart) scatterChart.resize(); 
-            if (trendChart1) trendChart1.resize();
-            if (trendChart2) trendChart2.resize();
-        }, 100);
+        setTimeout(() => { if (scatterChart) scatterChart.resize(); if (trendChart1) trendChart1.resize(); if (trendChart2) trendChart2.resize(); }, 100);
     }
 
+    // --- POLICY INSIGHT ENGINE LOGIC ---
+    function openPolicyModal() {
+        const modal = document.getElementById('policyModal');
+        const muniData = getMuniData(selectedMunicipio);
+        if (!muniData) { alert("Please select a municipality first."); return; }
+        modal.classList.remove('hidden');
+        analyzeMunicipality(muniData);
+    }
+
+    function closePolicyModal() {
+        document.getElementById('policyModal').classList.add('hidden');
+    }
+
+    function analyzeMunicipality(data) {
+        // 1. CALCULATE VITALITY SCORE
+        // Normalized logic: Pop Change (-40% to +5%), Income (10k to 50k), Unemployment (25% to 4%)
+        let popScore = ((data.Population_PctChange - (-40)) / (5 - (-40))) * 100;
+        let incScore = ((data.Income_Real2023 - 10000) / (50000 - 10000)) * 100;
+        let empScore = ((25 - data.Employment_Unemp2023) / (25 - 4)) * 100;
+        const clamp = (num) => Math.min(Math.max(num, 0), 100);
+        const finalScore = Math.round((clamp(popScore) * 0.4) + (clamp(incScore) * 0.3) + (clamp(empScore) * 0.3));
+
+        // 2. UPDATE UI
+        document.getElementById('modalMuniName').innerText = data.Municipio;
+        document.getElementById('vitalityScore').innerText = finalScore;
+        const circle = document.getElementById('scoreCircle');
+        const circumference = 2 * Math.PI * 60; 
+        circle.style.strokeDashoffset = circumference - (finalScore / 100) * circumference;
+
+        let label = "", color = "", directive = "", situation = "", actions = [];
+        if (finalScore < 30) {
+            label = "CRITICAL DISTRESS"; color = "#ef4444";
+            document.getElementById('modalCategory').className = "inline-block px-3 py-1 rounded-full text-xs font-bold bg-red-100 text-red-700 mt-2";
+            situation = `${data.Municipio} is facing an existential crisis. With a population change of <span class="font-bold text-red-600">${fmtPct(data.Population_PctChange)}</span> and a real median income of ${fmtCurr(data.Income_Real2023)}, the tax base is eroding faster than infrastructure costs can be reduced.`;
+            directive = "Immediate State & Federal Intervention Required. Focus on stabilization.";
+            actions = ["<strong>Fiscal Subsidy:</strong> Allocate emergency block grants to maintain essential municipal services.", "<strong>Depopulation Management:</strong> Consolidate low-density infrastructure to reduce overhead.", "<strong>Opportunity Zones:</strong> Designate as tax-free zone to attract light manufacturing."];
+        } else if (finalScore < 60) {
+            label = "AT RISK"; color = "#f59e0b";
+            document.getElementById('modalCategory').className = "inline-block px-3 py-1 rounded-full text-xs font-bold bg-orange-100 text-orange-700 mt-2";
+            situation = `${data.Municipio} is showing signs of stagnation. While not in immediate collapse, the unemployment rate of ${fmtPct(data.Employment_Unemp2023)} and housing vacancy trends indicate a lack of economic dynamism.`;
+            directive = "Targeted Economic Stimulus. Focus on job creation and retraining.";
+            actions = ["<strong>Small Business Grants:</strong> Incentives for local startups in tourism or agriculture.", "<strong>Housing Rehab:</strong> Subsidies for renovating vacant housing to attract remote workers.", "<strong>Education alignment:</strong> Partner local vocational schools with regional employers."];
+        } else {
+            label = "STABLE / THRIVING"; color = "#22c55e";
+            document.getElementById('modalCategory').className = "inline-block px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700 mt-2";
+            situation = `${data.Municipio} is outperforming the regional average. It acts as an economic anchor with relatively stable population trends and higher income levels (${fmtCurr(data.Income_Real2023)}).`;
+            directive = "Sustainable Growth Management. Focus on quality of life.";
+            actions = ["<strong>Infrastructure Expansion:</strong> Upgrade digital/physical infrastructure to support expansion.", "<strong>Magnet Programs:</strong> Invest in specialized high-school programs to retain families.", "<strong>Regional Leadership:</strong> Establish shared-service agreements with neighbors."];
+        }
+
+        document.getElementById('vitalityLabel').innerText = label;
+        document.getElementById('vitalityLabel').style.color = color;
+        document.getElementById('scoreCircle').style.stroke = color;
+        document.getElementById('directiveText').innerText = directive;
+        document.getElementById('situationText').innerHTML = situation;
+        const actionList = document.getElementById('actionPlan');
+        actionList.innerHTML = "";
+        actions.forEach(act => {
+            const li = document.createElement('li');
+            li.className = "flex gap-3 items-start text-sm text-gray-600";
+            li.innerHTML = `<span class="mt-1 w-2 h-2 rounded-full bg-gray-400 flex-shrink-0"></span><span>${act}</span>`;
+            actionList.appendChild(li);
+        });
+        drawRadar(data);
+    }
+
+    function drawRadar(data) {
+        const ctx = document.getElementById('radarChart').getContext('2d');
+        if (policyRadarChart) policyRadarChart.destroy();
+        const pScore = Math.min(100, Math.max(0, 50 + data.Population_PctChange * 2));
+        const iScore = Math.min(100, (data.Income_Real2023 / 35000) * 100);
+        const eScore = Math.min(100, Math.max(0, 100 - (data.Employment_Unemp2023 * 4)));
+        const hScore = Math.min(100, 100 - (data.Health_2023 * 5));
+        policyRadarChart = new Chart(ctx, {
+            type: 'radar',
+            data: {
+                labels: ['Pop Retention', 'Income Level', 'Employment', 'Health Access'],
+                datasets: [{
+                    label: data.Municipio, data: [pScore, iScore, eScore, hScore],
+                    backgroundColor: 'rgba(79, 70, 229, 0.2)', borderColor: 'rgba(79, 70, 229, 1)', pointBackgroundColor: 'rgba(79, 70, 229, 1)', borderWidth: 2
+                }, {
+                    label: 'PR Average', data: [50, 55, 60, 70],
+                    backgroundColor: 'rgba(148, 163, 184, 0.1)', borderColor: 'rgba(148, 163, 184, 0.5)', borderDash: [5, 5], pointRadius: 0, borderWidth: 1
+                }]
+            },
+            options: { scales: { r: { beginAtZero: true, max: 100, ticks: { display: false }, pointLabels: { font: { size: 10, weight: 'bold' } } } }, plugins: { legend: { display: true, position: 'bottom' } } }
+        });
+    }
 
     // --- Initialization ---
-
     async function init() {
         document.getElementById('muniSearch').addEventListener('input', updateMunicipioList);
-        
         try {
-            // Show loader before fetch
             document.getElementById('chart-loader').classList.remove('hidden');
             document.getElementById('scatter-canvas-wrapper').classList.add('hidden');
-            
             const rawResults = await fetchAllData();
             masterData = processData(rawResults);
-
-            if (masterData.length === 0) {
-                console.error("No valid data could be merged.");
-                document.getElementById('chart-loader').innerHTML = '<div class="text-red-400">Error loading data. No valid data found.</div>';
-                return;
-            }
-            
-            // Hide loader and show chart container
+            if (masterData.length === 0) { console.error("No valid data."); return; }
             document.getElementById('chart-loader').classList.add('hidden');
             document.getElementById('scatter-canvas-wrapper').classList.remove('hidden');
-
-            // Initial render
-            updateKPIs(); 
-            updateMunicipioList();
-            drawScatterPlot();
             
+            updateMunicipioList(); 
+            drawScatterPlot(); 
             drawTrendCharts(selectedMunicipio);
-
-            // Wire up axis selection handlers
+            
             document.getElementById('xAxisSelect').addEventListener('change', drawScatterPlot);
             document.getElementById('yAxisSelect').addEventListener('change', drawScatterPlot);
             document.getElementById('colorSelect').addEventListener('change', drawScatterPlot);
-            
-            // Expose the function globally for the HTML button's onclick attribute
             window.toggleMaximize = toggleMaximize;
-            
-        } catch (error) {
-            console.error("Failed to initialize dashboard:", error);
-            document.getElementById('chart-loader').innerHTML = '<div class="text-red-400">Error loading data. Check console for details.</div>';
-        }
+        } catch (error) { console.error("Init failed:", error); }
     }
 
-    // Call wireDropdown immediately for navigation functionality
-    document.addEventListener('DOMContentLoaded', wireDropdown);
-    // Call init after DOM is ready
-    init();
-
-    // Dropdown functionality (copied from other files)
     function wireDropdown() {
-      const root = document.getElementById('metrics-dropdown-root');
-      if (!root) return;
-      let hoverTimeout;
-      const menu = document.getElementById('metrics-menu');
-
+      const root = document.getElementById('metrics-dropdown-root'); if (!root) return;
+      let hoverTimeout; const menu = document.getElementById('metrics-menu');
       function addHovering(){ clearTimeout(hoverTimeout); root.classList.add('hovering'); }
       function removeHovering(){ hoverTimeout = setTimeout(()=>root.classList.remove('hovering'), 300); }
-
-      root.addEventListener('mouseenter', addHovering);
-      root.addEventListener('mouseleave', removeHovering);
-      if (menu) {
-        menu.addEventListener('mouseenter', addHovering);
-        menu.addEventListener('mouseleave', removeHovering); 
-      }
+      root.addEventListener('mouseenter', addHovering); root.addEventListener('mouseleave', removeHovering);
+      if (menu) { menu.addEventListener('mouseenter', addHovering); menu.addEventListener('mouseleave', removeHovering); }
     }
+    document.addEventListener('DOMContentLoaded', wireDropdown);
+    init();
   </script>
 </body>
 </html>
