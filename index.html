@@ -87,16 +87,15 @@
     }
     .leaflet-control-map-dropdown .dropdown-menu a { text-decoration: none; padding: 6px 12px; font-size: 13px; }
 
-    /* --- RADIAL MENU STYLES --- */
-    /* UPDATED: Moved container bottom up to 7rem to sit above the pill button */
+    /* --- RADIAL MENU STYLES (FIXED) --- */
     #radial-menu-container { pointer-events: none; width: 300px; height: 300px; position: fixed; bottom: 0; right: 0; z-index: 9999; }
     
     #radial-trigger { pointer-events: auto; }
     
-    /* UPDATED: Items bottom position matched to 7rem */
+    /* Radial Item Base State */
     .radial-item {
         position: absolute;
-        bottom: 7rem; /* Adjusted up */
+        bottom: 7rem;
         right: 2rem;  
         width: 3rem; height: 3rem;
         border-radius: 50%;
@@ -106,13 +105,28 @@
         display: flex; align-items: center; justify-content: center;
         text-decoration: none;
         opacity: 0;
-        transform: scale(0.5);
         pointer-events: none;
         transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
         z-index: 9990;
+
+        /* CSS Variables for position (default to 0) */
+        --tx: 0px;
+        --ty: 0px;
+        transform: translate(0, 0) scale(0.5);
     }
     
-    .radial-item:hover { background-color: #e0e7ff; transform: scale(1.1) !important; }
+    /* Radial Item Open State (Uses variables) */
+    .radial-open .radial-item {
+        opacity: 1;
+        pointer-events: auto;
+        transform: translate(var(--tx), var(--ty)) scale(1);
+    }
+
+    /* Radial Item Hover State (Scales without losing translation) */
+    .radial-open .radial-item:hover { 
+        background-color: #e0e7ff; 
+        transform: translate(var(--tx), var(--ty)) scale(1.1); 
+    }
     
     .radial-label {
         position: absolute; right: 120%; top: 50%; transform: translateY(-50%);
@@ -122,9 +136,6 @@
     }
     .radial-item:hover .radial-label { opacity: 1; }
 
-    .radial-open .radial-item { opacity: 1; pointer-events: auto; }
-    
-    /* UPDATED: Trigger bottom position matched to 7rem */
     #radial-trigger {
         position: absolute; bottom: 7rem; right: 2rem;
         width: 4rem; height: 4rem;
@@ -740,8 +751,7 @@
         }
     }
     
-    // --- RADIAL MENU LOGIC ---
-    // UPDATED: Reversed order (Population first)
+    // --- RADIAL MENU LOGIC (FIXED) ---
     const menuItems = [
         { label: 'Population', href: 'metrics/population.html', icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z' },
         { label: 'Employment Rate', href: 'metrics/employment.html', icon: 'M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z' },
@@ -776,8 +786,9 @@
             el.className = 'radial-item';
             el.style.transitionDelay = `${index * 0.03}s`;
             
-            el.dataset.x = x;
-            el.dataset.y = y;
+            // Store coordinates in CSS variables on the element
+            el.style.setProperty('--tx', `${x}px`);
+            el.style.setProperty('--ty', `${y}px`);
 
             el.innerHTML = `
                 <span class="radial-label">${item.label}</span>
@@ -791,22 +802,8 @@
 
     function toggleRadialMenu() {
         const container = document.getElementById('radial-menu-container');
-        const items = container.querySelectorAll('.radial-item');
-        const isOpen = container.classList.contains('radial-open');
-
-        if (isOpen) {
-            container.classList.remove('radial-open');
-            items.forEach(el => {
-                el.style.transform = `translate(0, 0) scale(0.5)`;
-            });
-        } else {
-            container.classList.add('radial-open');
-            items.forEach(el => {
-                const x = el.dataset.x;
-                const y = el.dataset.y;
-                el.style.transform = `translate(${x}px, ${y}px) scale(1)`;
-            });
-        }
+        // Simply toggle class - CSS variables handle the positioning now
+        container.classList.toggle('radial-open');
     }
   </script>
 </body>
