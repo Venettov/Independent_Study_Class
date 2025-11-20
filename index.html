@@ -87,7 +87,7 @@
     }
     .leaflet-control-map-dropdown .dropdown-menu a { text-decoration: none; padding: 6px 12px; font-size: 13px; }
 
-    /* --- RADIAL MENU STYLES (FIXED) --- */
+    /* --- RADIAL MENU STYLES --- */
     #radial-menu-container { pointer-events: none; width: 300px; height: 300px; position: fixed; bottom: 0; right: 0; z-index: 9999; }
     
     #radial-trigger { pointer-events: auto; }
@@ -107,33 +107,46 @@
         opacity: 0;
         pointer-events: none;
         transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
-        z-index: 9990;
+        z-index: 9990; /* Base Z-index */
 
-        /* CSS Variables for position (default to 0) */
+        /* CSS Variables for position */
         --tx: 0px;
         --ty: 0px;
         transform: translate(0, 0) scale(0.5);
     }
     
-    /* Radial Item Open State (Uses variables) */
+    /* Radial Item Open State */
     .radial-open .radial-item {
         opacity: 1;
         pointer-events: auto;
         transform: translate(var(--tx), var(--ty)) scale(1);
     }
 
-    /* Radial Item Hover State (Scales without losing translation) */
+    /* Radial Item Hover State - THE FIX IS HERE */
     .radial-open .radial-item:hover { 
         background-color: #e0e7ff; 
         transform: translate(var(--tx), var(--ty)) scale(1.1); 
+        z-index: 10005 !important; /* Forces this item AND its child label to be on top of neighbors */
     }
     
     .radial-label {
-        position: absolute; right: 120%; top: 50%; transform: translateY(-50%);
-        background: rgba(17, 24, 39, 0.9); color: white;
-        padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;
-        white-space: nowrap; opacity: 0; transition: opacity 0.2s; pointer-events: none;
+        position: absolute; 
+        right: 125%; /* Pushed slightly further left to avoid icon clipping */
+        top: 50%; 
+        transform: translateY(-50%);
+        background: rgba(17, 24, 39, 0.95); /* Slightly darker for readability */
+        color: white;
+        padding: 6px 10px; /* Slightly larger padding */
+        border-radius: 6px; 
+        font-size: 13px; /* Slightly larger text */
+        font-weight: 600;
+        white-space: nowrap; 
+        opacity: 0; 
+        transition: opacity 0.2s; 
+        pointer-events: none;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
     }
+    
     .radial-item:hover .radial-label { opacity: 1; }
 
     #radial-trigger {
