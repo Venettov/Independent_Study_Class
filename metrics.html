@@ -94,61 +94,17 @@
     }
     #scale-wrapper.disable-scale { transform: none !important; height: auto !important; margin-bottom: 0 !important; }
     
-    /* --- MAXIMIZATION LOGIC (UPDATED) --- */
+    /* Maximize/Fullscreen Logic */
     #dashboardVisuals { position: relative; transition: all 0.3s ease; }
-    
-    #dashboardVisuals.maximized { 
-        position: fixed; 
-        top: 0; left: 0; 
-        width: 100vw; height: 100vh; 
-        z-index: 900; 
-        background: #f3f4f6; 
-        margin: 0 !important; 
-        /* FIX 1: Add massive bottom padding so you can scroll past the last graph */
-        padding: 0 0 120px 0 !important; 
-        overflow-y: auto; 
-        display: block !important; 
-    }
-    
-    #dashboardVisuals.maximized #main-panel { 
-        display: flex !important; 
-        flex-direction: row !important; 
-        padding: 1rem !important; 
-        gap: 1rem !important; 
-        width: 100%; max-width: 1050px; 
-        margin: 0 auto; 
-    }
-    
+    #dashboardVisuals.maximized { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 900; background: #f3f4f6; margin: 0 !important; padding: 0 !important; overflow-y: auto; display: block !important; }
+    #dashboardVisuals.maximized #main-panel { display: flex !important; flex-direction: row !important; padding: 1rem !important; gap: 1rem !important; width: 100%; max-width: 1050px; margin: 0 auto; }
     #dashboardVisuals.maximized #scatterPlotContainer { width: calc(100% - 200px - 1rem) !important; flex-shrink: 0; }
     #dashboardVisuals.maximized .lg\:col-span-2 { width: 200px !important; flex-shrink: 0; }
     #dashboardVisuals.maximized #scatter-canvas-wrapper { height: 50vh !important; }
-    
-    #dashboardVisuals.maximized #municipioList { 
-        max-height: calc(40vh + 195px) !important; 
-        height: auto !important; 
-    }
-    
-    #dashboardVisuals.maximized #trendCharts { 
-        display: grid !important; 
-        grid-template-columns: 1fr 1fr; 
-        gap: 1rem; 
-        width: 100%; max-width: 1050px; 
-        margin: 0 auto; 
-    }
-    
-    #dashboardVisuals.maximized #trendCharts .chart-content-wrapper { 
-        /* FIX 2: Ensure enough height for bottom graphs */
-        height: 35vh !important; 
-        min-height: 300px;
-    }
-    
-    #dashboardVisuals.maximized .section-title { 
-        font-size: 1.5rem; 
-        padding: 1rem 1rem 0 1rem; 
-        max-width: 1050px; margin: 0 auto; 
-        margin-top: 1rem !important;
-    }
-    
+    #dashboardVisuals.maximized #municipioList { max-height: calc(40vh + 195px) !important; height: auto !important; }
+    #dashboardVisuals.maximized #trendCharts { display: grid !important; grid-template-columns: 1fr 1fr; gap: 1rem; width: 100%; max-width: 1050px; margin: 0 auto 2rem auto; }
+    #dashboardVisuals.maximized #trendCharts .chart-content-wrapper { height: 30vh !important; }
+    #dashboardVisuals.maximized .section-title { font-size: 1.5rem; padding: 1rem 1rem 0 1rem; max-width: 1050px; margin: 0 auto; }
     #maximizeButtonContainer { position: absolute; top: 1.5rem; right: 1.5rem; z-index: 910; }
 
     /* Policy Modal Styles */
@@ -347,8 +303,6 @@
               </div>
           </div>
           
-          <div class="section-title col-span-full">Selected Municipality Trends: <span id="trendMuniName" class="text-blue-400">Puerto Rico</span></div>
-
           <div id="trendCharts" class="card grid grid-cols-1 md:grid-cols-2 gap-4 col-span-full p-4">
               <div class="chart-container"> 
                   <h3 class="text-base font-semibold mb-2 text-black">Population & Housing Trend</h3>
@@ -369,7 +323,7 @@
       </main>
     </div>
 
-    <div class="fixed bottom-8 right-8 z-[950] flex flex-col items-end gap-3">
+    <div class="fixed bottom-8 right-8 z-50 flex flex-col items-end gap-3">
         
         <div class="bg-white px-4 py-2 rounded-lg shadow-lg border border-gray-200 text-gray-700 font-medium text-sm animate-fade-in">
             Selected: <span id="trendMuniName" class="text-blue-600 font-bold">Puerto Rico</span>
@@ -731,8 +685,7 @@
         wrapper.classList.toggle('disable-scale', isMaximized);
         maximizeIcon.classList.toggle('hidden', isMaximized);
         minimizeIcon.classList.toggle('hidden', !isMaximized);
-        // FIX 3: Increased delay to 350ms to ensure animation completes before resize
-        setTimeout(() => { if (scatterChart) scatterChart.resize(); if (trendChart1) trendChart1.resize(); if (trendChart2) trendChart2.resize(); }, 350);
+        setTimeout(() => { if (scatterChart) scatterChart.resize(); if (trendChart1) trendChart1.resize(); if (trendChart2) trendChart2.resize(); }, 100);
     }
 
     // --- POLICY INSIGHT ENGINE LOGIC ---
