@@ -42,7 +42,7 @@
 
     .mini { min-height: 300px; } 
     
-    /* Force canvas dimensions for Chart.js inside containers */
+    /* Force canvas dimensions for Chart.js inside containers (now redundant, but left for safety) */
     .mini canvas {
         width: 100% !important;
         height: 100% !important;
@@ -181,27 +181,6 @@
         </div>
       </section>
 
-      <section class="card p-6">
-        <h2 class="text-lg font-semibold mb-4">Hurricane Statistics (2015-2025)</h2>
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            
-            <div class="mini relative">
-                <h3 class="text-sm text-gray-500 font-medium mb-2 text-center">Storm Frequency by Year</h3>
-                <div class="h-64 w-full">
-                    <canvas id="chart-frequency"></canvas>
-                </div>
-            </div>
-
-            <div class="mini relative">
-                <h3 class="text-sm text-gray-500 font-medium mb-2 text-center">Top 10 Strongest Storms (Max Wind)</h3>
-                <div class="h-64 w-full">
-                    <canvas id="chart-intensity"></canvas>
-                </div>
-            </div>
-            
-        </div>
-      </section>
-
       <hr class="border-gray-300">
 
       <section class="card p-6 space-y-6">
@@ -252,196 +231,273 @@
       
     </main>
   </div>
+
   <script>
-      // 1. CORRECT PATH based on your setup
-      const HU_JSON = '../data/natural_disasters/caribbean_hurricane_tracks_2015_2025.json'; 
+    // ---------------------- Data Paths ----------------------
+    const HU_JSON = '../data/natural_disasters/caribbean_hurricane_tracks_2015_2025.json'; 
+    
+    let earthquakeLayerGroup = null; 
+    let hurricaneLayerGroup = null; 
+    let map;
+    
+    // ---------------------- Hurricane Plotting Logic ----------------------
+
+    const HU_WIND_BREAKS = [34, 64, 83, 96, 113]; // Knots (TS, HU1, HU2, HU3, HU4/5)
+    const HU_COLORS = ['#a3a3a3', '#3b82f6', '#fde047', '#fb923c', '#dc2626', '#991b1b']; 
+
+    function getTrackColor(wind) {
+        if (wind < HU_WIND_BREAKS[0]) return HU_COLORS[0];
+        if (wind < HU_WIND_BREAKS[1]) return HU_COLORS[1];
+        if (wind < HU_WIND_BREAKS[2]) return HU_COLORS[2];
+        if (wind < HU_WIND_BREAKS[3]) return HU_COLORS[3];
+        if (wind < HU_WIND_BREAKS[4]) return HU_COLORS[4];
+        return HU_COLORS[5];
+    }
+    
+    function getStatusLabel(wind, status) {
+        if (status === 'TS') return 'Tropical Storm';
+        if (status === 'HU') {
+            if (wind < 83) return 'Hurricane Cat 1';
+            if (wind < 96) return 'Hurricane Cat 2';
+            if (wind < 113) return 'Hurricane Cat 3';
+            return 'Hurricane Cat 4+';
+        }
+        if (status === 'DB') return 'Tropical Disturbance';
+        if (status === 'TD') return 'Tropical Depression';
+        if (status === 'SS') return 'Subtropical Storm';
+        if (status === 'SD') return 'Subtropical Depression';
+        if (status === 'LO') return 'Low';
+        if (status === 'WV') return 'Tropical Wave';
+        
+        return 'Other'; 
+    }
+
+    function plotHurricaneTracks(data, mapInstance) {
+        if (!data || data.length === 0) {
+            console.warn("Hurricane data is empty or failed to load. Check console for fetch errors (404).");
+            return;
+        }
+
+        if (hurricaneLayerGroup) {
+            hurricaneLayerGroup.clearLayers();
+        } else {
+            hurricaneLayerGroup = L.layerGroup().addTo(mapInstance);
+        }
+
+        data.forEach(storm => {
+            const latlons = storm.path.map(p => [p.lat, p.lon]);
+            const pathData = storm.path;
+            const stormName = storm.name;
+
+            // 1. Draw the polylines
+            L.polyline(latlons, { 
+                color: '#333', 
+                weight: 3.0, 
+                opacity: 0.6 
+            }).addTo(hurricaneLayerGroup);
+
+            // 2. Draw the markers for each point, colored by wind speed
+            pathData.forEach(p => {
+                const wind_knots = p.wind;
+                const color = getTrackColor(wind_knots);
+                const statusLabel = getStatusLabel(wind_knots, p.status);
+                const date = p.date.replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3');
+
+                L.circleMarker([p.lat, p.lon], {
+                    radius: 6.0, 
+                    fillColor: color, 
+                    color: '#000', 
+                    weight: 0.5,
+                    opacity: 0.9,
+                    fillOpacity: 0.9
+                }).bindPopup(`
+                    <strong>${stormName} - ${statusLabel} (${p.status})</strong>
+                    <br>Date: ${date}
+                    <br>Wind: ${wind_knots} knots (${(wind_knots * 1.15078).toFixed(0)} mph)
+                    <br>Location: ${p.lat.toFixed(2)}N, ${p.lon.toFixed(2)}W
+                `).addTo(hurricaneLayerGroup);
+            });
+        });
+        
+        hurricaneLayerGroup.bringToFront();
+        console.log("✅ Hurricane tracks plotted successfully.");
+    }
+
+    function renderHurricaneLegend(map){
+        const div = document.createElement('div');
+        div.className = 'leaflet-control-hu-legend'; 
+        
+        const title = 'Hurricane Track Wind Status (knots)';
+        let html = `<div style="font-weight:600;margin-bottom:5px; border-bottom: 1px solid #ccc;">${title}</div>`;
+
+        const legendItems = [
+            { label: '&le; 33 knots (TD/Other)', color: HU_COLORS[0] }, 
+            { label: '34-63 knots (TS)', color: HU_COLORS[1] },
+            { label: '64-82 knots (HU Cat 1)', color: HU_COLORS[2] },
+            { label: '83-95 knots (HU Cat 2)', color: HU_COLORS[3] },
+            { label: '96-112 knots (HU Cat 3)', color: HU_COLORS[4] },
+            { label: '&ge; 113 knots (HU Cat 4/5)', color: HU_COLORS[5] }
+        ];
+
+        legendItems.forEach(item => {
+            html += `
+                <div style="display:flex;align-items:center;gap:8px;margin:4px 0;">
+                    <div style="width:12px;height:12px;border-radius:50%;background:${item.color};border:1px solid #000;box-shadow:0 1px 2px rgba(0,0,0,.1);"></div>
+                    <span>${item.label}</span>
+                </div>
+            `;
+        });
+        
+        L.Control.HurricaneLegend = L.Control.extend({
+            onAdd: function(map) {
+                L.DomUtil.addClass(div, 'leaflet-control-hu-legend');
+                L.DomEvent.disableClickPropagation(div);
+                return div;
+            },
+            onRemove: function(map) {
+                // nothing special
+            }
+        });
+        
+        new L.Control.HurricaneLegend({position: 'bottomright'}).addTo(map);
+    }
+    // ---------------------- End Hurricane Plotting Logic ----------------------
+    
+    // ---------------------- Unused Logic Stubs ----------------------
+    const GEOJSON_URL = '../data/tl_2022_72_cousub/pr_municipalities.geojson';
+    const FIXED_GREEN_COLOR = '#22c55e';
+
+    function styleForFeature(feature){
+      return { fillColor: FIXED_GREEN_COLOR, weight: 1.2, color:'#111827', fillOpacity:.75 };
+    }
+    let _rows = []; 
+    function calculateExtremeValues(){}
+    function computeBreaks(){}
+    function wireMetricToggle(){}
+    function wireClearSelection(){}
+    // ---------------------- End Unused Logic Stubs ----------------------
+    
+    // Dropdown wiring
+    function wireDropdown() {
+        const root = document.getElementById('metrics-dropdown-root');
+        if (!root) return;
+        let hoverTimeout;
+        const menu = document.getElementById('metrics-menu');
+
+        function addHovering(){ clearTimeout(hoverTimeout); root.classList.add('hovering'); } 
+        function removeHovering(){ hoverTimeout = setTimeout(()=>root.classList.remove('hovering'), 500); }
+
+        root.addEventListener('mouseenter', addHovering);
+        root.addEventListener('mouseleave', removeHovering);
+        if (menu) {
+          menu.addEventListener('mouseenter', addHovering);
+          menu.addEventListener('mouseleave', removeHovering);
+        }
+    }
+
+    function wireMapDropdown() {
+        const root1 = document.getElementById('map-selection-dropdown-root'); 
+        if (root1) { 
+            let hoverTimeout;
+            const menu = document.getElementById('map-selection-menu');
+            function addHovering(){ clearTimeout(hoverTimeout); root1.classList.add('hovering'); } 
+            function removeHovering(){ hoverTimeout = setTimeout(()=>{ root1.classList.remove('hovering'); }, 500); }
+            root1.addEventListener('mouseenter', addHovering);
+            root1.addEventListener('mouseleave', removeHovering); 
+            if (menu) {
+              menu.addEventListener('mouseenter', addHovering);
+              menu.addEventListener('mouseleave', removeHovering);
+            }
+        }
+    }
+    
+    (async function init(){
+      const GEOJSON_URL_PATH = '../data/tl_2022_72_cousub/pr_municipalities.geojson'; 
+
+      let geojsonData;
+      try {
+        const gjRes = await fetch(GEOJSON_URL_PATH + '?' + Date.now());
+        geojsonData = await gjRes.json(); 
+      } catch (e) {
+        console.error("Failed to load GeoJSON data.");
+      }
+
+      const prBounds = L.latLngBounds([[17.85, -67.45],[18.55, -65.25]]);
       
-      // 2. Global Variables
-      let hurricaneLayerGroup = null; 
-      let map;
+      // --- Map Init (Choropleth + Hurricane Tracks) ---
+      map = L.map('map', { zoomControl: false, zoomSnap: .25 }).fitBounds(prBounds);
 
-      // --- Helper Functions for Map ---
-      const HU_WIND_BREAKS = [34, 64, 83, 96, 113]; 
-      const HU_COLORS = ['#a3a3a3', '#3b82f6', '#fde047', '#fb923c', '#dc2626', '#991b1b']; 
+      L.control.zoom({ position: 'topleft' }).addTo(map);
 
-      function getTrackColor(wind) {
-          if (wind < HU_WIND_BREAKS[0]) return HU_COLORS[0];
-          if (wind < HU_WIND_BREAKS[1]) return HU_COLORS[1];
-          if (wind < HU_WIND_BREAKS[2]) return HU_COLORS[2];
-          if (wind < HU_WIND_BREAKS[3]) return HU_COLORS[3];
-          if (wind < HU_WIND_BREAKS[4]) return HU_COLORS[4];
-          return HU_COLORS[5];
-      }
-      
-      function getStatusLabel(wind, status) {
-          if (status === 'TS') return 'Tropical Storm';
-          if (status === 'HU') return 'Hurricane';
-          return status; 
-      }
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors',
+        minZoom: 7, maxZoom: 19
+      }).addTo(map);
 
-      // --- Map Plotting Logic ---
-      function plotHurricaneTracks(data, mapInstance) {
-          if (!data || data.length === 0) return;
+      // Initialize the map dropdown control
+      L.Control.MapDropdown = L.Control.extend({
+          onAdd: function(map) {
+              const container = L.DomUtil.get('map-dropdown-container');
+              L.DomEvent.disableClickPropagation(container);
+              L.DomEvent.disableScrollPropagation(container);
+              return container.querySelector('.leaflet-control-map-dropdown');
+          },
+          onRemove: function(map) {}
+      });
+      new L.Control.MapDropdown({ position: 'topleft' }).addTo(map);
 
-          if (hurricaneLayerGroup) hurricaneLayerGroup.clearLayers();
-          else hurricaneLayerGroup = L.layerGroup().addTo(mapInstance);
-
-          data.forEach(storm => {
-              // Safety check: Ensure path exists
-              if (!storm.path || storm.path.length === 0) return;
-
-              const latlons = storm.path.map(p => [p.lat, p.lon]);
-              
-              // Draw Line
-              L.polyline(latlons, { color: '#333', weight: 3.0, opacity: 0.6 }).addTo(hurricaneLayerGroup);
-
-              // Draw Points
-              storm.path.forEach(p => {
-                  const color = getTrackColor(p.wind);
-                  L.circleMarker([p.lat, p.lon], {
-                      radius: 6.0, fillColor: color, color: '#000', weight: 0.5, opacity: 0.9, fillOpacity: 0.9
-                  }).bindPopup(`<strong>${storm.name}</strong><br>Wind: ${p.wind} knots`).addTo(hurricaneLayerGroup);
-              });
-          });
-          hurricaneLayerGroup.bringToFront();
-      }
-
-      function renderHurricaneLegend(map){
-          // Legend logic (same as before)
-          const div = document.createElement('div');
-          div.className = 'leaflet-control-hu-legend'; 
-          let html = `<div style="font-weight:600;margin-bottom:5px;border-bottom:1px solid #ccc;">Wind (knots)</div>`;
-          const legendItems = [
-              { label: '< 34 (TD)', color: HU_COLORS[0] }, 
-              { label: '34-63 (TS)', color: HU_COLORS[1] },
-              { label: '64-82 (Cat 1)', color: HU_COLORS[2] },
-              { label: '83-95 (Cat 2)', color: HU_COLORS[3] },
-              { label: '96-112 (Cat 3)', color: HU_COLORS[4] },
-              { label: '> 113 (Cat 4/5)', color: HU_COLORS[5] }
-          ];
-          legendItems.forEach(item => {
-              html += `<div style="display:flex;align-items:center;gap:8px;margin:4px 0;">
-                      <div style="width:12px;height:12px;border-radius:50%;background:${item.color};border:1px solid #000;"></div>
-                      <span>${item.label}</span></div>`;
-          });
-          div.innerHTML = html;
-          L.Control.HurricaneLegend = L.Control.extend({ onAdd: function() { return div; } });
-          new L.Control.HurricaneLegend({position: 'bottomright'}).addTo(map);
-      }
-      
-      // --- Chart Logic (UPDATED WITH SAFETY CHECKS) ---
-      function renderCharts(data) {
-          if (!data || data.length === 0) return;
-
-          const yearCounts = {};
-          const intensityData = [];
-
-          data.forEach(storm => {
-              // CRITICAL FIX: Skip storms with empty paths to prevent crash
-              if (!storm.path || storm.path.length === 0) return; 
-
-              // 1. Frequency Data
-              const year = storm.path[0].year; // This line was crashing if path was empty
-              yearCounts[year] = (yearCounts[year] || 0) + 1;
-
-              // 2. Intensity Data
-              const maxWind = Math.max(...storm.path.map(p => p.wind));
-              intensityData.push({ name: `${storm.name} (${year})`, wind: maxWind });
-          });
-
-          const years = Object.keys(yearCounts).sort();
-          const counts = years.map(y => yearCounts[y]);
-
-          // Sort top 10 storms
-          intensityData.sort((a, b) => b.wind - a.wind);
-          const top10 = intensityData.slice(0, 10);
-          
-          // Render Frequency Chart
-          const ctxFreq = document.getElementById('chart-frequency');
-          if (ctxFreq) {
-              new Chart(ctxFreq.getContext('2d'), {
-                  type: 'bar',
-                  data: {
-                      labels: years,
-                      datasets: [{
-                          label: 'Storm Count',
-                          data: counts,
-                          backgroundColor: '#3b82f6',
-                          borderRadius: 4
-                      }]
-                  },
-                  options: {
-                      responsive: true,
-                      maintainAspectRatio: false,
-                      plugins: { legend: { display: false } },
-                      scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
-                  }
-              });
+      if (geojsonData) {
+        let fc = geojsonData; 
+        let layer = L.geoJSON(fc, {
+          style: (feature) => styleForFeature(feature),
+          onEachFeature: (f, lyr) => {
+            lyr.bindPopup(`<strong>${f.properties.NAME || 'Unknown'}</strong>`);
+            lyr.bindTooltip(f.properties.NAME || 'Unknown', { direction:'center', className:'leaflet-tooltip' });
           }
-
-          // Render Intensity Chart
-          const ctxInt = document.getElementById('chart-intensity');
-          if (ctxInt) {
-              const getBarColor = (val) => {
-                  if(val >= 113) return '#991b1b'; 
-                  if(val >= 96)  return '#dc2626'; 
-                  if(val >= 83)  return '#fb923c'; 
-                  if(val >= 64)  return '#fde047'; 
-                  return '#3b82f6'; 
-              };
-              
-              new Chart(ctxInt.getContext('2d'), {
-                  type: 'bar',
-                  indexAxis: 'y',
-                  data: {
-                      labels: top10.map(d => d.name),
-                      datasets: [{
-                          label: 'Max Wind (knots)',
-                          data: top10.map(d => d.wind),
-                          backgroundColor: top10.map(d => getBarColor(d.wind)),
-                          borderRadius: 4
-                      }]
-                  },
-                  options: {
-                      responsive: true,
-                      maintainAspectRatio: false,
-                      plugins: { legend: { display: false } },
-                      scales: { x: { beginAtZero: true } }
-                  }
-              });
-          }
-      }
-
-      // --- Initialization ---
-      (async function init(){
-        const prBounds = L.latLngBounds([[17.85, -67.45],[18.55, -65.25]]);
-        map = L.map('map', { zoomControl: false }).fitBounds(prBounds);
-        L.control.zoom({ position: 'topleft' }).addTo(map);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          attribution: '&copy; OpenStreetMap contributors',
-          minZoom: 5, maxZoom: 10
         }).addTo(map);
 
-        try {
-            const huRes = await fetch(HU_JSON);
-            const fullHurricaneData = await huRes.json();
+        const b = layer.getBounds();
+        if (b.isValid()) map.fitBounds(b, { padding:[15,15] });
+      }
 
-            // Plot everything
-            plotHurricaneTracks(fullHurricaneData, map);
-            renderHurricaneLegend(map);
-            renderCharts(fullHurricaneData); // Call chart render function
+      // --- DATA LOADING AND PLOTTING ---
+      let fullHurricaneData = [];
+      try {
+          const huRes = await fetch(HU_JSON);
+          fullHurricaneData = await huRes.json();
+      } catch (e) {
+          console.error("Error loading or processing hurricane data:", HU_JSON, e);
+      }
+      
+      // Plot tracks + legend
+      plotHurricaneTracks(fullHurricaneData, map);
+      renderHurricaneLegend(map);
 
-        } catch (e) {
-            console.error("Error:", e);
+      wireMetricToggle();
+      wireClearSelection(); 
+      wireDropdown(); 
+      wireMapDropdown(); 
+    })();
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const metricsLink = document.querySelector('#metrics-dropdown-root > a');
+        const isMetricsSubPage = window.location.pathname.includes('/metrics/');
+        if (isMetricsSubPage) {
+            metricsLink.classList.add('border-b-2', 'border-blue-600', 'text-blue-600', 'font-semibold');
+            metricsLink.setAttribute('aria-current', 'page');
+            const currentPathname = window.location.pathname.split('/').pop();
+            const subPageLink = document.querySelector(`#metrics-menu a[href="${currentPathname}"]`);
+            if (subPageLink) { subPageLink.classList.add('bg-gray-100', 'font-semibold'); }
+        } else {
+            document.querySelectorAll('.nav-link[href]').forEach(a => {
+                if (a.href.endsWith(window.location.pathname)) {
+                    a.classList.add('border-b-2', 'border-blue-600', 'text-blue-600', 'font-semibold');
+                    a.setAttribute('aria-current', 'page');
+                }
+            });
         }
-        
-        // Dropdown UI
-        const root = document.getElementById('metrics-dropdown-root');
-        if (root) {
-          root.addEventListener('mouseenter', () => root.classList.add('hovering'));
-          root.addEventListener('mouseleave', () => setTimeout(()=>root.classList.remove('hovering'), 500));
-        }
-      })();
+        wireMapDropdown(); 
+    });
   </script>
 </body>
 </html>
