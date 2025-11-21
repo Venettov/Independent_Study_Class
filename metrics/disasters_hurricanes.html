@@ -739,7 +739,8 @@
       wireClearSelection(); 
       wireDropdown(); 
       wireMapDropdown(); 
-      initRadialMenu(); // Init Radial Menu
+      
+      // REMOVED: initRadialMenu(); from here to ensure it runs even if data load fails
     })();
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -760,6 +761,9 @@
             });
         }
         wireMapDropdown(); 
+        
+        // ADDED: Init Radial Menu here for reliability
+        initRadialMenu(); 
     });
   </script>
 </body>
