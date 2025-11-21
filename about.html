@@ -77,6 +77,10 @@
         /* CSS Variables for position */
         --tx: 0px;
         --ty: 0px;
+        /* CSS Variables for Label Offset */
+        --lx: 0px;
+        --ly: 0px;
+        
         transform: translate(0, 0) scale(0.5);
     }
     
@@ -94,25 +98,34 @@
         z-index: 10005 !important; /* Stacking fix */
     }
     
+    /* UPDATED RADIAL LABEL STYLES */
     .radial-label {
-        position: absolute; 
-        right: 125%; 
+        position: absolute;
+        left: 50%; 
         top: 50%; 
-        transform: translateY(-50%);
-        background: rgba(17, 24, 39, 0.95); 
-        color: white;
-        padding: 6px 10px; 
+        /* Move label radially outward based on calculations */
+        transform: translate(calc(-50% + var(--lx)), calc(-50% + var(--ly)));
+        
+        /* Visual Styles: White bg, Black text */
+        background: rgba(255, 255, 255, 0.95); 
+        color: black; 
+        padding: 4px 8px; 
         border-radius: 6px; 
-        font-size: 13px; 
-        font-weight: 600;
+        font-size: 12px; 
+        font-weight: 700;
         white-space: nowrap; 
+        
+        /* Visibility Control */
         opacity: 0; 
-        transition: opacity 0.2s; 
+        transition: opacity 0.3s ease;
         pointer-events: none;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        box-shadow: 0 2px 5px rgba(0,0,0,0.15);
     }
     
-    .radial-item:hover .radial-label { opacity: 1; }
+    /* Show ALL labels when menu is open */
+    .radial-open .radial-label { 
+        opacity: 1; 
+    }
 
     #radial-trigger {
         position: absolute; bottom: 7rem; right: 2rem;
@@ -364,8 +377,14 @@
             const angleDeg = startAngle - (step * index); 
             const angleRad = angleDeg * (Math.PI / 180);
             
+            // Icon coordinates
             const x = Math.round(radius * Math.cos(angleRad));
             const y = Math.round(radius * Math.sin(angleRad));
+
+            // Label coordinates (offset further out for "red line" effect)
+            const textGap = 75; // Distance from icon center to text
+            const lx = Math.round(textGap * Math.cos(angleRad));
+            const ly = Math.round(textGap * Math.sin(angleRad));
 
             const el = document.createElement('a');
             el.href = item.href;
@@ -375,6 +394,8 @@
             // Store coordinates in CSS variables on the element
             el.style.setProperty('--tx', `${x}px`);
             el.style.setProperty('--ty', `${y}px`);
+            el.style.setProperty('--lx', `${lx}px`);
+            el.style.setProperty('--ly', `${ly}px`);
 
             el.innerHTML = `
                 <span class="radial-label">${item.label}</span>
