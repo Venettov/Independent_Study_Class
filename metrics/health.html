@@ -150,11 +150,17 @@
         opacity: 0;
         pointer-events: none;
         transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
-        z-index: 9990; /* Base Z-index */
+        z-index: 9990;
 
         /* CSS Variables for position */
         --tx: 0px;
         --ty: 0px;
+        /* CSS Variables for Label Offset */
+        --lx: 0px;
+        --ly: 0px;
+        /* CSS Variable for Label Rotation */
+        --lr: 0deg;
+        
         transform: translate(0, 0) scale(0.5);
     }
     
@@ -169,28 +175,38 @@
     .radial-open .radial-item:hover { 
         background-color: #e0e7ff; 
         transform: translate(var(--tx), var(--ty)) scale(1.1); 
-        z-index: 10005 !important; /* Forces this item AND its child label to be on top of neighbors */
+        z-index: 10005 !important; /* Stacking fix */
     }
     
+    /* UPDATED RADIAL LABEL STYLES */
     .radial-label {
-        position: absolute; 
-        right: 125%; /* Pushed slightly further left to avoid icon clipping */
+        position: absolute;
+        left: 50%; 
         top: 50%; 
-        transform: translateY(-50%);
-        background: rgba(17, 24, 39, 0.95); /* Slightly darker for readability */
-        color: white;
-        padding: 6px 10px; /* Slightly larger padding */
+        /* Move label radially outward based on calculations AND rotate */
+        transform: translate(calc(-50% + var(--lx)), calc(-50% + var(--ly))) rotate(var(--lr));
+        transform-origin: center center;
+        
+        /* Visual Styles: White bg, Black text */
+        background: rgba(255, 255, 255, 0.95); 
+        color: black; 
+        padding: 4px 8px; 
         border-radius: 6px; 
-        font-size: 13px; /* Slightly larger text */
-        font-weight: 600;
+        font-size: 12px; 
+        font-weight: 700;
         white-space: nowrap; 
+        
+        /* Visibility Control */
         opacity: 0; 
-        transition: opacity 0.2s; 
+        transition: opacity 0.3s ease;
         pointer-events: none;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        box-shadow: 0 2px 5px rgba(0,0,0,0.15);
     }
     
-    .radial-item:hover .radial-label { opacity: 1; }
+    /* Show ALL labels when menu is open */
+    .radial-open .radial-label { 
+        opacity: 1; 
+    }
 
     #radial-trigger {
         position: absolute; bottom: 7rem; right: 2rem;
@@ -1033,11 +1049,11 @@
         }
     }
 
-    // --- RADIAL MENU LOGIC (Inserted) ---
+    // --- RADIAL MENU LOGIC ---
     const menuItems = [
         { label: 'Population', href: 'population.html', icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z' },
         { label: 'Employment Rate', href: 'employment.html', icon: 'M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z' },
-        { label: 'Employer Establishments', href: 'establishments.html', icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4' },
+        { label: 'Establishments', href: 'establishments.html', icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4' },
         { label: 'Household Income', href: 'income.html', icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
         { label: 'Housing Units', href: 'housing.html', icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6' },
         { label: 'Education', href: 'education.html', icon: 'M12 14l9-5-9-5-9 5 9 5z M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z' },
@@ -1060,8 +1076,14 @@
             const angleDeg = startAngle - (step * index); 
             const angleRad = angleDeg * (Math.PI / 180);
             
+            // Icon coordinates
             const x = Math.round(radius * Math.cos(angleRad));
             const y = Math.round(radius * Math.sin(angleRad));
+
+            // Label coordinates (offset further out for "red line" effect)
+            const textGap = 75; // Distance from icon center to text
+            const lx = Math.round(textGap * Math.cos(angleRad));
+            const ly = Math.round(textGap * Math.sin(angleRad));
 
             const el = document.createElement('a');
             el.href = item.href;
@@ -1071,6 +1093,9 @@
             // Store coordinates in CSS variables on the element
             el.style.setProperty('--tx', `${x}px`);
             el.style.setProperty('--ty', `${y}px`);
+            el.style.setProperty('--lx', `${lx}px`);
+            el.style.setProperty('--ly', `${ly}px`);
+            el.style.setProperty('--lr', `${angleDeg + 180}deg`); // Rotate text
 
             el.innerHTML = `
                 <span class="radial-label">${item.label}</span>
