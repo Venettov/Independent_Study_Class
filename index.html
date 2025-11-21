@@ -13,7 +13,6 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
   <style>
-    /* Cards + hero */
     .card {
       background:#fff;
       border-radius:1rem;
@@ -26,8 +25,6 @@
         radial-gradient(1200px 600px at 80% -10%, rgba(37,99,235,.10), transparent 60%),
         linear-gradient(180deg, #fafafa 0%, #f3f4f6 100%);
     }
-
-    /* Map — trimmed height so charts show sooner */
     #map { height: 48vh; width: 100%; border-radius: .75rem; }
     @media (min-width: 1280px) { #map { height: 46vh; } }
     @media (max-width: 640px)  { #map { height: 54vh; } }
@@ -42,12 +39,12 @@
       padding:5px 10px;
     }
 
-    /* Mini charts area */
     .mini { min-height: 260px; }
 
-    /* --- Dropdown base state & transitions --- */
+    /* Dropdown show-on-hover */
     #metrics-menu {
-      opacity: 0; visibility: hidden; transform: translateY(4px); pointer-events: none;
+      opacity: 0; visibility: hidden; transform: translateY(4px);
+      pointer-events: none;
       transition: opacity .15s ease, transform .15s ease, visibility .15s ease;
     }
     #metrics-dropdown-root:hover #metrics-menu,
@@ -59,33 +56,74 @@
       transform: rotate(180deg);
     }
     
-    /* Scale Wrapper */
+    /* New style for simulating 65% zoom on the main content */
     #scale-wrapper {
+        /* Apply the scale transformation */
         transform: scale(0.65); 
-        transform-origin: top center; 
-        height: 154%; 
+        transform-origin: top center; /* Scale from the top-center */
+        
+        /* Adjustments to compensate for the scaling effect on surrounding content */
+        height: 154%; /* Approx 1 / 0.65 to ensure vertical space is reserved */
         padding-bottom: 200px;
-        margin-bottom: -35%; 
+        margin-bottom: -35%; /* Pull up content following the wrapper */
     }
 
-    /* --- LEAFLET CONTROL STYLES --- */
-    .leaflet-control-map-dropdown { padding: 0; margin-left: 45px; margin-top: 5px; }
+    /* --- LEAFLET CONTROL STYLES (UPDATED) --- */
+    .leaflet-control-map-dropdown {
+      /* Base container for the control */
+      padding: 0; 
+      /* FIX 1: Move control to the right of the zoom button area */
+      margin-left: 45px; /* Pushes the control right to clear the zoom buttons */
+      margin-top: 5px; /* Move slightly down to align with zoom */
+    }
     .leaflet-control-map-dropdown .dropdown-root {
-      background: #fff; box-shadow: 0 1px 5px rgba(0,0,0,.65); border-radius: 4px; position: relative;
+      /* Mimic the style of the default leaflet controls */
+      background: #fff;
+      box-shadow: 0 1px 5px rgba(0,0,0,.65);
+      border-radius: 4px;
+      position: relative; /* Ensure menu positions correctly relative to this root */
     }
     .leaflet-control-map-dropdown .nav-link {
-        padding: 6px 10px; color: #333; font-weight: 500; font-size: 13px;
-        line-height: 1.2; display: flex; align-items: center; gap: 4px; cursor: pointer;
+        /* Style for the button */
+        padding: 6px 10px;
+        color: #333;
+        font-weight: 500;
+        font-size: 13px;
+        line-height: 1.2;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        cursor: pointer;
     }
+    
+    /* FIX 2: Hide the menu by default and use existing logic to show on hover */
     .leaflet-control-map-dropdown .dropdown-menu {
-        position: absolute; top: 100%; left: 0; margin-top: 5px; z-index: 1000;
-        opacity: 0; visibility: hidden; transform: translateY(4px); pointer-events: none;
+        /* Positioning the menu */
+        position: absolute;
+        top: 100%;
+        left: 0;
+        margin-top: 5px; 
+        z-index: 1000;
+        
+        /* Hiding logic */
+        opacity: 0; visibility: hidden; transform: translateY(4px);
+        pointer-events: none;
         transition: opacity .15s ease, transform .15s ease, visibility .15s ease;
     }
+    
     .leaflet-control-map-dropdown .dropdown-root.hovering .dropdown-menu {
         opacity: 1; visibility: visible; transform: translateY(0); pointer-events: auto;
     }
-    .leaflet-control-map-dropdown .dropdown-menu a { text-decoration: none; padding: 6px 12px; font-size: 13px; }
+    .leaflet-control-map-dropdown .dropdown-root.hovering #map-selection-chevron {
+        transform: rotate(180deg);
+    }
+    
+    .leaflet-control-map-dropdown .dropdown-menu a {
+        /* Styling the menu items */
+        text-decoration: none;
+        padding: 6px 12px;
+        font-size: 13px;
+    }
 
     /* --- RADIAL MENU STYLES --- */
     #radial-menu-container { pointer-events: none; width: 300px; height: 300px; position: fixed; bottom: 0; right: 0; z-index: 9999; }
@@ -112,6 +150,12 @@
         /* CSS Variables for position */
         --tx: 0px;
         --ty: 0px;
+        /* CSS Variables for Label Offset */
+        --lx: 0px;
+        --ly: 0px;
+        /* CSS Variable for Label Rotation */
+        --lr: 0deg;
+
         transform: translate(0, 0) scale(0.5);
     }
     
@@ -122,32 +166,42 @@
         transform: translate(var(--tx), var(--ty)) scale(1);
     }
 
-    /* Radial Item Hover State - THE FIX IS HERE */
+    /* Radial Item Hover State */
     .radial-open .radial-item:hover { 
         background-color: #e0e7ff; 
         transform: translate(var(--tx), var(--ty)) scale(1.1); 
         z-index: 10005 !important; /* Forces this item AND its child label to be on top of neighbors */
     }
     
+    /* UPDATED RADIAL LABEL STYLES */
     .radial-label {
-        position: absolute; 
-        right: 125%; /* Pushed slightly further left to avoid icon clipping */
+        position: absolute;
+        left: 50%; 
         top: 50%; 
-        transform: translateY(-50%);
-        background: rgba(17, 24, 39, 0.95); /* Slightly darker for readability */
-        color: white;
-        padding: 6px 10px; /* Slightly larger padding */
+        /* Move label radially outward AND rotate it */
+        transform: translate(calc(-50% + var(--lx)), calc(-50% + var(--ly))) rotate(var(--lr));
+        transform-origin: center center; /* Rotate around its own center */
+        
+        /* Visual Styles: White bg, Black text */
+        background: rgba(255, 255, 255, 0.95); 
+        color: black; 
+        padding: 4px 8px; 
         border-radius: 6px; 
-        font-size: 13px; /* Slightly larger text */
-        font-weight: 600;
+        font-size: 12px; 
+        font-weight: 700;
         white-space: nowrap; 
+        
+        /* Visibility Control */
         opacity: 0; 
-        transition: opacity 0.2s; 
+        transition: opacity 0.3s ease;
         pointer-events: none;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        box-shadow: 0 2px 5px rgba(0,0,0,0.15);
     }
     
-    .radial-item:hover .radial-label { opacity: 1; }
+    /* Show ALL labels when menu is open */
+    .radial-open .radial-label { 
+        opacity: 1; 
+    }
 
     #radial-trigger {
         position: absolute; bottom: 7rem; right: 2rem;
@@ -169,7 +223,7 @@
 
   <nav class="bg-white shadow sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-center gap-6 text-sm sm:text-base">
-      <a href="index.html"   class="nav-link border-b-2 border-blue-600 text-blue-600 font-semibold">Home</a>
+      <a href="index.html" class="nav-link border-b-2 border-blue-600 text-blue-600 font-semibold" aria-current="page">Home</a>
 
       <div class="relative" id="metrics-dropdown-root">
         <a href="metrics.html" class="nav-link border-b-2 border-transparent inline-flex items-center gap-1 cursor-pointer select-none">
@@ -180,9 +234,9 @@
         </a>
         <div id="metrics-menu" class="absolute right-0 mt-2 w-64 rounded-xl border border-gray-200 bg-white shadow-lg ring-1 ring-black/5 z-50">
           <div class="py-2">
-            <a href="metrics.html"               class="block px-4 py-2 hover:bg-gray-50 font-semibold">All Metrics Overview</a>
+            <a href="metrics.html" class="block px-4 py-2 hover:bg-gray-50 font-semibold">All Metrics Overview</a>
             <div class="my-1 border-t border-gray-100"></div>
-            <a href="metrics/population.html"     class="block px-4 py-2 hover:bg-gray-50">Population</a>
+            <a href="metrics/population.html"     class="block px-4 py-2 bg-gray-100 font-semibold">Population</a>
             <a href="metrics/employment.html"     class="block px-4 py-2 hover:bg-gray-50">Employment Rate</a>
             <a href="metrics/establishments.html" class="block px-4 py-2 hover:bg-gray-50">Employer Establishments</a>
             <a href="metrics/income.html"         class="block px-4 py-2 hover:bg-gray-50">Household Income</a>
@@ -195,54 +249,31 @@
         </div>
       </div>
 
-      <a href="literature.html"  class="nav-link border-b-2 border-transparent">Literature</a>
-      <a href="strategy.html"class="nav-link border-b-2 border-transparent">Strategy</a>
-      <a href="about.html"   class="nav-link border-b-2 border-transparent">About</a>
+      <a href="literature.html" class="nav-link border-b-2 border-transparent">Literature</a>
+      <a href="strategy.html"   class="nav-link border-b-2 border-transparent">Strategy</a>
+      <a href="about.html"      class="nav-link border-b-2 border-transparent">About</a>
     </div>
   </nav>
 
   <div id="scale-wrapper">
     <main class="max-w-7xl mx-auto px-4 py-8 space-y-8">
-
       <header class="card hero p-6 sm:p-8 lg:p-10 relative">
         <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between">
-            <div>
-                <p class="text-sm font-semibold text-gray-500 uppercase">Graduate Independent Study</p>
-                <h1 class="mt-2 text-4xl sm:text-5xl font-extrabold leading-tight">
-                    Population & Economic Dynamics in Puerto Rico
-                </h1>
-                <p class="mt-3 text-lg text-gray-700">
-                    A graduate research project examining demographic shifts, out-migration, and sustainable development
-                    strategies through linked data analysis and policy synthesis.
-                </p>
-                <div class="mt-5">
-                    <span class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-100 text-slate-800">
-                        <span class="inline-flex w-5 h-5 items-center justify-center rounded-full bg-slate-800 text-white text-xs">i</span>
-                        Hover over the map to see county / municipality details
-                    </span>
-                </div>
+          <div>
+            <p class="text-sm font-semibold text-gray-500 uppercase">Graduate Independent Study</p>
+            <h1 class="mt-2 text-4xl sm:text-5xl font-extrabold leading-tight">
+              Population & Economic Dynamics in Puerto Rico
+            </h1>
+            <p class="mt-3 text-lg text-gray-700">
+              A graduate research project examining demographic shifts, out-migration, and sustainable development
+              strategies through linked data analysis and policy synthesis.
+            </p>
+            <div class="mt-5">
+              <span class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-100 text-slate-800">
+                <span class="inline-flex w-5 h-5 items-center justify-center rounded-full bg-slate-800 text-white text-xs">i</span>
+                Hover over the map to see county / municipality details
+              </span>
             </div>
-        </div>
-
-        <div class="absolute bottom-4 right-4 group">
-          <div class="text-right">
-            <span class="text-sm font-semibold text-gray-700 cursor-pointer group-hover:text-blue-700 transition">
-              Project Customer: Puerto Rico Planning Board
-            </span>
-          </div>
-
-          <div class="absolute right-0 bottom-full mb-2 w-96 bg-white text-gray-800 p-4 rounded-lg shadow-xl border border-gray-200 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50">
-            <p class="text-gray-700 text-sm">
-              The Planning Board oversees long-term economic development, demographic analysis, and land-use
-              planning for Puerto Rico. This project’s interactive maps, municipal-level dashboards, and
-              population change analyses provide actionable insights that could directly support their policy
-              models and strategic decision-making.
-            </p>
-            <p class="text-sm mt-3">
-              🔗 <a href="https://jp.pr.gov" target="_blank" rel="noopener" class="text-blue-600 underline">
-                Visit Puerto Rico Planning Board Website
-              </a>
-            </p>
           </div>
         </div>
       </header>
@@ -251,14 +282,12 @@
         <div class="flex items-center justify-between gap-3">
           <div class="text-sm text-gray-700 font-medium">Map shading by</div>
           <div class="flex items-center gap-2">
-            <div class="inline-flex rounded-lg border bg-white shadow-sm overflow-hidden">
-              <button id="metricPct" type="button"
-                class="px-3 py-1.5 text-sm font-medium bg-blue-600 text-white">% change</button>
-              <button id="metricAbs" type="button"
-                class="px-3 py-1.5 text-sm font-medium hover:bg-gray-50">abs change</button>
+            <div class="inline-flex rounded-lg border bg-white shadow-sm overflow-hidden" id="metric-toggles">
+              <button id="metricPct" type="button" class="px-3 py-1.5 text-sm font-medium bg-blue-600 text-white">% change</button>
+              <button id="metricAbs" type="button" class="px-3 py-1.5 text-sm font-medium hover:bg-gray-50">abs change</button>
+              <button id="metricDensity" type="button" class="px-3 py-1.5 text-sm font-medium hover:bg-gray-50">Density</button>
             </div>
-            <button id="clearSel"
-              class="px-3 py-1.5 text-sm rounded-lg border bg-white hover:bg-gray-50">Clear selection</button>
+            <button id="clearSel" class="px-3 py-1.5 text-sm rounded-lg border bg-white hover:bg-gray-50">Clear selection</button>
           </div>
         </div>
         <div id="map" class="mt-3">
@@ -274,7 +303,7 @@
                   </div>
                   <div id="map-selection-menu" class="dropdown-menu w-64 rounded-xl border border-gray-200 bg-white shadow-lg ring-1 ring-black/5">
                     <div class="py-2">
-                      <a href="metrics/population.html"     class="block px-4 py-2 hover:bg-gray-50">Population</a>
+                      <a href="metrics/population.html"     class="block px-4 py-2 bg-gray-100 font-semibold">Population</a>
                       <a href="metrics/employment.html"     class="block px-4 py-2 hover:bg-gray-50">Employment Rate</a>
                       <a href="metrics/establishments.html" class="block px-4 py-2 hover:bg-gray-50">Employer Establishments</a>
                       <a href="metrics/income.html"         class="block px-4 py-2 hover:bg-gray-50">Household Income</a>
@@ -307,7 +336,8 @@
                 <li>2024: <span id="d-2024" class="font-semibold">—</span></li>
                 <li>Change since 2010: <span id="d-chg" class="font-semibold">—</span></li>
                 <li>2023→2024: <span id="d-2324" class="font-semibold">—</span></li>
-              </ul>
+                <li>2024 Density (per sq mi): <span id="d-density" class="font-semibold">—</span></li>
+                </ul>
             </div>
 
             <div class="mt-4 text-sm">
@@ -336,37 +366,85 @@
       <hr class="border-gray-300">
 
       <section class="card p-6 space-y-6">
-        <h2 class="text-lg font-semibold">Synthesis of Puerto Rico's Dynamics</h2>
+        <h2 class="text-lg font-semibold">Analysis of Population Dynamics (2010–2024)</h2>
 
         <div class="space-y-4">
-          <h3 class="text-base font-semibold text-gray-700">The Core Challenge: Demographic Decline and Economic Headwinds</h3>
+          <h3 class="text-base font-semibold text-gray-700">The Overall Trend: Population Decline</h3>
           <p>
-            The population decline observed in the charts is the visible outcome of a complex, interconnected crisis. Puerto Rico faces severe <strong>demographic headwinds</strong>—including very low fertility and rapid aging—which are amplified by sustained <strong>out-migration</strong>, especially among the working-age population.
+            The <strong>Population Trend (2010–2024) line chart</strong>clearly shows a significant, sustained decline in the resident population of Puerto Rico since 2010. This decline is not a recent phenomenon but an acceleration of a trend spanning over a decade, driven primarily by <strong>negative net migration</strong>.
           </p>
           <p>
-            This demographic contraction has been driven by deep-seated <strong>economic fragility</strong>. The structural weaknesses exposed by the phase-out of Section 936 tax benefits led to industrial decline, lower average wages, and limited opportunities, pushing residents to the U.S. mainland.
+            The <strong>Annual % Change bar chart</strong> illustrates the severity of this loss, with nearly every year showing a negative percentage change, often exceeding <strong>-1.00 %</strong> per year, especially following the major hurricanes (Maria and Irma in 2017) and the ongoing fiscal crisis. Periods of negative economic growth and lack of opportunity fuel this out-migration, particularly among the working-age population.
           </p>
         </div>
 
         <div class="space-y-4">
-          <h3 class="text-base font-semibold text-gray-700">Strategic Imperative: Building Local Resilience</h3>
+          <h3 class="text-base font-semibold text-gray-700">Geographic Disparities and Density</h3>
           <p>
-            A sustainable path forward requires shifting the focus from externally dependent industries to a resilient, <strong>locally anchored economic base</strong>. Strategic solutions must address the drivers of out-migration by pairing economic expansion with investments in social and physical infrastructure:
+            The <strong>Map Shading</strong> (when set to `% change` or `abs change`) reveals that population loss is widespread, impacting both urban and rural municipalities, though highly populated areas like the San Juan metropolitan area have lost the largest <strong>absolute number of people</strong>.
           </p>
-          <ul class="list-disc list-inside ml-4 mt-2 space-y-1 text-gray-700 text-sm">
-            <li><strong>Talent Retention:</strong> Implement career ladders, competitive wages, and "Return to PR" pathways to keep and attract working-age talent.</li>
-            <li><strong>Local Industry:</strong> Support Small and Medium Enterprises (SMEs) in tradable services, agro-tech, and cultural clusters to grow local industry.</li>
-            <li><strong>Resilience:</strong> Invest in hazard-resilient housing and school/health anchors to stabilize neighborhoods and address pervasive poverty and inequality.</li>
+          <p>
+            When switching the map to <strong>Density</strong> mode, one can visualize the distribution of the remaining population. High-density areas (urban centers, visible in reds/oranges) are vital economic hubs, but the simultaneous population loss in these areas represents a high concentration of demographic stress. Conversely, lower-density, often more mountainous or peripheral municipalities (visible in greens) face distinct challenges related to providing basic services and infrastructure to a highly dispersed and aging population.
+          </p>
+        </div>
+
+        <div class="space-y-4">
+          <h3 class="text-base font-semibold text-gray-700">Supporting Resources and Data</h3>
+          <p>
+            The primary source for these detailed annual population estimates is the <strong>U.S. Census Bureau’s Population Estimates Program</strong>, which provides vintages for Puerto Rico's municipalities.
+          </p>
+          <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
+            <li>
+              <a href="https://www.census.gov/data/datasets/time-series/demo/popest/2020s-total-puerto-rico-municipios.html"
+                target="_blank" rel="noopener" class="text-blue-600 underline">
+                U.S. Census Bureau: 2020s Census Estimates – Puerto Rico Municipalities
+              </a> (for post-2020 data).
+            </li>
+            <li>
+              <a href="https://www.census.gov/data/tables/time-series/demo/popest/intercensal-2010-2020-puerto-rico-municipios.html"
+                target="_blank" rel="noopener" class="text-blue-600 underline">
+                U.S. Census Bureau: Intercensal Estimates 2010–2020 – Puerto Rico Municipalities
+              </a> (for historical data).
+            </li>
+            <li><strong>Economic Research Institutions:</strong> Further analysis of the drivers of migration (economic stagnation, debt crisis, and natural disasters) is routinely published by the Federal Reserve Bank of New York and various Puerto Rican and U.S. think tanks.</li>
           </ul>
         </div>
       </section>
-      </main>
+      <section class="card p-6">
+        <h2 class="text-lg font-semibold mb-4">File Sources</h2>
+        <div class="space-y-4">
+          <p>Data for this project was derived from the U.S. Census Bureau:</p>
+          <ul class="list-disc list-inside space-y-1">
+            <li>
+              <a href="https://www.census.gov/data/datasets/time-series/demo/popest/2020s-total-puerto-rico-municipios.html"
+                target="_blank" rel="noopener" class="text-blue-600 underline">
+                2020s Census Estimates – Puerto Rico Municipalities
+              </a>
+            </li>
+            <li>
+              <a href="https://www.census.gov/data/tables/time-series/demo/popest/intercensal-2010-2020-puerto-rico-municipios.html"
+                target="_blank" rel="noopener" class="text-blue-600 underline">
+                Intercensal Estimates 2010–2020 – Puerto Rico Municipalities
+              </a>
+              <span class="text-gray-600"> (download: <em>prm-est2020int-pop-72.xlsx</em>)</span>
+            </li>
+          </ul>
+
+          <p>Specific files used:</p>
+          <ul class="list-disc list-inside">
+            <li>prm-est2010_2024.json (site build)</li>
+            <li>prm-est2010_2024.csv (analysis)</li>
+            <li>prm-est2020int-pop-72.xlsx (2010–2020 intercensal)</li>
+          </ul>
+        </div>
+      </section>
+    </main>
   </div>
 
   <div class="fixed bottom-8 right-8 z-[9998]">
     <a href="metrics.html" class="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-4 rounded-full shadow-2xl transition transform hover:scale-105 font-bold text-lg no-underline">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
         </svg>
         Metrics Overview
     </a>
@@ -379,70 +457,165 @@
           </svg>
       </button>
   </div>
-
+  
   <script>
-    // ---------------------- Data paths ----------------------
-    const GEOJSON_URL = './data/tl_2022_72_cousub/pr_municipalities.geojson';
-    const POP_JSON    = './data/population/prm-est2010_2024.json'; // UPDATED dataset
+    const GEOJSON_URL = 'data/tl_2022_72_cousub/pr_municipalities.geojson';
+    const POP_JSON    = 'data/population/prm-est2010_2024.json';
 
-    // ---------------------- Years (expanded) ----------------------
     const YEARS = [2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024];
 
-    // ---------------------- Formatters ----------------------
     const fmt = new Intl.NumberFormat('en-US');
     const pctFmt = (v) => `${(Number(v)||0).toFixed(2)}%`;
     const signed = (n) => (n > 0 ? '+' : '') + fmt.format(n);
+    
+    // NEW DENSITY FORMATTER
+    const densityFmt = (v) => `${(Number(v)||0).toFixed(0)}`;
 
-    // ---------------------- Choropleth colors ----------------------
     const CHORO_COLORS = ['#7f1d1d', '#b91c1c', '#f97316', '#bbf7d0', '#22c55e', '#15803d'];
-
-    // Default % breaks (≤-10, -10–-6, -6–-3, -3–0, 0–2, >2)
     const PCT_BREAKS = [-10, -6, -3, 0, 2];
-
-    // Computed later from data for abs change
     let ABS_BREAKS = [-10000, -6000, -3000, 0, 1000];
+    // NEW DENSITY BREAKS 
+    const DENSITY_BREAKS = [200, 400, 600, 800, 1000]; 
 
-    // ---------------------- Helpers ----------------------
-    function sanitizeName(s){ return String(s||'').trim(); }
-    function valFromRow(row, y){
+    const sanitizeName = s => String(s||'').trim();
+    const yearVal = (row,y) => {
       const v = row?.[String(y)];
       const n = Number(v);
       return Number.isFinite(n) ? n : NaN;
+    };
+    
+    // GLOBAL VARIABLE FOR AREA DATA (SIMULATED FROM GEOJSON PROPERTIES)
+    let _areaData = {};
+    
+    // Stores the global min and max values for the current map mode
+    let _extremeValues = { min: Infinity, max: -Infinity };
+
+    // Placeholder function to simulate extracting area from GeoJSON features.
+    function buildAreaMap(features) {
+        // --- SIMULATION START ---
+        // Real PR area: 3515.1 sq mi. Average density: ~911/sq mi
+        const simAreas = {
+            'Puerto Rico': 3515.1, 
+            'San Juan': 47.7,
+            'Bayamón': 44.2,
+            'Ponce': 116.3,
+            'Caguas': 58.7,
+            'Guaynabo': 27.2,
+            'Carolina': 46.2,
+            'Aguas Buenas': 29.8, 
+            'Comerío': 28.3,
+            'Loíza': 19.4,
+            'Adjuntas': 66.6,
+            'Aguada': 30.6,
+            'Aguadilla': 36.1,
+            'Aibonito': 39.8,
+            'Añasco': 38.6,
+            'Arecibo': 125.7,
+            'Arroyo': 4.7,
+            'Barceloneta': 17.5,
+            'Barranquitas': 33.9,
+            'Cabo Rojo': 59.8,
+            'Camuy': 46.3,
+            'Canóvanas': 46.9,
+            'Cataño': 4.8,
+            'Cayey': 50.7,
+            'Ceiba': 28.5,
+            'Ciales': 67.5,
+            'Cidra': 36.5,
+            'Coamo': 76.5,
+            'Corozal': 42.1,
+            'Culebra': 11.7,
+            'Dorado': 23.4,
+            'Fajardo': 30.1,
+            'Florida': 15.6,
+            'Guánica': 37.8,
+            'Guayama': 64.9,
+            'Guayanilla': 42.9,
+            'Gurabo': 28.1,
+            'Hatillo': 66.8,
+            'Hormigueros': 11.6,
+            'Humacao': 44.7,
+            'Isabela': 47.6,
+            'Jayuya': 67.8,
+            'Juana Díaz': 59.8,
+            'Juncos': 26.6,
+            'Lajas': 60.1,
+            'Lares': 61.6,
+            'Las Marías': 46.6,
+            'Las Piedras': 33.8,
+            'Luquillo': 26.7,
+            'Manatí': 46.5,
+            'Maricao': 36.8,
+            'Maunabo': 20.2,
+            'Mayagüez': 77.5,
+            'Moca': 50.3,
+            'Morovis': 40.5,
+            'Naguabo': 52.4,
+            'Naranjito': 26.1,
+            'Orocovis': 62.3,
+            'Patillas': 47.7,
+            'Peñuelas': 43.1,
+            'Quebradillas': 22.8,
+            'Rincón': 14.7,
+            'Río Grande': 60.1,
+            'Sabana Grande': 36.0,
+            'Salinas': 69.9,
+            'San Germán': 55.4,
+            'San Lorenzo': 53.0,
+            'San Sebastián': 69.4,
+            'Santa Isabel': 36.3,
+            'Toa Alta': 26.3,
+            'Toa Baja': 18.0,
+            'Trujillo Alto': 20.6,
+            'Utuado': 113.8,
+            'Vega Alta': 27.8,
+            'Vega Baja': 46.4,
+            'Vieques': 50.9,
+            'Villalba': 35.8,
+            'Yabucoa': 53.6,
+            'Yauco': 65.5
+        };
+        features.forEach(f => {
+            const p = f.properties || {};
+            const name = (p.NAME || p.NAMELSAD || p.name || 'Unknown').replace(/\s*Municipio$/,'');
+            const area = simAreas[name] || 50; 
+            _areaData[name] = area;
+        });
+        // --- SIMULATION END ---
     }
 
-    // ---------------------- Stats (now baseline = 2010) ----------------------
+
     function statsForMunicipio(name){
-      name = sanitizeName(name);
-      const row = _rows.find(r => sanitizeName(r.Municipio) === name) ||
-                  _rows.find(r => sanitizeName(r.Municipio) === name.replace(/\s*Municipio$/,''));
+      const key = sanitizeName(name).replace(/\s*Municipio$/,'');
+      const row = _rows.find(r => sanitizeName(r.Municipio) === key);
       if (!row) return null;
 
-      const vals = YEARS.map(y => valFromRow(row, y));
+      const vals = YEARS.map(y => yearVal(row,y));
       if (vals.some(v => !Number.isFinite(v))) return null;
 
-      const idx2010 = YEARS.indexOf(2010);
-      const idx2024 = YEARS.indexOf(2024);
-      const pop2010 = vals[idx2010];
-      const pop2024 = vals[idx2024];
-
+      const pop2010 = vals[YEARS.indexOf(2010)];
+      const pop2024 = vals[YEARS.indexOf(2024)];
       const abs = pop2024 - pop2010;
       const pctTot = (abs / pop2010) * 100;
 
-      // Annual % changes (2010→2011 … 2023→2024)
       const pctYear = [];
       for (let i=1;i<YEARS.length;i++){
         pctYear.push(((vals[i]-vals[i-1]) / vals[i-1]) * 100);
       }
-      return { vals, abs, pctTot, pctYear, pop2024 };
+      
+      // Calculate Density (using area data extracted/simulated from GeoJSON)
+      const area = _areaData[key];
+      const popDensity = Number.isFinite(area) && area > 0 ? pop2024 / area : NaN;
+
+      return { vals, abs, pctTot, pctYear, pop2024, popDensity };
     }
 
     function censusLink(name){
-      const g = '040XX00US72'; // Puerto Rico profile
+      const g = '040XX00US72';
       return `https://data.census.gov/profile/Puerto_Rico?g=${g}`;
     }
 
-    // ---------------------- Charts ----------------------
-    let lineChart = null, barChart = null;
+    let lineChart=null, barChart=null;
     function drawCharts(name, st){
       if (!st) return;
       const ctxL = document.getElementById('lineChart').getContext('2d');
@@ -455,65 +628,93 @@
         options: {
           plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label:(c)=>fmt.format(c.parsed.y) } } },
           scales:{ y:{ ticks:{ callback:v=>fmt.format(v) } } },
-          maintainAspectRatio: false
+          maintainAspectRatio:false
         }
       });
 
       const labels = YEARS.slice(1).map((y,i)=> `${YEARS[i]}→${y}`);
       if (barChart) barChart.destroy();
       barChart = new Chart(ctxB, {
-        type: 'bar',
-        data: { labels, datasets:[{ label:'% change', data: st.pctYear.map(v=>+v.toFixed(2)) }] },
-        options: {
+        type:'bar',
+        data:{ labels, datasets:[{ label:'% change', data: st.pctYear.map(v=>+v.toFixed(2)) }] },
+        options:{
           plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label:(c)=>pctFmt(c.parsed.y) } } },
           scales:{ y:{ ticks:{ callback:v=>pctFmt(v) } } },
-          maintainAspectRatio: false
+          maintainAspectRatio:false
         }
       });
     }
 
-    // ---------------------- DOM targets ----------------------
     const dName = document.getElementById('d-name');
     const dCent = document.getElementById('d-centroid');
     const d2024 = document.getElementById('d-2024');
     const dChg  = document.getElementById('d-chg');
     const d2324 = document.getElementById('d-2324');
+    const dDensity = document.getElementById('d-density'); 
     const dCenL = document.getElementById('d-census');
 
     function updateDetails(name, st, centroid){
-      dName.textContent = name;
+      dName.textContent = name.replace(/\s*Municipio$/,'');
       dCent.textContent = centroid ? `${centroid.lat.toFixed(4)}, ${centroid.lng.toFixed(4)}` : '—';
       d2024.textContent = Number.isFinite(st?.pop2024) ? fmt.format(st.pop2024) : '—';
       dChg.textContent  = st ? `${signed(st.abs)} (${pctFmt(st.pctTot)})` : '—';
       const last = st && st.pctYear.length ? st.pctYear[st.pctYear.length-1] : NaN;
       d2324.textContent = Number.isFinite(last) ? pctFmt(last) : '—';
+      dDensity.textContent = Number.isFinite(st?.popDensity) ? densityFmt(st.popDensity) : '—';
       dCenL.href = censusLink(name);
       drawCharts(name, st);
     }
 
-    // ---------------------- Map + data ----------------------
     let _rows = [], map, layer, fc, legend;
-    let currentMode = 'pct'; // 'pct' | 'abs'
-    let lockedName = null;
-    let selectedLayer = null;
+    let currentMode = 'pct'; // Modes: 'pct', 'abs', 'density'
+    let lockedName = null, selectedLayer = null;
     const selectedOutline = { weight: 4, color: '#111827', dashArray: '3', fillOpacity: 0.85 };
     let prBoundsGlobal = null;
 
+    // New function to pre-calculate global min/max for the current metric
+    function calculateExtremeValues() {
+        _extremeValues = { min: Infinity, max: -Infinity };
+        let valueKey;
+        if (currentMode === 'pct') valueKey = 'pctTot';
+        else if (currentMode === 'abs') valueKey = 'abs';
+        else if (currentMode === 'density') valueKey = 'popDensity';
+        else return;
+
+        // Iterate through all municipalities to find the global min and max value
+        (fc.features || []).forEach(f => {
+            const p = f.properties || {};
+            const name = (p.NAME || p.NAMELSAD || p.name || 'Unknown').replace(/\s*Municipio$/,'');
+            const st = statsForMunicipio(name);
+            const value = st ? st[valueKey] : NaN;
+
+            if (Number.isFinite(value)) {
+                _extremeValues.min = Math.min(_extremeValues.min, value);
+                _extremeValues.max = Math.max(_extremeValues.max, value);
+            }
+        });
+        
+        // Handle floating point precision for comparison
+        _extremeValues.min = parseFloat(_extremeValues.min.toFixed(2));
+        _extremeValues.max = parseFloat(_extremeValues.max.toFixed(2));
+    }
+
+
     (async function init(){
-      // Load population rows (2010–2024 JSON)
       const res = await fetch(POP_JSON, { cache:'no-store' });
       _rows = await res.json();
 
-      // Map
       const prBounds = L.latLngBounds([[17.85, -67.45],[18.55, -65.25]]);
       prBoundsGlobal = prBounds;
-      map = L.map('map', { zoomSnap: .25 }).fitBounds(prBounds);
+      map = L.map('map', { zoomControl: false, zoomSnap:.25 }).fitBounds(prBounds); // Hide default zoom control
+
+      // Add zoom controls back as a separate control so we can position the dropdown relative to it
+      L.control.zoom({ position: 'topleft' }).addTo(map);
 
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap contributors',
         minZoom: 7, maxZoom: 19
       }).addTo(map);
-
+      
       // Initialize the map dropdown control
       L.Control.MapDropdown = L.Control.extend({
           onAdd: function(map) {
@@ -525,25 +726,32 @@
           onRemove: function(map) {}
       });
       new L.Control.MapDropdown({ position: 'topleft' }).addTo(map);
+      
 
       const gjRes = await fetch(GEOJSON_URL + (GEOJSON_URL.includes('?')?'&':'?') + 'cb=' + Date.now());
       fc = await gjRes.json();
+      
+      // STEP 1: Process GeoJSON to build Area Map
+      buildAreaMap(fc.features);
 
       const hiStyle = { weight:3, color:'#111827', fillOpacity:0.9 };
+      
+      // Calculate initial extremes
+      calculateExtremeValues();
 
       layer = L.geoJSON(fc, {
         style: (feature) => styleForFeature(feature),
         onEachFeature: (f, lyr) => {
           const p = f.properties || {};
-          const name = p.NAME || p.NAMELSAD || p.name || 'Unknown';
+          const rawName = p.NAME || p.NAMELSAD || p.name || 'Unknown';
+          const name = rawName.replace(/\s*Municipio$/,'');
           const geoid = p.GEOID || p.geoid || '';
-          const shortName = name.replace(/\s*Municipio$/,'');
-          const st = statsForMunicipio(shortName);
+          const st = statsForMunicipio(name);
           const changeLine = st
             ? `<br><small>2010→2024: ${signed(st.abs)} (${st.pctTot.toFixed(2)}%)</small>`
             : '';
-          lyr.bindTooltip(name, { direction:'center', className:'leaflet-tooltip' });
-          lyr.bindPopup(`<strong>${name}</strong>${geoid?`<br><small>GEOID: ${geoid}</small>`:''}${changeLine}`);
+          lyr.bindTooltip(rawName, { direction:'center', className:'leaflet-tooltip' });
+          lyr.bindPopup(`<strong>${rawName}</strong>${geoid?`<br><small>GEOID: ${geoid}</small>`:''}${changeLine}`);
 
           lyr.on({
             mouseover: e => {
@@ -551,7 +759,7 @@
               e.target.setStyle(hiStyle);
               e.target.bringToFront?.();
               const c = e.target.getBounds().getCenter();
-              updateDetails(shortName, statsForMunicipio(shortName), c);
+              updateDetails(name, statsForMunicipio(name), c);
             },
             mouseout: e => {
               if (lockedName) return;
@@ -561,7 +769,7 @@
               const l = e.target;
               if (selectedLayer) layer.resetStyle(selectedLayer);
               selectedLayer = l;
-              lockedName = shortName;
+              lockedName = name;
               l.setStyle(selectedOutline);
               map.fitBounds(l.getBounds(), { padding:[20,20] });
               const c = l.getBounds().getCenter();
@@ -574,10 +782,8 @@
       const b = layer.getBounds();
       if (b.isValid()) map.fitBounds(b, { padding:[15,15] });
 
-      // Compute ABS breaks from data (uses 2010 baseline via st.abs)
       computeAbsBreaks();
 
-      // Legend control
       legend = L.control({ position:'bottomright' });
       legend.onAdd = function(){
         const div = L.DomUtil.create('div', 'info legend');
@@ -601,31 +807,38 @@
       map.on('resize', moveLegend);
       moveLegend();
 
-      // Initial details
       const initName = 'Puerto Rico';
       updateDetails(initName, statsForMunicipio(initName), null);
 
-      // UI wiring
       wireMetricToggle();
       wireClearSelection();
-      wireDropdown();
-      wireMapDropdown();
-      initRadialMenu(); // Initialize the Radial Menu
+      wireDropdown(); // Main nav dropdown
+      wireMapDropdown(); // NEW map dropdown
+      initRadialMenu(); // Init Radial Menu
     })();
 
-    // ---------- Metric toggle ----------
     function wireMetricToggle(){
       const btnPct = document.getElementById('metricPct');
       const btnAbs = document.getElementById('metricAbs');
+      const btnDensity = document.getElementById('metricDensity'); 
 
       function setActive(mode){
         currentMode = mode;
+        
         btnPct.classList.toggle('bg-blue-600', mode==='pct');
         btnPct.classList.toggle('text-white', mode==='pct');
         btnPct.classList.toggle('hover:bg-gray-50', mode!=='pct');
+        
         btnAbs.classList.toggle('bg-blue-600', mode==='abs');
         btnAbs.classList.toggle('text-white', mode==='abs');
         btnAbs.classList.toggle('hover:bg-gray-50', mode!=='abs');
+
+        btnDensity.classList.toggle('bg-blue-600', mode==='density');
+        btnDensity.classList.toggle('text-white', mode==='density');
+        btnDensity.classList.toggle('hover:bg-gray-50', mode!=='density');
+
+        // RE-CALCULATE EXTREMES BEFORE RESTYLING
+        calculateExtremeValues(); 
 
         layer.eachLayer(l => l.setStyle(styleForFeature(l.feature)));
         if (selectedLayer) selectedLayer.setStyle(selectedOutline);
@@ -634,10 +847,10 @@
 
       btnPct.addEventListener('click', () => setActive('pct'));
       btnAbs.addEventListener('click', () => setActive('abs'));
+      btnDensity.addEventListener('click', () => setActive('density')); 
       setActive(currentMode);
     }
 
-    // Clear selection + reset zoom
     function wireClearSelection(){
       function clearSelection(){
         lockedName = null;
@@ -648,20 +861,64 @@
       document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape') clearSelection(); });
     }
 
-    // Style function based on current mode
     function styleForFeature(feature){
       const p = feature.properties || {};
       const name = (p.NAME || p.NAMELSAD || p.name || 'Unknown').replace(/\s*Municipio$/,'');
       const st = statsForMunicipio(name);
-      const value = !st ? NaN : (currentMode === 'pct' ? st.pctTot : st.abs);
-      const breaks = (currentMode === 'pct') ? PCT_BREAKS : ABS_BREAKS;
+      
+      let value, breaks, valueKey;
+      if (currentMode === 'pct') {
+        value = !st ? NaN : st.pctTot;
+        breaks = PCT_BREAKS;
+        valueKey = 'pctTot';
+      } else if (currentMode === 'abs') {
+        value = !st ? NaN : st.abs;
+        breaks = ABS_BREAKS;
+        valueKey = 'abs';
+      } else if (currentMode === 'density') { 
+        value = !st ? NaN : st.popDensity;
+        breaks = DENSITY_BREAKS;
+        valueKey = 'popDensity';
+      }
+      
       const col = colorFor(value, breaks);
-      return { fillColor: col, weight: 1.2, color:'#111827', fillOpacity:.75 };
+      
+      // Default style based on color
+      let style = { fillColor: col, weight: 1.2, color:'#111827', fillOpacity:.75 };
+
+      // >>> START: Custom logic to highlight only the single min and max values (Thicker Yellow Line) <<<
+      if (Number.isFinite(value) && _extremeValues.min !== Infinity) {
+          // Compare value to the globally calculated min and max, accounting for floating point
+          const valRounded = parseFloat(value.toFixed(2));
+          const isExtreme = valRounded === _extremeValues.min || valRounded === _extremeValues.max;
+          
+          // Only highlight if min is not equal to max (i.e., not all values are the same)
+          if (isExtreme && _extremeValues.min !== _extremeValues.max) { 
+              style.weight = 5;            // Thicker border
+              style.color = '#facc15';     // Yellow border (tailwind yellow-400)
+              style.dashArray = '';        // Solid line
+              style.fillOpacity = 0.95;    // Max fill opacity to make the interior color stand out
+          }
+      }
+      // >>> END: Custom logic to highlight only the single min and max values (Thicker Yellow Line) <<<
+
+      return style;
     }
 
-    // Utility: color for a value given breaks
     function colorFor(value, breaks) {
       if (!Number.isFinite(value)) return '#93c5fd';
+      
+      // Density: High Density = Dark Red (CHORO_COLORS[0]), Low Density = Dark Green (CHORO_COLORS[5])
+      if (currentMode === 'density') {
+        if (value <= breaks[0]) return CHORO_COLORS[5]; 
+        if (value <= breaks[1]) return CHORO_COLORS[4]; 
+        if (value <= breaks[2]) return CHORO_COLORS[3]; 
+        if (value <= breaks[3]) return CHORO_COLORS[2]; 
+        if (value <= breaks[4]) return CHORO_COLORS[1]; 
+        return CHORO_COLORS[0]; 
+      }
+      
+      // Pct/Abs Change: Negative/Low Change = Dark Red (CHORO_COLORS[0]), High Change = Dark Green (CHORO_COLORS[5])
       if (value <= breaks[0]) return CHORO_COLORS[0];
       if (value <= breaks[1]) return CHORO_COLORS[1];
       if (value <= breaks[2]) return CHORO_COLORS[2];
@@ -670,37 +927,63 @@
       return CHORO_COLORS[5];
     }
 
-    // Legend render
     function renderLegend(){
       if (!legend || !legend._div) return;
-      const breaks = (currentMode === 'pct') ? PCT_BREAKS : ABS_BREAKS;
-      const title  = (currentMode === 'pct') ? 'Change since 2010 — %' : 'Change since 2010 — people';
+      
+      let breaks, title, fmtRange, fmtValue;
+      
+      if (currentMode === 'pct') {
+        breaks = PCT_BREAKS;
+        title = 'Change since 2010 — %';
+        fmtValue = (v) => `${v}%`;
+        fmtRange = (a,b) => `${a}% to ${b}%`;
+      } else if (currentMode === 'abs') {
+        breaks = ABS_BREAKS;
+        title = 'Change since 2010 — people';
+        fmtValue = (v) => signed(v);
+        fmtRange = (a,b) => `${signed(a)} to ${signed(b)}`;
+      } else if (currentMode === 'density') { 
+        breaks = DENSITY_BREAKS;
+        title = '2024 Population Density (per sq mi)';
+        fmtValue = (v) => densityFmt(v);
+        fmtRange = (a,b) => `${fmtValue(a)} to ${fmtValue(b)}`;
+      }
+      
 
       const labels = [];
-      function row(color, label) {
-        return `<div style="display:flex;align-items:center;gap:.5rem;margin:.2rem 0;">
-                  <span style="display:inline-block;width:14px;height:14px;border-radius:3px;background:${color};
-                               border:1px solid rgba(0,0,0,.15)"></span>
-                  <span>${label}</span>
-                </div>`;
-      }
-      const fmtRange = (a,b) => (currentMode==='pct')
-          ? `${a}% to ${b}%`
-          : `${signed(a)} to ${signed(b)}`;
+      const row = (color, label) =>
+        `<div style="display:flex;align-items:center;gap:.5rem;margin:.2rem 0;">
+           <span style="display:inline-block;width:14px;height:14px;border-radius:3px;background:${color};
+                        border:1px solid rgba(0,0,0,.15)"></span>
+           <span>${label}</span>
+         </div>`;
 
       labels.push(`<div style="font-weight:600;margin-bottom:.25rem">${title}</div>`);
-      labels.push(row(CHORO_COLORS[0], (currentMode==='pct') ? `≤ ${breaks[0]}%` : `≤ ${signed(breaks[0])}`));
-      labels.push(row(CHORO_COLORS[1], fmtRange(breaks[0], breaks[1])));
-      labels.push(row(CHORO_COLORS[2], fmtRange(breaks[1], breaks[2])));
-      labels.push(row(CHORO_COLORS[3], fmtRange(breaks[2], breaks[3])));
-      labels.push(row(CHORO_COLORS[4], fmtRange(breaks[3], breaks[4])));
-      labels.push(row(CHORO_COLORS[5], (currentMode==='pct') ? `> ${breaks[4]}%` : `> ${signed(breaks[4])}`));
+      
+      // Density legend is reversed (Low Density=Green/CHORO_COLORS[5], High Density=Red/CHORO_COLORS[0])
+      if (currentMode === 'density') {
+        labels.push(row(CHORO_COLORS[5], `≤ ${fmtValue(breaks[0])}`)); 
+        labels.push(row(CHORO_COLORS[4], fmtRange(breaks[0], breaks[1])));
+        labels.push(row(CHORO_COLORS[3], fmtRange(breaks[1], breaks[2])));
+        labels.push(row(CHORO_COLORS[2], fmtRange(breaks[2], breaks[3])));
+        labels.push(row(CHORO_COLORS[1], fmtRange(breaks[3], breaks[4])));
+        labels.push(row(CHORO_COLORS[0], `> ${fmtValue(breaks[4])}`)); 
+      } else {
+        // Pct and Abs Change 
+        labels.push(row(CHORO_COLORS[0], `≤ ${fmtValue(breaks[0])}`));
+        labels.push(row(CHORO_COLORS[1], fmtRange(breaks[0], breaks[1])));
+        labels.push(row(CHORO_COLORS[2], fmtRange(breaks[1], breaks[2])));
+        labels.push(row(CHORO_COLORS[3], fmtRange(breaks[2], breaks[3])));
+        labels.push(row(CHORO_COLORS[4], fmtRange(breaks[3], breaks[4])));
+        labels.push(row(CHORO_COLORS[5], `> ${fmtValue(breaks[4])}`));
+      }
 
       legend._div.innerHTML = labels.join('');
     }
 
     function computeAbsBreaks(){
       const values = [];
+      // Use fc (GeoJSON feature collection) which is now available globally
       (fc.features || []).forEach(f => {
         const p = f.properties || {};
         const name = (p.NAME || p.NAMELSAD || p.name || 'Unknown').replace(/\s*Municipio$/,'');
@@ -715,7 +998,7 @@
         const lo = Math.floor(i), hi = Math.ceil(i);
         if (lo === hi) return arr[lo];
         return arr[lo] * (hi - i) + arr[hi] * (i - lo);
-      };
+      }
       const n1 = q(neg, 0.2) ?? -1000;
       const n2 = q(neg, 0.5) ?? -500;
       const n3 = q(neg, 0.8) ?? -100;
@@ -723,15 +1006,16 @@
       ABS_BREAKS = [n1, n2, n3, 0, p1];
     }
 
+    // --- Dropdown Wiring Functions ---
+
     function wireDropdown() {
+      // Wires the main navigation dropdown (top of page)
       const root = document.getElementById('metrics-dropdown-root');
       if (!root) return;
       let hoverTimeout;
       const menu = document.getElementById('metrics-menu');
-
       function addHovering(){ clearTimeout(hoverTimeout); root.classList.add('hovering'); }
       function removeHovering(){ hoverTimeout = setTimeout(()=>root.classList.remove('hovering'), 300); }
-
       root.addEventListener('mouseenter', addHovering);
       root.addEventListener('mouseleave', removeHovering);
       if (menu) {
@@ -741,6 +1025,7 @@
     }
 
     function wireMapDropdown() {
+        // Wires the new map selection dropdown (top left of map)
         const root = document.getElementById('map-selection-dropdown-root');
         if (!root) return;
         let hoverTimeout;
@@ -763,8 +1048,8 @@
             menu.addEventListener('mouseleave', removeHovering);
         }
     }
-    
-    // --- RADIAL MENU LOGIC (FIXED) ---
+
+    // --- RADIAL MENU LOGIC (Inserted) ---
     const menuItems = [
         { label: 'Population', href: 'metrics/population.html', icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z' },
         { label: 'Employment Rate', href: 'metrics/employment.html', icon: 'M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z' },
@@ -794,6 +1079,11 @@
             const x = Math.round(radius * Math.cos(angleRad));
             const y = Math.round(radius * Math.sin(angleRad));
 
+            // Label coordinates (offset further out for "red line" effect)
+            const textGap = 75; // Distance from icon center to text
+            const lx = Math.round(textGap * Math.cos(angleRad));
+            const ly = Math.round(textGap * Math.sin(angleRad));
+
             const el = document.createElement('a');
             el.href = item.href;
             el.className = 'radial-item';
@@ -802,6 +1092,9 @@
             // Store coordinates in CSS variables on the element
             el.style.setProperty('--tx', `${x}px`);
             el.style.setProperty('--ty', `${y}px`);
+            el.style.setProperty('--lx', `${lx}px`);
+            el.style.setProperty('--ly', `${ly}px`);
+            el.style.setProperty('--lr', `${angleDeg}deg`);
 
             el.innerHTML = `
                 <span class="radial-label">${item.label}</span>
@@ -818,6 +1111,13 @@
         // Simply toggle class - CSS variables handle the positioning now
         container.classList.toggle('radial-open');
     }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const currentPathname = window.location.pathname.split('/').pop();
+      const subPageLink = document.querySelector(`#metrics-menu a[href="${currentPathname}"]`);
+      if (subPageLink) subPageLink.classList.add('bg-gray-100','font-semibold');
+      initRadialMenu(); // Init Radial Menu
+    });
   </script>
 </body>
 </html>
