@@ -39,7 +39,12 @@
       padding:5px 10px;
     }
 
-    .mini { min-height: 260px; }
+    /* Force relative positioning and minimum height for charts to prevent collapse */
+    .mini { 
+        min-height: 300px; 
+        position: relative; 
+        width: 100%;
+    }
 
     /* --- Dropdown base state & transitions (Main Nav) --- */
     #metrics-menu {
@@ -58,20 +63,17 @@
     
     /* New style for simulating 65% zoom on the main content */
     #scale-wrapper {
-        /* Apply the scale transformation */
         transform: scale(0.65); 
-        transform-origin: top center; /* Scale from the top-center */
-        
-        /* Adjustments to compensate for the scaling effect on surrounding content */
-        height: 154%; /* Approx 1 / 0.65 to ensure vertical space is reserved */
+        transform-origin: top center; 
+        height: 154%; 
         padding-bottom: 200px;
-        margin-bottom: -35%; /* Pull up content following the wrapper */
+        margin-bottom: -35%;
     }
 
-    /* --- LEAFLET CONTROL STYLES (Map Dropdown) --- */
+    /* --- LEAFLET CONTROL STYLES --- */
     .leaflet-control-map-dropdown {
       padding: 0; 
-      margin-left: 45px; /* Pushes the control right to clear the zoom buttons */
+      margin-left: 45px; 
       margin-top: 5px; 
     }
     .leaflet-control-map-dropdown .dropdown-root {
@@ -98,8 +100,6 @@
         left: 0;
         margin-top: 5px; 
         z-index: 1000;
-        
-        /* Hiding logic */
         opacity: 0; visibility: hidden; transform: translateY(4px);
         pointer-events: none;
         transition: opacity .15s ease, transform .15s ease, visibility .15s ease;
@@ -120,93 +120,42 @@
 
     /* --- RADIAL MENU STYLES --- */
     #radial-menu-container { pointer-events: none; width: 300px; height: 300px; position: fixed; bottom: 0; right: 0; z-index: 9999; }
-    
     #radial-trigger { pointer-events: auto; }
     
     /* Radial Item Base State */
     .radial-item {
-        position: absolute;
-        bottom: 7rem;
-        right: 2rem;  
-        width: 3rem; height: 3rem;
-        border-radius: 50%;
-        background-color: white;
-        color: #4f46e5;
+        position: absolute; bottom: 7rem; right: 2rem;  
+        width: 3rem; height: 3rem; border-radius: 50%;
+        background-color: white; color: #4f46e5;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         display: flex; align-items: center; justify-content: center;
-        text-decoration: none;
-        opacity: 0;
-        pointer-events: none;
+        text-decoration: none; opacity: 0; pointer-events: none;
         transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
         z-index: 9990;
-
-        /* CSS Variables for position */
-        --tx: 0px;
-        --ty: 0px;
-        /* CSS Variables for Label Offset */
-        --lx: 0px;
-        --ly: 0px;
-        /* CSS Variable for Label Rotation */
-        --lr: 0deg;
-        
+        --tx: 0px; --ty: 0px; --lx: 0px; --ly: 0px; --lr: 0deg;
         transform: translate(0, 0) scale(0.5);
     }
+    .radial-open .radial-item { opacity: 1; pointer-events: auto; transform: translate(var(--tx), var(--ty)) scale(1); }
+    .radial-open .radial-item:hover { background-color: #e0e7ff; transform: translate(var(--tx), var(--ty)) scale(1.1); z-index: 10005 !important; }
     
-    /* Radial Item Open State */
-    .radial-open .radial-item {
-        opacity: 1;
-        pointer-events: auto;
-        transform: translate(var(--tx), var(--ty)) scale(1);
-    }
-
-    /* Radial Item Hover State */
-    .radial-open .radial-item:hover { 
-        background-color: #e0e7ff; 
-        transform: translate(var(--tx), var(--ty)) scale(1.1); 
-        z-index: 10005 !important; /* Stacking fix */
-    }
-    
-    /* UPDATED RADIAL LABEL STYLES */
     .radial-label {
-        position: absolute;
-        left: 50%; 
-        top: 50%; 
-        /* Move label radially outward based on calculations AND rotate */
+        position: absolute; left: 50%; top: 50%; 
         transform: translate(calc(-50% + var(--lx)), calc(-50% + var(--ly))) rotate(var(--lr));
         transform-origin: center center;
-        
-        /* Visual Styles: White bg, Black text */
-        background: rgba(255, 255, 255, 0.95); 
-        color: black; 
-        padding: 4px 8px; 
-        border-radius: 6px; 
-        font-size: 12px; 
-        font-weight: 700;
-        white-space: nowrap; 
-        
-        /* Visibility Control */
-        opacity: 0; 
-        transition: opacity 0.3s ease;
-        pointer-events: none;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+        background: rgba(255, 255, 255, 0.95); color: black; 
+        padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 700;
+        white-space: nowrap; opacity: 0; transition: opacity 0.3s ease;
+        pointer-events: none; box-shadow: 0 2px 5px rgba(0,0,0,0.15);
     }
-    
-    /* Show ALL labels when menu is open */
-    .radial-open .radial-label { 
-        opacity: 1; 
-    }
+    .radial-open .radial-label { opacity: 1; }
 
     #radial-trigger {
         position: absolute; bottom: 7rem; right: 2rem;
-        width: 4rem; height: 4rem;
-        border-radius: 50%;
-        background-color: #4f46e5;
-        color: white;
+        width: 4rem; height: 4rem; border-radius: 50%;
+        background-color: #4f46e5; color: white;
         box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
         display: flex; align-items: center; justify-content: center;
-        cursor: pointer;
-        transition: transform 0.3s ease;
-        z-index: 10000;
+        cursor: pointer; transition: transform 0.3s ease; z-index: 10000;
     }
     #radial-trigger:hover { transform: scale(1.05); background-color: #4338ca; }
     .radial-open #radial-trigger { transform: rotate(45deg); background-color: #ef4444; }
@@ -340,21 +289,21 @@
 
           <div>
             <h3 class="font-semibold mb-2">Establishment Count Trend (2012–2023)</h3>
-            <div class="mini bg-gray-50 rounded p-3">
+            <div class="mini bg-gray-50 rounded p-3 relative h-72">
               <canvas id="lineChartNominal"></canvas>
             </div>
           </div>
 
           <div>
             <h3 class="font-semibold mb-2">Annual % Change in Establishments</h3>
-            <div class="mini bg-gray-50 rounded p-3">
+            <div class="mini bg-gray-50 rounded p-3 relative h-72">
               <canvas id="barChartNominal"></canvas>
             </div>
           </div>
           
           <div>
             <h3 class="font-semibold mb-2">Annual % Change (Nominal, Placeholder)</h3>
-            <div class="mini bg-gray-50 rounded p-3">
+            <div class="mini bg-gray-50 rounded p-3 relative h-72">
               <canvas id="barChartReal"></canvas>
             </div>
           </div>
@@ -445,7 +394,7 @@
   <div class="fixed bottom-8 right-8 z-[9998]">
     <a href="../metrics.html" class="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-4 rounded-full shadow-2xl transition transform hover:scale-105 font-bold text-lg no-underline">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
         </svg>
         Metrics Overview
     </a>
@@ -967,7 +916,7 @@
       let hoverTimeout;
       const menu = document.getElementById('metrics-menu');
       function addHovering(){ clearTimeout(hoverTimeout); root.classList.add('hovering'); }
-      function removeHovering(){ hoverTimeout = setTimeout(()=>root.classList.remove('hovering'), 300); }
+      function removeHovering(){ hoverTimeout = setTimeout(()=>root.classList.remove('hovering'), 600); }
       root.addEventListener('mouseenter', addHovering);
       root.addEventListener('mouseleave', removeHovering);
       if (menu) {
@@ -990,7 +939,7 @@
         function removeHovering(){ 
             hoverTimeout = setTimeout(()=>{
                 root.classList.remove('hovering');
-            }, 300); 
+            }, 600); 
         }
 
         root.addEventListener('mouseenter', addHovering);
@@ -1066,14 +1015,28 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-      const currentPathname = window.location.pathname.split('/').pop();
-      const subPageLink = document.querySelector(`#metrics-menu a[href="${currentPathname}"]`);
-      if (subPageLink) subPageLink.classList.add('bg-gray-100','font-semibold');
+      const metricsLink = document.querySelector('#metrics-dropdown-root > a');
+      const isMetricsSubPage = window.location.pathname.includes('/metrics/');
 
-      // Initialize the map dropdown handler
-      wireMapDropdown();
-      // Init Radial Menu
-      initRadialMenu();
+      if (isMetricsSubPage) {
+        metricsLink.classList.add('border-b-2', 'border-blue-600', 'text-blue-600', 'font-semibold');
+        metricsLink.setAttribute('aria-current', 'page');
+        
+        const currentPathname = window.location.pathname.split('/').pop();
+        const subPageLink = document.querySelector(`#metrics-menu a[href="${currentPathname}"]`);
+        if (subPageLink) {
+          subPageLink.classList.add('bg-gray-100', 'font-semibold');
+        }
+      } else {
+        document.querySelectorAll('.nav-link[href]').forEach(a => {
+          if (a.href.endsWith(window.location.pathname)) {
+            a.classList.add('border-b-2', 'border-blue-600', 'text-blue-600', 'font-semibold');
+            a.setAttribute('aria-current', 'page');
+          }
+        });
+      }
+      wireMapDropdown(); // Ensure the map dropdown is also wired up on DOMContentLoaded
+      initRadialMenu(); // Init Radial Menu
     });
   </script>
 </body>
