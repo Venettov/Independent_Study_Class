@@ -41,7 +41,7 @@
 
     .mini { min-height: 260px; }
 
-    /* Dropdown show-on-hover */
+    /* --- Dropdown base state & transitions (Main Nav) --- */
     #metrics-menu {
       opacity: 0; visibility: hidden; transform: translateY(4px);
       pointer-events: none;
@@ -327,9 +327,7 @@
               <div class="font-semibold text-gray-700">Total Employer Establishments (Vintage 2023):</div>
               <ul class="mt-1 space-y-1">
                 <li>2023 Count: <span id="d-2023" class="font-semibold">—</span></li>
-                <li>2023 Placeholder: <span id="d-2023-real" class="font-semibold">—</span></li>
                 <li>Change since 2012 (Absolute): <span id="d-chg" class="font-semibold">—</span></li>
-                <li>Change since 2012 (Placeholder): <span id="d-chg-real" class="font-semibold">—</span></li>
               </ul>
             </div>
 
@@ -378,7 +376,7 @@
               <strong class="text-blue-600">Establishment Count Trend</strong> is the raw number of establishments, as reported by the Census Bureau's County Business Patterns (CBP) data.
             </li>
             <li>
-              <strong>Note on Placeholder Fields:</strong> The "Real" income columns in the original data structure are retained here as placeholders (`null`) to ensure the JavaScript code runs without error. The visualization logic is therefore adjusted to focus entirely on Nominal (raw) counts.
+              <strong>Note on Placeholder Fields:</strong> The "Real" income columns in the original data structure are retained here as placeholders to ensure the JavaScript code runs without error. The visualization logic is therefore adjusted to focus entirely on Nominal (raw) counts.
             </li>
           </ul>
 
@@ -398,31 +396,49 @@
         </div>
         </section>
 
-      <section class="card p-6">
-        <h2 class="text-lg font-semibold mb-4">File Sources</h2>
-        <div class="space-y-4">
-          <p>Data for this metric was derived from the U.S. Census Bureau:</p>
-          <ul class="list-disc list-inside space-y-1">
-            <li>
-              <a href="https://data.census.gov/cedsci/table?g=0400000US72&tid=CB2300CBP.CB2300CBP"
-                target="_blank" rel="noopener" class="text-blue-600 underline">
-                2023 County Business Patterns (CBP) - Employer Establishments (NAICS 00)
-              </a>
-            </li>
-            <li>
-              <a href="https://wwwcensus.gov/data/tables/time-series/demo/popest/intercensal-2010-2020-puerto-rico-municipios.html"
-                target="_blank" rel="noopener" class="text-gray-600">
-                (Original file source for municipal boundaries/GeoJSON remains valid)
-              </a>
-            </li>
-          </ul>
+      <!-- ANALYSIS AND SUPPORTING RESOURCES (REPLACED FILE SOURCES) -->
+      <section class="card p-6 space-y-6">
+        <h2 class="text-lg font-semibold">Analysis and Supporting Resources</h2>
 
-          <p>Specific files used:</p>
-          <ul class="list-disc list-inside">
-            <li>municipios_cbp_establishments_2010_2023_wide.json (site build)</li>
-          </ul>
+        <div class="space-y-4">
+            <h3 class="text-base font-semibold text-gray-700">Business Resilience Amidst Adversity 🏭</h3>
+            <p>
+                The data covering <strong>2012 through 2023</strong> captures a tumultuous decade for Puerto Rican businesses, characterized by a debt crisis, two major hurricanes (2017), earthquakes (2020), and a global pandemic. Despite these challenges, the <strong>Employer Establishment</strong> count reveals a complex story of resilience and adaptation.
+            </p>
+            
+            <h4 class="text-sm font-semibold text-gray-600 mt-4">Post-Disaster Dynamics:</h4>
+            <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
+                <li>The charts often show a noticeable dip in establishment counts around <strong>2017-2018</strong>, reflecting the immediate closure of businesses following Hurricane Maria.</li>
+                <li>However, subsequent years frequently show stabilization or growth. This recovery is partially driven by the influx of <strong>federal reconstruction funds</strong> and pandemic relief programs (like PPP loans), which provided a lifeline to many small and medium enterprises (SMEs) and stimulated activity in the construction and service sectors.</li>
+            </ul>
+
+            <h4 class="text-sm font-semibold text-gray-600 mt-4">Population vs. Business Density:</h4>
+            <p>
+                An interesting divergence appears when comparing this data to population trends. While the population has consistently declined, the number of businesses in certain municipalities has remained stable or even grown. This suggests a potential increase in <strong>business density</strong> relative to the remaining population, or a shift in the economy where a smaller population is serviced by a resilient core of establishments. It may also reflect the formalization of new types of businesses in the gig or tourism economies.
+            </p>
+        </div>
+        
+        <div class="space-y-2 text-sm text-gray-600">
+            <h4 class="font-semibold">Research References:</h4>
+            <ul class="list-disc list-inside ml-4 space-y-1">
+                <li>
+                    <strong>Business Data Source:</strong> 
+                    <a href="https://data.census.gov/cedsci/table?g=0400000US72&tid=CB2300CBP.CB2300CBP" target="_blank" rel="noopener" class="text-blue-600 hover:text-blue-800 hover:underline">
+                        U.S. Census Bureau: County Business Patterns (CBP)
+                    </a>
+                </li>
+                <li>
+                    <strong>Economic Context:</strong> 
+                    <span class="text-gray-500">Federal Reserve Bank of New York - Regional Economic Analysis</span>
+                </li>
+                <li>
+                    <strong>Processed Data Files:</strong>
+                    <span class="text-gray-500 italic">municipios_cbp_establishments_2010_2023_wide.json</span>
+                </li>
+            </ul>
         </div>
       </section>
+
     </main>
   </div>
 
@@ -618,12 +634,12 @@
       
       // Nominal fields
       d2023.textContent = Number.isFinite(st?.val2023) ? fmt.format(st.val2023) : '—';
-      dChg.textContent  = st ? `${signed(st.nominalCumAbs)} (${pctFmt(st.nominalCumPct)})` : '—';
+      dChg.textContent  = st ? `${signed(st.nominalCumAbs)}` : '—';
       
       // Real Placeholder fields (show nominal values)
-      d2023Real.textContent = Number.isFinite(st?.realVal2023) ? fmt.format(st.realVal2023) : '—';
+      d2023Real.textContent = "";
       // Use the Nominal Change for the Placeholder display since the underlying JSON data is null
-      dChgReal.textContent  = st ? `${signed(st.nominalCumAbs)} (${pctFmt(st.nominalCumPct)})` : '—'; 
+      dChgReal.textContent  = ""; 
 
       dCenL.href = censusLink(name);
       drawCharts(name, st);
@@ -1050,28 +1066,14 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-      const metricsLink = document.querySelector('#metrics-dropdown-root > a');
-      const isMetricsSubPage = window.location.pathname.includes('/metrics/');
+      const currentPathname = window.location.pathname.split('/').pop();
+      const subPageLink = document.querySelector(`#metrics-menu a[href="${currentPathname}"]`);
+      if (subPageLink) subPageLink.classList.add('bg-gray-100','font-semibold');
 
-      if (isMetricsSubPage) {
-        metricsLink.classList.add('border-b-2', 'border-blue-600', 'text-blue-600', 'font-semibold');
-        metricsLink.setAttribute('aria-current', 'page');
-        
-        const currentPathname = window.location.pathname.split('/').pop();
-        const subPageLink = document.querySelector(`#metrics-menu a[href="${currentPathname}"]`);
-        if (subPageLink) {
-          subPageLink.classList.add('bg-gray-100', 'font-semibold');
-        }
-      } else {
-        document.querySelectorAll('.nav-link[href]').forEach(a => {
-          if (a.href.endsWith(window.location.pathname)) {
-            a.classList.add('border-b-2', 'border-blue-600', 'text-blue-600', 'font-semibold');
-            a.setAttribute('aria-current', 'page');
-          }
-        });
-      }
-      wireMapDropdown(); // Ensure the map dropdown is also wired up on DOMContentLoaded
-      initRadialMenu(); // Init Radial Menu
+      // Initialize the map dropdown handler
+      wireMapDropdown();
+      // Init Radial Menu
+      initRadialMenu();
     });
   </script>
 </body>
