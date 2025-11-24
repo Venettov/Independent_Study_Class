@@ -13,23 +13,19 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
   <style>
-    /* Card Styling */
     .card {
       background:#fff;
       border-radius:1rem;
       box-shadow:0 10px 15px -3px rgba(0,0,0,.1), 0 4px 6px -2px rgba(0,0,0,.05);
       overflow:visible;
     }
-    
-    /* Hero Background */
     .hero {
       background:
         radial-gradient(1200px 600px at 20% -10%, rgba(239,68,68,.12), transparent 60%),
         radial-gradient(1200px 600px at 80% -10%, rgba(37,99,235,.10), transparent 60%),
         linear-gradient(180deg, #fafafa 0%, #f3f4f6 100%);
     }
-
-    /* Map Height Controls */
+    /* Map IDs updated to target only map 1 */
     #map { height: 48vh; width: 100%; border-radius: .75rem; } 
     @media (min-width: 1280px) { #map { height: 46vh; } } 
     @media (max-width: 640px)  { #map { height: 54vh; } } 
@@ -44,7 +40,16 @@
       padding:5px 10px;
     }
 
-    /* Legend Styling */
+    .mini { min-height: 300px; } 
+    
+    /* Force canvas dimensions for Chart.js inside containers */
+    .mini canvas {
+        width: 100% !important;
+        height: 100% !important;
+        display: block;
+    }
+
+    /* UPDATED LEGEND CSS: Removed absolute positioning to let Leaflet control it */
     .leaflet-control-hu-legend {
         background: white;
         padding: 8px 10px;
@@ -53,13 +58,10 @@
         font: 12px/1.3 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
         width: 160px;
         margin-right: 10px;
-        margin-bottom: 25px;
+        margin-bottom: 25px; /* Spacing to avoid overlap with attribution */
     }
     
-    /* Scale Wrapper for Desktop Zoom Management */
-    #scale-wrapper {transform: scale(0.65); transform-origin: top center; height: 154%; padding-bottom: 200px; margin-bottom: -35%;}
-
-    /* Menu & Dropdown Styling */
+    /* Global wrappers/dropdowns remain unchanged */
     #metrics-menu {
       opacity: 0; visibility: hidden; transform: translateY(4px); pointer-events: none;
       transition: opacity .15s ease, transform .15s ease, visibility .15s ease;
@@ -72,8 +74,7 @@
     #metrics-dropdown-root.hovering #metrics-chevron {
       transform: rotate(180deg);
     }
-
-    /* Leaflet Map Dropdown */
+    #scale-wrapper {transform: scale(0.65); transform-origin: top center; height: 154%; padding-bottom: 200px; margin-bottom: -35%;}
     .leaflet-control-map-dropdown {padding: 0; margin-left: 45px; margin-top: 5px;}
     .leaflet-control-map-dropdown .dropdown-root {background: #fff; box-shadow: 0 1px 5px rgba(0,0,0,.65); border-radius: 4px; position: relative;}
     .leaflet-control-map-dropdown .nav-link {padding: 6px 10px; color: #333; font-weight: 500; font-size: 13px; line-height: 1.2; display: flex; align-items: center; gap: 4px; cursor: pointer;}
@@ -84,41 +85,93 @@
 
     /* --- RADIAL MENU STYLES --- */
     #radial-menu-container { pointer-events: none; width: 300px; height: 300px; position: fixed; bottom: 0; right: 0; z-index: 9999; }
+    
     #radial-trigger { pointer-events: auto; }
     
+    /* Radial Item Base State */
     .radial-item {
-        position: absolute; bottom: 7rem; right: 2rem;  
-        width: 3rem; height: 3rem; border-radius: 50%;
-        background-color: white; color: #4f46e5;
+        position: absolute;
+        bottom: 7rem;
+        right: 2rem;  
+        width: 3rem; height: 3rem;
+        border-radius: 50%;
+        background-color: white;
+        color: #4f46e5;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         display: flex; align-items: center; justify-content: center;
-        text-decoration: none; opacity: 0; pointer-events: none;
+        text-decoration: none;
+        opacity: 0;
+        pointer-events: none;
         transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
         z-index: 9990;
-        --tx: 0px; --ty: 0px; --lx: 0px; --ly: 0px; --lr: 0deg;
+
+        /* CSS Variables for position */
+        --tx: 0px;
+        --ty: 0px;
+        /* CSS Variables for Label Offset */
+        --lx: 0px;
+        --ly: 0px;
+        /* CSS Variable for Label Rotation */
+        --lr: 0deg;
+        
         transform: translate(0, 0) scale(0.5);
     }
-    .radial-open .radial-item { opacity: 1; pointer-events: auto; transform: translate(var(--tx), var(--ty)) scale(1); }
-    .radial-open .radial-item:hover { background-color: #e0e7ff; transform: translate(var(--tx), var(--ty)) scale(1.1); z-index: 10005 !important; }
     
+    /* Radial Item Open State */
+    .radial-open .radial-item {
+        opacity: 1;
+        pointer-events: auto;
+        transform: translate(var(--tx), var(--ty)) scale(1);
+    }
+
+    /* Radial Item Hover State */
+    .radial-open .radial-item:hover { 
+        background-color: #e0e7ff; 
+        transform: translate(var(--tx), var(--ty)) scale(1.1); 
+        z-index: 10005 !important; /* Stacking fix */
+    }
+    
+    /* UPDATED RADIAL LABEL STYLES */
     .radial-label {
-        position: absolute; left: 50%; top: 50%; 
+        position: absolute;
+        left: 50%; 
+        top: 50%; 
+        /* Move label radially outward based on calculations AND rotate */
         transform: translate(calc(-50% + var(--lx)), calc(-50% + var(--ly))) rotate(var(--lr));
         transform-origin: center center;
-        background: rgba(255, 255, 255, 0.95); color: black; 
-        padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 700;
-        white-space: nowrap; opacity: 0; transition: opacity 0.3s ease;
-        pointer-events: none; box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+        
+        /* Visual Styles: White bg, Black text */
+        background: rgba(255, 255, 255, 0.95); 
+        color: black; 
+        padding: 4px 8px; 
+        border-radius: 6px; 
+        font-size: 12px; 
+        font-weight: 700;
+        white-space: nowrap; 
+        
+        /* Visibility Control */
+        opacity: 0; 
+        transition: opacity 0.3s ease;
+        pointer-events: none;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.15);
     }
-    .radial-open .radial-label { opacity: 1; }
+    
+    /* Show ALL labels when menu is open */
+    .radial-open .radial-label { 
+        opacity: 1; 
+    }
 
     #radial-trigger {
         position: absolute; bottom: 7rem; right: 2rem;
-        width: 4rem; height: 4rem; border-radius: 50%;
-        background-color: #4f46e5; color: white;
+        width: 4rem; height: 4rem;
+        border-radius: 50%;
+        background-color: #4f46e5;
+        color: white;
         box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
         display: flex; align-items: center; justify-content: center;
-        cursor: pointer; transition: transform 0.3s ease; z-index: 10000;
+        cursor: pointer;
+        transition: transform 0.3s ease;
+        z-index: 10000;
     }
     #radial-trigger:hover { transform: scale(1.05); background-color: #4338ca; }
     .radial-open #radial-trigger { transform: rotate(45deg); background-color: #ef4444; }
@@ -168,7 +221,7 @@
               Population & Economic Dynamics in Puerto Rico
             </h1>
             <p class="mt-3 text-lg text-gray-700">
-              A graduate research project examining demographic shifts, out-migration, and sustainable development strategies.
+              A graduate research project examining demographic shifts, out-migration, and sustainable development strategies through linked data analysis and policy synthesis.
             </p>
             <div class="mt-5">
               <span class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-100 text-slate-800">
@@ -181,6 +234,13 @@
 
       <section class="card p-4">
         <h2 class="text-lg font-semibold mb-3">Hurricane Tracks (2015-2025) near Puerto Rico</h2>
+        <div class="flex items-center justify-between gap-3">
+          <div class="text-sm text-gray-700 font-medium">Map shading by</div>
+          <div class="flex items-center gap-2">
+            <div class="inline-flex rounded-lg border bg-white shadow-sm overflow-hidden">
+            </div>
+          </div>
+        </div>
         <div id="map" class="mt-3">
           <div class="leaflet-control-container" id="map-dropdown-container">
             <div class="leaflet-top leaflet-left">
@@ -216,16 +276,16 @@
         <h2 class="text-lg font-semibold mb-4">Hurricane Statistics (2015-2025)</h2>
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
             
-            <div class="relative w-full">
+            <div class="mini relative">
                 <h3 class="text-sm text-gray-500 font-medium mb-2 text-center">Storm Frequency by Year</h3>
-                <div class="h-80 w-full relative">
+                <div class="h-64 w-full">
                     <canvas id="chart-frequency"></canvas>
                 </div>
             </div>
 
-            <div class="relative w-full">
+            <div class="mini relative">
                 <h3 class="text-sm text-gray-500 font-medium mb-2 text-center">Top 10 Strongest Storms (Max Wind)</h3>
-                <div class="h-80 w-full relative">
+                <div class="h-64 w-full">
                     <canvas id="chart-intensity"></canvas>
                 </div>
             </div>
@@ -237,13 +297,46 @@
 
       <section class="card p-6 space-y-6">
         <h2 class="text-lg font-semibold">Analysis and Supporting Resources</h2>
+
         <div class="space-y-4">
-            <h3 class="text-base font-semibold text-gray-700">Hurricane Impact and Migration</h3>
-            <p>Puerto Rico is geographically exposed to frequent and severe tropical cyclones, triggering significant socioeconomic shifts and mass migration.</p>
+            <h3 class="text-base font-semibold text-gray-700">Hurricane Impact and Migration in Puerto Rico 🇵🇷</h3>
+            <p>
+                Puerto Rico is geographically exposed to frequent and severe <strong>tropical cyclones (hurricanes and tropical storms)</strong>, with impacts often triggering significant socioeconomic shifts, most notably mass migration.
+            </p>
+            
             <h4 class="text-sm font-semibold text-gray-600 mt-4">Socioeconomic and Infrastructural Impact:</h4>
             <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
-                <li>Major hurricanes inflict severe damage to infrastructure, including the electrical grid and housing.</li>
-                <li>Recovery is often slow, complicated by economic instability.</li>
+                <li>Major hurricanes inflict severe damage to the island's already fragile <strong>infrastructure</strong>, including the electrical grid, transportation networks, and housing stock.</li>
+                <li>The recovery process is often slow and complicated by existing <strong>economic instability</strong> and structural vulnerabilities.</li>
+                <li>The destruction leads to long-term <strong>service disruption</strong>, including prolonged power outages and limited access to essential medical and educational services.</li>
+            </ul>
+
+            <h4 class="text-sm font-semibold text-gray-600 mt-4">Disaster-Driven Migration:</h4>
+            <p>
+                Hurricanes serve as significant accelerators of pre-existing <strong>migration trends</strong> from Puerto Rico to the U.S. mainland. The displacement caused by severe storms is often permanent, transforming the migration pattern from economic necessity to survival:
+            </p>
+            <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
+                <li>Following <strong>Hurricane Maria in 2017</strong>, Puerto Rico experienced one of the largest <strong>mass displacement events</strong> in recent U.S. history, with hundreds of thousands of residents relocating, primarily to Florida and other eastern states.</li>
+                <li>Migration rates accelerate sharply in the years immediately following major storms, driven by the loss of homes, lack of <strong>job opportunities</strong>, and the realization that rebuilding will take years.</li>
+                <li>This outward migration results in a <strong>long-term decline in the tax base and population</strong>, challenging the island’s ability to recover economically and manage its debt.</li>
+            </ul>
+        </div>
+        
+        <div class="space-y-2 text-sm text-gray-600">
+            <h4 class="font-semibold">Research References:</h4>
+            <ul class="list-disc list-inside ml-4 space-y-1">
+                <li>
+                    <strong>Migration and Demographic Shifts:</strong> 
+                    <a href="#" target="_blank" class="text-blue-600 hover:text-blue-800 hover:underline">Center for Puerto Rican Studies (CUNY) research on post-Maria migration trends.</a>
+                </li>
+                <li>
+                    <strong>Hurricane Risk and Climate Vulnerability:</strong> 
+                    <a href="#" target="_blank" class="text-blue-600 hover:text-blue-800 hover:underline">General NOAA/NHC data on tropical cyclone exposure in the Caribbean.</a>
+                </li>
+                <li>
+                    <strong>Disaster Recovery Portal:</strong> 
+                    <a href="#" target="_blank" class="text-blue-600 hover:text-blue-800 hover:underline">Puerto Rico Disaster Recovery Transparency Portal (COR3) for economic impact data.</a>
+                </li>
             </ul>
         </div>
       </section>
@@ -270,12 +363,16 @@
 
   <script>
     // ---------------------- Data Paths ----------------------
+    // Ensure this path is correct relative to your HTML file location
     const HU_JSON = '../data/natural_disasters/caribbean_hurricane_tracks_2015_2025.json'; 
-    const HU_WIND_BREAKS = [34, 64, 83, 96, 113]; 
-    const HU_COLORS = ['#a3a3a3', '#3b82f6', '#fde047', '#fb923c', '#dc2626', '#991b1b']; 
-
+    
+    let hurricaneLayerGroup = null; 
     let map;
-    let hurricaneLayerGroup = null;
+    
+    // ---------------------- Hurricane Plotting Logic ----------------------
+
+    const HU_WIND_BREAKS = [34, 64, 83, 96, 113]; // Knots (TS, HU1, HU2, HU3, HU4/5)
+    const HU_COLORS = ['#a3a3a3', '#3b82f6', '#fde047', '#fb923c', '#dc2626', '#991b1b']; 
 
     function getTrackColor(wind) {
         if (wind < HU_WIND_BREAKS[0]) return HU_COLORS[0];
@@ -294,49 +391,74 @@
             if (wind < 113) return 'Hurricane Cat 3';
             return 'Hurricane Cat 4+';
         }
-        return status;
+        if (status === 'DB') return 'Tropical Disturbance';
+        if (status === 'TD') return 'Tropical Depression';
+        if (status === 'SS') return 'Subtropical Storm';
+        if (status === 'SD') return 'Subtropical Depression';
+        if (status === 'LO') return 'Low';
+        if (status === 'WV') return 'Tropical Wave';
+        return 'Other'; 
     }
 
     function plotHurricaneTracks(data, mapInstance) {
-        if (!data || data.length === 0) return;
-        if (hurricaneLayerGroup) hurricaneLayerGroup.clearLayers();
-        else hurricaneLayerGroup = L.layerGroup().addTo(mapInstance);
+        if (!data || data.length === 0) {
+            console.warn("Hurricane data is empty or failed to load. Check console for fetch errors (404).");
+            return;
+        }
+
+        if (hurricaneLayerGroup) {
+            hurricaneLayerGroup.clearLayers();
+        } else {
+            hurricaneLayerGroup = L.layerGroup().addTo(mapInstance);
+        }
 
         data.forEach(storm => {
-            if (!storm.path) return;
             const latlons = storm.path.map(p => [p.lat, p.lon]);
             const pathData = storm.path;
             const stormName = storm.name;
 
-            L.polyline(latlons, { color: '#333', weight: 3.0, opacity: 0.6 }).addTo(hurricaneLayerGroup);
+            // 1. Draw the polylines
+            L.polyline(latlons, { 
+                color: '#333', 
+                weight: 3.0, 
+                opacity: 0.6 
+            }).addTo(hurricaneLayerGroup);
 
+            // 2. Draw the markers for each point
             pathData.forEach(p => {
-                const wind_knots = Number(p.wind); // Force number
+                const wind_knots = p.wind;
                 const color = getTrackColor(wind_knots);
                 const statusLabel = getStatusLabel(wind_knots, p.status);
-                // Safe date formatting
-                const dateStr = String(p.date || "00000000");
-                const formattedDate = dateStr.length >= 8 
-                    ? dateStr.replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3') 
-                    : dateStr;
+                const date = p.date.replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3');
 
                 L.circleMarker([p.lat, p.lon], {
-                    radius: 6.0, fillColor: color, color: '#000', weight: 0.5, opacity: 0.9, fillOpacity: 0.9
+                    radius: 6.0, 
+                    fillColor: color, 
+                    color: '#000', 
+                    weight: 0.5,
+                    opacity: 0.9,
+                    fillOpacity: 0.9
                 }).bindPopup(`
-                    <strong>${stormName} - ${statusLabel}</strong><br>
-                    Date: ${formattedDate}<br>
-                    Wind: ${wind_knots} knots<br>
+                    <strong>${stormName} - ${statusLabel} (${p.status})</strong>
+                    <br>Date: ${date}
+                    <br>Wind: ${wind_knots} knots (${(wind_knots * 1.15078).toFixed(0)} mph)
+                    <br>Location: ${p.lat.toFixed(2)}N, ${p.lon.toFixed(2)}W
                 `).addTo(hurricaneLayerGroup);
             });
         });
+        
         hurricaneLayerGroup.bringToFront();
+        console.log("✅ Hurricane tracks plotted successfully.");
     }
 
     function renderHurricaneLegend(map){
         const div = document.createElement('div');
+        // FIX: Added standard leaflet control class
         div.className = 'leaflet-control leaflet-control-hu-legend'; 
+        
         const title = 'Hurricane Track Wind Status (knots)';
         let html = `<div style="font-weight:600;margin-bottom:5px; border-bottom: 1px solid #ccc;">${title}</div>`;
+
         const legendItems = [
             { label: '&le; 33 knots (TD/Other)', color: HU_COLORS[0] }, 
             { label: '34-63 knots (TS)', color: HU_COLORS[1] },
@@ -345,93 +467,102 @@
             { label: '96-112 knots (HU Cat 3)', color: HU_COLORS[4] },
             { label: '&ge; 113 knots (HU Cat 4/5)', color: HU_COLORS[5] }
         ];
+
         legendItems.forEach(item => {
-            html += `<div style="display:flex;align-items:center;gap:8px;margin:4px 0;">
+            html += `
+                <div style="display:flex;align-items:center;gap:8px;margin:4px 0;">
                     <div style="width:12px;height:12px;border-radius:50%;background:${item.color};border:1px solid #000;box-shadow:0 1px 2px rgba(0,0,0,.1);"></div>
-                    <span>${item.label}</span></div>`;
+                    <span>${item.label}</span>
+                </div>
+            `;
         });
+        
         div.innerHTML = html;
+
         L.Control.HurricaneLegend = L.Control.extend({
-            onAdd: function(map) { L.DomEvent.disableClickPropagation(div); return div; },
+            onAdd: function(map) {
+                // Prevent clicks on legend from zooming map
+                L.DomEvent.disableClickPropagation(div);
+                return div;
+            },
             onRemove: function(map) {}
         });
+        
         new L.Control.HurricaneLegend({position: 'bottomright'}).addTo(map);
     }
     
-    // ---------------------- UPDATED CHART LOGIC ----------------------
+    // ---------------------- Chart Plotting Logic ----------------------
     function renderCharts(data) {
         if (!data || data.length === 0) return;
-        
-        console.log("Rendering charts with data:", data.length, "storms");
 
         const yearCounts = {};
         const intensityData = [];
 
         data.forEach(storm => {
+            // SAFETY CHECK: Ensure path is not empty to prevent crash
             if (!storm.path || storm.path.length === 0) return;
 
-            // Robust Year Extraction: Iterate path until we find a date
-            let year = "Unknown";
-            for(let p of storm.path) {
-                if (p.date) {
-                    year = String(p.date).substring(0, 4);
-                    break;
-                }
-            }
-            if(year !== "Unknown") {
-                yearCounts[year] = (yearCounts[year] || 0) + 1;
-            }
+            // Get Year
+            const year = storm.path[0].year;
+            yearCounts[year] = (yearCounts[year] || 0) + 1;
 
-            // Robust Max Wind Calculation
-            const maxWind = Math.max(...storm.path.map(p => Number(p.wind) || 0));
-            if (maxWind > 0) {
-                intensityData.push({ name: storm.name + ` (${year})`, wind: maxWind });
-            }
+            // Get Max Wind
+            const maxWind = Math.max(...storm.path.map(p => p.wind));
+            intensityData.push({
+                name: storm.name + ` (${year})`,
+                wind: maxWind
+            });
         });
 
-        // 1. Frequency Chart
+        // Prepare Frequency Chart Data
         const years = Object.keys(yearCounts).sort();
         const counts = years.map(y => yearCounts[y]);
+
+        // Prepare Intensity Chart Data (Sort descending and take top 10)
+        intensityData.sort((a, b) => b.wind - a.wind);
+        const top10 = intensityData.slice(0, 10);
         
-        const freqCanvas = document.getElementById('chart-frequency');
-        if(freqCanvas) {
-            new Chart(freqCanvas.getContext('2d'), {
+        // --- Render Chart 1: Frequency ---
+        const ctxFreq = document.getElementById('chart-frequency');
+        if(ctxFreq) {
+            new Chart(ctxFreq.getContext('2d'), {
                 type: 'bar',
                 data: {
                     labels: years,
                     datasets: [{
                         label: 'Number of Storms',
                         data: counts,
-                        backgroundColor: '#3b82f6',
-                        borderRadius: 4
+                        backgroundColor: '#3b82f6', // Blue-500
+                        borderRadius: 4,
+                        hoverBackgroundColor: '#2563eb'
                     }]
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false, // Important!
+                    maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
-                    scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+                    scales: {
+                        y: { beginAtZero: true, ticks: { stepSize: 1 }, title: { display: true, text: 'Count' } }
+                    }
                 }
             });
         }
 
-        // 2. Intensity Chart
-        const intCanvas = document.getElementById('chart-intensity');
-        if(intCanvas) {
-            intensityData.sort((a, b) => b.wind - a.wind);
-            const top10 = intensityData.slice(0, 10);
-            
+        // --- Render Chart 2: Intensity (Top 10) ---
+        const ctxInt = document.getElementById('chart-intensity');
+        if(ctxInt) {
+            // Helper to color bars based on category
             const getBarColor = (val) => {
-                if(val >= 113) return '#991b1b'; 
-                if(val >= 96)  return '#dc2626'; 
-                if(val >= 83)  return '#fb923c'; 
-                if(val >= 64)  return '#fde047'; 
-                return '#3b82f6'; 
+                if(val >= 113) return '#991b1b'; // Cat 4/5
+                if(val >= 96)  return '#dc2626'; // Cat 3
+                if(val >= 83)  return '#fb923c'; // Cat 2
+                if(val >= 64)  return '#fde047'; // Cat 1
+                return '#3b82f6'; // TS and below
             };
             
-            new Chart(intCanvas.getContext('2d'), {
+            new Chart(ctxInt.getContext('2d'), {
                 type: 'bar',
-                indexAxis: 'y', 
+                indexAxis: 'y', // Horizontal Bar Chart
                 data: {
                     labels: top10.map(d => d.name),
                     datasets: [{
@@ -443,40 +574,64 @@
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false, // Important!
+                    maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
-                    scales: { x: { beginAtZero: true } }
+                    scales: {
+                        x: { beginAtZero: true, title: { display: true, text: 'Wind Speed (knots)' } }
+                    }
                 }
             });
         }
     }
     
-    // Dropdown Logic
+    // ---------------------- Unused Logic Stubs ----------------------
+    const FIXED_GREEN_COLOR = '#22c55e';
+
+    function styleForFeature(feature){
+      return { fillColor: FIXED_GREEN_COLOR, weight: 1.2, color:'#111827', fillOpacity:.75 };
+    }
+    let _rows = []; 
+    function calculateExtremeValues(){}
+    function computeBreaks(){}
+    function wireMetricToggle(){}
+    function wireClearSelection(){}
+    // ---------------------- End Unused Logic Stubs ----------------------
+    
+    // Dropdown wiring
     function wireDropdown() {
         const root = document.getElementById('metrics-dropdown-root');
         if (!root) return;
-        const menu = document.getElementById('metrics-menu');
         let hoverTimeout;
-        const add = () => { clearTimeout(hoverTimeout); root.classList.add('hovering'); };
-        const remove = () => { hoverTimeout = setTimeout(()=>root.classList.remove('hovering'), 500); };
-        root.addEventListener('mouseenter', add);
-        root.addEventListener('mouseleave', remove);
-        if (menu) { menu.addEventListener('mouseenter', add); menu.addEventListener('mouseleave', remove); }
+        const menu = document.getElementById('metrics-menu');
+
+        function addHovering(){ clearTimeout(hoverTimeout); root.classList.add('hovering'); } 
+        function removeHovering(){ hoverTimeout = setTimeout(()=>root.classList.remove('hovering'), 500); }
+
+        root.addEventListener('mouseenter', addHovering);
+        root.addEventListener('mouseleave', removeHovering);
+        if (menu) {
+          menu.addEventListener('mouseenter', addHovering);
+          menu.addEventListener('mouseleave', removeHovering);
+        }
     }
+
     function wireMapDropdown() {
-        const root = document.getElementById('map-selection-dropdown-root'); 
-        if (root) { 
-            const menu = document.getElementById('map-selection-menu');
+        const root1 = document.getElementById('map-selection-dropdown-root'); 
+        if (root1) { 
             let hoverTimeout;
-            const add = () => { clearTimeout(hoverTimeout); root.classList.add('hovering'); };
-            const remove = () => { hoverTimeout = setTimeout(()=>{ root.classList.remove('hovering'); }, 500); };
-            root.addEventListener('mouseenter', add);
-            root.addEventListener('mouseleave', remove); 
-            if (menu) { menu.addEventListener('mouseenter', add); menu.addEventListener('mouseleave', remove); }
+            const menu = document.getElementById('map-selection-menu');
+            function addHovering(){ clearTimeout(hoverTimeout); root1.classList.add('hovering'); } 
+            function removeHovering(){ hoverTimeout = setTimeout(()=>{ root1.classList.remove('hovering'); }, 500); }
+            root1.addEventListener('mouseenter', addHovering);
+            root1.addEventListener('mouseleave', removeHovering); 
+            if (menu) {
+              menu.addEventListener('mouseenter', addHovering);
+              menu.addEventListener('mouseleave', removeHovering);
+            }
         }
     }
     
-    // Radial Menu Logic
+    // --- RADIAL MENU LOGIC ---
     const menuItems = [
         { label: 'Population', href: 'population.html', icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z' },
         { label: 'Employment Rate', href: 'employment.html', icon: 'M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z' },
@@ -492,14 +647,23 @@
     function initRadialMenu() {
         const container = document.getElementById('radial-menu-container');
         const trigger = document.getElementById('radial-trigger');
-        const totalAngle = 100; const radius = 180; const count = menuItems.length; const startAngle = -95; const step = totalAngle / (count - 1);
+        
+        const totalAngle = 100; // Degrees of spread
+        const radius = 180; // Distance from center
+        const count = menuItems.length;
+        const startAngle = -95; // Top (12 o'clock ish)
+        const step = totalAngle / (count - 1);
 
         menuItems.forEach((item, index) => {
             const angleDeg = startAngle - (step * index); 
             const angleRad = angleDeg * (Math.PI / 180);
+            
+            // Icon coordinates
             const x = Math.round(radius * Math.cos(angleRad));
             const y = Math.round(radius * Math.sin(angleRad));
-            const textGap = 75; 
+
+            // Label coordinates (offset further out for "red line" effect)
+            const textGap = 75; // Distance from icon center to text
             const lx = Math.round(textGap * Math.cos(angleRad));
             const ly = Math.round(textGap * Math.sin(angleRad));
 
@@ -507,58 +671,125 @@
             el.href = item.href;
             el.className = 'radial-item';
             el.style.transitionDelay = `${index * 0.03}s`;
-            el.style.setProperty('--tx', `${x}px`); el.style.setProperty('--ty', `${y}px`);
-            el.style.setProperty('--lx', `${lx}px`); el.style.setProperty('--ly', `${ly}px`);
-            el.style.setProperty('--lr', `${angleDeg + 180}deg`); 
+            
+            // Store coordinates in CSS variables on the element
+            el.style.setProperty('--tx', `${x}px`);
+            el.style.setProperty('--ty', `${y}px`);
+            el.style.setProperty('--lx', `${lx}px`);
+            el.style.setProperty('--ly', `${ly}px`);
+            el.style.setProperty('--lr', `${angleDeg + 180}deg`); // Rotate text
 
-            el.innerHTML = `<span class="radial-label">${item.label}</span>
+            el.innerHTML = `
+                <span class="radial-label">${item.label}</span>
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${item.icon}" />
-                </svg>`;
+                </svg>
+            `;
             container.insertBefore(el, trigger);
         });
     }
-    function toggleRadialMenu() { document.getElementById('radial-menu-container').classList.toggle('radial-open'); }
+
+    function toggleRadialMenu() {
+        const container = document.getElementById('radial-menu-container');
+        // Simply toggle class - CSS variables handle the positioning now
+        container.classList.toggle('radial-open');
+    }
     
-    // Main Init
     (async function init(){
-      const GEOJSON_URL = '../data/tl_2022_72_cousub/pr_municipalities.geojson'; 
+      const GEOJSON_URL_PATH = '../data/tl_2022_72_cousub/pr_municipalities.geojson'; 
+
+      let geojsonData;
+      try {
+        const gjRes = await fetch(GEOJSON_URL_PATH + '?' + Date.now());
+        geojsonData = await gjRes.json(); 
+      } catch (e) {
+        console.error("Failed to load GeoJSON data.");
+      }
+
       const prBounds = L.latLngBounds([[17.85, -67.45],[18.55, -65.25]]);
       
+      // --- Map Init (Choropleth + Hurricane Tracks) ---
       map = L.map('map', { zoomControl: false, zoomSnap: .25 }).fitBounds(prBounds);
-      L.control.zoom({ position: 'topleft' }).addTo(map);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap', minZoom: 7, maxZoom: 19 }).addTo(map);
 
+      L.control.zoom({ position: 'topleft' }).addTo(map);
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors',
+        minZoom: 7, maxZoom: 19
+      }).addTo(map);
+
+      // Initialize the map dropdown control
       L.Control.MapDropdown = L.Control.extend({
           onAdd: function(map) {
-              const c = L.DomUtil.get('map-dropdown-container');
-              L.DomEvent.disableClickPropagation(c); L.DomEvent.disableScrollPropagation(c);
-              return c.querySelector('.leaflet-control-map-dropdown');
-          }, onRemove: function(map) {}
+              const container = L.DomUtil.get('map-dropdown-container');
+              L.DomEvent.disableClickPropagation(container);
+              L.DomEvent.disableScrollPropagation(container);
+              return container.querySelector('.leaflet-control-map-dropdown');
+          },
+          onRemove: function(map) {}
       });
       new L.Control.MapDropdown({ position: 'topleft' }).addTo(map);
 
-      try {
-        const gjRes = await fetch(GEOJSON_URL);
-        const geojsonData = await gjRes.json(); 
-        L.geoJSON(geojsonData, {
-          style: { fillColor: '#22c55e', weight: 1.2, color:'#111827', fillOpacity:.75 },
-          onEachFeature: (f, lyr) => { lyr.bindPopup(`<strong>${f.properties.NAME}</strong>`); }
+      if (geojsonData) {
+        let fc = geojsonData; 
+        let layer = L.geoJSON(fc, {
+          style: (feature) => styleForFeature(feature),
+          onEachFeature: (f, lyr) => {
+            lyr.bindPopup(`<strong>${f.properties.NAME || 'Unknown'}</strong>`);
+            lyr.bindTooltip(f.properties.NAME || 'Unknown', { direction:'center', className:'leaflet-tooltip' });
+          }
         }).addTo(map);
-      } catch (e) { console.warn("GeoJSON failed", e); }
 
-      try {
-          const huRes = await fetch(HU_JSON);
-          const fullHurricaneData = await huRes.json();
-          plotHurricaneTracks(fullHurricaneData, map);
-          renderHurricaneLegend(map);
-          renderCharts(fullHurricaneData); // <--- Charts called here
-      } catch (e) {
-          console.error("Hurricane Data Error:", e);
+        const b = layer.getBounds();
+        if (b.isValid()) map.fitBounds(b, { padding:[15,15] });
       }
 
-      wireDropdown(); wireMapDropdown(); initRadialMenu(); 
+      // --- DATA LOADING AND PLOTTING ---
+      let fullHurricaneData = [];
+      try {
+          const huRes = await fetch(HU_JSON);
+          fullHurricaneData = await huRes.json();
+      } catch (e) {
+          console.error("Error loading or processing hurricane data:", HU_JSON, e);
+      }
+      
+      // Plot tracks + legend
+      plotHurricaneTracks(fullHurricaneData, map);
+      renderHurricaneLegend(map);
+      
+      // Render Statistical Charts (New Call)
+      renderCharts(fullHurricaneData);
+
+      wireMetricToggle();
+      wireClearSelection(); 
+      wireDropdown(); 
+      wireMapDropdown(); 
+      
+      // REMOVED: initRadialMenu(); from here to ensure it runs even if data load fails
     })();
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const metricsLink = document.querySelector('#metrics-dropdown-root > a');
+        const isMetricsSubPage = window.location.pathname.includes('/metrics/');
+        if (isMetricsSubPage) {
+            metricsLink.classList.add('border-b-2', 'border-blue-600', 'text-blue-600', 'font-semibold');
+            metricsLink.setAttribute('aria-current', 'page');
+            const currentPathname = window.location.pathname.split('/').pop();
+            const subPageLink = document.querySelector(`#metrics-menu a[href="${currentPathname}"]`);
+            if (subPageLink) { subPageLink.classList.add('bg-gray-100', 'font-semibold'); }
+        } else {
+            document.querySelectorAll('.nav-link[href]').forEach(a => {
+                if (a.href.endsWith(window.location.pathname)) {
+                    a.classList.add('border-b-2', 'border-blue-600', 'text-blue-600', 'font-semibold');
+                    a.setAttribute('aria-current', 'page');
+                }
+            });
+        }
+        wireMapDropdown(); 
+        
+        // ADDED: Init Radial Menu here for reliability
+        initRadialMenu(); 
+    });
   </script>
 </body>
 </html>
