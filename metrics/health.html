@@ -231,7 +231,7 @@
       <a href="../index.html"   class="nav-link border-b-2 border-transparent">Home</a>
 
       <div class="relative" id="metrics-dropdown-root">
-        <a href="../metrics.html" class="nav-link border-b-2 border-transparent inline-flex items-center gap-1 cursor-pointer select-none">
+        <a href="../metrics.html" class="nav-link border-b-2 border-blue-600 text-blue-600 font-semibold inline-flex items-center gap-1 cursor-pointer select-none" aria-current="page">
           Metrics
           <svg id="metrics-chevron" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 transition-transform" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
             <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.24 4.5a.75.75 0 01-1.08 0l-4.24-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/>
@@ -376,44 +376,62 @@
               <canvas id="compareChart"></canvas>
           </div>
         </div>
-        <div class="mt-10 pt-6 border-t border-gray-200">
-            <h3 class="text-xl font-semibold mb-3">Understanding the Health Coverage Trend</h3>
-            <p class="text-gray-700 text-base">
-                The striking, massive drop in the uninsured rate shown between 2014 and 2015 is not solely a reflection of real-world improvement. It is a combination of two major factors:
+      </section>
+
+      <!-- ANALYSIS AND SUPPORTING RESOURCES (REPLACED FILE SOURCES) -->
+      <section class="card p-6 space-y-6">
+        <h2 class="text-lg font-semibold">Analysis and Supporting Resources</h2>
+
+        <div class="space-y-4">
+            <h3 class="text-base font-semibold text-gray-700">Public Coverage Expansion & Volatility 🏥</h3>
+            <p>
+                The trajectory of health coverage in Puerto Rico is defined by a massive structural shift around 2014–2015, followed by a period of low but volatile uninsured rates.
             </p>
-            <ul class="list-disc list-inside space-y-2 text-sm text-gray-700 mt-3 ml-4">
-                <li>
-                    <strong>Policy Effect:</strong> The implementation of the <strong>Affordable Care Act (ACA)</strong> and the corresponding expansion of government-funded healthcare (*Mi Salud*) in Puerto Rico dramatically increased public coverage, moving a large uninsured population into the insured category.
-                </li>
-                <li>
-                    <strong>Data Discontinuity:</strong> The drop was <strong>amplified by a major methodological change</strong> in the U.S. Census Bureau's American Community Survey (ACS) starting in 2015. New, clearer questions were introduced that effectively captured public health insurance enrollment, whereas previous surveys often missed this information, leading to an artificially high "uninsured" rate before 2015.
-                </li>
-            </ul>
             
-            <h3 class="text-xl font-semibold mt-6 mb-3">Analyzing Post-2015 Volatility</h3>
-            <p class="text-gray-700 text-base">
-                Since 2015, the uninsured rate has stabilized in the low single digits (4%–8%). However, the annual bar chart shows high volatility—small changes in this low rate result in noticeable positive or negative absolute percentage point swings. This suggests that the remaining uninsured population is <strong>highly susceptible to local economic shocks and mobility</strong>:
+            <h4 class="text-sm font-semibold text-gray-600 mt-4">The ACA & Data Discontinuity Effect:</h4>
+            <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
+                <li>The dramatic drop in the uninsured rate between 2014 and 2015 was driven by the implementation of the <strong>Affordable Care Act (ACA)</strong> and the expansion of the local public option (*Plan Vital* / *Mi Salud*).</li>
+                <li>Simultaneously, the U.S. Census Bureau improved its survey methodology in 2015 to better capture public coverage, correcting previous undercounts.</li>
+            </ul>
+
+            <h4 class="text-sm font-semibold text-gray-600 mt-4">Post-2015 Stability and Shocks:</h4>
+            <p>
+                Since 2015, the uninsured rate has remained in the low single digits (4%–8%). However, year-to-year volatility remains due to:
             </p>
-            <ul class="list-disc list-inside space-y-2 text-sm text-gray-700 mt-3 ml-4">
+            <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
+                <li><strong>Economic Shocks:</strong> Hurricane Maria (2017) and the pandemic caused temporary disruptions in employer-sponsored coverage, shifting more residents onto public plans or leaving them briefly uninsured.</li>
+                <li><strong>Migration:</strong> High mobility among the working-age population creates fluctuations in the small remaining pool of uninsured residents.</li>
+            </ul>
+        </div>
+        
+        <div class="space-y-2 text-sm text-gray-600">
+            <h4 class="font-semibold">Research References:</h4>
+            <ul class="list-disc list-inside ml-4 space-y-1">
                 <li>
-                    <strong>Small Denominator Effect:</strong> Because the rate is so low, minor shifts in the number of uninsured individuals (the numerator) or the population (the denominator) can exaggerate the apparent percentage point change.
+                    <strong>Health Insurance Data:</strong> 
+                    <a href="https://data.census.gov/table?q=S2701:+HEALTH+INSURANCE+COVERAGE+STATUS+Puerto+Rico" target="_blank" rel="noopener" class="text-blue-600 hover:text-blue-800 hover:underline">
+                        ACS Table S2701: Health Insurance Coverage Status
+                    </a>
                 </li>
                 <li>
-                    <strong>Economic and Migration Shocks:</strong> Post-2017 (Hurricane Maria) and during the COVID-19 pandemic, sudden job losses, business closures, and high migration rates created rapid, temporary shifts in employer-provided and public coverage, causing the year-to-year swings seen in the municipal data.
+                    <strong>Public Health Context:</strong> 
+                    <span class="text-gray-500">Puerto Rico Department of Health (Departamento de Salud) & CMS Medicaid & CHIP Scorecard.</span>
                 </li>
                 <li>
-                    <strong>Hard-to-Reach Population:</strong> The population remaining uninsured tends to be complex—often young, highly mobile, or self-employed—making their rate difficult to measure precisely and highly sensitive to local economic events.
+                    <strong>Processed Data Files:</strong>
+                    <span class="text-gray-500 italic">municipios_acs_health_2013_2023_wide.json</span>
                 </li>
             </ul>
         </div>
-        </section>
+      </section>
+
     </main>
   </div>
 
   <div class="fixed bottom-8 right-8 z-[9998]">
     <a href="../metrics.html" class="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-4 rounded-full shadow-2xl transition transform hover:scale-105 font-bold text-lg no-underline">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
         </svg>
         Metrics Overview
     </a>
@@ -1136,6 +1154,7 @@
         });
       }
       wireMapDropdown(); // Ensure the map dropdown is also wired up on DOMContentLoaded
+      initRadialMenu(); // Init Radial Menu
     });
   </script>
 </body>
