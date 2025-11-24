@@ -403,33 +403,53 @@
         </div>
         </section>
 
-      <section class="card p-6">
-        <h2 class="text-lg font-semibold mb-4">File Sources</h2>
-        <div class="space-y-4">
-          <p>Data for this project was derived from the U.S. Census Bureau:</p>
-          <ul class="list-disc list-inside space-y-1">
-            <li>
-              <a href="https://data.census.gov/cedsci/table?g=0400000US72&tid=ACSST5Y2023.S1901"
-                target="_blank" rel="noopener" class="text-blue-600 underline">
-                2023 ACS 5-Year Estimates - Median Household Income (Table S1901)
-              </a>
-            </li>
-            <li>
-              <a href="https://wwwcensus.gov/data/tables/time-series/demo/popest/intercensal-2010-2020-puerto-rico-municipios.html"
-                target="_blank" rel="noopener" class="text-gray-600">
-                (Original file source for municipal boundaries/GeoJSON remains valid)
-              </a>
-            </li>
-          </ul>
+      <!-- ANALYSIS AND SUPPORTING RESOURCES (REPLACED FILE SOURCES) -->
+      <section class="card p-6 space-y-6">
+        <h2 class="text-lg font-semibold">Analysis and Supporting Resources</h2>
 
-          <p>Specific files used:</p>
-          <ul class="list-disc list-inside">
-            <li>municipios_acs_s1901_median_income_2010_2023_wide.json (site build)</li>
-            <li>municipios_acs_s1901_median_income_2010_2023_wide.csv (analysis)</li>
-            <li>prm-est2020int-pop-72.xlsx (2010–2020 intercensal)</li>
-          </ul>
+        <div class="space-y-4">
+            <h3 class="text-base font-semibold text-gray-700">Economic Reality: Nominal Gains vs. Real Purchasing Power 📉</h3>
+            <p>
+                The charts presented above highlight a critical disconnect in Puerto Rico's economic recovery. While <strong>nominal income</strong> has consistently trended upward since 2010—giving the appearance of economic growth—the <strong>real income (inflation-adjusted)</strong> metrics tell a story of stagnation and volatility.
+            </p>
+            
+            <h4 class="text-sm font-semibold text-gray-600 mt-4">Inflationary Pressure:</h4>
+            <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
+                <li>Although households are earning more dollars today than a decade ago, the cost of living (driven by global inflation, energy costs, and Jones Act shipping premiums) has risen at a comparable or faster rate in many years.</li>
+                <li>The "Real Annual % Change" chart frequently dips into negative territory, indicating years where the average Puerto Rican family actually lost purchasing power despite receiving a pay raise.</li>
+            </ul>
+
+            <h4 class="text-sm font-semibold text-gray-600 mt-4">Impact on Migration:</h4>
+            <p>
+                This stagnation in real wages serves as a powerful "push factor" for <strong>out-migration</strong>. When local wages fail to keep pace with the rising cost of essential goods, working-age professionals are incentivized to relocate to the U.S. mainland, where purchasing power parity is often more favorable. This dynamic exacerbates the island's population decline and labor shortages.
+            </p>
+        </div>
+        
+        <div class="space-y-2 text-sm text-gray-600">
+            <h4 class="font-semibold">Research References:</h4>
+            <ul class="list-disc list-inside ml-4 space-y-1">
+                <li>
+                    <strong>Median Household Income Data:</strong> 
+                    <a href="https://data.census.gov/cedsci/table?g=0400000US72&tid=ACSST5Y2023.S1901" target="_blank" rel="noopener" class="text-blue-600 hover:text-blue-800 hover:underline">
+                        2023 ACS 5-Year Estimates - Median Household Income (Table S1901)
+                    </a>
+                </li>
+                <li>
+                    <strong>Municipal Boundaries:</strong> 
+                    <span class="text-gray-500">U.S. Census Bureau (TIGER/Line Shapefiles)</span>
+                </li>
+                <li>
+                    <strong>Inflation Adjustments:</strong> 
+                    <span class="text-gray-500">Bureau of Labor Statistics (CPI-U) used for Real Income calculations.</span>
+                </li>
+                <li>
+                    <strong>Processed Data Files:</strong>
+                    <span class="text-gray-500 italic">municipios_acs_s1901_median_income_2010_2023_wide.json</span>
+                </li>
+            </ul>
         </div>
       </section>
+
     </main>
   </div>
 
