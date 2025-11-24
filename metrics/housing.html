@@ -41,7 +41,7 @@
 
     .mini { min-height: 260px; }
 
-    /* Dropdown show-on-hover */
+    /* --- Dropdown base state & transitions (Main Nav) --- */
     #metrics-menu {
       opacity: 0; visibility: hidden; transform: translateY(4px);
       pointer-events: none;
@@ -354,25 +354,54 @@
         </div>
       </section>
 
-      <section class="card p-6">
-        <h2 class="text-lg font-semibold mb-4">File Sources</h2>
-        <div class="space-y-4">
-          <p>Data for this project was derived from the U.S. Census Bureau:</p>
-          <ul class="list-disc list-inside space-y-1">
-            <li>
-              <a href="https://data.census.gov/cedsci/table?q=B25001%3A%20HOUSING%20UNITS&g=0400000US72&tid=ACSDT5Y2023.B25001"
-                target="_blank" rel="noopener" class="text-blue-600 underline">
-                ACS 5-Year Detailed Table B25001 (Total Housing Units)
-              </a>
-            </li>
-          </ul>
+      <!-- ANALYSIS AND SUPPORTING RESOURCES (REPLACED FILE SOURCES) -->
+      <section class="card p-6 space-y-6">
+        <h2 class="text-lg font-semibold">Analysis and Supporting Resources</h2>
 
-          <p>Specific files used:</p>
-          <ul class="list-disc list-inside">
-            <li>municipios_acs_housing_2013_2023_wide.json (site build)</li>
-          </ul>
+        <div class="space-y-4">
+            <h3 class="text-base font-semibold text-gray-700">Housing Market Contraction & Resilience 🏠</h3>
+            <p>
+                The trajectory of housing units in Puerto Rico reflects the complex interplay between demographic shifts and the physical toll of natural disasters. The data from 2013 to 2023 illustrates how external shocks have impacted the island's habitable stock.
+            </p>
+            
+            <h4 class="text-sm font-semibold text-gray-600 mt-4">The Post-Maria Landscape:</h4>
+            <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
+                <li>The data frequently shows fluctuations corresponding to the widespread destruction caused by <strong>Hurricane Maria (2017)</strong> and the <strong>2020 Earthquakes</strong> (particularly in the southwest). These events permanently removed thousands of units from the active housing stock.</li>
+                <li>Reconstruction efforts often face delays, meaning the "recovery" in housing numbers can lag significantly behind the actual need or funding allocation.</li>
+            </ul>
+
+            <h4 class="text-sm font-semibold text-gray-600 mt-4">Vacancy vs. Availability:</h4>
+            <p>
+                A critical paradox in Puerto Rico's housing market is the high rate of vacancy amidst a shortage of affordable, formal housing. While population decline has technically created a surplus of units, many of these are:
+            </p>
+            <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
+                <li>In disrepair or abandoned due to out-migration.</li>
+                <li>Located in flood-prone areas or built informally without clear title, complicating federal aid.</li>
+                <li>Converted into short-term rentals (Airbnbs), removing them from the long-term rental market for locals.</li>
+            </ul>
+        </div>
+        
+        <div class="space-y-2 text-sm text-gray-600">
+            <h4 class="font-semibold">Research References:</h4>
+            <ul class="list-disc list-inside ml-4 space-y-1">
+                <li>
+                    <strong>Housing Data Source:</strong> 
+                    <a href="https://data.census.gov/cedsci/table?q=B25001%3A%20HOUSING%20UNITS&g=0400000US72&tid=ACSDT5Y2023.B25001" target="_blank" rel="noopener" class="text-blue-600 hover:text-blue-800 hover:underline">
+                        ACS 5-Year Detailed Table B25001 (Total Housing Units)
+                    </a>
+                </li>
+                <li>
+                    <strong>Reconstruction Context:</strong> 
+                    <span class="text-gray-500">FEMA & COR3 Transparency Portal (Disaster Recovery)</span>
+                </li>
+                <li>
+                    <strong>Processed Data Files:</strong>
+                    <span class="text-gray-500 italic">municipios_acs_housing_2013_2023_wide.json</span>
+                </li>
+            </ul>
         </div>
       </section>
+
     </main>
   </div>
 
