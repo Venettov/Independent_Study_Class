@@ -39,14 +39,9 @@
       padding:5px 10px;
     }
 
-    /* Force relative positioning and minimum height for charts to prevent collapse */
-    .mini { 
-        min-height: 300px; 
-        position: relative; 
-        width: 100%;
-    }
+    .mini { min-height: 260px; }
 
-    /* --- Dropdown base state & transitions (Main Nav) --- */
+    /* Dropdown show-on-hover */
     #metrics-menu {
       opacity: 0; visibility: hidden; transform: translateY(4px);
       pointer-events: none;
@@ -63,17 +58,20 @@
     
     /* New style for simulating 65% zoom on the main content */
     #scale-wrapper {
+        /* Apply the scale transformation */
         transform: scale(0.65); 
-        transform-origin: top center; 
-        height: 154%; 
+        transform-origin: top center; /* Scale from the top-center */
+        
+        /* Adjustments to compensate for the scaling effect on surrounding content */
+        height: 154%; /* Approx 1 / 0.65 to ensure vertical space is reserved */
         padding-bottom: 200px;
-        margin-bottom: -35%;
+        margin-bottom: -35%; /* Pull up content following the wrapper */
     }
 
-    /* --- LEAFLET CONTROL STYLES --- */
+    /* --- LEAFLET CONTROL STYLES (Map Dropdown) --- */
     .leaflet-control-map-dropdown {
       padding: 0; 
-      margin-left: 45px; 
+      margin-left: 45px; /* Pushes the control right to clear the zoom buttons */
       margin-top: 5px; 
     }
     .leaflet-control-map-dropdown .dropdown-root {
@@ -100,6 +98,8 @@
         left: 0;
         margin-top: 5px; 
         z-index: 1000;
+        
+        /* Hiding logic */
         opacity: 0; visibility: hidden; transform: translateY(4px);
         pointer-events: none;
         transition: opacity .15s ease, transform .15s ease, visibility .15s ease;
@@ -120,42 +120,93 @@
 
     /* --- RADIAL MENU STYLES --- */
     #radial-menu-container { pointer-events: none; width: 300px; height: 300px; position: fixed; bottom: 0; right: 0; z-index: 9999; }
+    
     #radial-trigger { pointer-events: auto; }
     
     /* Radial Item Base State */
     .radial-item {
-        position: absolute; bottom: 7rem; right: 2rem;  
-        width: 3rem; height: 3rem; border-radius: 50%;
-        background-color: white; color: #4f46e5;
+        position: absolute;
+        bottom: 7rem;
+        right: 2rem;  
+        width: 3rem; height: 3rem;
+        border-radius: 50%;
+        background-color: white;
+        color: #4f46e5;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         display: flex; align-items: center; justify-content: center;
-        text-decoration: none; opacity: 0; pointer-events: none;
+        text-decoration: none;
+        opacity: 0;
+        pointer-events: none;
         transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
         z-index: 9990;
-        --tx: 0px; --ty: 0px; --lx: 0px; --ly: 0px; --lr: 0deg;
+
+        /* CSS Variables for position */
+        --tx: 0px;
+        --ty: 0px;
+        /* CSS Variables for Label Offset */
+        --lx: 0px;
+        --ly: 0px;
+        /* CSS Variable for Label Rotation */
+        --lr: 0deg;
+        
         transform: translate(0, 0) scale(0.5);
     }
-    .radial-open .radial-item { opacity: 1; pointer-events: auto; transform: translate(var(--tx), var(--ty)) scale(1); }
-    .radial-open .radial-item:hover { background-color: #e0e7ff; transform: translate(var(--tx), var(--ty)) scale(1.1); z-index: 10005 !important; }
     
+    /* Radial Item Open State */
+    .radial-open .radial-item {
+        opacity: 1;
+        pointer-events: auto;
+        transform: translate(var(--tx), var(--ty)) scale(1);
+    }
+
+    /* Radial Item Hover State */
+    .radial-open .radial-item:hover { 
+        background-color: #e0e7ff; 
+        transform: translate(var(--tx), var(--ty)) scale(1.1); 
+        z-index: 10005 !important; /* Stacking fix */
+    }
+    
+    /* UPDATED RADIAL LABEL STYLES */
     .radial-label {
-        position: absolute; left: 50%; top: 50%; 
+        position: absolute;
+        left: 50%; 
+        top: 50%; 
+        /* Move label radially outward based on calculations AND rotate */
         transform: translate(calc(-50% + var(--lx)), calc(-50% + var(--ly))) rotate(var(--lr));
         transform-origin: center center;
-        background: rgba(255, 255, 255, 0.95); color: black; 
-        padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 700;
-        white-space: nowrap; opacity: 0; transition: opacity 0.3s ease;
-        pointer-events: none; box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+        
+        /* Visual Styles: White bg, Black text */
+        background: rgba(255, 255, 255, 0.95); 
+        color: black; 
+        padding: 4px 8px; 
+        border-radius: 6px; 
+        font-size: 12px; 
+        font-weight: 700;
+        white-space: nowrap; 
+        
+        /* Visibility Control */
+        opacity: 0; 
+        transition: opacity 0.3s ease;
+        pointer-events: none;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.15);
     }
-    .radial-open .radial-label { opacity: 1; }
+    
+    /* Show ALL labels when menu is open */
+    .radial-open .radial-label { 
+        opacity: 1; 
+    }
 
     #radial-trigger {
         position: absolute; bottom: 7rem; right: 2rem;
-        width: 4rem; height: 4rem; border-radius: 50%;
-        background-color: #4f46e5; color: white;
+        width: 4rem; height: 4rem;
+        border-radius: 50%;
+        background-color: #4f46e5;
+        color: white;
         box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
         display: flex; align-items: center; justify-content: center;
-        cursor: pointer; transition: transform 0.3s ease; z-index: 10000;
+        cursor: pointer;
+        transition: transform 0.3s ease;
+        z-index: 10000;
     }
     #radial-trigger:hover { transform: scale(1.05); background-color: #4338ca; }
     .radial-open #radial-trigger { transform: rotate(45deg); background-color: #ef4444; }
@@ -276,7 +327,9 @@
               <div class="font-semibold text-gray-700">Total Employer Establishments (Vintage 2023):</div>
               <ul class="mt-1 space-y-1">
                 <li>2023 Count: <span id="d-2023" class="font-semibold">—</span></li>
+                <li>2023 Placeholder: <span id="d-2023-real" class="font-semibold">—</span></li>
                 <li>Change since 2012 (Absolute): <span id="d-chg" class="font-semibold">—</span></li>
+                <li>Change since 2012 (Placeholder): <span id="d-chg-real" class="font-semibold">—</span></li>
               </ul>
             </div>
 
@@ -289,21 +342,21 @@
 
           <div>
             <h3 class="font-semibold mb-2">Establishment Count Trend (2012–2023)</h3>
-            <div class="mini bg-gray-50 rounded p-3 relative h-72">
+            <div class="mini bg-gray-50 rounded p-3">
               <canvas id="lineChartNominal"></canvas>
             </div>
           </div>
 
           <div>
             <h3 class="font-semibold mb-2">Annual % Change in Establishments</h3>
-            <div class="mini bg-gray-50 rounded p-3 relative h-72">
+            <div class="mini bg-gray-50 rounded p-3">
               <canvas id="barChartNominal"></canvas>
             </div>
           </div>
           
           <div>
             <h3 class="font-semibold mb-2">Annual % Change (Nominal, Placeholder)</h3>
-            <div class="mini bg-gray-50 rounded p-3 relative h-72">
+            <div class="mini bg-gray-50 rounded p-3">
               <canvas id="barChartReal"></canvas>
             </div>
           </div>
@@ -325,7 +378,7 @@
               <strong class="text-blue-600">Establishment Count Trend</strong> is the raw number of establishments, as reported by the Census Bureau's County Business Patterns (CBP) data.
             </li>
             <li>
-              <strong>Note on Placeholder Fields:</strong> The "Real" income columns in the original data structure are retained here as placeholders to ensure the JavaScript code runs without error. The visualization logic is therefore adjusted to focus entirely on Nominal (raw) counts.
+              <strong>Note on Placeholder Fields:</strong> The "Real" income columns in the original data structure are retained here as placeholders (`null`) to ensure the JavaScript code runs without error. The visualization logic is therefore adjusted to focus entirely on Nominal (raw) counts.
             </li>
           </ul>
 
@@ -345,56 +398,38 @@
         </div>
         </section>
 
-      <!-- ANALYSIS AND SUPPORTING RESOURCES (REPLACED FILE SOURCES) -->
-      <section class="card p-6 space-y-6">
-        <h2 class="text-lg font-semibold">Analysis and Supporting Resources</h2>
-
+      <section class="card p-6">
+        <h2 class="text-lg font-semibold mb-4">File Sources</h2>
         <div class="space-y-4">
-            <h3 class="text-base font-semibold text-gray-700">Business Resilience Amidst Adversity 🏭</h3>
-            <p>
-                The data covering <strong>2012 through 2023</strong> captures a tumultuous decade for Puerto Rican businesses, characterized by a debt crisis, two major hurricanes (2017), earthquakes (2020), and a global pandemic. Despite these challenges, the <strong>Employer Establishment</strong> count reveals a complex story of resilience and adaptation.
-            </p>
-            
-            <h4 class="text-sm font-semibold text-gray-600 mt-4">Post-Disaster Dynamics:</h4>
-            <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
-                <li>The charts often show a noticeable dip in establishment counts around <strong>2017-2018</strong>, reflecting the immediate closure of businesses following Hurricane Maria.</li>
-                <li>However, subsequent years frequently show stabilization or growth. This recovery is partially driven by the influx of <strong>federal reconstruction funds</strong> and pandemic relief programs (like PPP loans), which provided a lifeline to many small and medium enterprises (SMEs) and stimulated activity in the construction and service sectors.</li>
-            </ul>
+          <p>Data for this metric was derived from the U.S. Census Bureau:</p>
+          <ul class="list-disc list-inside space-y-1">
+            <li>
+              <a href="https://data.census.gov/cedsci/table?g=0400000US72&tid=CB2300CBP.CB2300CBP"
+                target="_blank" rel="noopener" class="text-blue-600 underline">
+                2023 County Business Patterns (CBP) - Employer Establishments (NAICS 00)
+              </a>
+            </li>
+            <li>
+              <a href="https://wwwcensus.gov/data/tables/time-series/demo/popest/intercensal-2010-2020-puerto-rico-municipios.html"
+                target="_blank" rel="noopener" class="text-gray-600">
+                (Original file source for municipal boundaries/GeoJSON remains valid)
+              </a>
+            </li>
+          </ul>
 
-            <h4 class="text-sm font-semibold text-gray-600 mt-4">Population vs. Business Density:</h4>
-            <p>
-                An interesting divergence appears when comparing this data to population trends. While the population has consistently declined, the number of businesses in certain municipalities has remained stable or even grown. This suggests a potential increase in <strong>business density</strong> relative to the remaining population, or a shift in the economy where a smaller population is serviced by a resilient core of establishments. It may also reflect the formalization of new types of businesses in the gig or tourism economies.
-            </p>
-        </div>
-        
-        <div class="space-y-2 text-sm text-gray-600">
-            <h4 class="font-semibold">Research References:</h4>
-            <ul class="list-disc list-inside ml-4 space-y-1">
-                <li>
-                    <strong>Business Data Source:</strong> 
-                    <a href="https://data.census.gov/cedsci/table?g=0400000US72&tid=CB2300CBP.CB2300CBP" target="_blank" rel="noopener" class="text-blue-600 hover:text-blue-800 hover:underline">
-                        U.S. Census Bureau: County Business Patterns (CBP)
-                    </a>
-                </li>
-                <li>
-                    <strong>Economic Context:</strong> 
-                    <span class="text-gray-500">Federal Reserve Bank of New York - Regional Economic Analysis</span>
-                </li>
-                <li>
-                    <strong>Processed Data Files:</strong>
-                    <span class="text-gray-500 italic">municipios_cbp_establishments_2010_2023_wide.json</span>
-                </li>
-            </ul>
+          <p>Specific files used:</p>
+          <ul class="list-disc list-inside">
+            <li>municipios_cbp_establishments_2010_2023_wide.json (site build)</li>
+          </ul>
         </div>
       </section>
-
     </main>
   </div>
 
   <div class="fixed bottom-8 right-8 z-[9998]">
     <a href="../metrics.html" class="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-4 rounded-full shadow-2xl transition transform hover:scale-105 font-bold text-lg no-underline">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
         </svg>
         Metrics Overview
     </a>
@@ -583,12 +618,12 @@
       
       // Nominal fields
       d2023.textContent = Number.isFinite(st?.val2023) ? fmt.format(st.val2023) : '—';
-      dChg.textContent  = st ? `${signed(st.nominalCumAbs)}` : '—';
+      dChg.textContent  = st ? `${signed(st.nominalCumAbs)} (${pctFmt(st.nominalCumPct)})` : '—';
       
       // Real Placeholder fields (show nominal values)
-      d2023Real.textContent = "";
+      d2023Real.textContent = Number.isFinite(st?.realVal2023) ? fmt.format(st.realVal2023) : '—';
       // Use the Nominal Change for the Placeholder display since the underlying JSON data is null
-      dChgReal.textContent  = ""; 
+      dChgReal.textContent  = st ? `${signed(st.nominalCumAbs)} (${pctFmt(st.nominalCumPct)})` : '—'; 
 
       dCenL.href = censusLink(name);
       drawCharts(name, st);
@@ -916,7 +951,7 @@
       let hoverTimeout;
       const menu = document.getElementById('metrics-menu');
       function addHovering(){ clearTimeout(hoverTimeout); root.classList.add('hovering'); }
-      function removeHovering(){ hoverTimeout = setTimeout(()=>root.classList.remove('hovering'), 600); }
+      function removeHovering(){ hoverTimeout = setTimeout(()=>root.classList.remove('hovering'), 300); }
       root.addEventListener('mouseenter', addHovering);
       root.addEventListener('mouseleave', removeHovering);
       if (menu) {
@@ -939,7 +974,7 @@
         function removeHovering(){ 
             hoverTimeout = setTimeout(()=>{
                 root.classList.remove('hovering');
-            }, 600); 
+            }, 300); 
         }
 
         root.addEventListener('mouseenter', addHovering);
