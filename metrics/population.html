@@ -41,7 +41,7 @@
 
     .mini { min-height: 260px; }
 
-    /* Dropdown show-on-hover */
+    /* --- Dropdown base state & transitions (Main Nav) --- */
     #metrics-menu {
       opacity: 0; visibility: hidden; transform: translateY(4px);
       pointer-events: none;
@@ -68,23 +68,19 @@
         margin-bottom: -35%; /* Pull up content following the wrapper */
     }
 
-    /* --- LEAFLET CONTROL STYLES (UPDATED) --- */
+    /* --- LEAFLET CONTROL STYLES (Map Dropdown) --- */
     .leaflet-control-map-dropdown {
-      /* Base container for the control */
       padding: 0; 
-      /* FIX 1: Move control to the right of the zoom button area */
       margin-left: 45px; /* Pushes the control right to clear the zoom buttons */
-      margin-top: 5px; /* Move slightly down to align with zoom */
+      margin-top: 5px; 
     }
     .leaflet-control-map-dropdown .dropdown-root {
-      /* Mimic the style of the default leaflet controls */
       background: #fff;
       box-shadow: 0 1px 5px rgba(0,0,0,.65);
       border-radius: 4px;
-      position: relative; /* Ensure menu positions correctly relative to this root */
+      position: relative; 
     }
     .leaflet-control-map-dropdown .nav-link {
-        /* Style for the button */
         padding: 6px 10px;
         color: #333;
         font-weight: 500;
@@ -96,9 +92,7 @@
         cursor: pointer;
     }
     
-    /* FIX 2: Hide the menu by default and use existing logic to show on hover */
     .leaflet-control-map-dropdown .dropdown-menu {
-        /* Positioning the menu */
         position: absolute;
         top: 100%;
         left: 0;
@@ -119,7 +113,6 @@
     }
     
     .leaflet-control-map-dropdown .dropdown-menu a {
-        /* Styling the menu items */
         text-decoration: none;
         padding: 6px 12px;
         font-size: 13px;
@@ -365,79 +358,51 @@
       
       <hr class="border-gray-300">
 
+      <!-- ANALYSIS AND SUPPORTING RESOURCES (REPLACED FILE SOURCES) -->
       <section class="card p-6 space-y-6">
-        <h2 class="text-lg font-semibold">Analysis of Population Dynamics (2010–2024)</h2>
+        <h2 class="text-lg font-semibold">Analysis and Supporting Resources</h2>
 
         <div class="space-y-4">
-          <h3 class="text-base font-semibold text-gray-700">The Overall Trend: Population Decline</h3>
-          <p>
-            The <strong>Population Trend (2010–2024) line chart</strong>clearly shows a significant, sustained decline in the resident population of Puerto Rico since 2010. This decline is not a recent phenomenon but an acceleration of a trend spanning over a decade, driven primarily by <strong>negative net migration</strong>.
-          </p>
-          <p>
-            The <strong>Annual % Change bar chart</strong> illustrates the severity of this loss, with nearly every year showing a negative percentage change, often exceeding <strong>-1.00 %</strong> per year, especially following the major hurricanes (Maria and Irma in 2017) and the ongoing fiscal crisis. Periods of negative economic growth and lack of opportunity fuel this out-migration, particularly among the working-age population.
-          </p>
+            <h3 class="text-base font-semibold text-gray-700">A Decade of Contraction 📉</h3>
+            <p>
+                The demographic data for Puerto Rico reveals a stark and continuous trend: <strong>sustained population decline</strong>. Since 2010, the island has experienced a significant contraction in its resident population, a phenomenon driven largely by <strong>negative net migration</strong> rather than natural decrease (births vs. deaths).
+            </p>
+            
+            <h4 class="text-sm font-semibold text-gray-600 mt-4">Accelerating Factors:</h4>
+            <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
+                <li>The <strong>Annual % Change</strong> chart demonstrates that this decline is not uniform. Sharp dips correlate with major external shocks, most notably the economic recession that began in 2006 and the devastating 2017 hurricane season (Maria and Irma).</li>
+                <li>While the rate of decline has stabilized in some recent years, it remains consistently negative, indicating that more people continue to leave the island than arrive or are born there.</li>
+            </ul>
+
+            <h4 class="text-sm font-semibold text-gray-600 mt-4">Geographic Impact:</h4>
+            <p>
+                The map highlights that while the <strong>San Juan metropolitan area</strong> has lost the greatest absolute number of residents, the percentage loss is widespread, affecting rural and mountainous municipalities severely. This widespread depopulation poses significant challenges for maintaining infrastructure, schools, and healthcare services in lower-density areas.
+            </p>
         </div>
-
-        <div class="space-y-4">
-          <h3 class="text-base font-semibold text-gray-700">Geographic Disparities and Density</h3>
-          <p>
-            The <strong>Map Shading</strong> (when set to `% change` or `abs change`) reveals that population loss is widespread, impacting both urban and rural municipalities, though highly populated areas like the San Juan metropolitan area have lost the largest <strong>absolute number of people</strong>.
-          </p>
-          <p>
-            When switching the map to <strong>Density</strong> mode, one can visualize the distribution of the remaining population. High-density areas (urban centers, visible in reds/oranges) are vital economic hubs, but the simultaneous population loss in these areas represents a high concentration of demographic stress. Conversely, lower-density, often more mountainous or peripheral municipalities (visible in greens) face distinct challenges related to providing basic services and infrastructure to a highly dispersed and aging population.
-          </p>
-        </div>
-
-        <div class="space-y-4">
-          <h3 class="text-base font-semibold text-gray-700">Supporting Resources and Data</h3>
-          <p>
-            The primary source for these detailed annual population estimates is the <strong>U.S. Census Bureau’s Population Estimates Program</strong>, which provides vintages for Puerto Rico's municipalities.
-          </p>
-          <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
-            <li>
-              <a href="https://www.census.gov/data/datasets/time-series/demo/popest/2020s-total-puerto-rico-municipios.html"
-                target="_blank" rel="noopener" class="text-blue-600 underline">
-                U.S. Census Bureau: 2020s Census Estimates – Puerto Rico Municipalities
-              </a> (for post-2020 data).
-            </li>
-            <li>
-              <a href="https://www.census.gov/data/tables/time-series/demo/popest/intercensal-2010-2020-puerto-rico-municipios.html"
-                target="_blank" rel="noopener" class="text-blue-600 underline">
-                U.S. Census Bureau: Intercensal Estimates 2010–2020 – Puerto Rico Municipalities
-              </a> (for historical data).
-            </li>
-            <li><strong>Economic Research Institutions:</strong> Further analysis of the drivers of migration (economic stagnation, debt crisis, and natural disasters) is routinely published by the Federal Reserve Bank of New York and various Puerto Rican and U.S. think tanks.</li>
-          </ul>
+        
+        <div class="space-y-2 text-sm text-gray-600">
+            <h4 class="font-semibold">Research References:</h4>
+            <ul class="list-disc list-inside ml-4 space-y-1">
+                <li>
+                    <strong>Population Estimates:</strong> 
+                    <a href="https://www.census.gov/data/datasets/time-series/demo/popest/2020s-total-puerto-rico-municipios.html" target="_blank" rel="noopener" class="text-blue-600 hover:text-blue-800 hover:underline">
+                        U.S. Census Bureau: 2020s Population Estimates
+                    </a>
+                </li>
+                <li>
+                    <strong>Historical Data:</strong> 
+                    <a href="https://www.census.gov/data/tables/time-series/demo/popest/intercensal-2010-2020-puerto-rico-municipios.html" target="_blank" rel="noopener" class="text-blue-600 hover:text-blue-800 hover:underline">
+                        Intercensal Estimates 2010–2020
+                    </a>
+                </li>
+                <li>
+                    <strong>Processed Data Files:</strong>
+                    <span class="text-gray-500 italic">prm-est2010_2024.json</span>
+                </li>
+            </ul>
         </div>
       </section>
-      <section class="card p-6">
-        <h2 class="text-lg font-semibold mb-4">File Sources</h2>
-        <div class="space-y-4">
-          <p>Data for this project was derived from the U.S. Census Bureau:</p>
-          <ul class="list-disc list-inside space-y-1">
-            <li>
-              <a href="https://www.census.gov/data/datasets/time-series/demo/popest/2020s-total-puerto-rico-municipios.html"
-                target="_blank" rel="noopener" class="text-blue-600 underline">
-                2020s Census Estimates – Puerto Rico Municipalities
-              </a>
-            </li>
-            <li>
-              <a href="https://www.census.gov/data/tables/time-series/demo/popest/intercensal-2010-2020-puerto-rico-municipios.html"
-                target="_blank" rel="noopener" class="text-blue-600 underline">
-                Intercensal Estimates 2010–2020 – Puerto Rico Municipalities
-              </a>
-              <span class="text-gray-600"> (download: <em>prm-est2020int-pop-72.xlsx</em>)</span>
-            </li>
-          </ul>
 
-          <p>Specific files used:</p>
-          <ul class="list-disc list-inside">
-            <li>prm-est2010_2024.json (site build)</li>
-            <li>prm-est2010_2024.csv (analysis)</li>
-            <li>prm-est2020int-pop-72.xlsx (2010–2020 intercensal)</li>
-          </ul>
-        </div>
-      </section>
     </main>
   </div>
 
@@ -1117,6 +1082,11 @@
       const currentPathname = window.location.pathname.split('/').pop();
       const subPageLink = document.querySelector(`#metrics-menu a[href="${currentPathname}"]`);
       if (subPageLink) subPageLink.classList.add('bg-gray-100','font-semibold');
+
+      // Initialize the map dropdown handler
+      wireMapDropdown();
+      // Init Radial Menu
+      initRadialMenu();
     });
   </script>
 </body>
