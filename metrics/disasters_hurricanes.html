@@ -10,8 +10,6 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-
   <style>
     .card {
       background:#fff;
@@ -40,14 +38,7 @@
       padding:5px 10px;
     }
 
-    .mini { min-height: 300px; } 
-    
-    /* Force canvas dimensions for Chart.js inside containers */
-    .mini canvas {
-        width: 100% !important;
-        height: 100% !important;
-        display: block;
-    }
+    /* .mini and canvas CSS classes removed */
 
     /* UPDATED LEGEND CSS: Removed absolute positioning to let Leaflet control it */
     .leaflet-control-hu-legend {
@@ -272,29 +263,6 @@
         </div>
       </section>
 
-      <section class="card p-6">
-        <h2 class="text-lg font-semibold mb-4">Hurricane Statistics (2015-2025)</h2>
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            
-            <div class="mini relative">
-                <h3 class="text-sm text-gray-500 font-medium mb-2 text-center">Storm Frequency by Year</h3>
-                <div class="h-64 w-full">
-                    <canvas id="chart-frequency"></canvas>
-                </div>
-            </div>
-
-            <div class="mini relative">
-                <h3 class="text-sm text-gray-500 font-medium mb-2 text-center">Top 10 Strongest Storms (Max Wind)</h3>
-                <div class="h-64 w-full">
-                    <canvas id="chart-intensity"></canvas>
-                </div>
-            </div>
-            
-        </div>
-      </section>
-
-      <hr class="border-gray-300">
-
       <section class="card p-6 space-y-6">
         <h2 class="text-lg font-semibold">Analysis and Supporting Resources</h2>
 
@@ -491,98 +459,7 @@
         new L.Control.HurricaneLegend({position: 'bottomright'}).addTo(map);
     }
     
-    // ---------------------- Chart Plotting Logic ----------------------
-    function renderCharts(data) {
-        if (!data || data.length === 0) return;
-
-        const yearCounts = {};
-        const intensityData = [];
-
-        data.forEach(storm => {
-            // SAFETY CHECK: Ensure path is not empty to prevent crash
-            if (!storm.path || storm.path.length === 0) return;
-
-            // Get Year
-            const year = storm.path[0].year;
-            yearCounts[year] = (yearCounts[year] || 0) + 1;
-
-            // Get Max Wind
-            const maxWind = Math.max(...storm.path.map(p => p.wind));
-            intensityData.push({
-                name: storm.name + ` (${year})`,
-                wind: maxWind
-            });
-        });
-
-        // Prepare Frequency Chart Data
-        const years = Object.keys(yearCounts).sort();
-        const counts = years.map(y => yearCounts[y]);
-
-        // Prepare Intensity Chart Data (Sort descending and take top 10)
-        intensityData.sort((a, b) => b.wind - a.wind);
-        const top10 = intensityData.slice(0, 10);
-        
-        // --- Render Chart 1: Frequency ---
-        const ctxFreq = document.getElementById('chart-frequency');
-        if(ctxFreq) {
-            new Chart(ctxFreq.getContext('2d'), {
-                type: 'bar',
-                data: {
-                    labels: years,
-                    datasets: [{
-                        label: 'Number of Storms',
-                        data: counts,
-                        backgroundColor: '#3b82f6', // Blue-500
-                        borderRadius: 4,
-                        hoverBackgroundColor: '#2563eb'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        y: { beginAtZero: true, ticks: { stepSize: 1 }, title: { display: true, text: 'Count' } }
-                    }
-                }
-            });
-        }
-
-        // --- Render Chart 2: Intensity (Top 10) ---
-        const ctxInt = document.getElementById('chart-intensity');
-        if(ctxInt) {
-            // Helper to color bars based on category
-            const getBarColor = (val) => {
-                if(val >= 113) return '#991b1b'; // Cat 4/5
-                if(val >= 96)  return '#dc2626'; // Cat 3
-                if(val >= 83)  return '#fb923c'; // Cat 2
-                if(val >= 64)  return '#fde047'; // Cat 1
-                return '#3b82f6'; // TS and below
-            };
-            
-            new Chart(ctxInt.getContext('2d'), {
-                type: 'bar',
-                indexAxis: 'y', // Horizontal Bar Chart
-                data: {
-                    labels: top10.map(d => d.name),
-                    datasets: [{
-                        label: 'Max Wind (knots)',
-                        data: top10.map(d => d.wind),
-                        backgroundColor: top10.map(d => getBarColor(d.wind)),
-                        borderRadius: 4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        x: { beginAtZero: true, title: { display: true, text: 'Wind Speed (knots)' } }
-                    }
-                }
-            });
-        }
-    }
+    // --- Chart Rendering Logic Removed ---
     
     // ---------------------- Unused Logic Stubs ----------------------
     const FIXED_GREEN_COLOR = '#22c55e';
@@ -757,15 +634,13 @@
       plotHurricaneTracks(fullHurricaneData, map);
       renderHurricaneLegend(map);
       
-      // Render Statistical Charts (New Call)
-      renderCharts(fullHurricaneData);
+      // Removed Chart Call here
 
       wireMetricToggle();
       wireClearSelection(); 
       wireDropdown(); 
       wireMapDropdown(); 
       
-      // REMOVED: initRadialMenu(); from here to ensure it runs even if data load fails
     })();
 
     document.addEventListener('DOMContentLoaded', () => {
