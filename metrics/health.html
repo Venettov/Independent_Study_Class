@@ -231,7 +231,7 @@
       <a href="../index.html"   class="nav-link border-b-2 border-transparent">Home</a>
 
       <div class="relative" id="metrics-dropdown-root">
-        <a href="../metrics.html" class="nav-link border-b-2 border-transparent inline-flex items-center gap-1 cursor-pointer select-none">
+        <a href="../metrics.html" class="nav-link border-b-2 border-blue-600 text-blue-600 font-semibold inline-flex items-center gap-1 cursor-pointer select-none" aria-current="page">
           Metrics
           <svg id="metrics-chevron" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 transition-transform" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
             <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.24 4.5a.75.75 0 01-1.08 0l-4.24-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/>
@@ -406,14 +406,29 @@
                 </li>
             </ul>
         </div>
-        </section>
+        <div class="mt-10 pt-6 border-t border-gray-200">
+            <h3 class="text-lg font-semibold mb-2">Research References:</h3>
+            <ul class="list-disc list-inside ml-4 text-sm text-gray-700">
+                <li>
+                    <strong>Health Insurance Data:</strong> 
+                    <a href="https://data.census.gov/cedsci/table?q=S2701" target="_blank" rel="noopener" class="text-blue-600 underline">ACS Table S2701: Health Insurance Coverage Status</a>
+                </li>
+                <li>
+                    <strong>Public Health Context:</strong> Puerto Rico Department of Health (Departamento de Salud) & CMS Medicaid & CHIP Scorecard.
+                </li>
+                <li>
+                    <strong>Processed Data Files:</strong> <em>municipios_acs_health_2013_2023_wide.json</em>
+                </li>
+            </ul>
+        </div>
+      </section>
     </main>
   </div>
 
   <div class="fixed bottom-8 right-8 z-[9998]">
     <a href="../metrics.html" class="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-4 rounded-full shadow-2xl transition transform hover:scale-105 font-bold text-lg no-underline">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
         </svg>
         Metrics Overview
     </a>
@@ -1136,6 +1151,7 @@
         });
       }
       wireMapDropdown(); // Ensure the map dropdown is also wired up on DOMContentLoaded
+      initRadialMenu(); // Init Radial Menu
     });
   </script>
 </body>
